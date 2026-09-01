@@ -1,5 +1,4 @@
-
-or# SGEMD — Contexto Maestro para Reconstrucción del MVP
+# SGEMD — Contexto Maestro para Reconstrucción del MVP
 
 > **Propósito de este documento:** servir como especificación y contexto único **SGEMD (Sistema de Gestión de Emprendimiento Minuto de Dios)** desde cero, de forma limpia.
 >
