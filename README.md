@@ -4,7 +4,7 @@
 >
 > **Qué es y qué no es:** es un documento de **especificación/contexto**. Describe el comportamiento **correcto esperado** del MVP y qué debe evitarse del proyecto anterior. **No contiene** secretos, contraseñas, tokens, valores de `.env`, ni credenciales reales. **No es** un copiado del código anterior.
 >
-> El proyecto se construye **DESDE CERO**. No se debe asumir que hay que conservar errores, estructuras innecesarias ni tablas obsoletas del proyecto anterior. 
+> El proyecto se construye **DESDE CERO**. No se debe asumir que hay que conservar errores, estructuras innecesarias ni tablas obsoletas del proyecto anterior.
 
 ---
 
@@ -32,7 +32,7 @@
 
 ### Qué es SGEMD
 
-**SGEMD (Sistema de Gestión de Emprendimiento Minuto de Dios)** es una plataforma web para gestionar de extremo a extremo el emprendimiento estudiantil universitario.
+**SGEMD (Sistema de Gestión de Emprendimiento Minuto de Dios)** es una plataforma web para gestionar de extremo a extremo el emprendimiento estudiantil universitario, utilizando tecnologías modernas como **Node.js** para el backend y **React** para el frontend.
 
 ### Para quién está pensado
 
@@ -42,11 +42,11 @@
 
 ### Qué problema resuelve
 
-Centraliza la información que hoy está dispersa: quién emprende, qué tan avanzado está su emprendimiento, qué docente lo orienta, qué seguimiento/acuerdos existen, qué tareas y asesorías se han definido. Elimina la dependencia de hojas de cálculo o seguimiento informal.
+Centraliza la información que hoy está dispersa: quién emprende, qué tan avanzado está su emprendimiento, qué docente lo orienta, qué seguimiento/acuerdos existen, qué tareas y asesorías se han definido. Elimina la dependencia de hojas de cálculo o seguimiento informal. Permite una correcta recolección de datos alineada con los estándares de investigación y proyectos institucionales de UNIMINUTO.
 
 ### Cuál es el objetivo del MVP
 
-Que un estudiante pueda registrarse, tener un emprendimiento, que el administrador le asigne un docente mentor, que el docente registre seguimiento y tareas, y que el estudiante consulte su avance — todo con dashboards alimentados por datos reales de la base de datos.
+Que un estudiante pueda registrarse, tener un emprendimiento, que el administrador le asigne un docente mentor, que el docente registre seguimiento y tareas, y que el estudiante consulte su avance — todo con dashboards alimentados por datos reales de la base de datos. El diseño debe ser totalmente responsive para visualización en computadoras de escritorio y dispositivos móviles.
 
 ### Flujo principal del sistema
 
@@ -69,17 +69,17 @@ Existe **un único campo de rol** en el usuario, con valores:
 
 ### Administrador (rol 1)
 
-- **Puede hacer:** gestionar cualquier usuario (crear, editar, activar/desactivar, cambiar rol), crear/editar/eliminar emprendimientos, crear/eliminar/reasignar asignaciones, consultar todos los emprendimientos/seguimientos/tareas/asesorías, dashboard global.
+- **Puede hacer:** gestionar cualquier usuario (crear, editar, activar/desactivar, cambiar rol), crear/editar/eliminar emprendimientos, crear/eliminar/reasignar asignaciones, consultar todos los emprendimientos/seguimientos/tareas/asesorías, dashboard global. Modifica variables bloqueadas para el estudiante (Mentor asignado, observaciones, sector productivo y etapa). Aprueba la creación de emprendimientos paralelos para un estudiante.
 - **No debería:** crear seguimientos/tareas como si fuera el docente asignado (puede administrarlos pero no "firmarlos"), ni ver credenciales o secretos.
 
 ### Docente / Mentor (rol 3)
 
-- **Puede hacer:** ver únicamente los emprendimientos que **le fueron asignados** (vía asignaciones), registrar seguimiento (crear/editar/eliminar notas) de esos emprendimientos, crear/editar/eliminar tareas y asesorías de sus asignados, ver el perfil de sus estudiantes, consultar su dashboard.
+- **Puede hacer:** ver únicamente los emprendimientos que **le fueron asignados** (vía asignaciones), registrar seguimiento (crear/editar/eliminar notas) de esos emprendimientos, crear/editar/eliminar tareas y asesorías de sus asignados, ver el perfil de sus estudiantes, consultar su dashboard. Registra asistencias a eventos manualmente en la plataforma.
 - **No debería:** ver emprendimientos/estudiantes de otros docentes, modificar el emprendimiento del estudiante, eliminar usuarios ni cambiar roles.
 
 ### Estudiante (rol 2)
 
-- **Puede hacer:** consultar **sus** emprendimientos, ver su progreso/etapas, consultar (solo lectura) el seguimiento de su emprendimiento, consultar y **completar** sus tareas, solicitar/consultar asesorías, consultar su dashboard.
+- **Puede hacer:** consultar **sus** emprendimientos, ver su progreso/etapas, consultar (solo lectura) el seguimiento de su emprendimiento, consultar y **completar** sus tareas, solicitar/consultar asesorías, consultar su dashboard. **Permisos de edición de su emprendimiento:** Puede editar el Nombre, Descripción, Redes Sociales y, opcionalmente, el plan de trabajo.
 - **No debería:** crear seguimientos ni tareas, ver emprendimientos de otros, ni ver datos de otros usuarios.
 
 **Regla general de autorización:** cada endpoint de negocio valida **rol** y **alcance** en **backend** (no solo en la UI). Un docente solo ve lo asignado a él; un estudiante solo lo propio; el admin todo.
@@ -102,7 +102,7 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 - **Quién lo usa:** público (estudiantes).
 - **Qué puede hacer:** crear cuenta con datos personales y correo institucional.
 - **Información que maneja:** nombre, correo institucional (único), contraseña (hash bcrypt), datos opcionales.
-- **Flujo:** envía datos → backend crea usuario con rol `Estudiante`, `Verificado=0` → genera código de verificación → lo envía por correo → el usuario lo ingresa → backend lo valida y activa la cuenta.
+- **Flujo:** envía datos → backend crea usuario con rol `Estudiante`, `Verificado=0` → genera código de verificación → lo envía por correo → el usuario lo ingresa → backend lo valida y activa la cuenta. Utiliza un flujo de código numérico (OTP) de **8 dígitos** enviado al correo electrónico del estudiante a través de un servicio SMTP genérico. Este código es temporal (caduca en **5 minutos**) y se valida estrictamente en el backend.
 
 ### Usuarios y roles
 
@@ -114,7 +114,7 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 ### Emprendimientos
 
 - **Quién lo usa:** admin crea/edita; docente consulta (los asignados); estudiante consulta (los suyos).
-- **Qué puede hacer:** crear emprendimiento con propietario-estudiante, consultar (con alcance por rol), editar, ver detalle y etapa.
+- **Qué puede hacer:** crear emprendimiento con propietario-estudiante, consultar (con alcance por rol), editar, ver detalle y etapa. Si un estudiante inicia un nuevo emprendimiento, el anterior no se sobrescribe (se mantiene la trazabilidad a menos que se desee borrar). Se pueden manejar emprendimientos en paralelo, pero el registro de un segundo emprendimiento requiere **aprobación explícita del Administrador**.
 - **Información que maneja:** nombre, descripción, tipo, sector productivo, redes sociales, acompañamiento, acta de compromiso, etapa, propietario, fechas.
 - **Flujo:** admin crea el emprendimiento y lo asocia a un estudiante; el docente lo ve si tiene asignación; el estudiante lo ve si es el propietario.
 
@@ -128,7 +128,7 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 ### Consulta
 
 - **Quién lo usa:** todos.
-- **Qué puede hacer:** consultar recursos/entidades según su rol y alcance. Ver detalle de emprendimientos, usuarios, asignaciones.
+- **Qué puede hacer:** consultar recursos/entidades según su rol y alcance. Ver detalle de emprendimientos, usuarios, asignaciones. Todos los endpoints de listados implementan paginación desde el inicio.
 - **Flujo:** cada consulta se filtra por rol y propiedad en backend.
 
 ### Seguimiento
@@ -143,14 +143,18 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 - **Quién lo usa:** estudiante (solicita/consulta), docente (confirma/crea/consulta), admin (consulta).
 - **Qué puede hacer:** solicitar una asesoría, programar (fecha/horario/modalidad), confirmar.
 - **Información que maneja:** nombre, descripción, fecha, modalidad, horario, estado (pendiente/confirmada), estudiante, docente.
-- **Flujo:** el estudiante solicita; el docente la ve y confirma; ambos consultan la agenda.
+- **Flujo:** el estudiante solicita; el docente la ve y confirma; ambos consultan la agenda. El sistema envía notificaciones en tiempo real a los usuarios cuando un docente confirma una asesoría.
 
 ### Tareas / plan de trabajo
 
 - **Quién lo usa:** docente (crea/edita/elimina), estudiante (consulta y completa), admin (consulta).
 - **Qué puede hacer:** crear tareas ligadas a un emprendimiento y a un estudiante, con fecha límite y estado.
 - **Información que maneja:** título, descripción, fecha límite, estado (pendiente/completada/vencida), emprendimiento, estudiante, docente.
-- **Flujo:** el docente crea la tarea → el estudiante la ve → la completa → el sistema calcula el avance (% de completadas).
+- **Flujo:** el docente crea la tarea → el estudiante la ve → la completa → el sistema calcula el avance (% de completadas). El sistema envía notificaciones en tiempo real a los usuarios cuando un docente asigna una nueva tarea.
+
+### Gestión de Archivos
+
+El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PDFs, imágenes de evidencia) de hasta **500 MB** para tareas, seguimientos y asesorías. Se almacenan localmente en el servidor (organizados en carpetas, con planes de migración a la nube futura para respetar el ciclo de vida de la información). Si se elimina el registro asociado (tarea, asesoría), el archivo se elimina físicamente del servidor.
 
 ### Dashboards
 
@@ -166,10 +170,10 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 - **Información que maneja:** etapa del emprendimiento, % de tareas completadas.
 - **Flujo:** datos calculados a partir de la BD (etapa y tareas).
 
-### Eventos (si forman parte del MVP — ver prioridades)
+### Eventos
 
 - **Quién lo usa:** admin (crea/edita), usuarios (se registran/consultando).
-- **Qué puede hacer:** crear eventos, registrar asistencia de usuarios.
+- **Qué puede hacer:** crear eventos, registrar asistencia de usuarios. Activa para el MVP de eventos. Registrada y digitada manualmente por el Admin o el Docente.
 - **Información que maneja:** nombre, descripción, tipo, modalidad, fecha/horario, capacidad, estado, participantes.
 - **Flujo:** el admin crea el evento; el usuario se registra; se muestra la lista.
 
@@ -181,7 +185,7 @@ La nueva implementación es **desde cero** y no debe conservar estructuras innec
 
 ### Frontend
 
-- SPA en **React** con React Router.
+- Desarrollado utilizando **React** (SPA) con React Router. Totalmente responsive.
 - Cliente API central (`api.js`) que agrega el header de autenticación y **maneja 401/403** (limpia token y redirige a login).
 - Guardas de ruta (`PrivateRoute`) por rol.
 - Sidebars/menús por rol (Admin, Docente, Estudiante).
@@ -189,7 +193,7 @@ La nueva implementación es **desde cero** y no debe conservar estructuras innec
 
 ### Backend
 
-- **Node.js + Express**.
+- Desarrollado utilizando **Node.js** con Express.
 - Arquitectura por capas: `routes` → `controllers` → `services` → BD.
 - Middlewares: `authenticateToken`, `isAdmin`, `isTeacher`, `isStudent`.
 - Consultas parametrizadas (evitar inyección SQL).
@@ -204,7 +208,7 @@ La nueva implementación es **desde cero** y no debe conservar estructuras innec
 ### Base de datos
 
 - **MySQL** (v8), accedida mediante un pool de conexiones (`mysql2`).
-- Inicialización mediante script SQL montado en la primera creación del contenedor.
+- Inicialización mediante script SQL montado en la primera creación del contenedor. Sin scripts de migración. La base de datos será 100% limpia sin excepciones ni datos externos.
 - Modelo definido en la [sección 5](#5-modelo-de-datos).
 
 ### Autenticación
@@ -258,21 +262,21 @@ SGEMD/
 
 ### Catalogos (referenciados por claves foráneas)
 
-| Tabla                  | PK                     | Propósito                                  | Cardinalidad              |
-| ---------------------- | ---------------------- | ------------------------------------------ | ------------------------- |
-| `roles`                | idRoles                | Rol: 1=Admin, 2=Estudiante, 3=Docente      | 1 → N usuarios            |
-| `tipodocumentos`       | idTipoDocumento        | Tipo de documento                          | 1 → N usuarios            |
-| `programaacademico`    | idProgramaAcademico    | Programa académico                         | 1 → N usuarios            |
-| `centrouniversitarios` | idCentroUniversitarios | Centro/campus universitario                | 1 → N usuarios            |
-| `municipios`           | idMunicipio            | Municipio                                  | 1 → N usuarios            |
-| `tipopoblacion`        | idTipoPoblacion        | Población vulnerable                       | 1 → N usuarios            |
-| `tipousuarios`         | idTipoUsuarios         | Estudiante/Egresado/Docente/Administrativo | 1 → N usuarios            |
-| `etapaemprendimiento`  | idEtapaEmprendimiento  | Etapa del emprendimiento (`TipoEtapa`)     | 1 → N emprendimientos     |
-| `sectoreconomico`      | idSectorEconomico      | Sector económico                           | 1 → N diagnósticos        |
-| `modalidad`            | idModalidad            | Presencial/Distancia                       | 1 → N asesorías/eventos   |
-| `tipo_evento`          | idTipo_evento          | Tipo de evento                             | 1 → N eventos             |
-| `fecha_y_Horarios`     | idFecha_y_Horarios     | Bloque de fecha/hora                       | 1 → N asesorías / eventos |
-| `modulos`              | idModulos              | (evaluar si es necesario)                  | 1 → N usuarios (opcional) |
+| Tabla                  | PK                     | Propósito                                                             | Cardinalidad              |
+| ---------------------- | ---------------------- | --------------------------------------------------------------------- | ------------------------- |
+| `roles`                | idRoles                | Rol: 1=Admin, 2=Estudiante, 3=Docente                                 | 1 → N usuarios            |
+| `tipodocumentos`       | idTipoDocumento        | Tipo de documento                                                     | 1 → N usuarios            |
+| `programaacademico`    | idProgramaAcademico    | Programa académico                                                    | 1 → N usuarios            |
+| `centrouniversitarios` | idCentroUniversitarios | Centro/campus universitario                                           | 1 → N usuarios            |
+| `municipios`           | idMunicipio            | Municipio                                                             | 1 → N usuarios            |
+| `tipopoblacion`        | idTipoPoblacion        | Población vulnerable                                                  | 1 → N usuarios            |
+| `tipousuarios`         | idTipoUsuarios         | Estudiante/Egresado/Docente/Administrativo                            | 1 → N usuarios            |
+| `etapaemprendimiento`  | idEtapaEmprendimiento  | Etapa del emprendimiento (`TipoEtapa`)                                | 1 → N emprendimientos     |
+| `sectoreconomico`      | idSectorEconomico      | Sector económico                                                      | 1 → N diagnósticos        |
+| `modalidad`            | idModalidad            | Presencial/Distancia                                                  | 1 → N asesorías/eventos   |
+| `tipo_evento`          | idTipo_evento          | Tipo de evento                                                        | 1 → N eventos             |
+| `fecha_y_Horarios`     | idFecha_y_Horarios     | Bloque de fecha/hora                                                  | 1 → N asesorías / eventos |
+| `modulos`              | idModulos              | Controla qué partes de la plataforma están disponibles para cada rol. | 1 → N usuarios (opcional) |
 
 ### Entidades de negocio
 
@@ -285,7 +289,7 @@ SGEMD/
 
 #### `emprendimiento`
 
-- **Propósito:** representa el emprendimiento del estudiante.
+- **Propósito:** representa el emprendimiento del estudiante. El **Tipo de Emprendimiento** se maneja a través de un catálogo ya creado en BD.
 - **Campos importantes:** idEmprendimiento, Nombre, Descripcion, TipoEmprendimiento, SectorProductivo, RedesSociales, Acompanamiento, ActaCompromiso, FechaCreacion, FechaActualizacion.
 - **Fks:** EtapaEmprendimiento_idEtapaEmprendimiento → etapaemprendimiento; Usuarios_idUsuarios → usuarios (**propietario** estudiante).
 - **Relaciones/cardinalidades:** Propietario (usuarios) **1 → N** emprendimiento; Etapa **1 → N** emprendimiento; Emprendimiento **1 → N** seguimientos; Emprendimiento **1 → N** tareas; Emprendimiento **1 → N** diagnósticos; Emprendimiento **0..1 → N** asignaciones.
@@ -299,11 +303,10 @@ SGEMD/
 
 #### `seguimientos`
 
-- **Propósito:** nota/anotación de acompañamiento sobre un emprendimiento.
+- **Propósito:** nota/anotación de acompañamiento sobre un emprendimiento. No se deben incluir los campos vestigiales `histproal` ni `SeguimientoCol`.
 - **Campos importantes:** idSeguimientos, Descripcion, TipoSeguimiento, FechaCreacion, FechaActualizacion.
 - **Fks:** Emprendimiento_idEmprendimiento → emprendimiento (**obligatorio**); Usuarios_idUsuarios → usuarios (**autor**).
 - **Relaciones/cardinalidades:** Emprendimiento **1 → N** seguimientos; Usuario (autor) **1 → N** seguimientos.
-- **Decisión pendiente (ver sección 11):** qué campos adicionales conservar o eliminar (p. ej. `histproal`, `SeguimientoCol` son vestigiales y no se recomiendan).
 
 #### `tareas`
 
@@ -321,7 +324,7 @@ SGEMD/
 
 #### `diagnosticos`
 
-- **Propósito:** resultado de un diagnóstico del emprendimiento (muchos campos de evaluación).
+- **Propósito:** resultado de un diagnóstico del emprendimiento (muchos campos de evaluación). Estructura en desarrollo. Matriz de indicadores técnicos a definir y priorizar.
 - **Campos importantes:** idDiagnosticos, FechaEmprendimiento y numerosos indicadores (escala/booleanos) y textos.
 - **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; SectorEconomico_idSectorEconomico → sectoreconomico.
 - **Relaciones:** Emprendimiento **1 → 1** (o **1 → N**) diagnóstico.
@@ -331,7 +334,6 @@ SGEMD/
 - **Propósito:** eventos académicos/culturales y registro de participación.
 - **`eventos` campos:** idEventos, Nombre_evento, Descripcion_evento, Capacidad_maxima, Estado, Requiere_registro, Fecha_creacion, Fecha_actualizacion. **Fks:** Tipo_evento_idTipo_evento → tipo_evento; Modalidad_idModalidad → modalidad; Fecha_y_Horarios_idFecha_y_Horarios → fecha_y_Horarios.
 - **`usuarios_has_Eventos`:** tabla pivote con PK compuesta (Usuarios_idUsuarios, Eventos_idEventos), campo Estado_asistencia, FKs a usuarios y eventos. Cardinalidad Usuario **N : N** Evento.
-- **(El módulo de eventos puede quedar fuera del MVP mínimo — ver prioridades.)**
 
 #### `codigosverificacion`
 
@@ -343,8 +345,6 @@ SGEMD/
 
 - `evaluacioneshabilidades` — evaluación de habilidades no implementada en el flujo principal del MVP.
 - `solicitudestutoria` — duplica la funcionalidad de asesorías.
-- `asistencia` — auxiliar; evaluar si el MVP la requiere.
-- `modulos` — columnas sin uso claro; evaluar.
 - Tablas no relacionadas con el flujo principal deben descartarse en la reconstrucción.
 
 ---
@@ -381,7 +381,12 @@ SGEMD/
 
 **Etapas**
 
-- R17: las etapas del emprendimiento son un catálogo cerrado (Ideación, Prototipado, Validación, Lanzamiento). El emprendimiento apunta a una etapa. La etapa **no** es un tipo de seguimiento.
+- R17: las etapas del emprendimiento son un catálogo cerrado:
+  1. Análisis y Definición de Requerimientos
+  2. Planeación y Diseño Arquitectónico
+  3. Desarrollo e Implementación Funcional
+  4. Evaluación y Validación de Impacto
+     El emprendimiento apunta a una etapa. La etapa **no** es un tipo de seguimiento.
 
 **Tareas**
 
@@ -464,26 +469,26 @@ SGEMD/
 
 ### advice (asesorías)
 
-| Método | Ruta          | Rol                | Propósito        |
-| ------ | ------------- | ------------------ | ---------------- |
-| GET    | `/advice`     | auth (filtra rol)  | Listar           |
-| GET    | `/advice/:id` | auth (alcance)     | Detalle          |
-| POST   | `/advice`     | estudent/teacher   | Crear/solicitar  |
-| PUT    | `/advice/:id` | autor/admin        | Editar/confirmar |
-| DELETE | `/advice/:id` | autor/admin        | Eliminar         |
+| Método | Ruta          | Rol               | Propósito        |
+| ------ | ------------- | ----------------- | ---------------- |
+| GET    | `/advice`     | auth (filtra rol) | Listar           |
+| GET    | `/advice/:id` | auth (alcance)    | Detalle          |
+| POST   | `/advice`     | estudent/teacher  | Crear/solicitar  |
+| PUT    | `/advice/:id` | autor/admin       | Editar/confirmar |
+| DELETE | `/advice/:id` | autor/admin       | Eliminar         |
 
 ### tareas
 
-| Método | Ruta                                   | Rol                        | Propósito                     |
-| ------ | -------------------------------------- | -------------------------- | ----------------------------- |
-| GET    | `/task`                                | auth (filtra rol)          | Listar                        |
-| GET    | `/task/my-task`                        | auth                       | Tareas del usuario + vencidas |
-| GET    | `/task/entrepreneurship/:empId`        | auth                       | Tareas por emprendimiento     |
-| GET    | `/task/advance/entrepreneurship/:entId`| auth                       | % avance (derivado)           |
-| POST   | `/task`                                | docente/admin              | Crear                         |
-| PUT    | `/task/:id`                            | teacher/admin              | Editar                        |
-| PUT    | `/task/:id/completar`                  | auth (estudiante asignado) | Completar                     |
-| DELETE | `/task/:id`                            | teacher/admin              | Eliminar                      |
+| Método | Ruta                                    | Rol                        | Propósito                     |
+| ------ | --------------------------------------- | -------------------------- | ----------------------------- |
+| GET    | `/task`                                 | auth (filtra rol)          | Listar                        |
+| GET    | `/task/my-task`                         | auth                       | Tareas del usuario + vencidas |
+| GET    | `/task/entrepreneurship/:empId`         | auth                       | Tareas por emprendimiento     |
+| GET    | `/task/advance/entrepreneurship/:entId` | auth                       | % avance (derivado)           |
+| POST   | `/task`                                 | docente/admin              | Crear                         |
+| PUT    | `/task/:id`                             | teacher/admin              | Editar                        |
+| PUT    | `/task/:id/completar`                   | auth (estudiante asignado) | Completar                     |
+| DELETE | `/task/:id`                             | teacher/admin              | Eliminar                      |
 
 ### diagnosis
 
@@ -579,7 +584,7 @@ SGEMD/
 - **Manejo seguro de credenciales:** nunca exponer contraseñas, secretos, tokens (más allá del de sesión) ni códigos en respuestas.
 - **CORS:** restringido a orígenes permitidos.
 - **Validación de entrada:** sanitizar y parametrizar todas las consultas; validar tipos/longitudes/campos requeridos.
-- **Manejo de errores:** respuestas JSON consistentes sin exponer stack traces ni datos internos.
+- **Manejo de errores:** respuestas JSON consistententes sin exponer stack traces ni datos internos.
 
 ---
 
@@ -594,7 +599,7 @@ SGEMD/
 - **Duplicación de modelos de asignación:** coexistían `emprendimiento.Usuarios_idUsuarios` (dueño) y `asignaciones` (mentor), sin conectar. Usar un modelo único.
 - **Datos mock donde debería haber datos reales:** cuentas demo que saltan el backend; dashboards con valores inventados. Todo dato de dashboard debe venir de la BD.
 - **Problemas de autorización:** muchos endpoints solo exigían autenticación sin validar rol ni alcance; el estudiante podía operar donde no debía. Validar **rol y propiedad** en backend.
-- **Verificación de correo insegura:** el código se devolvía en la respuesta y no se validaba en backend; cualquiera podía marcar `Verificado=1`. Implementar validación real en backend con persistencia en BD.
+- **Verificación de correo insegura:** el código se devolvía en la respuesta y no se validaba en backend; cualquiera podía marcar `Verificado=1`. Implementar validación real en backend con persistencia en BD. No devolver OTPs en respuestas JSON al frontend.
 - **Inconsistencias entre roles:** frontend usaba `Rol` numérico y backend `Roles_idRoles1` u objetos de sesión distintos (`UserMenu.jsx` roto). Unificar a un solo campo de rol.
 - **Inconsistencias de etapas:** el frontend usaba nombres de etapa distintos a los de BD y el backend referenciaba una columna inexistente (`et.Etapa` en vez de `TipoEtapa`). Unificar catálogo de etapas y columnas.
 - **Consultas SQL incompatibles:** joins que usaban columnas inexistentes o nombres mal escritos. Escribir consultas contra el modelo de BD real.
@@ -609,7 +614,7 @@ SGEMD/
 
 ### Decisiones ya confirmadas (para el MVP)
 
-- Next + Node/Nest + POSTGRESQL con Docker.
+- Node.js (backend) + React (frontend) + POSTGRESQL/MySQL con Docker.
 - Un único campo de rol (`Roles_idRoles1`): 1=Admin, 2=Estudent, 3=Teacher.
 - Autenticación con JWT (8 h) + bcrypt + verificación de correo real en backend.
 - Modelo de asignación único (tabla `assignments` mentor↔estudiante↔emprendimiento).
@@ -628,14 +633,11 @@ SGEMD/
   - Quién crea: solo docente asignado/admin (confirmado como recomendado).
   - Quién consulta: docente asignado y estudiante del emprendimiento y admin (lectura para estudiante).
   - Historial: ordenado por fecha, por emprendimiento.
-  - Campos a conservar: `description`, `typeMonitoring`, fechas, autor, emprendimiento. Evaluar si se eliminan campos vestigiales (`histproal`, `monitoringCol`).
-  - **Si se reconstruye desde cero NO hay datos existentes que preservar**, por lo que la tabla se crea con el modelo correcto desde el inicio (esto elimina el problema de migración del proyecto anterior). Aun así, si en algún punto hubiera datos previos, decidir cómo asignarlos a emprendimientos/autores.
-- Tipo de emprendimiento (bool vs. catálogo).
-- Edición de emprendimiento por el estudiante propietario (¿solo admin o también el estudiante?).
-- Inclusión o no del módulo de **eventos** y de **diagnóstico** en el MVP (ver prioridades).
-- Recuperación de contraseña (¿incluir o post-MVP?).
-- Módulo de comparativa de emprendimientos (¿parte del MVP o post?).
-
+  - Campos a conservar: `description`, `typeMonitoring`, fechas, autor, emprendimiento.
+  - **Si se reconstruye desde cero NO hay datos existentes que preservar**, por lo que la tabla se crea con el modelo correcto desde el inicio (esto elimina el problema de migración del proyecto anterior).
+- Inclusión del módulo de **eventos** y de **diagnóstico** en el MVP (Confirmado).
+- Recuperación de contraseña (Confirmado).
+- Módulo de comparativa de emprendimientos (Opcional/Post-MVP).
 
 ---
 
@@ -643,21 +645,21 @@ SGEMD/
 
 ### P0 — Imprescindible
 
-- Autenticación: registro, login, logout, verificación de correo real en backend, JWT, cierre de rutas por rol.
+- Autenticación: registro, login, logout, verificación de correo real en backend (OTP 8 dígitos/5 min), JWT, cierre de rutas por rol.
 - Usuarios y roles (admin gestiona usuarios; edición de perfil).
-- Emprendimientos: crear (admin), consultar con alcance, ver detalle y etapa.
+- Emprendimientos: crear (admin), consultar con alcance, ver detalle y etapa. Historial de emprendimientos.
 - Asignaciones: admin asigna docente a estudiante (+ emprendimiento); docente consulta sus asignados; estudiante su/s mentor/es.
-- Seguimiento: docente registra notas sobre un emprendimiento; estudiante consulta historial.
-- Tareas: docente crea, estudiante completa, estados y avance derivados de BD.
-- Asesorías: estudiante solicita, docente confirma, ambos consultan.
-- Dashboards por rol con métricas reales.
-- Base de datos inicializada completa (todas las tablas) en Docker.
+- Seguimiento: docente registra notas sobre un emprendimiento; estudiante consulta historial. Adjuntos (hasta 500MB).
+- Tareas: docente crea, estudiante completa, estados y avance derivados de BD. Adjuntos (hasta 500MB).
+- Asesorías: estudiante solicita, docente confirma, ambos consultan. Notificaciones en tiempo real.
+- Dashboards por rol con métricas reales. Paginación en listas.
+- Base de datos inicializada completa (todas las tablas) en Docker. Sin scripts de migración.
 - Seguridad: secretos en entorno, `.env` ignorado, validación en backend.
 
 ### P1 — Importante
 
 - Diagnóstico de emprendimiento.
-- Eventos (creación y registro de asistencia).
+- Eventos (creación y registro de asistencia manual).
 - Mejoras de perfil (avatar, datos extendidos).
 - Plan de trabajo agrupado por etapas.
 
@@ -665,7 +667,6 @@ SGEMD/
 
 - Comparativa de emprendimientos.
 - Evaluación de habilidades (no estaba funcional).
-- Recuperación de contraseña por correo.
 - Notificaciones/push.
 - Internacionalización.
 
@@ -675,36 +676,37 @@ SGEMD/
 
 Pruebas funcionales para considerar el MVP terminado:
 
-1. Un estudiante puede **registrarse**, recibir un código de verificación real, verificar su correo e **iniciar sesión**.
-2. Un administrador puede **crear** usuarios/docentes y **asignar un emprendimiento a un docente**.
+1. Un estudiante puede **registrarse**, recibir un código OTP de 8 dígitos, verificar su correo y **iniciar sesión**.
+2. Un administrador puede **crear** usuarios/docentes, **asignar un emprendimiento a un docente**, y aprobar emprendimientos paralelos.
 3. Un docente consulta **solo sus emprendimientos asignados** (no los de otros).
-4. Un docente puede **registrar seguimiento** (nota) sobre un emprendimiento asignado.
+4. Un docente puede **registrar seguimiento** (nota y adjuntos) sobre un emprendimiento asignado.
 5. El **estudiante puede consultar** el historial de seguimiento de su emprendimiento (solo lectura).
 6. Un docente puede **crear tareas**; un estudiante puede **completar** sus tareas; el estado cambia correctamente.
-7. Las **tareas persisten** en BD y sobreviven al reinicio.
-8. Un estudiante puede **solicitar una asesoría** y el docente **confirmarla**.
+7. Las **tareas persisten** en BD y sobreviven al reinicio. Los adjuntos se eliminan del servidor si se borra la tarea.
+8. Un estudiante puede **solicitar una asesoría** y el docente **confirmarla**. Se reciben notificaciones en tiempo real.
 9. Los **dashboards muestran datos reales** de BD (conteos y % de avance correctos por rol).
 10. Un estudiante **no puede** ver ni modificar recursos de otros; un docente **no puede** ver emprendimientos ajenos.
-11. El sistema **no expone** credenciales ni secretos en ninguna respuesta.
-12. La base de datos se **inicializa completa** en un entorno Docker limpio (todas las tablas necesarias).
+11. El sistema **no expone** credenciales, secretos, ni códigos OTP en ninguna respuesta.
+12. La base de datos se **inicializa completa** en un entorno Docker limpio (todas las tablas necesarias). El diseño es totalmente responsive.
 
 ---
 
 ## 14. Orden recomendado de construcción
 
 1. **Modelo de datos / Base de datos** — definir y crear el esquema completo correcto (todas las tablas del MVP), con seed inicial y sin secretos.
-2. **Backend base** — Express, conexión a BD, manejo de errores, CORS, estructura de carpetas.
-3. **Autenticación** — registro, verificación de correo real, login, JWT, logout, middleware de auth y de rol.
-4. **Usuarios / roles** — endpoints y lógica de usuarios, perfil, gestión por admin.
-5. **Emprendimientos** — CRUD y etapa, con alcance por rol.
+2. **Backend base (Node.js)** — Express, conexión a BD, manejo de errores, CORS, estructura de carpetas. Configuración de SMTP.
+3. **Autenticación** — registro, verificación OTP por correo, login, JWT, logout, middleware de auth y de rol.
+4. **Usuarios / roles / módulos** — endpoints y lógica de usuarios, perfil, gestión por admin. Control de vistas por módulo.
+5. **Emprendimientos** — CRUD, etapas (catálogo predefinido), estados históricos y validación para emprendimientos paralelos.
 6. **Asignaciones** — crear/consultar/desactivar; conectar con emprendimientos y usuarios.
-7. **Seguimiento** — endpoints por emprendimiento, autor, alcance.
-8. **Asesorías** — solicitud, confirmación, consulta.
-9. **Tareas** — CRUD, estados, avance.
-10. **Dashboards** — endpoints de métricas reales por rol.
-11. **Frontend** — autenticación, layout/sidebars, páginas por rol, consumo de la API, guardas.
-12. **Pruebas** — funcionales de extremo a extremo (criterios de aceptación).
-13. **Docker** — contenerización (backend, frontend, MySQL), variables de entorno, inicialización de BD, README.
+7. **Seguimiento y Adjuntos** — endpoints por emprendimiento, autor, alcance. Subida/borrado de archivos (local, hasta 500MB).
+8. **Asesorías y Notificaciones** — solicitud, confirmación, consulta. Alertas en tiempo real (Socket.io).
+9. **Tareas** — CRUD, estados, avance, adjuntos.
+10. **Eventos y Asistencia** — CRUD de eventos, registro manual de asistencia.
+11. **Dashboards** — endpoints de métricas reales por rol. Paginación en todos los listados.
+12. **Frontend (React)** — autenticación, layout/sidebars (responsive), páginas por rol, consumo de la API, guardas.
+13. **Pruebas** — funcionales de extremo a extremo (criterios de aceptación).
+14. **Docker** — contenerización (backend, frontend, MySQL), variables de entorno, inicialización de BD, README.
 
 ---
 
@@ -713,14 +715,15 @@ Pruebas funcionales para considerar el MVP terminado:
 Cuando el MVP esté terminado, el proyecto debe verse así:
 
 - **Un esquema de BD completo y coherente** con el código (sin columnas ni tablas huérfanas u obsoletas en el flujo principal).
-- **Backend REST limpio y por capas**, con una sola implementación de autenticación y autorización por rol/alcance en cada endpoint.
-- **Frontend React** con páginas por rol, guardas, menús coherentes y cliente API que maneja sesiones.
-- **Seguimiento funcional**: el docente registra notas sobre un emprendimiento y el estudiante las consulta; el autor queda registrado.
+- **Backend REST limpio y por capas (Node.js)**, con una sola implementación de autenticación y autorización por rol/alcance en cada endpoint.
+- **Frontend React totalmente responsive** con páginas por rol, guardas, menús coherentes y cliente API que maneja sesiones.
+- **Seguimiento funcional**: el docente registra notas (con adjuntos) sobre un emprendimiento y el estudiante las consulta; el autor queda registrado.
 - **Asignaciones funcionales**: el docente ve "sus" emprendimientos y el estudiante "sus" mentor/emprendimientos.
-- **Tareas funcionales** con estados y avance derivados de BD.
+- **Tareas funcionales** con estados, adjuntos y avance derivados de BD.
 - **Dashboards con métricas reales** (sin datos mock ni cuentas demo que salten el backend).
-- **Seguridad correcta**: secretos solo en entorno, `.env` ignorado, `.env.example` sin valores reales, verificación de correo real, sin credenciales expuestas en el historial ni en respuestas.
-- **Despliegue con Docker** que inicialice la BD completa y levante backend + frontend con variables de entorno.
+- **Notificaciones en tiempo real** para eventos clave (asesorías, tareas).
+- **Seguridad correcta**: secretos solo en entorno, `.env` ignorado, `.env.example` sin valores reales, verificación OTP (8 dígitos/5 min) por correo real, sin credenciales expuestas.
+- **Despliegue con Docker** que inicialice la BD completa y limpia, levantando backend + frontend con variables de entorno.
 
 ### Distinción final de conceptos
 
