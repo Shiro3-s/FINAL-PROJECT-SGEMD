@@ -1,0 +1,20 @@
+C4Context
+  title Diagrama de Contexto del Sistema SGEMD
+
+  Person(admin, "Administrador", "Coordinador/a del Centro Progresa que gestiona usuarios, asignaciones, eventos y reportes.")
+  Person(teacher, "Docente / Mentor", "Asesor que registra seguimiento, tareas y asesorías de los emprendimientos asignados.")
+  Person(student, "Estudiante", "Emprendedor que se registra, solicita asesorías, completa tareas y consulta su avance.")
+
+  System(sgemd, "SGEMD", "Sistema de Gestión de Emprendimiento Minuto de Dios. Plataforma web (React + Node.js) con los módulos de autenticación, emprendimientos, asignaciones, seguimiento, tareas, asesorías, eventos, diagnóstico y dashboards.")
+
+  System_Ext(smtp, "Servicio SMTP", "Envía por correo el código OTP de 8 dígitos para verificar la cuenta del estudiante.")
+  System_Ext(db, "PostgreSQL 17", "Base de datos relacional que almacena todo el expediente central del sistema.")
+
+  Rel(admin, sgemd, "Gestiona usuarios, emprendimientos, asignaciones, agenda, eventos y descarga respaldos (CSV/Excel)")
+  Rel(teacher, sgemd, "Consulta sus asignados, registra seguimiento/tareas/asesorías y confirma citas")
+  Rel(student, sgemd, "Se registra, verifica correo, solicita asesorías, completa tareas y consulta su progreso")
+  Rel(sgemd, smtp, "Envía correos con OTP de verificación")
+  Rel(sgemd, db, "Lee y escribe datos (consultas parametrizadas)")
+  Rel(student, smtp, "Recibe el código OTP en su correo institucional")
+
+  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")

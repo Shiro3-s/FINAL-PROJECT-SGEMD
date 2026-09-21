@@ -42,7 +42,7 @@ The primary source of truth is the provided context document: `README_SGEMD.md`.
 
 ## 5. Project Constraints
 
-* **Architecture:** Must use Node.js, Express, React, and MySQL (v8) orchestrated via Docker.
+* **Architecture:** Must use Node.js, Express, React, and PostgreSQL (17) orchestrated via Docker.
 
 
 * **Security:** Passwords must be hashed with bcrypt (salt 10+). Environment variables must strictly manage secrets.
@@ -248,7 +248,7 @@ Priorities are defined to segregate the essential core platform (MVP) from valua
 * Role-specific Dashboards fed by real data.
 
 
-* Clean Docker-based MySQL initialization.
+* Clean Docker-based PostgreSQL initialization.
 
 
 
@@ -327,7 +327,7 @@ Release 2 will focus on **Could Have** (Priority P2) capabilities:
 ## 25. Project Roadmap
 
 ```
-Phase 0: Architecture & Database Design (Docker, MySQL schema)
+Phase 0: Architecture & Database Design (Docker, PostgreSQL schema)
     ↓
 Phase 1: Backend Foundation (Node.js, Express, Auth, OTP)
     ↓
@@ -357,7 +357,7 @@ The MVP focuses strictly on securing the data lifecycle and operational workflow
 * **Frontend:** React SPA with React Router. Centralized API client intercepting 401/403 errors.
 
 
-* **Database:** MySQL v8 connected via `mysql2` connection pool.
+* **Database:** PostgreSQL 17 connected via `pg` connection pool.
 
 
 * **Security:** Middleware layer validating JWTs and ensuring ownership/role checks before controller execution.
@@ -432,7 +432,7 @@ The MVP focuses strictly on securing the data lifecycle and operational workflow
 
 ## 33. Deployment & Operations Strategy
 
-* **Containerization:** `docker-compose.yml` orchestrating Frontend, Backend, and MySQL services.
+* **Containerization:** `docker-compose.yml` orchestrating Frontend, Backend, and PostgreSQL services.
 
 
 * **Environment:** `.env.example` provided for safe placeholder definitions.
@@ -486,7 +486,7 @@ The MVP focuses strictly on securing the data lifecycle and operational workflow
 * **MoSCoW Priority:** Must Have
 * **Release:** MVP
 * **Related Requirements:** REQ-F-001, REQ-DATA-001
-* **Objective:** Generate the clean MySQL v8 schema for the SGEMD MVP.
+* **Objective:** Generate the clean PostgreSQL 17 schema for the SGEMD MVP.
 * **Context:** The project requires a complete database rebuild to discard legacy debt. No migration scripts.
 * **Inputs:** `README_SGEMD.md` Data Model section.
 * **Dependencies:** None.
@@ -494,19 +494,19 @@ The MVP focuses strictly on securing the data lifecycle and operational workflow
 
 ```text
 Review the Data Model section in the provided README_SGEMD.md.
-Create a complete, clean `schema.sql` file for MySQL v8. 
+Create a complete, clean `schema.sql` file for PostgreSQL 17. 
 Include all catalog tables (roles, tipodocumentos, etc.) and business entities (usuarios, emprendimiento, asignaciones, seguimientos, tareas, asesorias, diagnosticos, eventos, codigosverificacion).
 Ensure strict foreign key constraints. 
 Include initial seed data for the catalog tables (e.g., Roles: 1=Admin, 2=Estudiante, 3=Docente).
 Do not include any dummy data for users or entrepreneurships. 
-Ensure case-consistency (snake_case or camelCase) is strictly applied to avoid Linux MySQL issues.
+Ensure case-consistency (snake_case or camelCase) is strictly applied to avoid PostgreSQL identifier normalization (lowercase) issues.
 Output the SQL code in a clear block.
 
 ```
 
 * **Expected Output:** A comprehensive `schema.sql` script.
 * **Acceptance Criteria:** Valid SQL syntax; all 1:N and N:M relationships properly defined; catalog data seeded.
-* **Validation:** Run in a MySQL v8 Docker container without errors.
+* **Validation:** Run in a PostgreSQL 17 Docker container without errors.
 * **Execution Order:** 1
 * **Complexity:** Medium
 
@@ -528,7 +528,7 @@ Implement the Authentication controllers and services for SGEMD based on README_
 1. `/auth/register`: Accept student data, hash the password (bcrypt salt 10), save user as `Verificado=0`. Generate an 8-digit numeric OTP, save it to `codigosverificacion` (5 min expiry), and simulate sending an email via Nodemailer (SMTP). DO NOT return the OTP in the JSON response.
 2. `/auth/verify`: Accept email and OTP. Validate against DB. If valid and not expired, set `Verificado=1` and `Usado=1`.
 3. `/auth/login`: Validate email/password. Return a JWT (8-hour expiry) with user ID and Role ID in the payload. Do not return the password hash.
-Ensure all database interactions use parameterized queries via `mysql2`.
+Ensure all database interactions use parameterized queries via `pg`.
 
 ```
 
@@ -719,7 +719,7 @@ Docker DB Setup → Backend Auth → Assignment Logic → Tracing/Tasks API → 
 * Code passes end-to-end user journey tests.
 * System is deployed to a staging environment mirroring production.
 * README updated with deployment instructions.
-* No mock data remains; all dashboard data originates from MySQL.
+* No mock data remains; all dashboard data originates from PostgreSQL.
 
 ## 48. Complete Product Definition of Done
 

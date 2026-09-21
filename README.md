@@ -183,6 +183,8 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 
 La nueva implementación es **desde cero** y no debe conservar estructuras innecesarias ni errores del proyecto anterior.
 
+> **Diagrama de componentes:** se agregó el diagrama de componentes del proyecto en `docs/component-diagram.drawio`, que refleja la arquitectura propuesta (Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura).
+
 ### Frontend
 
 - Desarrollado utilizando **React** (SPA) con React Router. Totalmente responsive.
@@ -207,7 +209,7 @@ La nueva implementación es **desde cero** y no debe conservar estructuras innec
 
 ### Base de datos
 
-- **MySQL** (v8), accedida mediante un pool de conexiones (`mysql2`).
+- **PostgreSQL** (17), accedida mediante un pool de conexiones (`pg`).
 - Inicialización mediante script SQL montado en la primera creación del contenedor. Sin scripts de migración. La base de datos será 100% limpia sin excepciones ni datos externos.
 - Modelo definido en la [sección 5](#5-modelo-de-datos).
 
@@ -249,7 +251,7 @@ SGEMD/
 ├── database/
 │   ├── schema.sql             (modelo objetivo; sin secretos)
 │   └── seed.sql               (opcional)
-├── docker-compose.yml         (backend, frontend, mysql; variables de entorno)
+├── docker-compose.yml         (backend, frontend, postgres; variables de entorno)
 ├── .gitignore                 (.env, node_modules, __pycache__, *.log, uploads)
 └── README.md                  (instalación, despliegue; sin credenciales reales)
 ```
@@ -605,7 +607,7 @@ SGEMD/
 - **Consultas SQL incompatibles:** joins que usaban columnas inexistentes o nombres mal escritos. Escribir consultas contra el modelo de BD real.
 - **Tablas no incluidas en Docker:** `tareas` existía solo en un script aparte y no se montaba en la inicialización. La BD inicial (Docker) debe crear **todas** las tablas necesarias.
 - **Errores de tipeo de identificadores:** p. ej. `EtapaEmprimiento` en un componente. Validar nombres de campos/campos en toda la UI.
-- **Case-sensitivity:** nombres de tablas/columnas sensibles a mayúsculas en MySQL/Linux. Usar una convención de nombres consistente.
+- **Case-sensitivity:** en PostgreSQL los identificadores no entrecomillados se normalizan a minúsculas. Usar una convención de nombres consistente (snake_case).
 - **Secretos en el historial:** `.env` estuvo versionado y sus secretos llegaron a commits. En la reconstrucción **nunca** versionar `.env` ni secretos; usar `.env.example` con placeholders.
 
 ---
@@ -614,7 +616,7 @@ SGEMD/
 
 ### Decisiones ya confirmadas (para el MVP)
 
-- Node.js (backend) + React (frontend) + POSTGRESQL/MySQL con Docker.
+- Node.js (backend) + React (frontend) + PostgreSQL con Docker.
 - Un único campo de rol (`Roles_idRoles1`): 1=Admin, 2=Estudent, 3=Teacher.
 - Autenticación con JWT (8 h) + bcrypt + verificación de correo real en backend.
 - Modelo de asignación único (tabla `assignments` mentor↔estudiante↔emprendimiento).
@@ -706,7 +708,7 @@ Pruebas funcionales para considerar el MVP terminado:
 11. **Dashboards** — endpoints de métricas reales por rol. Paginación en todos los listados.
 12. **Frontend (React)** — autenticación, layout/sidebars (responsive), páginas por rol, consumo de la API, guardas.
 13. **Pruebas** — funcionales de extremo a extremo (criterios de aceptación).
-14. **Docker** — contenerización (backend, frontend, MySQL), variables de entorno, inicialización de BD, README.
+14. **Docker** — contenerización (backend, frontend, PostgreSQL), variables de entorno, inicialización de BD, README.
 
 ---
 

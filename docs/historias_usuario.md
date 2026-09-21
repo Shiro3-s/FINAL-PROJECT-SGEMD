@@ -4,7 +4,7 @@
 * **Dominio principal o propósito:** El documento detalla el diseño y los requisitos de una plataforma web (Proyecto Quantum) destinada a gestionar los procesos de emprendimiento en el Centro Progresa.
 * **Roles principales identificados:** Coordinadora (Administradora), Estudiante (Emprendedor) y Asesor (Docente).
 * **Procesos de negocio clave:** El sistema abarca el registro de estudiantes, el diagnóstico de caracterización, la gestión y asignación manual de agendas para asesorías, y la generación de reportes analíticos.
-* **Propósito general de la funcionalidad:** Se busca reemplazar la gestión manual basada en Excel para evitar cuellos de botella y pérdidas de información. La nueva herramienta centralizará los datos en un "Expediente Central del Proyecto", soportado por una base de datos MySQL. Además, automatizará el cálculo de métricas y proporcionará un entorno seguro con autenticación JWT y alta usabilidad.
+* **Propósito general de la funcionalidad:** Se busca reemplazar la gestión manual basada en Excel para evitar cuellos de botella y pérdidas de información. La nueva herramienta centralizará los datos en un "Expediente Central del Proyecto", soportado por una base de datos PostgreSQL. Además, automatizará el cálculo de métricas y proporcionará un entorno seguro con autenticación JWT y alta usabilidad.
 
 ## 2. Actores y Roles de Usuario
 | Rol / Actor | Descripción | Responsabilidades |
@@ -85,7 +85,7 @@
 ### Feature: Expediente Central del Proyecto
 **Como** Asesor y Estudiante  
 **Queremos** acceder a una bitácora histórica y adjuntar documentos  
-**Para** centralizar toda la información y evidencias en una base de datos relacional MySQL  
+**Para** centralizar toda la información y evidencias en una base de datos relacional PostgreSQL  
 
 * **Escenario:** Revisión de historia por nuevo asesor asignado  
   * **Dado** que soy un nuevo asesor asignado a un proyecto existente  
@@ -95,7 +95,7 @@
 * **Escenario:** Subida de archivos adjuntos al expediente  
   * **Dado** que un usuario (Estudiante o Asesor) se encuentra en el perfil del proyecto  
   * **Cuando** sube un archivo de evidencia (ej. PDF, Excel)  
-  * **Entonces** el sistema almacena el documento en la base de datos MySQL y lo vincula de forma permanente al Expediente Central  
+  * **Entonces** el sistema almacena el documento en la base de datos PostgreSQL y lo vincula de forma permanente al Expediente Central  
 
 ### Feature: Agendamiento Manual Restringido
 **Como** Coordinadora  
@@ -170,7 +170,7 @@
 5. **Emparejamiento:** La Coordinadora asigna el proyecto al Asesor correspondiente.
 6. **Seguimiento Continuo:** Cuando el estudiante necesita asesoría, utiliza la plataforma (generando trazabilidad/movimientos, adjuntando PDFs/Excel) y solicita la cita.
 7. **Agendamiento:** La Coordinadora aprueba el horario con transacciones seguras (ACID). El sistema notifica a ambas partes vía notificaciones In-App.
-8. **Finalización o Inactividad:** El Asesor atiende la cita y deja notas en el Expediente Central (MySQL). Si el estudiante deja de usar el portal durante 3 meses, pasa a estado Inactivo automáticamente.
+8. **Finalización o Inactividad:** El Asesor atiende la cita y deja notas en el Expediente Central (PostgreSQL). Si el estudiante deja de usar el portal durante 3 meses, pasa a estado Inactivo automáticamente.
 
 ## 6. Casos Límite y Flujos Alternativos
 * **Caso Límite 1: Solicitud de Cita sin Avances.** El estudiante pide mentoría sin completar trazabilidad reciente. El sistema permite la solicitud pero la resalta visualmente en color rojo para el asesor.
@@ -180,7 +180,7 @@
 ## 7. Decisiones Técnicas y Reglas de Negocio Aclaradas
 * **Autenticación:** Implementación de registro independiente con JWT y perfiles de habilitación progresiva.
 * **Diagnóstico:** Las preguntas y métricas son estáticas en código, pero se cambiarán mediante requerimientos a backend según solicitudes administrativas.
-* **Expediente Central:** Soportado por base de datos relacional MySQL, adaptada para almacenar y vincular archivos adjuntos (Excel, PDF, etc.) y exportar datos.
+* **Expediente Central:** Soportado por base de datos relacional PostgreSQL, adaptada para almacenar y vincular archivos adjuntos (Excel, PDF, etc.) y exportar datos.
 * **Notificaciones:** Exclusivamente In-App, reemplazando la necesidad de envíos vía correo electrónico.
 * **Semaforización:** El parámetro para considerar un "avance" es generar trazabilidad y movimientos orgánicos dentro de la plataforma.
 * **Inactividad:** El umbral se establece estrictamente en 3 meses exactos sin generar movimientos.
