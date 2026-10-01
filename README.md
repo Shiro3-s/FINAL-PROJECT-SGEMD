@@ -186,6 +186,8 @@ La nueva implementación es **desde cero** y no debe conservar estructuras innec
 > **Diagrama de componentes:** se agregó el diagrama de componentes del proyecto en `docs/component-diagram.drawio`, que refleja la arquitectura propuesta (Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura).
 >
 > **Diagrama de clases:** en `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Muestra la estructura interna del dominio: 18 clases con atributos, visibilidad, métodos y multiplicidades, derivadas del modelo de datos de la [sección 5](#5-modelo-de-datos). Incluye trazabilidad requisito → clase y la revisión crítica contra los FR/NFR.
+>
+> **Diagrama entidad-relación:** en `docs/diagrama-entidades.md` (fuente Mermaid), `.png` y `.drawio` editable. Representa el modelo de datos objetivo: **29 tablas y 42 relaciones** (16 de negocio con comportamiento + 13 catálogos de lectura), derivadas de la [sección 5](#5-modelo-de-datos) y corregidas con `docs/diagrama-clases.md`.
 
 ### Frontend
 
@@ -263,6 +265,8 @@ SGEMD/
 ## 5. Modelo de datos
 
 > Diseño **conceptual** objetivo. No es una réplica del `schema.sql` anterior. No implementar la BD todavía; solo usar como guía. No incluir secretos ni datos sensibles en los scripts.
+>
+> **Diagrama entidad-relación:** la versión corregida del modelo está en `docs/diagrama-entidades.drawio` (con `.md` y `.png`), que aplica **snake_case** a todas las columnas, vincula `codigosverificacion` por `usuario_id`, modela los módulos como `habilitaciones` por persona y agrega `adjuntos` con sus tres tablas pivote.
 
 ### Catalogos (referenciados por claves foráneas)
 
