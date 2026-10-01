@@ -184,6 +184,8 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 La nueva implementación es **desde cero** y no debe conservar estructuras innecesarias ni errores del proyecto anterior.
 
 > **Diagrama de componentes:** se agregó el diagrama de componentes del proyecto en `docs/component-diagram.drawio`, que refleja la arquitectura propuesta (Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura).
+>
+> **Diagrama de clases:** en `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Muestra la estructura interna del dominio: 18 clases con atributos, visibilidad, métodos y multiplicidades, derivadas del modelo de datos de la [sección 5](#5-modelo-de-datos). Incluye trazabilidad requisito → clase y la revisión crítica contra los FR/NFR.
 
 ### Frontend
 

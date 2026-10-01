@@ -1,0 +1,253 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="diagrama-clases-sgemd" name="Diagrama de clases">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4897" pageHeight="2518" math="0" shadow="0">
+      <root>
+<mxCell id="0" />
+<mxCell id="1" parent="0" />
+        <mxCell id="Usuario" value="Usuario" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="2141" y="8" width="361" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario_atr" value="-idUsuarios: int&lt;br&gt;-nombre: string&lt;br&gt;-correoInstitucional: string&lt;br&gt;-correoPersonal: string&lt;br&gt;-password: string&lt;br&gt;-verificado: boolean&lt;br&gt;-estado: boolean&lt;br&gt;-celular: string&lt;br&gt;-telefono: string&lt;br&gt;-direccion: string&lt;br&gt;-genero: string&lt;br&gt;-estadoCivil: string&lt;br&gt;-fechaNacimiento: date&lt;br&gt;-semestre: int&lt;br&gt;-imgPerfil: string&lt;br&gt;-fechaCreacion: datetime&lt;br&gt;-fechaActualizacion: datetime" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2141" y="42" width="361" height="454" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario_met" value="+registrar(): Usuario&lt;br&gt;+verificarCorreo(codigo: string): boolean&lt;br&gt;+iniciarSesion(): Token&lt;br&gt;+cerrarSesion(): void&lt;br&gt;+consultarPerfil(): Usuario&lt;br&gt;+editarPerfil(): Usuario&lt;br&gt;+subirAvatar(archivo: Adjunto): void&lt;br&gt;+desactivar(): void&lt;br&gt;+reactivar(): void&lt;br&gt;+esAdministrador(): boolean&lt;br&gt;+esDocente(): boolean&lt;br&gt;+esEstudiante(): boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2141" y="496" width="361" height="304" as="geometry" />
+        </mxCell>
+        <mxCell id="FechaHorario" value="&lt;&lt;bloque&gt;&gt;&lt;br&gt;FechaHorario" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="4319" y="284" width="281" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="FechaHorario_atr" value="-idFecha_y_Horarios: int&lt;br&gt;-fecha: date&lt;br&gt;-horaInicio: time&lt;br&gt;-horaFin: time" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="4319" y="318" width="281" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="FechaHorario_met" value="+estaDisponible(): boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="4319" y="488" width="281" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="EtapaEmprendimiento" value="&lt;&lt;catalogo&gt;&gt;&lt;br&gt;EtapaEmprendimiento" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="1514" y="320" width="316" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="EtapaEmprendimiento_atr" value="-idEtapaEmprendimiento: int&lt;br&gt;-tipoEtapa: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="1514" y="354" width="316" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="EtapaEmprendimiento_met" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="1514" y="488" width="316" height="0" as="geometry" />
+        </mxCell>
+        <mxCell id="TipoEvento" value="&lt;&lt;catalogo&gt;&gt;&lt;br&gt;TipoEvento" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="3487" y="320" width="204" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="TipoEvento_atr" value="-idTipo_evento: int&lt;br&gt;-nombre: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="3487" y="354" width="204" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="TipoEvento_met" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="3487" y="488" width="204" height="0" as="geometry" />
+        </mxCell>
+        <mxCell id="Modalidad" value="&lt;&lt;catalogo&gt;&gt;&lt;br&gt;Modalidad" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="4084" y="320" width="185" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Modalidad_atr" value="-idModalidad: int&lt;br&gt;-nombre: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="4084" y="354" width="185" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="Modalidad_met" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="4084" y="488" width="185" height="0" as="geometry" />
+        </mxCell>
+        <mxCell id="Emprendimiento" value="Emprendimiento" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="874" width="523" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Emprendimiento_atr" value="-idEmprendimiento: int&lt;br&gt;-nombre: string&lt;br&gt;-descripcion: string&lt;br&gt;-tipoEmprendimiento: string&lt;br&gt;-sectorProductivo: string&lt;br&gt;-redesSociales: string&lt;br&gt;-acompanamiento: string&lt;br&gt;-actaCompromiso: string&lt;br&gt;-fechaCreacion: datetime&lt;br&gt;-fechaActualizacion: datetime&lt;br&gt;+consultarPorAlcance(usuario: Usuario): Emprendimiento[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="908" width="523" height="313" as="geometry" />
+        </mxCell>
+        <mxCell id="Emprendimiento_met" value="+crear(): Emprendimiento&lt;br&gt;+editar(): Emprendimiento&lt;br&gt;+eliminar(): void&lt;br&gt;+cambiarEtapa(etapa: EtapaEmprendimiento): void&lt;br&gt;+esParalelo(): boolean&lt;br&gt;+registrarActa(archivo: Adjunto): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="1221" width="523" height="157" as="geometry" />
+        </mxCell>
+        <mxCell id="Asesoria" value="Asesoria" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="4265" y="898" width="432" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Asesoria_atr" value="-idAsesorias: int&lt;br&gt;-nombreDeAsesoria: string&lt;br&gt;-descripcion: string&lt;br&gt;-fechaAsesoria: date&lt;br&gt;-comentarios: string&lt;br&gt;-confirmacion: string&lt;br&gt;-fechaCreacion: datetime&lt;br&gt;-fechaActualizacion: datetime&lt;br&gt;+consultarPorAlcance(usuario: Usuario): Asesoria[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="4265" y="932" width="432" height="263" as="geometry" />
+        </mxCell>
+        <mxCell id="Asesoria_met" value="+solicitar(estudiante: Usuario): Asesoria&lt;br&gt;+confirmar(docente: Usuario): Asesoria&lt;br&gt;+editar(autor: Usuario): Asesoria&lt;br&gt;+eliminar(autor: Usuario): void&lt;br&gt;+estaPendiente(): boolean&lt;br&gt;+adjuntarEvidencia(archivo: Adjunto): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="4265" y="1195" width="432" height="159" as="geometry" />
+        </mxCell>
+        <mxCell id="Evento" value="Evento" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="3299" y="910" width="484" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Evento_atr" value="-idEventos: int&lt;br&gt;-nombreEvento: string&lt;br&gt;-descripcionEvento: string&lt;br&gt;-capacidadMaxima: int&lt;br&gt;-estado: boolean&lt;br&gt;-requiereRegistro: boolean&lt;br&gt;-fechaCreacion: datetime&lt;br&gt;-fechaActualizacion: datetime&lt;br&gt;+listar(): Evento[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="3299" y="944" width="484" height="264" as="geometry" />
+        </mxCell>
+        <mxCell id="Evento_met" value="+crear(): Evento&lt;br&gt;+editar(): Evento&lt;br&gt;+registrarAsistencia(usuario: Usuario, estado: string): void&lt;br&gt;+desregistrar(usuario: Usuario): void&lt;br&gt;+hayCupo(): boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="3299" y="1208" width="484" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="CodigoVerificacion" value="CodigoVerificacion" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="840" y="982" width="425" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="CodigoVerificacion_atr" value="-idCodigo: int&lt;br&gt;-correoInstitucional: string&lt;br&gt;-codigo: string&lt;br&gt;-expiracion: datetime&lt;br&gt;-usado: boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1016" width="425" height="168" as="geometry" />
+        </mxCell>
+        <mxCell id="CodigoVerificacion_met" value="+generar(correo: string): CodigoVerificacion&lt;br&gt;+estaVencido(): boolean&lt;br&gt;+marcarUsado(): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1184" width="425" height="86" as="geometry" />
+        </mxCell>
+        <mxCell id="Modulo" value="&lt;&lt;catalogo&gt;&gt;&lt;br&gt;Modulo" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="2113" y="1030" width="417" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Modulo_atr" value="-idModulos: int&lt;br&gt;-nombre: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2113" y="1064" width="417" height="113" as="geometry" />
+        </mxCell>
+        <mxCell id="Modulo_met" value="+estaHabilitadoPara(usuario: Usuario): boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2113" y="1177" width="417" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="Rol" value="&lt;&lt;catalogo&gt;&gt;&lt;br&gt;Rol" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="1042" width="174" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Rol_atr" value="-idRoles: int&lt;br&gt;-nombre: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="1076" width="174" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="Rol_met" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="1210" width="174" height="0" as="geometry" />
+        </mxCell>
+        <mxCell id="SectorEconomico" value="&lt;&lt;catalogo&gt;&gt;&lt;br&gt;SectorEconomico" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="2989" y="1042" width="260" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="SectorEconomico_atr" value="-idSectorEconomico: int&lt;br&gt;-nombre: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2989" y="1076" width="260" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="SectorEconomico_met" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2989" y="1210" width="260" height="0" as="geometry" />
+        </mxCell>
+        <mxCell id="Tarea" value="Tarea" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="2397" y="1452" width="369" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Tarea_atr" value="-idTareas: int&lt;br&gt;-titulo: string&lt;br&gt;-descripcion: string&lt;br&gt;-fechaLimite: date&lt;br&gt;-estado: string&lt;br&gt;-fechaCreacion: datetime&lt;br&gt;-fechaActualizacion: datetime&lt;br&gt;+consultarMisTareas(): Tarea[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2397" y="1486" width="369" height="236" as="geometry" />
+        </mxCell>
+        <mxCell id="Tarea_met" value="+crear(): Tarea&lt;br&gt;+editar(): Tarea&lt;br&gt;+eliminar(): void&lt;br&gt;+completar(): void&lt;br&gt;+marcarVencida(): void&lt;br&gt;+calcularAvance(): decimal&lt;br&gt;+adjuntarEvidencia(archivo: Adjunto): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2397" y="1722" width="369" height="186" as="geometry" />
+        </mxCell>
+        <mxCell id="Asignacion" value="Asignacion" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="8" y="1512" width="441" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Asignacion_atr" value="-idAsignacion: int&lt;br&gt;-fechaAsignacion: date&lt;br&gt;-estado: boolean&lt;br&gt;+consultarPorMentor(): Asignacion[]&lt;br&gt;+consultarPorEstudiante(): Asignacion[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="8" y="1546" width="441" height="163" as="geometry" />
+        </mxCell>
+        <mxCell id="Asignacion_met" value="+crear(): Asignacion&lt;br&gt;+reasignar(mentor: Usuario): Asignacion&lt;br&gt;+desactivar(): void&lt;br&gt;+estaActiva(): boolean&lt;br&gt;+validarUnicaActivaPorEmprendimiento(): boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="8" y="1709" width="441" height="139" as="geometry" />
+        </mxCell>
+        <mxCell id="Seguimiento" value="Seguimiento" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="499" y="1512" width="484" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Seguimiento_atr" value="-idSeguimientos: int&lt;br&gt;-descripcion: string&lt;br&gt;-tipoSeguimiento: string&lt;br&gt;-fechaCreacion: datetime&lt;br&gt;-fechaActualizacion: datetime&lt;br&gt;+consultarHistorialPorEmprendimiento(): Seguimiento[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="499" y="1546" width="484" height="191" as="geometry" />
+        </mxCell>
+        <mxCell id="Seguimiento_met" value="+registrar(autor: Usuario): Seguimiento&lt;br&gt;+editar(autor: Usuario): Seguimiento&lt;br&gt;+eliminar(autor: Usuario): void&lt;br&gt;+adjuntarEvidencia(archivo: Adjunto): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="499" y="1737" width="484" height="111" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico" value="Diagnostico" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="2879" y="1512" width="414" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico_atr" value="-idDiagnosticos: int&lt;br&gt;-fechaEmprendimiento: date&lt;br&gt;-indicadores: json&lt;br&gt;-fortalezas: string&lt;br&gt;-oportunidadesMejora: string&lt;br&gt;+consultarPorEmprendimiento(): Diagnostico[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2879" y="1546" width="414" height="191" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico_met" value="+generar(): Diagnostico&lt;br&gt;+editar(): Diagnostico&lt;br&gt;+eliminar(): void&lt;br&gt;+calcularMetricas(): Diagnostico" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2879" y="1737" width="414" height="111" as="geometry" />
+        </mxCell>
+        <mxCell id="InscripcionEvento" value="InscripcionEvento" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="3561" y="1608" width="387" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="InscripcionEvento_atr" value="-estadoAsistencia: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="3561" y="1642" width="387" height="67" as="geometry" />
+        </mxCell>
+        <mxCell id="InscripcionEvento_met" value="+marcarAsistencia(estado: string): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="3561" y="1709" width="387" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="Adjunto" value="&lt;&lt;propuesta&gt;&gt;&lt;br&gt;Adjunto" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=middle;align=center;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="2576" y="1982" width="286" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Adjunto_atr" value="-idAdjunto: int&lt;br&gt;-nombreArchivo: string&lt;br&gt;-rutaArchivo: string&lt;br&gt;-tamanioBytes: long&lt;br&gt;-tipoMime: string&lt;br&gt;-fechaSubida: datetime" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2576" y="2016" width="286" height="209" as="geometry" />
+        </mxCell>
+        <mxCell id="Adjunto_met" value="+subir(archivo): Adjunto&lt;br&gt;+descargar(): Archivo&lt;br&gt;+eliminarDelServidor(): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="2576" y="2225" width="286" height="93" as="geometry" />
+        </mxCell>
+        <mxCell id="rel1" value="tiene" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Rol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2" value="habilitado por" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Modulo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3" value="es propietario de" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Emprendimiento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4" value="clasifica" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="EtapaEmprendimiento" target="Emprendimiento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5" value="mentor" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Asignacion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel6" value="estudiante" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Asignacion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel7" value="vincula" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Emprendimiento" target="Asignacion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel8" value="registra" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Emprendimiento" target="Seguimiento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel9" value="es autor de" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Seguimiento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel10" value="planifica" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Emprendimiento" target="Tarea">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel11" value="estudiante asignado" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Tarea">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel12" value="docente creador" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Tarea">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel13" value="estudiante solicita" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Asesoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel14" value="docente confirma" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="Asesoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel15" value="modalidad" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Modalidad" target="Asesoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel16" value="ocupa" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="FechaHorario" target="Asesoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel17" value="evalua" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Emprendimiento" target="Diagnostico">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel18" value="sector" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="SectorEconomico" target="Diagnostico">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel19" value="tipifica" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="TipoEvento" target="Evento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel20" value="modalidad" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Modalidad" target="Evento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel21" value="programa" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="FechaHorario" target="Evento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel22" value="convoca" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Evento" target="InscripcionEvento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel23" value="participa" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="InscripcionEvento">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel24" value="solicita por correo" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Usuario" target="CodigoVerificacion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel25" value="evidencia" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Seguimiento" target="Adjunto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel26" value="evidencia" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Tarea" target="Adjunto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel27" value="evidencia" style="endArrow=open;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="Asesoria" target="Adjunto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
