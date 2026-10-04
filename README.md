@@ -8,6 +8,14 @@
 
 ---
 
+> **Nota sobre esta rama:** si estás viendo esto en la rama `prototype/stitch`, aquí además del documento de especificación vive el **prototipo navegable de SGEMD**: 50 pantallas generadas en Stitch, un `index.html` índice para recorrerlas y el pipeline en Python que las genera, audita y publica.
+>
+> Empieza por **[PROTOTIPO-STITCH.md](PROTOTIPO-STITCH.md)**: qué contiene la rama y cómo usarla.
+>
+> Este `README.md` es la especificación general del proyecto y se mantiene idéntico al de `main`.
+
+---
+
 ## Contenido
 
 1. [Objetivo del proyecto](#1-objetivo-del-proyecto)
