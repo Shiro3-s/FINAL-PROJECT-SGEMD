@@ -1,0 +1,7 @@
+# Artefactos generados que no aportan al repositorio.
+# El prototipo (HTML, fuentes y documentacion) si se versiona aqui.
+__pycache__/
+*.pyc
+_subida.log
+_scan.txt
+_subidas_proyecto_anterior.json
