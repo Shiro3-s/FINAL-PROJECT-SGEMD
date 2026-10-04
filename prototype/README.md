@@ -7,6 +7,7 @@ pantallas globales de acceso.
 - **Stitch:** https://stitch.withgoogle.com/projects/8880818071963426152
 - **Índice local:** [`index.html`](index.html) — ábrelo con doble clic, sin servidor
 
+
 > **Advertencia de alcance:** este es un prototipo de interfaz. **No hay backend.**
 > El login es simulado y la "sesión" vive en `localStorage` del navegador. Nada de
 > lo que se ve aquí envía correos, guarda datos ni valida contra un servidor real.
@@ -15,17 +16,32 @@ pantallas globales de acceso.
 
 ## Contenido
 
-1. [Cómo verlo](#1-cómo-verlo)
-2. [Qué contiene](#2-qué-contiene)
-3. [Las vistas por rol](#3-las-vistas-por-rol)
-4. [Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
-5. [Sistema de diseño](#5-sistema-de-diseño)
-6. [Logo](#6-logo)
-7. [Cómo está construido](#7-cómo-está-construido)
-8. [Comandos](#8-comandos)
-9. [Validación automática](#9-validación-automática)
-10. [Publicación en Stitch](#10-publicación-en-stitch)
-11. [Limitaciones conocidas](#11-limitaciones-conocidas)
+- [Prototipo SGEMD](#prototipo-sgemd)
+  - [Contenido](#contenido)
+  - [1. Cómo verlo](#1-cómo-verlo)
+    - [Opción A — el índice local (recomendada para revisar)](#opción-a--el-índice-local-recomendada-para-revisar)
+    - [Opción B — Stitch](#opción-b--stitch)
+    - [Cuentas de demostración](#cuentas-de-demostración)
+  - [2. Qué contiene](#2-qué-contiene)
+  - [3. Las vistas por rol](#3-las-vistas-por-rol)
+    - [3.1 Acceso global (4)](#31-acceso-global-4)
+    - [3.2 Estudiante (16)](#32-estudiante-16)
+    - [3.3 Docente (12)](#33-docente-12)
+    - [3.4 Administrador (18)](#34-administrador-18)
+  - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
+  - [5. Sistema de diseño](#5-sistema-de-diseño)
+    - [Paleta cerrada](#paleta-cerrada)
+    - [Tipografía](#tipografía)
+    - [Formas y espaciado](#formas-y-espaciado)
+    - [Responsive](#responsive)
+  - [6. Logo](#6-logo)
+  - [7. Cómo está construido](#7-cómo-está-construido)
+  - [8. Comandos](#8-comandos)
+  - [9. Validación automática](#9-validación-automática)
+  - [10. Publicación en Stitch](#10-publicación-en-stitch)
+    - [Por qué el flujo es como es](#por-qué-el-flujo-es-como-es)
+  - [11. Limitaciones conocidas](#11-limitaciones-conocidas)
+  - [Ver también](#ver-también)
 
 ---
 
