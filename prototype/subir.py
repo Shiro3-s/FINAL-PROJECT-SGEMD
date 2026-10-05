@@ -23,7 +23,7 @@ import urllib.request
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 API = "https://stitch.googleapis.com"
-PROYECTO = "8880818071963426152"
+PROYECTO = "3060781598377201049"
 ESTADO = os.path.join(BASE, "_subidas.json")
 TITULO_LOGO = "SGEMD - Logo institucional"
 ORDEN = ["compartido", "estudiante", "docente", "admin"]
