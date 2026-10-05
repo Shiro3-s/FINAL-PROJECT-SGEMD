@@ -4,7 +4,7 @@ Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto
 50 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
-- **Stitch:** https://stitch.withgoogle.com/projects/8880818071963426152
+- **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Índice local:** [`index.html`](index.html) — ábrelo con doble clic, sin servidor
 
 
@@ -59,9 +59,13 @@ sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal c
 
 ### Opción B — Stitch
 
-<https://stitch.withgoogle.com/projects/8880818071963426152>
+<https://stitch.withgoogle.com/projects/3060781598377201049>
 
 Cada pantalla es un documento independiente dentro del proyecto.
+
+> **Comentario:** este enlace se actualizó porque el proyecto anterior
+> (`projects/8880818071963426152`) se borró debido a un error. El prototipo se creó
+> de nuevo en Stitch y se resubieron las 51 pantallas, por lo que la dirección cambió.
 
 ### Cuentas de demostración
 
@@ -361,10 +365,13 @@ pantalla en Stitch, sin servidor de por medio.
 
 ## 10. Publicación en Stitch
 
-- **Proyecto:** `projects/8880818071963426152`
-- **Enlace:** https://stitch.withgoogle.com/projects/8880818071963426152
+- **Proyecto:** `projects/3060781598377201049`
+- **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Total:** 51 pantallas en el proyecto — las 50 de interfaz más una de marca
   (`_marca/logo-color-1200.png`).
+- **Comentario:** el enlace se actualizó al recrear el proyecto. El anterior
+  (`projects/8880818071963426152`) se borró por un error; se creó uno nuevo en
+  Stitch y se resubieron las 51 pantallas.
 
 `index.html` **no** se sube: es una galería local y sus enlaces relativos no
 funcionarían dentro de Stitch.

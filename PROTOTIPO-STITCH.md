@@ -2,7 +2,12 @@
 
 Esta rama contiene la creación del **prototipo de SGEMD en Stitch**:
 
-<https://stitch.withgoogle.com/projects/8880818071963426152>
+<https://stitch.withgoogle.com/projects/3060781598377201049>
+
+> **Comentario sobre este enlace:** el proyecto anterior
+> (`projects/8880818071963426152`) se borró a causa de un error, por lo que su URL
+> quedó obsoleta. Se creó este proyecto nuevo en Stitch y se volvieron a subir las
+> 51 pantallas, así que el enlace cambió.
 
 Si llegaste aquí por el `README.md` de la raíz, ten en cuenta que ese
 describe el proyecto completo. Lo que hay en esta rama es su versión
