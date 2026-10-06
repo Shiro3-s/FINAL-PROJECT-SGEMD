@@ -4,7 +4,7 @@ Sistema de Gestión de Emprendimiento Minuto de Dios. Diagrama de clases del
 **núcleo de dominio** del MVP: entidades con sus atributos, visibilidad,
 métodos y multiplicidades.
 
-> **Complementa a `component-diagram.mmd`**, no lo reemplaza. El diagrama de
+> **Complementa a `diagrama-componentes.md`**, no lo reemplaza. El diagrama de
 > componentes muestra *dónde vive cada pieza* (frontend, backend, middleware,
 > PostgreSQL). Las clases muestran *cómo se estructura el negocio por dentro*.
 > Junto con `context-diagram.mmd` completan la familia de diagramas del MVP.
@@ -14,9 +14,9 @@ métodos y multiplicidades.
 | Aspecto | Detalle |
 | ------- | ------- |
 | **Fuente de verdad** | `README.md` §5 *Modelo de datos*, §6 *Decisiones*, §7 *API* (versión `origin/main`, motor PostgreSQL 17) |
-| **Contraste con** | `docs/fr_nfr_sgemd.md`, `docs/historias_usuario.md`, `docs/component-diagram.mmd` |
+| **Contraste con** | `docs/fr_nfr_sgemd.md`, `docs/historias_usuario.md`, `docs/diagrama-componentes.md` |
 | **Herramienta** | Mermaid (`classDiagram`) + draw.io |
-| **Validación** | 18 clases, 27 relaciones, renderizado en `mermaid-cli` y verificado sin cajas superpuestas |
+| **Validación** | 20 clases, 31 relaciones, renderizado en `mermaid-cli` y verificado sin cajas superpuestas |
 
 **Decisión de diseño:** los nombres de los atributos son **idénticos a las
 columnas del modelo físico**. No se renombraron a nombres "limpios" porque
@@ -159,6 +159,20 @@ classDiagram
         +calcularMetricas(): Diagnostico
     }
 
+    class Caracterizacion {
+        -idCaracterizacion: int
+        -modeloNegocio: json
+        -marketing: json
+        -producto: json
+        -administrativoFinanciero: json
+        -fechaCreacion: datetime
+        -fechaActualizacion: datetime
+        +diligenciar(): Caracterizacion
+        +editarRespuestas(): Caracterizacion
+        +consultarPorEmprendimiento(): Caracterizacion[]
+        +recalcular(): Diagnostico
+    }
+
     class Evento {
         -idEventos: int
         -nombreEvento: string
@@ -251,11 +265,23 @@ classDiagram
         +estaHabilitadoPara(usuario: Usuario): boolean
     }
 
+    class Habilitacion {
+        -idHabilitacion: int
+        -fechaHabilitacion: datetime
+        -estado: boolean
+        +habilitar(): Habilitacion
+        +deshabilitar(): void
+        +consultarPorUsuario(): Habilitacion[]
+        +consultarPorModulo(): Habilitacion[]
+    }
+
     Usuario "0..*" --> "1" Rol : tiene
-    Usuario "0..*" --> "0..1" Modulo : habilitado por
+    Usuario "1" --> "0..*" Habilitacion : posee
+    Modulo "1" --> "0..*" Habilitacion : habilita
 
     Usuario "1" --> "0..*" Emprendimiento : es propietario de
     EtapaEmprendimiento "1" --> "0..*" Emprendimiento : clasifica
+    Emprendimiento "1" --> "0..*" Caracterizacion : caracteriza
 
     Usuario "1" --> "0..*" Asignacion : mentor
     Usuario "1" --> "0..*" Asignacion : estudiante
@@ -268,6 +294,7 @@ classDiagram
     Usuario "1" --> "0..*" Tarea : estudiante asignado
     Usuario "0..1" --> "0..*" Tarea : docente creador
 
+    Emprendimiento "1" --> "0..*" Asesoria : incluye en su expediente
     Usuario "1" --> "0..*" Asesoria : estudiante solicita
     Usuario "0..1" --> "0..*" Asesoria : docente confirma
     Modalidad "1" --> "0..*" Asesoria : modalidad
@@ -275,6 +302,7 @@ classDiagram
 
     Emprendimiento "1" --> "0..*" Diagnostico : evalua
     SectorEconomico "1" --> "0..*" Diagnostico : sector
+    Caracterizacion "1" --> "0..1" Diagnostico : origina
 
     TipoEvento "1" --> "0..*" Evento : tipifica
     Modalidad "1" --> "0..*" Evento : modalidad
@@ -306,26 +334,26 @@ añadiría cajas vacías al diagrama sin aportar información.
 | `centrouniversitarios` | `idCentroUniversitarios` | `Usuario` (campus) |
 | `municipios` | `idMunicipio` | `Usuario` (municipio de residencia) |
 | `tipopoblacion` | `idTipoPoblacion` | `Usuario` (población vulnerable) |
-| `modulos` | `idModulos` | `Usuario` (0..1) — sí aparece en el diagrama por tener método |
+| `modulos` | `idModulos` | `Habilitacion` (1→N) — aparece en el diagrama por tener método. La habilitación por **usuario** vive en `Habilitacion`, no en `Usuario` |
 
 ---
 
 ## Capa de servicios: qué clase responde por qué requisito
 
 Cada clase del diagrama se materializa en el backend como un servicio
-(`routes → controllers → services → BD`, según `component-diagram.mmd`).
+(`routes → controllers → services → BD`, según `diagrama-componentes.md`).
 
 | Servicio | Clases del diagrama que opera | Requisito / regla que obliga |
 | -------- | ----------------------------- | ----------------------------- |
 | `AuthService` | `Usuario`, `CodigoVerificacion` | FR-001, R1, R2 · OTP 8 dígitos / 5 min |
-| `UserService` | `Usuario`, `Rol`, `Modulo` | FR-002 (usuarios y roles) · R3 |
+| `UserService` | `Usuario`, `Rol`, `Modulo`, `Habilitacion` | FR-002 (usuarios y roles) · R3 · AQ-02 (habilitación individual por usuario) |
 | `EmprendimientoService` | `Emprendimiento`, `EtapaEmprendimiento` | FR-004, FR-010 · R4–R8 · R17 (4 etapas) |
 | `AsignacionService` | `Asignacion`, `Usuario`, `Emprendimiento` | FR-004 · R9–R11 (una activa por emprendimiento) |
 | `SeguimientoService` | `Seguimiento`, `Emprendimiento`, `Usuario` | FR-006 · R12–R16 (autor obligatorio) |
 | `TareaService` | `Tarea`, `Emprendimiento`, `Usuario` | FR-007 · R18–R21 (avance derivado de BD) |
 | `AsesoriaService` | `Asesoria`, `FechaHorario`, `Modalidad` | FR-004, FR-005 · R22–R23 · BR-002 |
-| `DiagnosticoService` | `Diagnostico`, `SectorEconomico` | FR-002 (diagnóstico automático) |
-| `EventoService` | `Evento`, `InscripcionEvento`, `TipoEvento` | FR-005 (registro y asistencia manual) |
+| `DiagnosticoService` | `Diagnostico`, `Caracterizacion`, `SectorEconomico` | FR-002 (diagnóstico automático) · BP-001 |
+| `EventoService` | `Evento`, `InscripcionEvento`, `TipoEvento` | FR-005 (notificaciones de eventos) · CRUD de eventos y registro manual de asistencia |
 | `DashboardService` | `Usuario`, `Emprendimiento`, `Tarea` | FR-010 (métricas reales, no mock) |
 | `AdjuntoService` | `Adjunto` (propuesta) | FR-008 (500 MB, se borra con el registro) |
 
@@ -337,13 +365,13 @@ Este es el resultado de validar el modelo contra las historias y las reglas de
 negocio, **no** de aceptar el primer borrador. La IA no detecta estos problemas:
 solo aparecen al cotejar el diagrama contra el documento de requisitos.
 
-| # | Problema | Corrección propuesta | Justificación (regla / requisito afectado) |
-| - | -------- | -------------------- | ------------------------------------------ |
-| 1 | **`asesorias` no tiene relación con `emprendimiento`.** El expediente central del proyecto no puede incluir las asesorías. | Agregar `Emprendimiento_idEmprendimiento` a `asesorias` y la relación `Emprendimiento "1" --> "0..*" Asesoria`. | FR-006: *"anclar todo el historial de diagnósticos, notas de seguimiento, tareas **y asesorías** directamente a la entidad Emprendimiento"*. En `transcription_2.md` la coordinadora lo pide explícito para que el asesor nuevo vea el contexto. |
-| 2 | **No existe entidad para las respuestas del formulario de caracterización**, solo el resultado. Sin las respuestas no se puede recalcular ni auditar el diagnóstico. | Nueva clase `Caracterizacion` (1..N por emprendimiento) que guarda las respuestas por sección, ligada a `Diagnostico`. | FR-002 y BP-001: el estudiante diligencia el formulario (modelo de negocio, marketing, producto, administrativo-financiero) y el sistema calcula métricas. Hoy solo se modela el resultado, no el insumo. |
-| 3 | **`FechaHorario` es `0..1` en `asesorias` pero la tabla de catálogos lo declara `1 → N`.** Además, sin esa relación la *"prevención de duplicidad"* no se puede garantizar. | Fijar `FechaHorario "0..1" --> "0..*" Asesoria` (lo hace el administrador al confirmar) y añadir restricción `UNIQUE` por `Fecha_y_Horarios_idFecha_y_Horarios` en las asesorías confirmadas. | BR-002 y la *"prevención de duplicidad mediante propiedades ACID"* de `historias_usuario.md`. |
-| 4 | **`modulos` no puede modelar el desbloqueo progresivo por estudiante.** Está declarado como catálogo `1 → N usuarios`, o sea control por *rol*, no por *persona*. | Separar en dos: `Modulo` (catálogo por rol, se queda) y `Habilitacion` (par clave usuario/módulo, «recién habilitado tras la reunión de socialización»). | AQ-02 de `fr_nfr_sgemd.md`, marcada **prioridad alta**: el estudiante se registra pero el administrador debe habilitarle el resto de la plataforma *individualmente*. Un catálogo por rol no puede expresar eso. |
-| 5 | **Adjuntos: el requisito existe pero la entidad no.** `FR-008` exige subir, descargar y **borrar el archivo del servidor** cuando se elimina el registro asociado. | Clase `Adjunto` con borrado en cascada controlado por el servicio (se marca `<<propuesta>>` en el diagrama porque todavía no está aprobada). | FR-008 + criterio de aceptación 7: *"Los adjuntos se eliminan del servidor si se borra la tarea"*. Sin entidad no hay forma de garantizarlo. |
+| # | Problema | Corrección propuesta | Justificación (regla / requisito afectado) | Estado |
+| - | -------- | -------------------- | ------------------------------------------ | ------- |
+| 1 | **`asesorias` no tiene relación con `emprendimiento`.** El expediente central del proyecto no puede incluir las asesorías. | Agregar `Emprendimiento_idEmprendimiento` a `asesorias` y la relación `Emprendimiento "1" --> "0..*" Asesoria`. | FR-006: *"anclar todo el historial de diagnósticos, notas de seguimiento, tareas **y asesorías** directamente a la entidad Emprendimiento"*. En `transcription_2.md` la coordinadora lo pide explícito para que el asesor nuevo vea el contexto. | ✅ **Aplicada** 2026-10-06 |
+| 2 | **No existe entidad para las respuestas del formulario de caracterización**, solo el resultado. Sin las respuestas no se puede recalcular ni auditar el diagnóstico. | Nueva clase `Caracterizacion` (1..N por emprendimiento) que guarda las respuestas por sección, ligada a `Diagnostico`. | FR-002 y BP-001: el estudiante diligencia el formulario (modelo de negocio, marketing, producto, administrativo-financiero) y el sistema calcula métricas. Hoy solo se modela el resultado, no el insumo. | ✅ **Aplicada** 2026-10-06 |
+| 3 | **`FechaHorario` es `0..1` en `asesorias` pero la tabla de catálogos lo declara `1 → N`.** Además, sin esa relación la *"prevención de duplicidad"* no se puede garantizar. | Fijar `FechaHorario "0..1" --> "0..*" Asesoria` (lo hace el administrador al confirmar) y añadir restricción `UNIQUE` por `Fecha_y_Horarios_idFecha_y_Horarios` en las asesorías confirmadas. | BR-002 y la *"prevención de duplicidad mediante propiedades ACID"* de `historias_usuario.md`. | ✅ **Ya correcta** en el modelo (no hizo falta tocarla) |
+| 4 | **`modulos` no puede modelar el desbloqueo progresivo por estudiante.** Está declarado como catálogo `1 → N usuarios`, o sea control por *rol*, no por *persona*. | Separar en dos: `Modulo` (catálogo por rol, se queda) y `Habilitacion` (par clave usuario/módulo, «recién habilitado tras la reunión de socialización»). | AQ-02 de `fr_nfr_sgemd.md`, marcada **prioridad alta**: el estudiante se registra pero el administrador debe habilitarle el resto de la plataforma *individualmente*. Un catálogo por rol no puede expresar eso. | ✅ **Aplicada** 2026-10-06 |
+| 5 | **Adjuntos: el requisito existe pero la entidad no.** `FR-008` exige subir, descargar y **borrar el archivo del servidor** cuando se elimina el registro asociado. | Clase `Adjunto` con borrado en cascada controlado por el servicio (se marca `<<propuesta>>` en el diagrama porque todavía no está aprobada). | FR-008 + criterio de aceptación 7: *"Los adjuntos se eliminan del servidor si se borra la tarea"*. Sin entidad no hay forma de garantizarlo. | ⏳ **Pendiente de aprobación** del equipo |
 
 ### Inconsistencias documentales detectadas (no son del modelo, hay que corregirlas en los documentos)
 
@@ -357,6 +385,8 @@ solo aparecen al cotejar el diagrama contra el documento de requisitos.
 ### Supuestos declarados
 
 - `Diagnostico "0..*"` por `Emprendimiento`: el `README.md` §5 dice *"1 → 1 (o 1 → N)"*. Se eligió **1 → N** porque el historial de re-diagnósticos es el valor de la plataforma; queda por confirmar.
+- `Caracterizacion "1" --> "0..1" Diagnostico`: el `0..1` permite que el formulario esté enviado pero el diagnóstico aún no calculado. Si cada re-diagnóstico exige diligenciar un **nuevo** formulario, cambiar a `1..1`; si basta con recalcular sobre las mismas respuestas, se mantiene `0..1`. **Queda por confirmar.**
+- `Caracterizacion` y `Habilitacion` son **entidades nuevas** (no existían en el modelo anterior): se agregan porque la matriz de correcciones las señala como faltantes. `Adjunto` sigue marcada `<<propuesta>>` porque el propio requisito la deja pendiente de aprobación; a esas dos no se les puso ese estereotipo porque son correcciones del modelo, no propuestas abiertas.
 - `FechaHorario "0..1"` en `Asesoria`: se asume que el bloque se asigna **después** de que la coordinadora confirme la cita, no al solicitarla.
 - La clase `Adjunto` está marcada `<<propuesta>>` a propósito: **no existe** en el modelo actual, se agrega para poder discutirla.
 
@@ -370,15 +400,16 @@ Cada clase del diagrama existe porque al menos un requisito la necesita
 | Requisito / Regla | Clases del diagrama que lo soportan |
 | ----------------- | ------------------------------------ |
 | FR-001 Registro + OTP | `Usuario`, `CodigoVerificacion` |
-| FR-002 Diagnóstico automático | `Diagnostico`, `Emprendimiento`, `SectorEconomico` *(falta `Caracterizacion` → problema 2)* |
+| FR-002 Diagnóstico automático | `Diagnostico`, `Caracterizacion`, `Emprendimiento`, `SectorEconomico` |
 | FR-003 Acta de confidencialidad | `Emprendimiento.actaCompromiso`, `Adjunto` |
 | FR-004 Asignación y agenda manual | `Asignacion`, `Asesoria`, `FechaHorario`, `Modalidad` |
-| FR-005 Notificaciones en tiempo real | `Asesoria`, `Tarea`, `Evento`, `InscripcionEvento` |
-| FR-006 Expediente central | `Emprendimiento`, `Seguimiento`, `Tarea`, `Asesoria` *(problema 1)* |
+| FR-005 Notificaciones en tiempo real | `Asesoria`, `Tarea`, `Evento`, `InscripcionEvento`, `TipoEvento` |
+| FR-006 Expediente central | `Emprendimiento`, `Seguimiento`, `Tarea`, `Asesoria`, `Caracterizacion` |
 | FR-007 Semaforización inactividad | `Usuario.estado`, `Tarea.calcularAvance()` |
-| FR-008 Archivos adjuntos | `Adjunto` *(problema 5)* |
+| FR-008 Archivos adjuntos | `Adjunto` |
 | FR-009 Exportar datos | `DashboardService` → sin entidad propia (lectura agregada) |
 | FR-010 Dashboards | `Usuario`, `Emprendimiento`, `Tarea`, `Rol` |
+| AQ-02 Habilitación de plataforma | `Modulo`, `Habilitacion` |
 | R17 Etapas (catálogo cerrado de 4) | `EtapaEmprendimiento` |
 | NFR-002 Autorización por alcance | Multiplicidades de `Asignacion` y `Emprendimiento` |
 
@@ -387,8 +418,8 @@ Cada clase del diagrama existe porque al menos un requisito la necesita
 ## Cómo llevarlo a draw.io (visual)
 
 1. **Opción A — Abrir el `.drawio` editable:** abre `diagrama-clases.drawio` en
-   draw.io desktop o en app.diagrams.net. Ya viene con las 18 clases en tres
-   compartimentos (nombre / atributos / métodos) y las 27 relaciones.
+   draw.io desktop o en app.diagrams.net. Ya viene con las 20 clases en tres
+   compartimentos (nombre / atributos / métodos) y las 31 relaciones.
 2. **Opción B — Importar el PNG:** arrastra `diagrama-clases.png` al lienzo, o
    *File → Insert from… → Image*.
 3. **Opción C — Mermaid → draw.io:** copia el bloque Mermaid de este documento a

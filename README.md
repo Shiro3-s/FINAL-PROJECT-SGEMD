@@ -183,9 +183,9 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 
 La nueva implementación es **desde cero** y no debe conservar estructuras innecesarias ni errores del proyecto anterior.
 
-> **Diagrama de componentes:** se agregó el diagrama de componentes del proyecto en `docs/component-diagram.drawio`, que refleja la arquitectura propuesta (Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura).
+> **Diagrama de componentes:** en `docs/diagrama-componentes.md` (fuente Mermaid), `.png` y `.drawio` editable. Refleja la arquitectura del MVP: Frontend React (SPA) → Backend Node.js + Express (middleware, servicios por módulo, validación y SQL parametrizado) → Seguridad (JWT / bcrypt / OTP) → PostgreSQL → SMTP e infraestructura Docker. Incluye notificaciones en tiempo real (Socket.io) y almacenamiento de archivos (≤ 500 MB).
 >
-> **Diagrama de clases:** en `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Muestra la estructura interna del dominio: 18 clases con atributos, visibilidad, métodos y multiplicidades, derivadas del modelo de datos de la [sección 5](#5-modelo-de-datos). Incluye trazabilidad requisito → clase y la revisión crítica contra los FR/NFR.
+> **Diagrama de clases:** en `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Muestra la estructura interna del dominio: 20 clases con atributos, visibilidad, métodos y multiplicidades, derivadas del modelo de datos de la [sección 5](#5-modelo-de-datos). Incluye trazabilidad requisito → clase y la revisión crítica contra los FR/NFR.
 
 ### Frontend
 
@@ -279,8 +279,8 @@ SGEMD/
 | `sectoreconomico`      | idSectorEconomico      | Sector económico                                                      | 1 → N diagnósticos        |
 | `modalidad`            | idModalidad            | Presencial/Distancia                                                  | 1 → N asesorías/eventos   |
 | `tipo_evento`          | idTipo_evento          | Tipo de evento                                                        | 1 → N eventos             |
-| `fecha_y_Horarios`     | idFecha_y_Horarios     | Bloque de fecha/hora                                                  | 1 → N asesorías / eventos |
-| `modulos`              | idModulos              | Controla qué partes de la plataforma están disponibles para cada rol. | 1 → N usuarios (opcional) |
+| `fecha_y_Horarios`     | idFecha_y_Horarios     | Bloque de fecha/hora                                                  | 0..1 → * asesorías · 1 → N eventos |
+| `modulos`              | idModulos              | Controla qué partes de la plataforma están disponibles para cada usuario (se activan por usuario vía `habilitaciones`). | 1 → N habilitaciones |
 
 ### Entidades de negocio
 
@@ -288,15 +288,22 @@ SGEMD/
 
 - **Propósito:** todos los usuarios del sistema (admin, docente, estudiante).
 - **Campos importantes:** idUsuarios, Nombre, CorreoInstitucional (único), CorreoPersonal, Password (hash bcrypt — nunca se devuelve), Verificado (0/1), Estado (1 activo / 0 desactivado), Celular, Telefono, Direccion, Genero, EstadoCivil, FechaNacimiento, Semestre, Modalidad, img_perfil, FechaCreacion, FechaActualizacion.
-- **Fks:** Roles_idRoles1 → roles, TipoDocumentos_idTipoDocumento → tipodocumentos, ProgramaAcademico_idProgramaAcademico → programaacademico, CentroUniversitarios_idCentroUniversitarios → centrouniversitarios, Municipios_idMunicipio → municipios, TipoPoblacion_idTipoPoblacion → tipopoblacion, TipoUsuarios_idTipoUsuarios → tipousuarios, Modulos_idModulos (opcional) → modulos.
+- **Fks:** Roles_idRoles1 → roles, TipoDocumentos_idTipoDocumento → tipodocumentos, ProgramaAcademico_idProgramaAcademico → programaacademico, CentroUniversitarios_idCentroUniversitarios → centrouniversitarios, Municipios_idMunicipio → municipios, TipoPoblacion_idTipoPoblacion → tipopoblacion, TipoUsuarios_idTipoUsuarios → tipousuarios.
 - **Relaciones:** un usuario (estudiante) puede ser propietario de N emprendimientos; puede participar como mentor o estudiante en N asignaciones; puede ser autor de N seguimientos; puede tener N tareas; puede solicitar N asesorías.
+
+#### `habilitaciones`
+
+- **Propósito:** habilita/deshabilita un módulo de la plataforma para un usuario concreto (por ejemplo, un estudiante con los módulos A y B habilitados y el C no — AQ-02).
+- **Campos importantes:** idHabilitacion, FechaHabilitacion, Estado (1 habilitado / 0 deshabilitado).
+- **Fks:** Usuarios_idUsuarios → usuarios; Modulos_idModulos → modulos.
+- **Relaciones/cardinalidades:** Usuario **1 → 0..\*** habilitaciones; Módulo **1 → 0..\*** habilitaciones.
 
 #### `emprendimiento`
 
 - **Propósito:** representa el emprendimiento del estudiante. El **Tipo de Emprendimiento** se maneja a través de un catálogo ya creado en BD.
 - **Campos importantes:** idEmprendimiento, Nombre, Descripcion, TipoEmprendimiento, SectorProductivo, RedesSociales, Acompanamiento, ActaCompromiso, FechaCreacion, FechaActualizacion.
 - **Fks:** EtapaEmprendimiento_idEtapaEmprendimiento → etapaemprendimiento; Usuarios_idUsuarios → usuarios (**propietario** estudiante).
-- **Relaciones/cardinalidades:** Propietario (usuarios) **1 → N** emprendimiento; Etapa **1 → N** emprendimiento; Emprendimiento **1 → N** seguimientos; Emprendimiento **1 → N** tareas; Emprendimiento **1 → N** diagnósticos; Emprendimiento **0..1 → N** asignaciones.
+- **Relaciones/cardinalidades:** Propietario (usuarios) **1 → N** emprendimiento; Etapa **1 → N** emprendimiento; Emprendimiento **1 → N** seguimientos; Emprendimiento **1 → N** tareas; Emprendimiento **1 → N** diagnósticos; Emprendimiento **1 → N** caracterizaciones; Emprendimiento **0..1 → N** asignaciones.
 
 #### `asignaciones`
 
@@ -319,19 +326,33 @@ SGEMD/
 - **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; Usuario_idUsuarios → usuarios (estudiante asignado); Docentes_idDocentes (opcional) → usuarios.
 - **Relaciones/cardinalidades:** Emprendimiento **1 → N** tareas; Estudiante **1 → N** tareas; Docente **1 → N** tareas.
 
+#### `adjuntos`
+
+- **Propósito:** archivos asociados a seguimientos, tareas o asesorías (evidencias). Eliminar el registro elimina físicamente el archivo (**FR-008**). En el diagrama figura como propuesta pendiente de aprobación.
+- **Campos importantes:** idAdjunto, NombreArchivo, RutaArchivo, TamanioBytes, TipoMime, FechaSubida.
+- **Fks:** Seguimientos_idSeguimientos (opcional) → seguimientos; Tareas_idTareas (opcional) → tareas; Asesorias_idAsesorias (opcional) → asesorias.
+- **Relaciones/cardinalidades:** Seguimiento **0..\* → 0..\*** adjuntos; Tarea **0..\* → 0..\*** adjuntos; Asesoría **0..\* → 0..\*** adjuntos.
+
 #### `asesorias`
 
 - **Propósito:** sesión de acompañamiento entre estudiante y docente.
 - **Campos importantes:** idAsesorias, Nombre_de_asesoria, Descripcion, Fecha_asesoria, Comentarios, confirmacion (pendiente/confirmada), Fecha_creacion, Fecha_actualizacion.
-- **Fks:** Usuarios_idUsuarios → usuarios (estudiante solicitante); Docentes_idDocentes (opcional) → usuarios; Modalidad_idModalidad → modalidad; Fecha_y_Horarios_idFecha_y_Horarios → fecha_y_Horarios.
-- **Relaciones/cardinalidades:** Estudiante **1 → N** asesorías; Docente **1 → N** asesorías; Modalidad **1 → N** asesorías.
+- **Fks:** Usuarios_idUsuarios → usuarios (estudiante solicitante); Docentes_idDocentes (opcional) → usuarios; Emprendimiento_idEmprendimiento → emprendimiento; Modalidad_idModalidad → modalidad; Fecha_y_Horarios_idFecha_y_Horarios (opcional) → fecha_y_Horarios.
+- **Relaciones/cardinalidades:** Estudiante **1 → N** asesorías; Docente **1 → N** asesorías; Emprendimiento **1 → 0..\*** asesorías (expediente); Modalidad **1 → N** asesorías; Fecha y horarios **0..1 → \*** asesorías.
+
+#### `caracterizaciones`
+
+- **Propósito:** formulario de caracterización del emprendimiento por bloques (modelo de negocio, marketing, producto, administrativo-financiero). Al guardarse, dispara el diagnóstico automático.
+- **Campos importantes:** idCaracterizacion, ModeloNegocio (json), Marketing (json), Producto (json), AdministrativoFinanciero (json), FechaCreacion, FechaActualizacion.
+- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento.
+- **Relaciones/cardinalidades:** Emprendimiento **1 → N** caracterizaciones; Caracterización **1 → 0..1** diagnóstico (origina).
 
 #### `diagnosticos`
 
 - **Propósito:** resultado de un diagnóstico del emprendimiento (muchos campos de evaluación). Estructura en desarrollo. Matriz de indicadores técnicos a definir y priorizar.
 - **Campos importantes:** idDiagnosticos, FechaEmprendimiento y numerosos indicadores (escala/booleanos) y textos.
 - **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; SectorEconomico_idSectorEconomico → sectoreconomico.
-- **Relaciones:** Emprendimiento **1 → 1** (o **1 → N**) diagnóstico.
+- **Relaciones:** Emprendimiento **1 → N** diagnósticos; Sector económico **1 → N** diagnósticos; Caracterización **1 → 0..1** diagnóstico (lo origina).
 
 #### `eventos` y `usuarios_has_Eventos`
 
