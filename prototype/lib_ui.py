@@ -165,8 +165,15 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
     )
     m = ""
     if migas:
+        # BT1: el breadcrumb no tiene enlaces muertos. "Inicio" navega al
+        # dashboard real; los niveles intermedios son texto (contexto), y el
+        # ultimo es la pagina actual (texto). Asi no hay <a href="#"> falsos.
+        def _miga(i, x):
+            if i == 0 and x.lower() == "inicio":
+                return '<a href="dashboard.html">' + x + "</a>"
+            return '<span class="miga-item">%s</span>' % x
         m = '<div class="crumbs">' + " &rsaquo; ".join(
-            '<a href="#">' + x + "</a>" if i < len(migas) - 1 else x
+            _miga(i, x) if i < len(migas) - 1 else "<b>%s</b>" % x
             for i, x in enumerate(migas)
         ) + "</div>"
     encabezado = "<h1>%s</h1>" % titulo
@@ -281,9 +288,10 @@ def _etiqueta(c):
     return re.sub(r"<[^>]+>", "", str(c)).strip()
 
 
-def tabla(cabeceras, filas, con_checkbox=False):
+def tabla(cabeceras, filas, con_checkbox=False, id=""):
     """cabeceras: lista de 'Etiqueta' | ('num','Etiqueta') | '@ACC'.
-    filas: listas de HTML con la misma longitud que cabeceras."""
+    filas: listas de HTML con la misma longitud que cabeceras.
+    id: id opcional para la <table>, usado por EV2 (inscripcion a eventos)."""
     cab = ""
     if con_checkbox:
         cab += ('<th scope="col" style="width:44px">'
@@ -304,10 +312,11 @@ def tabla(cabeceras, filas, con_checkbox=False):
             else:
                 celdas += '<td data-label="%s">%s</td>' % (eti, x)
         body += "<tr>%s%s</tr>" % (sel, celdas)
+    tid = ' id="%s"' % id if id else ""
     return (
         '<div class="card tabla-envoltura"><div class="tabla-scroll">'
-        '<table class="tabla"><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
-        "</div></div>" % (cab, body)
+        '<table class="tabla"%s><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
+        "</div></div>" % (tid, cab, body)
     )
 
 

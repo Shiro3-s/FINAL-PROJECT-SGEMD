@@ -259,7 +259,8 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
   .otp{gap:6px}
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
-.drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2)}
+.drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
+.drop.sobre{border-color:var(--azul-real);background:var(--azul-real-10);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
@@ -444,7 +445,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="#">Inicio</a> &rsaquo; Estado de seguimiento</div><div class="page-head"><h1>Estado de seguimiento</h1><p class="sub">Aqui ves cuanto has avanzado y que te falta por completar.</p><div class="acciones"><a class="btn btn-secundario" href="plan-trabajo.html">Plan de trabajo</a><a class="btn btn-acento" href="tareas.html">Ver mis tareas</a></div></div><div class="grid g-2-1"><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Miiovimiento en el plan</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap"><div style="text-align:center"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="avance"><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="rgba(0,74,147,.15)" stroke-width="10"/><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="#004a93" stroke-width="10" stroke-linecap="round" stroke-dasharray="222.05" transform="rotate(-90 66.0 66.0)"/><text x="66.0" y="69.0" font-size="22" font-weight="700" fill="#051533" text-anchor="middle" font-family="Inter,sans-serif">62%</text><text x="66.0" y="84.0" font-size="10.5" fill="#162644" text-anchor="middle" font-family="Inter,sans-serif">avance</text></svg><div style="font-size:13px;color:#162644;margin-top:6px;text-align:center">FASE 2 · Ejecucion</div></div><div style="flex:1;min-width:300px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Fase actual</div><div style="font-size:20px;font-weight:700;color:#051533">FASE 2</div><div style="font-size:13px;color:#162644">Ejecucion y validacion</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Tareas completadas</div><div style="font-size:20px;font-weight:700;color:#051533">6 / 10</div><div style="font-size:13px;color:#162644">60% del total asignado</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Asesorias recibidas</div><div style="font-size:20px;font-weight:700;color:#051533">3</div><div style="font-size:13px;color:#162644">ultima: 04 nov 2024</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Seguimientos registrados</div><div style="font-size:20px;font-weight:700;color:#051533">5</div><div style="font-size:13px;color:#162644">ultimo: 08 nov 2024</div></div></div></div></div></div></div><div class="card"><div class="card-head"><h3>Avance por fases</h3><span class="hint">Las fases se habilitan en orden segun el avance del docente asignado</span></div><div class="card-body"><div style="display:flex;height:22px;border-radius:999px;overflow:hidden;border:1px solid #bbbbbb"><div style="width:100%;background:#004a93" title="FASE 1 · Ideacion y precipitacion de ideas 100%"></div><div style="width:62%;background:#004a93" title="FASE 2 · Estructuracion y ejecucion 62%"></div></div><div style="margin-top:12px"><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 1 · Ideacion y precipitacion de ideas</span><b style="color:#051533">100%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 2 · Estructuracion y ejecucion</span><b style="color:#051533">62%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 3 · Consolidacion del proceso</span><b style="color:#051533">0%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 4 · Escalamiento y Clifton</span><b style="color:#051533">0%</b></div></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Hitos cumplidos</h3><span class="hint"></span></div><div class="card-body"><div class="lista-def" style="padding:4px 0"><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Diagnostico inicial entregado</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Plan de trabajo cargado por el docente</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Primeras ventas registradas</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Perfil de cliente definido</dd></div></div></div></div><div class="card"><div class="card-head"><h3>Requisito bloqueante</h3><a class="btn btn-secundario btn-sm" href="perfil.html">Ver mi perfil</a><span class="hint"></span></div><div class="card-body"><div style="font-size:13px;color:#162644">Tu cuenta esta en estado <b style="color:#051533">Limitado</b>. While no sea activada por un administrador, el diagnostico inicial no puede enviarse.</div><div style="margin-top:14px"><span class="badge b-b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Cuenta limitada</span></div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Estado de seguimiento</b></div><div class="page-head"><h1>Estado de seguimiento</h1><p class="sub">Aqui ves cuanto has avanzado y que te falta por completar.</p><div class="acciones"><a class="btn btn-secundario" href="plan-trabajo.html">Plan de trabajo</a><a class="btn btn-acento" href="tareas.html">Ver mis tareas</a></div></div><div class="grid g-2-1"><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Movimiento en el plan</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap"><div style="text-align:center"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="avance"><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="rgba(0,74,147,.15)" stroke-width="10"/><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="#004a93" stroke-width="10" stroke-linecap="round" stroke-dasharray="222.05" transform="rotate(-90 66.0 66.0)"/><text x="66.0" y="69.0" font-size="22" font-weight="700" fill="#051533" text-anchor="middle" font-family="Inter,sans-serif">62%</text><text x="66.0" y="84.0" font-size="10.5" fill="#162644" text-anchor="middle" font-family="Inter,sans-serif">avance</text></svg><div style="font-size:13px;color:#162644;margin-top:6px;text-align:center">FASE 2 · Ejecucion</div></div><div style="flex:1;min-width:300px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Fase actual</div><div style="font-size:20px;font-weight:700;color:#051533">FASE 2</div><div style="font-size:13px;color:#162644">Ejecucion y validacion</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Tareas completadas</div><div style="font-size:20px;font-weight:700;color:#051533">3 / 7</div><div style="font-size:13px;color:#162644">43% del total asignado</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Asesorias recibidas</div><div style="font-size:20px;font-weight:700;color:#051533">3</div><div style="font-size:13px;color:#162644">ultima: 04 nov 2024</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div style="font-size:13px;color:#162644">Seguimientos registrados</div><div style="font-size:20px;font-weight:700;color:#051533">5</div><div style="font-size:13px;color:#162644">ultimo: 08 nov 2024</div></div></div></div></div></div></div><div class="card"><div class="card-head"><h3>Avance por fases</h3><span class="hint">Las fases se habilitan en orden segun el avance del docente asignado</span></div><div class="card-body"><div style="display:flex;height:22px;border-radius:999px;overflow:hidden;border:1px solid #bbbbbb"><div style="width:100%;background:#004a93" title="FASE 1 · Ideación y priorización de ideas 100%"></div><div style="width:62%;background:#004a93" title="FASE 2 · Estructuracion y ejecucion 62%"></div></div><div style="margin-top:12px"><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 1 · Ideación y priorización de ideas</span><b style="color:#051533">100%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 2 · Estructuracion y ejecucion</span><b style="color:#051533">62%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 3 · Consolidacion del proceso</span><b style="color:#051533">0%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 4 · Escalamiento</span><b style="color:#051533">0%</b></div></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Hitos cumplidos</h3><span class="hint"></span></div><div class="card-body"><div class="lista-def" style="padding:4px 0"><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Diagnostico inicial entregado</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Plan de trabajo cargado por el docente</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Primeras ventas registradas</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Perfil de cliente definido</dd></div></div></div></div><div class="card"><div class="card-head"><h3>Requisito bloqueante</h3><a class="btn btn-secundario btn-sm" href="perfil.html">Ver mi perfil</a><span class="hint"></span></div><div class="card-body"><div style="font-size:13px;color:#162644">Tu cuenta esta en estado <b style="color:#051533">Limitado</b>. Mientras no sea activada por un administrador, el diagnostico inicial no puede enviarse.</div><div style="margin-top:14px"><span class="badge b-b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Cuenta limitada</span></div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -487,7 +488,10 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
   var ICO = {
     check: "M20 6 9 17l-5-5", x: "M18 6 6 18M6 6l12 12", lapiz: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7",
     ojo: "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z", alerta: "M12 9v4M12 17h.01",
-    info: "M12 16v-4M12 8h.01", descargar: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+    info: "M12 16v-4M12 8h.01", descargar: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
+    clip: "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48",
+    upload: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
+    doc: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"
   };
 
   /* --- toast ----------------------------------------------------------- */
@@ -775,6 +779,13 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
           '<p class="modal-aviso">Vista de prototipo. En producción aquí se cargaría el expediente completo.</p>');
         break;
 
+      case "ver-acta":
+        e.preventDefault();
+        abrirModal("Acta de la asesoría",
+          '<p class="confirm-texto">' + esc(registro) + "</p>" +
+          '<p class="modal-aviso">Vista de prototipo. En producción aquí se cargaría el acta firmada con acuerdos y compromisos.</p>');
+        break;
+
       case "editar":
       case "editar-docente":
       case "editar-estudiante":
@@ -833,13 +844,83 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         var_inscribir(b);
         break;
 
+      case "seccion-siguiente":
+        /* DG1: navega al siguiente panel del cuestionario y actualiza los pasos. */
+        e.preventDefault();
+        if (panelesDiag.length) {
+          var sig = Math.min(diagPanelActual() + 1, panelesDiag.length - 1);
+          diagMostrar(sig);
+          guardar({ seccionDiag: sig });
+        }
+        break;
+
+      case "seccion-anterior":
+        e.preventDefault();
+        if (panelesDiag.length) {
+          var ant = Math.max(diagPanelActual() - 1, 0);
+          diagMostrar(ant);
+          guardar({ seccionDiag: ant });
+        }
+        break;
+
+      case "enviar-diagnostico":
+        /* DG4: persiste el envio del cuestionario completo. */
+        e.preventDefault();
+        guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
+        toast("Diagnóstico enviado al docente", "ok");
+        b.textContent = "Diagnóstico enviado ✓";
+        b.disabled = true;
+        break;
+
+      case "guardar-borrador":
+        /* DG4: el avance real del formulario se persiste en localStorage. */
+        e.preventDefault();
+        var borrador = {};
+        $$(".campo input, .campo select, .campo textarea").forEach(function (c) {
+          var lbl = c.closest(".campo") ? $("label", c.closest(".campo")) : null;
+          borrador[lbl ? lbl.textContent.replace(/\s+/g, " ").trim() : c.id] = c.value;
+        });
+        guardar({ borrador: borrador, seccionDiag: panelesDiag.length ? diagPanelActual() : null });
+        toast("Borrador guardado. Puedes retomar donde quedaste.", "ok");
+        break;
+
+      case "guardar-y-salir":
+        e.preventDefault();
+        var borrador2 = {};
+        $$(".campo input, .campo select, .campo textarea").forEach(function (c) {
+          var lbl = c.closest(".campo") ? $("label", c.closest(".campo")) : null;
+          borrador2[lbl ? lbl.textContent.replace(/\s+/g, " ").trim() : c.id] = c.value;
+        });
+        guardar({ borrador: borrador2, seccionDiag: panelesDiag.length ? diagPanelActual() : null });
+        toast("Avance guardado. Volviendo al inicio…", "ok");
+        setTimeout(function () { location.href = "dashboard.html"; }, 800);
+        break;
+
+      case "enviar-solicitud":
+        /* SA3: "Enviar solicitud" crea la solicitud de asesoria (persistencia
+           local del prototipo), la guarda en el estado de la pagina y deja el
+           boton en estado "enviada" para que no se duplique. */
+        e.preventDefault();
+        var cardSol = b.closest(".card");
+        var datosSol = {};
+        if (cardSol) {
+          $$("input, select, textarea", cardSol).forEach(function (c) {
+            if (!c.value) return;
+            var e2 = c.closest(".campo") ? $("label", c.closest(".campo")) : null;
+            var k = e2 ? e2.textContent.replace(/\s+/g, " ").trim() : (c.placeholder || c.name || "campo");
+            datosSol[k] = c.value;
+          });
+        }
+        guardar({ solicitud: datosSol, enviada: true, fecha: new Date().toISOString().slice(0, 10) });
+        toast("Solicitud enviada al docente", "ok");
+        b.textContent = "Solicitud enviada ✓";
+        b.disabled = true;
+        break;
+
       case "guardar":
       case "guardar-cambios":
-      case "guardar-borrador":
-      case "guardar-y-salir":
       case "guardar-recomendaciones":
       case "enviar":
-      case "enviar-solicitud":
       case "crear":
       case "crear-emprendimiento":
       case "nuevo":
@@ -860,6 +941,36 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         pedirArchivo(b);
         break;
 
+      case "adjuntar-evidencias":
+        /* TD1: abre el input file real de la tarea (o cae al fallback generico). */
+        e.preventDefault();
+        if (evInput) evInput.click();
+        else pedirArchivo(b);
+        break;
+
+      case "quitar-adjunto":
+        /* TD2: quita un adjunto de la lista y persiste el estado. */
+        e.preventDefault();
+        var nombreAdj = b.dataset.nombre || "";
+        evArchivos = evArchivos.filter(function (f) { return f.nombre !== nombreAdj; });
+        pintarAdjuntos();
+        guardar({ adjuntos: evArchivos });
+        toast("Adjunto quitado", "info");
+        break;
+
+      case "marcar-completada":
+        /* TD3: solo se puede marcar con evidencia adjunta; persiste el estado. */
+        e.preventDefault();
+        if (!evArchivos.length) {
+          toast("Adjunta al menos un archivo de evidencia", "error");
+          break;
+        }
+        guardar({ completada: true, adjuntos: evArchivos });
+        b.disabled = true;
+        b.textContent = "Completada ✓";
+        toast("Tarea enviada a revisión", "ok");
+        break;
+
       case "notificaciones":
         e.preventDefault();
         abrirDrawer("Notificaciones", [
@@ -868,6 +979,27 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
           "Se publicó un evento nuevo",
           "Recordatorio: evidencia de tarea pendiente"
         ]);
+        break;
+
+      case "cerrar-sesion":
+        e.preventDefault();
+        cerrarSesion();
+        break;
+
+      case "marcar-todas-como-leidas":
+        e.preventDefault();
+        var porLeer = 0;
+        $$(".notif").forEach(function (n) {
+          if (n.classList.contains("no-leida")) {
+            n.classList.remove("no-leida");
+            var punto = $(".notif-dot", n);
+            if (punto) punto.remove();
+            porLeer++;
+          }
+        });
+        if (typeof notifRefrescar === "function") notifRefrescar();
+        if (typeof notifPersistir === "function") notifPersistir();
+        toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
         break;
 
       default:
@@ -879,9 +1011,89 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
   });
 
   function var_inscribir(b) {
+    var fila = filaDe(b);
+    var tP = $("#tabla-proximos");
+    var tI = $("#tabla-inscritos");
+    if (tP && tI && fila) {
+      /* EV2: inscripcion real entre las dos tablas de la vista de eventos. */
+      var inscribir = fila.closest(tP) != null;
+      moverEvento(fila, tP, tI, inscribir);
+      toast(inscribir ? "Inscripción registrada. El evento aparece en tu panel." : "Inscripción cancelada",
+            inscribir ? "ok" : "info");
+      return;
+    }
     var dentro = b.classList.toggle("hecho");
     b.setAttribute("aria-pressed", dentro ? "true" : "false");
     toast(dentro ? "Inscripción registrada" : "Inscripción cancelada", dentro ? "ok" : "info");
+  }
+
+  /* EV2: mueve una fila de la tabla de proximos a la de inscritos (o viceversa).
+     Cada fila movida guarda su HTML original (data-original) para poder
+     restaurar la inscripcion al cancelarla. El estado persiste en localStorage
+     con la lista de eventos inscritos (por nombre). */
+  function moverEvento(fila, tProc, tInsc, inscribir) {
+    var tbProc = $("tbody", tProc);
+    var tbInsc = $("tbody", tInsc);
+    if (!tbProc || !tbInsc) return;
+    if (inscribir) {
+      var celdas = $$("td", fila);
+      if (celdas.length < 4) return;
+      var tr = document.createElement("tr");
+      tr.setAttribute("data-original", fila.outerHTML.replace(/"/g, "&quot;"));
+      var colTxt = [
+        celdas[0].innerHTML,
+        celdas[2].innerHTML,
+        celdas[3].innerHTML
+      ];
+      colTxt.forEach(function (html, idx) {
+        var td = document.createElement("td");
+        td.innerHTML = html;
+        if (idx === 1) td.dataset.label = "Fecha y hora";
+        if (idx === 2) td.dataset.label = "Modalidad";
+        tr.appendChild(td);
+      });
+      var tdA = document.createElement("td");
+      tdA.className = "acc";
+      tdA.appendChild(badgeJS("Inscrito"));
+      var btn = document.createElement("button");
+      btn.className = "btn btn-sm btn-secundario";
+      btn.dataset.accion = "inscribirse";
+      btn.title = "Cancelar inscripción";
+      btn.textContent = "Cancelar";
+      tdA.appendChild(btn);
+      tr.appendChild(tdA);
+      tbInsc.appendChild(tr);
+      fila.parentNode.removeChild(fila);
+    } else {
+      var original = fila.getAttribute("data-original");
+      if (original) {
+        var aux = document.createElement("tbody");
+        aux.innerHTML = original.replace(/&quot;/g, '"');
+        var restaurada = aux.firstElementChild;
+        if (restaurada) tbProc.appendChild(restaurada);
+      }
+      fila.parentNode.removeChild(fila);
+    }
+    guardar({ eventosInscritos: nombresEventos() });
+  }
+
+  function nombresEventos() {
+    var tI = $("#tabla-inscritos");
+    var out = [];
+    if (!tI) return out;
+    $$("tbody tr", tI).forEach(function (tr) {
+      var td = tr.children[0];
+      if (td) out.push(td.textContent.replace(/\s+/g, " ").trim());
+    });
+    return out;
+  }
+
+  function badgeJS(txt) {
+    var s = document.createElement("span");
+    s.className = "badge b-linea";
+    s.appendChild(icono(ICO.check, 12));
+    s.appendChild(document.createTextNode(" " + txt));
+    return s;
   }
 
   function pedirArchivo(b) {
@@ -893,6 +1105,162 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
       if (f) b.textContent = f.name.length > 22 ? f.name.slice(0, 22) + "…" : f.name;
     });
     input.click();
+  }
+
+  /* --- evidencia de tarea (TD1-TD3) -------------------------------------- */
+  /* La zona de carga es un <label for="evidencia-real"> con un input file real
+     (oculto). Al elegir/droppear archivos se pinta la lista de adjuntos con
+     nombre, tamano y fecha, se actualiza el contador y se habilita el boton
+     "Marcar como completada". El estado persiste en localStorage (prototipo). */
+  var evInput = $("#evidencia-real");
+  var evLista = $("#adjuntos-lista");
+  var evArchivos = [];
+  function fmtEv(n) {
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + " MB";
+    return Math.max(1, Math.round(n / 1024)) + " KB";
+  }
+  function pintarAdjuntos() {
+    if (!evLista) return;
+    var contador = $("#contador-adjuntos");
+    if (contador) contador.textContent = evArchivos.length === 1 ? "1 archivo" : evArchivos.length + " archivos";
+    if (!evArchivos.length) {
+      evLista.innerHTML = "<div class=\"vacio\">" + icono(ICO.doc, 40) +
+        "<h3>Todavia no has adjuntado evidencia</h3>" +
+        "<p>Cuando subas los archivos apareceran aqui con su fecha de carga.</p>" +
+        '<button class="btn btn-secundario" data-accion="adjuntar-evidencias">' + icono(ICO.clip, 16) +
+        " Adjuntar ahora</button></div>";
+      var btnCompletarInicial = $("[data-accion='marcar-completada']");
+      if (btnCompletarInicial) btnCompletarInicial.disabled = true;
+      return;
+    }
+    var filas = evArchivos.map(function (f) {
+      return '<div class="lista-def" style="padding:4px 0"><div class="def-row">' +
+        icono(ICO.clip, 16) + "<dd style=\"color:#051533\"><b>" + esc(f.nombre) + "</b>" +
+        '<br><span style="font-size:12px;color:#5a6b8c">' + esc(f.tam) + " · " + esc(f.dia) + "</span></dd>" +
+        '<dt style="flex:0 0 auto"><button class="icon-btn" data-accion="quitar-adjunto" ' +
+        'data-nombre="' + esc(f.nombre) + '" aria-label="Quitar ' + esc(f.nombre) + '">' +
+        icono(ICO.x, 14) + "</button></dt></div></div>";
+    }).join("");
+    evLista.innerHTML = filas +
+      '<div style="margin-top:12px;text-align:right"><button class="btn btn-secundario btn-sm" ' +
+      'data-accion="adjuntar-evidencias">' + icono(ICO.clip, 15) + " Adjuntar m&aacute;s</button></div>";
+    var btnCompletar = $("[data-accion='marcar-completada']");
+    if (btnCompletar) btnCompletar.disabled = evArchivos.length === 0;
+  }
+  function anadirEvidencias(lista) {
+    Array.prototype.forEach.call(lista || [], function (f) {
+      if (evArchivos.length >= 5) { toast("Máximo 5 archivos por tarea", "error"); return; }
+      evArchivos.push({ nombre: f.name, tam: fmtEv(f.size), dia: new Date().toLocaleDateString("es-CO") });
+    });
+    pintarAdjuntos();
+    guardar({ adjuntos: evArchivos });
+  }
+  if (evInput && evInput.addEventListener) {
+    evInput.addEventListener("change", function () {
+      anadirEvidencias(evInput.files);
+      evInput.value = "";
+    });
+    var zonaEv = evInput.closest(".drop") || evInput.parentNode;
+    if (zonaEv) {
+      ["dragover", "dragleave"].forEach(function (tipo) {
+        zonaEv.addEventListener(tipo, function (e) {
+          e.preventDefault();
+          zonaEv.classList.toggle("sobre", tipo === "dragover");
+        });
+      });
+      zonaEv.addEventListener("drop", function (e) {
+        e.preventDefault();
+        zonaEv.classList.remove("sobre");
+        anadirEvidencias(e.dataTransfer.files);
+      });
+    }
+  }
+
+  /* --- cuestionario por secciones (DG1/DG3/DG4) -------------------------- */
+  /* El diagnostico son 5 paneles data-panel-nombre="seccion-N". Los botones
+     Siguiente/Anterior navegan entre paneles y el contador cuenta las
+     preguntas reales respondidas (22 campos), no un texto fijo. */
+  var panelesDiag = $$("[data-panel-nombre^='seccion-']");
+  function diagPanelActual() {
+    for (var i = 0; i < panelesDiag.length; i++) {
+      if (!panelesDiag[i].hidden) return i;
+    }
+    return 0;
+  }
+  function diagContar() {
+    var respondidas = 0, total = 0;
+    panelesDiag.forEach(function (p) {
+      $$(".campo input, .campo select, .campo textarea", p).forEach(function (c) {
+        total++;
+        if (c.value && c.value.trim()) respondidas++;
+      });
+    });
+    var r = respondidas + " de " + total + " preguntas respondidas";
+    $$("[data-contador-diagnostico]").forEach(function (x) { x.textContent = "Progreso: " + r; });
+    return r;
+  }
+  function diagMostrar(i) {
+    panelesDiag.forEach(function (p, j) {
+      p.hidden = j !== i;
+    });
+    var pasos = $$(".steps .step");
+    pasos.forEach(function (st, j) {
+      st.className = "step" + (j < i ? " hecho" : j === i ? " activo" : "");
+      var num = $("i", st);
+      if (num) num.textContent = j + 1;
+      if (j < i) st.querySelector("i").innerHTML = icono(ICO.check, 14);
+    });
+    diagContar();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* --- bandeja de notificaciones (NO2/NO3) ------------------------------- */
+  /* Los chip[data-chip] filtran la bandeja por tipo/estado y un clic sobre
+     una notificacion pendiente la marca como leida. Ambos estados persisten
+     en localStorage (prototipo). */
+  var notifs = $$(".notif");
+  function notifRefrescar() {
+    var n = 0;
+    notifs.forEach(function (x) { if (x.classList.contains("no-leida")) n++; });
+    var c = $("#contador-no-leidas");
+    if (c) c.textContent = n + (n === 1 ? " sin leer" : " sin leer");
+    return n;
+  }
+  function notifPersistir() {
+    var leidas = [];
+    notifs.forEach(function (x) {
+      if (!x.classList.contains("no-leida")) leidas.push(x.dataset.i);
+    });
+    guardar({ notifsLeidas: leidas });
+  }
+  function notifFiltro(f) {
+    notifs.forEach(function (x) {
+      var ok = f === "todas" ||
+        (f === "sin-leer" && x.classList.contains("no-leida")) ||
+        x.dataset.tipo === f;
+      x.hidden = !ok;
+    });
+  }
+  if (notifs.length) {
+    $$(".chip[data-chip]").forEach(function (ch) {
+      ch.addEventListener("click", function () {
+        $$(".chip[data-chip]").forEach(function (o) { o.classList.toggle("on", o === ch); });
+        notifFiltro(ch.dataset.chip);
+        notifRefrescar();
+      });
+    });
+    notifs.forEach(function (x) {
+      x.addEventListener("click", function () {
+        if (x.classList.contains("no-leida")) {
+          x.classList.remove("no-leida");
+          var dot = $(".notif-dot", x);
+          if (dot) dot.remove();
+          notifRefrescar();
+          notifPersistir();
+        }
+      });
+    });
+    notifRefrescar();
   }
 
   /* --- validacion de formularios ----------------------------------------- */
@@ -974,6 +1342,16 @@ guardar(estado);
       ? "login.html"
       : "../compartido/login.html";
   }
+  function cerrarSesion() {
+    /* Logout unico del prototipo (BT4): borra la clave de la pagina, la sesion
+       de "sgemd:sesion" (la escribe login.html en compartido/) y redirige. */
+    store(null, true, null);
+    try {
+      localStorage.removeItem("sgemd:sesion");
+      sessionStorage.removeItem("sgemd:sesion");
+    } catch (x) {}
+    location.href = rutaLogin();
+  }
   $$(".who").forEach(function (w) {
     w.setAttribute("tabindex", "0");
     w.setAttribute("role", "button");
@@ -993,15 +1371,7 @@ guardar(estado);
             abierto = false;
             m.remove();
             if (b.dataset.accion === "cerrar-sesion") {
-              /* La sesion la abre el login en compartido/login.html bajo
-                 "sgemd:sesion"; se borra de localStorage y de sessionStorage
-                 para que un logout no deje nada detrás. */
-              store(null, true, null);
-              try {
-                localStorage.removeItem("sgemd:sesion");
-                sessionStorage.removeItem("sgemd:sesion");
-              } catch (x) {}
-              location.href = rutaLogin();
+              cerrarSesion();
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");
@@ -1025,6 +1395,58 @@ guardar(estado);
       var b = $$("button", barra)[previo.tab];
       if (b) b.click();
     }
+  }
+  /* DG4: retomar el cuestionario en el punto guardado (seccion + respuestas). */
+  if (previo && previo.borrador && typeof previo.borrador === "object" && panelesDiag.length) {
+    var porLabel = {};
+    Object.keys(previo.borrador).forEach(function (k) {
+      porLabel[k.toLowerCase().replace(/\s+/g, " ").trim()] = previo.borrador[k];
+    });
+    panelesDiag.forEach(function (p) {
+      $$(".campo", p).forEach(function (campoBox) {
+        var lbl = $("label", campoBox);
+        if (!lbl) return;
+        var c = $("input, select, textarea", campoBox);
+        if (!c) return;
+        var k = lbl.textContent.replace(/\s+/g, " ").trim().toLowerCase();
+        if (porLabel[k] != null && !(c.value && c.value.trim())) c.value = porLabel[k];
+      });
+    });
+    if (previo.seccionDiag != null) diagMostrar(previo.seccionDiag);
+    else diagContar();
+  }
+  if (previo && Array.isArray(previo.adjuntos) && evLista) {
+    evArchivos = previo.adjuntos;
+    pintarAdjuntos();
+  }
+  /* EV2: restaurar las inscripciones a eventos guardadas en localStorage. */
+  if (previo && Array.isArray(previo.eventosInscritos) && previo.eventosInscritos.length) {
+    var tP = $("#tabla-proximos"), tI = $("#tabla-inscritos");
+    if (tP && tI) {
+      $$("tbody tr", tP).forEach(function (f) {
+        var td0 = f.children[0];
+        var nombre = td0 ? td0.textContent.replace(/\s+/g, " ").trim() : "";
+        if (previo.eventosInscritos.indexOf(nombre) >= 0) moverEvento(f, tP, tI, true);
+      });
+    }
+  }
+  /* NO3: restaurar notificaciones leidas. */
+  if (previo && Array.isArray(previo.notifsLeidas) && notifs.length) {
+    var setL = {};
+    previo.notifsLeidas.forEach(function (i) { setL[i] = true; });
+    notifs.forEach(function (n) {
+      if (setL[n.dataset.i] && n.classList.contains("no-leida")) {
+        n.classList.remove("no-leida");
+        var dot = $(".notif-dot", n);
+        if (dot) dot.remove();
+      }
+    });
+    notifRefrescar();
+  }
+  if (previo && previo.completada && $("[data-accion='marcar-completada']")) {
+    var bComp = $("[data-accion='marcar-completada']");
+    bComp.disabled = true;
+    bComp.textContent = "Completada ✓";
   }
   document.documentElement.classList.add("js-listo");
 })();
