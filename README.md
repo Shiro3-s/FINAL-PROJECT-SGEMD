@@ -12,7 +12,7 @@
 >
 > Empieza por **[PROTOTIPO-STITCH.md](PROTOTIPO-STITCH.md)**: qué contiene la rama y cómo usarla.
 >
-> Este `README.md` es la especificación general del proyecto y se mantiene idéntico al de `main`.
+> Este `README.md` es la especificación general del proyecto. En `main` se mantiene como documento de especificación puro; en esta rama añade, además, notas del prototipo y enlaces a su documentación. En particular, el **refactor UX/UI del Rol Docente** está documentado en **[docs/docente-rol-ux.md](docs/docente-rol-ux.md)** (y en `docs/estructura_de_vistas_sgemd.md` §3.3).
 
 ---
 
@@ -83,7 +83,10 @@ Existe **un único campo de rol** en el usuario, con valores:
 ### Docente / Mentor (rol 3)
 
 - **Puede hacer:** ver únicamente los emprendimientos que **le fueron asignados** (vía asignaciones), registrar seguimiento (crear/editar/eliminar notas) de esos emprendimientos, crear/editar/eliminar tareas y asesorías de sus asignados, ver el perfil de sus estudiantes, consultar su dashboard. Registra asistencias a eventos manualmente en la plataforma.
+- **Capacidades del rol (refactor UX/UI):** registrar **avance con calificación** (puntaje 0–100 + retroalimentación) y **estado de revisión** (Pendiente · En revisión · Calificada · Devuelta); **confirmar o reprogramar** asesorías de sus estudiantes (el estudiante no agenda solo, BR-002); **revisar el diagnóstico y guardar recomendaciones**; mantener una **bitácora de comentarios** por emprendimiento; y **gestionar sus notificaciones** (filtro por tipo, marcar como leído).
 - **No debería:** ver emprendimientos/estudiantes de otros docentes, modificar el emprendimiento del estudiante, eliminar usuarios ni cambiar roles.
+
+> Detalle del refactor y de las 12 pantallas del rol en **[docs/docente-rol-ux.md](docs/docente-rol-ux.md)**.
 
 ### Estudiante (rol 2)
 
@@ -142,9 +145,9 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 ### Seguimiento
 
 - **Quién lo usa:** docente (crea/consulta/edita/elimina), admin (administra), estudiante (solo lectura).
-- **Qué puede hacer:** registrar notas/anotaciones de acompañamiento sobre un emprendimiento.
-- **Información que maneja:** descripción de la nota, tipo, **autor** (usuario), **emprendimiento** relacionado, fechas.
-- **Flujo:** el docente registra una nota sobre un emprendimiento asignado; el estudiante consulta el historial de su emprendimiento.
+- **Qué puede hacer:** registrar notas/avances de acompañamiento sobre un emprendimiento y **calificarlos** con puntaje y retroalimentación, asignándoles un estado de revisión.
+- **Información que maneja:** descripción de la nota, tipo, **autor** (usuario), **emprendimiento** relacionado, fechas, **estado de revisión** (Pendiente · En revisión · Calificada · Devuelta), **puntaje** y **retroalimentación**.
+- **Flujo:** el docente registra una nota/avance sobre un emprendimiento asignado (con puntaje y retroalimentación cuando la califica); el estudiante consulta el historial de su emprendimiento.
 
 ### Asesorías
 
@@ -155,10 +158,10 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 
 ### Tareas / plan de trabajo
 
-- **Quién lo usa:** docente (crea/edita/elimina), estudiante (consulta y completa), admin (consulta).
-- **Qué puede hacer:** crear tareas ligadas a un emprendimiento y a un estudiante, con fecha límite y estado.
-- **Información que maneja:** título, descripción, fecha límite, estado (pendiente/completada/vencida), emprendimiento, estudiante, docente.
-- **Flujo:** el docente crea la tarea → el estudiante la ve → la completa → el sistema calcula el avance (% de completadas). El sistema envía notificaciones en tiempo real a los usuarios cuando un docente asigna una nueva tarea.
+- **Quién lo usa:** docente (crea/edita/elimina/califica), estudiante (consulta y completa), admin (consulta).
+- **Qué puede hacer:** crear tareas ligadas a un emprendimiento y a un estudiante, con fecha límite, prioridad y evidencia requerida; **calificarlas** (puntaje + retroalimentación) y **devolverlas** al estudiante.
+- **Información que maneja:** título, descripción, fecha límite, estado (pendiente/completada/vencida), prioridad, evidencia requerida, puntaje y retroalimentación, emprendimiento, estudiante, docente.
+- **Flujo:** el docente crea la tarea → el estudiante la ve → la completa → el sistema calcula el avance (% de completadas). El docente puede calificarla (puntaje y retroalimentación) o devolverla al estudiante. El sistema envía notificaciones en tiempo real a los usuarios cuando un docente asigna una nueva tarea o la devuelve.
 
 ### Gestión de Archivos
 
@@ -557,15 +560,22 @@ SGEMD/
 
 ### Docente / Mentor
 
-| Pantalla                  | Información que debe mostrar                                                                                                 |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard                 | Métricas de sus asignados: nº estudiantes, emprendimientos asignados, % avance de tareas, nº asesorías/notas de seguimiento. |
-| Emprendimientos asignados | Solo los emprendimientos en los que es mentor (vía asignaciones), con su etapa y datos.                                      |
-| Seguimiento               | Crear/ver/editar/eliminar notas del emprendimiento seleccionado.                                                             |
-| Asesorías                 | Ver/solicitar/confirmar asesorías de sus estudiantes.                                                                        |
-| Tareas                    | Crear/editar tareas de sus asignados; ver estados y avance.                                                                  |
-| Diagnóstico               | Ver/crear diagnóstico del emprendimiento (según alcance).                                                                    |
-| Perfil                    | Datos propios.                                                                                                               |
+| Pantalla | Información que debe mostrar |
+| --- | --- |
+| Dashboard (Inicio) | Panorama de sus asignados: nº estudiantes, emprendimientos asignados, % avance de tareas, próximas asesorías; accesos rápidos (registrar avance, calificar, revisar diagnóstico). Los pendientes enlazan a la lista ya filtrada (`?f=`). |
+| Emprendimientos asignados | Solo los emprendimientos en los que es mentor (vía asignaciones), con su etapa, avance y **estado de revisión**; vista Tarjetas/Tabla con filtros de etapa/sector. |
+| Expediente del emprendimiento | Detalle con pestañas Avances · Tareas · Asesorías · Diagnóstico · Comentarios; **bitácora de comentarios** (autor · fecha · texto) y **calificación** desde el tablero de avances. |
+| Seguimiento (lista) | Notas/avances del emprendimiento seleccionado, con filtros por fase y evidencia y contador de resultados; abre el historial. |
+| Tablero de seguimiento | Estado de avance por estudiante y prioridades de revisión (evidencias por revisar, avances sin calificar, asesorías por confirmar). |
+| Registrar avance y calificar | Nota de avance con **estado de revisión** (Pendiente · En revisión · Calificada · Devuelta), **puntaje** (0–100) y **retroalimentación**. |
+| Asesorías | Solicitudes de sus estudiantes; **confirmar** o **reprogramar** (fecha, hora, modalidad, lugar) con ventana modal. |
+| Registrar asesoría | Agendamiento de una asesoría (fecha, hora, modalidad, lugar). |
+| Diagnóstico | Resultado del diagnóstico con **recomendaciones**; tabla de pendientes de revisión y confirmación al guardar. |
+| Tareas | Tareas de sus asignados con filtros por estado/prioridad; **asignar tarea** y **calificar** (puntaje, retroalimentación, evidencia) o **devolver** al estudiante. |
+| Perfil | Datos propios; cambio de contraseña por modal y preferencias de notificación. |
+| Notificaciones | Avisos con filtro por tipo (chips) y "Marcar todo como leído" con confirmación. |
+
+> Estas 12 pantallas corresponden al refactor UX/UI del rol; detalle y contrato de interacción en **[docs/docente-rol-ux.md](docs/docente-rol-ux.md)** y en `docs/estructura_de_vistas_sgemd.md` §3.3.
 
 ### Estudiante
 
@@ -637,6 +647,7 @@ SGEMD/
 - Emprendimiento con propietario-estudiante (`User_idUsers`) + etapa (`entrepreneurialStage`).
 - Seguimiento ligado a un emprendimiento; autor registrado.
 - Tareas ligadas a emprendimiento y estudiante; estados y avance derivados de BD.
+- **Estados de revisión del docente** (Pendiente · En revisión · Calificada · Devuelta) sobre seguimiento/avances y tareas, con calificación por **puntaje (0–100) + retroalimentación** y posibilidad de **devolver** la tarea al estudiante.
 - Dashboards con métricas reales (no mock).
 - Secretos solo por variables de entorno; `.env` ignorado; `.env.example` sin secretos.
 

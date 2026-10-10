@@ -416,6 +416,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 
 @media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
 .cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kanban-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.k-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}</style>
+<style>.sep{height:20px}.sep-lg{height:22px}.acciones-col{display:flex;flex-direction:column;gap:10px}.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.acciones-rapidas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.acciones-rapidas .btn{width:100%}.resultados-contador{font-size:13px;color:var(--tinta-2);margin-left:auto}.prog{min-width:110px}.prog-num{font-size:13px;color:var(--tinta-2)}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.chip.activo{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}.aviso[hidden]{display:none}.comentarios{display:flex;flex-direction:column;gap:14px}.comentario{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;background:var(--blanco)}.comentario-cab{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.comentario-autor{font-size:13px;font-weight:700;color:var(--tinta)}.comentario-fecha{font-size:13px;color:var(--tinta-2)}.comentario-texto{font-size:14px;color:var(--tinta-2);line-height:1.6}.comentario-form{margin-top:16px}.campo input[type=number]{width:100%;height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}@media (max-width:479px){.acciones-rapidas{grid-template-columns:minmax(0,1fr)}}</style>
 </head>
 <body>
 <div class="shell">
@@ -444,7 +445,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="#">Inicio</a> &rsaquo; <a href="#">Mis asesorias</a> &rsaquo; Registrar asesoria</div><div class="page-head"><h1>Registrar asesoria</h1><p class="sub">Confirma la fecha solicitada y deja el acta de la sesion.</p><div class="acciones"><a class="btn btn-secundario" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver</a></div></div><div class="steps"><div class="step hecho"><i><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></i><b>Solicitud recibida</b></div><div class="step-line"></div><div class="step activo"><i>2</i><b>Confirmar fecha</b></div><div class="step-line"></div><div class="step "><i>3</i><b>Registrar sesion</b></div><div class="step-line"></div><div class="step "><i>4</i><b>Cerrar asesoria</b></div></div><div style="height:22px"></div><div class="grid g-2-1"><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Solicitud del estudiante</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Estudiante</dt><dd>Mariana Lopez</dd></div><div class="def-row"><dt>Emprendimiento</dt><dd>Sabor y Sabe</dd></div><div class="def-row"><dt>Fecha preferida</dt><dd>20 de noviembre de 2024</dd></div><div class="def-row"><dt>Horario preferido</dt><dd>Manana, 09:00 a 11:00</dd></div><div class="def-row"><dt>Temas sugeridos</dt><dd>Presupuesto y punto de equilibrio</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Datos de la asesoria</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f29">Emprendimiento</label><input id="f29" type="text" value="Sabor y Sabe" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo tus emprendimientos asignados</div></div></div></div><div class="card"><div class="card-head"><h3>Confirmacion de agenda</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f30">Fecha<span class="req">*</span></label><input id="f30" type="date" value="2024-11-20" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>La fecha propuesta por el estudiante fue el 20 de noviembre.</div></div><div class="campo"><label for="f31">Hora<span class="req">*</span></label><input id="f31" type="time" value="10:00" placeholder="" required></div><div class="campo"><label for="s32">Modalidad<span class="req">*</span></label><select id="s32"><option>Presencial</option><option>Virtual</option><option selected>Modalidad mixta</option></select></div><div class="campo"><label for="f33">Lugar o enlace</label><input id="f33" type="text" value="Sala 3 del bloque B / meet.sgemd.edu.co/ases-014" placeholder=""></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Temas a trabajar</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f34">Contenido de la sesion</label><textarea id="f34" placeholder="Que temas se van a trabajar">Presupuesto de insumos, punto de equilibrio y canal de venta en el campus.</textarea></div></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><a class="btn btn-primario" href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Confirmar y notificar</a><a class="btn btn-secundario" href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Proponer otra fecha</a><a class="btn btn-secundario" href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg> Rechazar solicitud</a></div><div class="nota-foot">Al confirmar, el estudiante recibe la notificacion con la fecha, la hora y el lugar.</div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="#">Inicio</a> &rsaquo; <a href="#">Mis asesorias</a> &rsaquo; Registrar asesoria</div><div class="page-head"><h1>Registrar asesoria</h1><p class="sub">Confirma la fecha solicitada y deja el acta de la sesion.</p><div class="acciones"><a class="btn btn-secundario" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver</a></div></div><div class="steps"><div class="step hecho"><i><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></i><b>Solicitud recibida</b></div><div class="step-line"></div><div class="step activo"><i>2</i><b>Confirmar fecha</b></div><div class="step-line"></div><div class="step "><i>3</i><b>Registrar sesion</b></div><div class="step-line"></div><div class="step "><i>4</i><b>Cerrar asesoria</b></div></div><div class="sep-lg"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Solicitud del estudiante</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Estudiante</dt><dd>Mariana Lopez</dd></div><div class="def-row"><dt>Emprendimiento</dt><dd>Sabor y Sabe</dd></div><div class="def-row"><dt>Fecha preferida</dt><dd>20 de noviembre de 2024</dd></div><div class="def-row"><dt>Horario preferido</dt><dd>Manana, 09:00 a 11:00</dd></div><div class="def-row"><dt>Temas sugeridos</dt><dd>Presupuesto y punto de equilibrio</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Datos de la asesoria</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f29">Emprendimiento</label><input id="f29" type="text" value="Sabor y Sabe" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo tus emprendimientos asignados</div></div></div></div><div class="card"><div class="card-head"><h3>Confirmacion de agenda</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f30">Fecha<span class="req">*</span></label><input id="f30" type="date" value="2024-11-20" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>La fecha propuesta por el estudiante fue el 20 de noviembre.</div></div><div class="campo"><label for="f31">Hora<span class="req">*</span></label><input id="f31" type="time" value="10:00" placeholder="" required></div><div class="campo"><label for="s32">Modalidad<span class="req">*</span></label><select id="s32"><option>Presencial</option><option>Virtual</option><option selected>Modalidad mixta</option></select></div><div class="campo"><label for="f33">Lugar o enlace</label><input id="f33" type="text" value="Sala 3 del bloque B / meet.sgemd.edu.co/ases-014" placeholder=""></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Temas a trabajar</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f34">Contenido de la sesion</label><textarea id="f34" placeholder="Que temas se van a trabajar">Presupuesto de insumos, punto de equilibrio y canal de venta en el campus.</textarea></div></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="acciones-col"><button data-accion="confirmar-asesoria" class="btn btn-primario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Confirmar y notificar</button><button data-accion="reprogramar-asesoria" class="btn btn-secundario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Proponer otra fecha</button><button data-accion="rechazar-asesoria" class="btn btn-secundario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg> Rechazar solicitud</button></div><div class="nota-foot">Al confirmar, el estudiante recibe la notificacion con la fecha, la hora y el lugar.</div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -1027,6 +1028,278 @@ guardar(estado);
     }
   }
   document.documentElement.classList.add("js-listo");
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  var ACCIONES = {
+    "calificar": 1, "asignar-tarea": 1, "confirmar-asesoria": 1,
+    "reprogramar-asesoria": 1, "rechazar-asesoria": 1, "publicar-comentario": 1,
+    "devolver-tarea": 1, "registrar-avance": 1, "revisar-diagnostico": 1,
+    "guardar-recomendaciones": 1,
+    "confirmar-avance": 1, "cambiar-contrasena": 1, "marcar-todo-leido": 1,
+    "filtrar-notificacion": 1
+  };
+
+  var pila = null;
+  function toast(msg, tipo) {
+    if (!pila) {
+      pila = document.createElement("div");
+      pila.className = "toast-pila";
+      pila.setAttribute("role", "status");
+      pila.setAttribute("aria-live", "polite");
+      document.body.appendChild(pila);
+    }
+    var t = document.createElement("div");
+    t.className = "toast t-" + (tipo || "info");
+    t.appendChild(document.createTextNode(msg));
+    pila.appendChild(t);
+    setTimeout(function () { t.classList.add("va-fuera"); }, 3200);
+    setTimeout(function () { t.remove(); }, 3700);
+  }
+
+  function cerrarModal() {
+    var v = $(".modal-velo");
+    if (v) v.remove();
+    document.body.classList.remove("sin-scroll");
+  }
+
+  function abrirModal(titulo, cuerpoHTML, botones) {
+    cerrarModal();
+    var velo = document.createElement("div");
+    velo.className = "modal-velo";
+    var caja = document.createElement("div");
+    caja.className = "modal";
+    caja.setAttribute("role", "dialog");
+    caja.setAttribute("aria-modal", "true");
+    caja.setAttribute("aria-label", titulo);
+    var head = document.createElement("div");
+    head.className = "modal-head";
+    var h2 = document.createElement("h2");
+    h2.textContent = titulo;
+    var equis = document.createElement("button");
+    equis.className = "icon-btn modal-x";
+    equis.setAttribute("aria-label", "Cerrar");
+    equis.appendChild(document.createTextNode("X"));
+    head.appendChild(h2);
+    head.appendChild(equis);
+    var cuerpo = document.createElement("div");
+    cuerpo.className = "modal-cuerpo";
+    cuerpo.innerHTML = cuerpoHTML;
+    var pie = document.createElement("div");
+    pie.className = "modal-foot";
+    (botones || []).forEach(function (b) {
+      var el = document.createElement("button");
+      el.className = b.clase || "btn btn-secundario";
+      el.appendChild(document.createTextNode(b.txt));
+      el.addEventListener("click", function () {
+        if (b.al) b.al(caja);
+        if (b.cerrar !== false) cerrarModal();
+      });
+      pie.appendChild(el);
+    });
+    caja.appendChild(head);
+    caja.appendChild(cuerpo);
+    caja.appendChild(pie);
+    velo.appendChild(caja);
+    document.body.appendChild(velo);
+    document.body.classList.add("sin-scroll");
+    equis.addEventListener("click", cerrarModal);
+    velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
+    var foco = $("input, select, textarea, .modal-foot button", caja);
+    if (foco) foco.focus();
+    return caja;
+  }
+
+  function confirmar(titulo, texto, al) {
+    abrirModal(titulo, '<p class="confirm-texto"></p>', [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Confirmar", clase: "btn btn-peligro", al: al }
+    ]);
+    $(".confirm-texto").textContent = texto;
+  }
+
+  function campo(id, etq, tipo) {
+    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
+      '<input id="' + id + '" type="' + (tipo || "text") + '"></div>';
+  }
+  function area(id, etq, ph) {
+    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
+      '<textarea id="' + id + '" placeholder="' + ph + '"></textarea></div>';
+  }
+  function selCampo(id, etq, opciones) {
+    var ops = opciones.map(function (o) { return "<option>" + o + "</option>"; }).join("");
+    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
+      '<select id="' + id + '">' + ops + '</select></div>';
+  }
+
+  var BODY_CALIFICAR = campo("cal-puntaje", "Puntaje (0 a 100)", "number") +
+    selCampo("cal-resultado", "Resultado", ["Aprobada", "En revision", "Devuelta"]) +
+    area("cal-retro", "Retroalimentacion", "Observaciones para el estudiante");
+
+  var BODY_ASIGNAR = campo("asig-titulo", "Titulo de la tarea") +
+    campo("asig-emp", "Emprendimiento") +
+    selCampo("asig-prio", "Prioridad", ["Alta", "Media", "Baja"]) +
+    campo("asig-fecha", "Fecha limite", "date") +
+    area("asig-instr", "Instrucciones", "Que debe entregar el estudiante");
+
+  var BODY_ASESORIA = campo("as-fecha", "Fecha", "date") +
+    campo("as-hora", "Hora", "time") +
+    selCampo("as-mod", "Modalidad", ["Presencial", "Virtual", "Modalidad mixta"]) +
+    campo("as-lugar", "Lugar o enlace");
+
+  var BODY_DIAG = area("diag-rec", "Recomendaciones", "Que debe reforzar el estudiante");
+
+  var BODY_CLAVE = campo("clave-act", "Contrasena actual", "password") +
+    campo("clave-nueva", "Contrasena nueva", "password") +
+    campo("clave-rep", "Repetir contrasena nueva", "password");
+
+  function aplicarFiltroDesdeURL() {
+    var m = location.search.match(/[?&]f=([^&]+)/);
+    if (!m) return;
+    var val = decodeURIComponent(m[1].split("+").join(" "));
+    var sels = document.querySelectorAll("select[data-filtro]");
+    for (var i = 0; i < sels.length; i++) {
+      var s = sels[i], ok = false;
+      for (var j = 0; j < s.options.length; j++) {
+        if (s.options[j].value === val) { ok = true; break; }
+      }
+      if (ok) { s.value = val; s.dispatchEvent(new Event("change")); return; }
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", aplicarFiltroDesdeURL);
+  } else {
+    aplicarFiltroDesdeURL();
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button, a.btn");
+    if (!b) return;
+    var acc = b.getAttribute("data-accion");
+    if (!acc || !ACCIONES[acc]) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (acc === "registrar-avance") { location.href = "seguimiento-notas.html"; return; }
+
+    if (acc === "calificar") {
+      abrirModal("Calificar entrega", BODY_CALIFICAR, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Guardar calificacion", clase: "btn btn-primario", al: function () { toast("Calificacion guardada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "asignar-tarea") {
+      abrirModal("Asignar tarea", BODY_ASIGNAR, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Asignar tarea", clase: "btn btn-primario", al: function () { toast("Tarea asignada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "confirmar-asesoria") {
+      abrirModal("Confirmar asesoria", BODY_ASESORIA, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Confirmar y notificar", clase: "btn btn-primario", al: function () { toast("Asesoria confirmada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "reprogramar-asesoria") {
+      abrirModal("Proponer otra fecha", BODY_ASESORIA, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Enviar propuesta", clase: "btn btn-primario", al: function () { toast("Nueva fecha propuesta", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "rechazar-asesoria") {
+      confirmar("Rechazar solicitud", "Se notificara al estudiante que la solicitud fue rechazada.", function () { toast("Solicitud rechazada", "info"); });
+      return;
+    }
+    if (acc === "revisar-diagnostico") {
+      abrirModal("Recomendaciones del diagnostico", BODY_DIAG, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Guardar recomendaciones", clase: "btn btn-primario", al: function () { toast("Recomendaciones guardadas", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "guardar-recomendaciones") {
+      confirmar("Guardar recomendaciones", "Se enviaran al estudiante y se marcaran como revisadas.", function () { toast("Recomendaciones guardadas", "ok"); });
+      return;
+    }
+    if (acc === "cambiar-contrasena") {
+      abrirModal("Cambiar contrasena", BODY_CLAVE, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Actualizar contrasena", clase: "btn btn-primario", al: function () { toast("Contrasena actualizada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "devolver-tarea") {
+      confirmar("Devolver tarea", "La tarea volvera al estudiante para que ajuste la evidencia.", function () { toast("Tarea devuelta", "info"); });
+      return;
+    }
+    if (acc === "confirmar-avance") {
+      confirmar("Registrar avance", "Se guardara el avance y se notificara al estudiante.", function () { toast("Avance registrado", "ok"); });
+      return;
+    }
+    if (acc === "marcar-todo-leido") {
+      confirmar("Marcar todo como leido", "Se archivaran todas las notificaciones pendientes.", function () {
+        var c = $(".count");
+        if (c) c.textContent = "0";
+        toast("Notificaciones marcadas como leidas", "ok");
+      });
+      return;
+    }
+    if (acc === "publicar-comentario") {
+      var cont = b.closest(".comentario-form") || document;
+      var ta = $("textarea", cont);
+      var txt = ta && ta.value.trim();
+      if (!txt) { toast("Escribe un comentario", "error"); return; }
+      var lista = $(".comentarios");
+      if (lista) {
+        var art = document.createElement("article");
+        art.className = "comentario";
+        var cab = document.createElement("div");
+        cab.className = "comentario-cab";
+        var aut = document.createElement("span");
+        aut.className = "comentario-autor";
+        aut.appendChild(document.createTextNode("Carlos Mendoza"));
+        var fec = document.createElement("span");
+        fec.className = "comentario-fecha";
+        fec.appendChild(document.createTextNode("Ahora"));
+        cab.appendChild(aut);
+        cab.appendChild(fec);
+        var tx = document.createElement("div");
+        tx.className = "comentario-texto";
+        tx.appendChild(document.createTextNode(txt));
+        art.appendChild(cab);
+        art.appendChild(tx);
+        lista.appendChild(art);
+      }
+      if (ta) ta.value = "";
+      toast("Comentario publicado", "ok");
+      return;
+    }
+    if (acc === "filtrar-notificacion") {
+      var tipo = b.getAttribute("data-tipo");
+      $$(".chips .chip").forEach(function (c) {
+        c.classList.toggle("activo", c === b);
+        c.setAttribute("aria-pressed", c === b ? "true" : "false");
+      });
+      $$(".aviso").forEach(function (av) {
+        var ver = !tipo || tipo === "todos" || av.classList.contains("u-" + tipo);
+        av.hidden = !ver;
+      });
+      return;
+    }
+  }, true);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") cerrarModal();
+  });
 })();
 </script>
 </body>

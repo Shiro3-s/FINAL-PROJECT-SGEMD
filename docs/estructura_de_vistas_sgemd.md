@@ -77,14 +77,19 @@ Enfocado en el desarrollo del proyecto, seguimiento de tareas y solicitud de ase
     *   **Consultar Eventos:** Vista de catálogo mediante tarjetas con barra de búsqueda superior y calendario lateral.
 
 ### 3.3. Perfil Docente (Asesor)
-El menú lateral se adapta para centrarse en las herramientas de tutoría, retroalimentación y seguimiento académico.
+El menú lateral se adapta para centrarse en las herramientas de tutoría, retroalimentación y seguimiento académico. El rol se compone de **12 pantallas** en `docente/` (Inicio, Asesorías, Registrar asesoría, Emprendimientos asignados, Expediente, Seguimiento lista, Tablero de seguimiento, Registrar avance, Diagnóstico, Tareas asignadas, Perfil y Notificaciones) y fue objeto de un refactor UX/UI completo — ver [`docente-rol-ux.md`](docente-rol-ux.md).
 
+*   **Inicio:** panorama de emprendimientos asignados, tarjeta de **acciones rápidas** (registrar avance, calificar, revisar diagnóstico), próximas asesorías y compromisos del día. Los pendientes enlazan a la **lista ya filtrada** (`?f=`).
 *   **Módulo "Asesorías"**
-    *   **Mis Asesorías:** Tabla con las asignaciones bajo su cargo, mostrando el "Nombre Estudiante" y "Tipo de emprendimiento". Incluye botones de estado: Asignar, Editar y Eliminar.
-    *   **Crear/Editar Asesorías:** Interfaz de agendamiento con widgets de fecha y hora, selección de "Temas" y "Estudiante", y datos del organizador. Botón verde para crear y gris oscuro para editar.
-    *   **Eliminación:** Validación manual obligatoria (Sí/No) a través de una ventana modal.
+    *   **Mis Asesorías:** tabla con las asignaciones bajo su cargo, filtros funcionales por **estado** y **emprendimiento** con contador de resultados, y acciones por fila: **Confirmar** (modal de confirmación/notificación), **Reprogramar** (modal con fecha/hora) y **Ver detalle**. Las solicitudes pendientes se confirman o reprograman con ventana modal.
+    *   **Crear/Editar Asesorías (Registrar asesoría):** interfaz de agendamiento con fecha, hora, modalidad y lugar; "Confirmar y notificar", "Proponer otra fecha" y "Rechazar solicitud" abren modal o confirmación.
+*   **Módulo "Emprendimientos"**
+    *   **Listado:** pestañas **Tarjetas / Tabla**; la tabla muestra los proyectos asignados (Emprendimiento, Estudiante, Sector, Etapa, Avance, **Estado de revisión**, Última actividad, Acciones) con filtros de etapa/sector y contador. Cada fila abre el expediente.
+    *   **Expediente del emprendimiento:** pestañas **Avances · Tareas · Asesorías · Diagnóstico · Comentarios**; incluye **bitácora de comentarios** (autor · fecha · texto + editor) y permite **calificar** desde el tablero de avances.
 *   **Módulo "Seguimiento"**
-    *   **Tabla de Progreso:** Listado con Fecha, Nombre del estudiante, Frecuencia y Proceso, junto con acciones (Ver/Editar/Eliminar) en formato de enlace.
-    *   **Dashboard Analítico:** Panel para monitorear avance. Integra gráficos circulares (tareas completadas vs pendientes, % total completado) y un esquema inferior de tareas categorizadas por prioridad (Alta, Media, Baja) usando colores de semáforo.
-    *   **Notas de Acompañamiento:** Interfaz dedicada con editor de texto para que el docente registre las observaciones puntuales de cada emprendimiento asignado.
-    *   **Vistas Analíticas de Cursos:** Métricas de participación, tareas descargadas/completadas y resultados de pruebas de los estudiantes a su cargo.
+    *   **Seguimiento (lista):** filtros funcionales por **fase** y **evidencia** con contador; "Registrar avance" navega a la pantalla de notas; "Ver historial" abre modal.
+    *   **Tablero de seguimiento:** panel analítico con avance por estudiante y pendientes por prioridad que enlazan a la lista filtrada.
+    *   **Registrar avance y calificar (Notas de Acompañamiento):** `<select>` de **estado de revisión** (Pendiente · En revisión · Calificada · Devuelta), puntaje, retroalimentación y confirmación al registrar el avance.
+    *   **Revisión del Diagnóstico:** resultados del diagnóstico con recomendaciones; tabla de **pendientes de revisión** y confirmación al guardar las recomendaciones.
+    *   **Tareas asignadas:** filtros por **estado** y **prioridad**; **modal de calificación** por tarea, **modal de asignación** de tarea y acción "Devolver al estudiante".
+*   **Perfil y Notificaciones:** edición de datos con confirmación al guardar, cambio de contraseña por modal y notificaciones con filtro por tipo (chips con `aria-pressed`) y "Marcar todo como leído" con confirmación.
