@@ -168,6 +168,27 @@ JS = r"""
     if (window.innerWidth < 1024 && e.target.closest("a")) abrirSB(false);
   });
 
+  /* --- acordeon del menu lateral (grupos desplegables) ------------------- */
+  /* Los grupos solo existen en el rol Estudiante (ver NAV en lib_ui). El
+     grupo con la pagina activa viene marcado "abierto" desde el servidor;
+     los demas recuerdan su estado entre paginas con localStorage. El click
+     en el boton nav-label togglea la clase y su aria-expanded. */
+  var CLAVE_NAV = "sgemd:v1:nav:acordeon";
+  function navLeer() {
+    try { return JSON.parse(localStorage.getItem(CLAVE_NAV)) || []; } catch (e) { return []; }
+  }
+  function navGuardar(grupos) {
+    try { localStorage.setItem(CLAVE_NAV, JSON.stringify(grupos)); } catch (e) {}
+  }
+  $$(".nav-group").forEach(function (g) {
+    var etiqueta = g.getAttribute("data-grupo");
+    if ($(".activo", g) || navLeer().indexOf(etiqueta) >= 0) {
+      g.classList.add("abierto");
+      var lbl = $(".nav-label", g);
+      if (lbl) lbl.setAttribute("aria-expanded", "true");
+    }
+  });
+
   /* --- pestanas --------------------------------------------------------- */
   $$(".tabs").forEach(function (barra) {
     var btns = $$("button", barra);
@@ -318,6 +339,21 @@ JS = r"""
   document.addEventListener("click", function (e) {
     var b = e.target.closest("button, a.btn");
     if (!b) return;
+    /* Acordeon del menu: el nav-label es boton propio, no pasa por el switch */
+    if (b.classList.contains("nav-label")) {
+      var gr = b.closest(".nav-group");
+      if (!gr) return;
+      var abrir = !gr.classList.contains("abierto");
+      gr.classList.toggle("abierto", abrir);
+      b.setAttribute("aria-expanded", abrir ? "true" : "false");
+      var lista = navLeer();
+      var etiqueta = gr.getAttribute("data-grupo");
+      var idx = lista.indexOf(etiqueta);
+      if (abrir && idx < 0) lista.push(etiqueta);
+      if (!abrir && idx >= 0) lista.splice(idx, 1);
+      navGuardar(lista);
+      return;
+    }
     var accion = accionDe(b);
     var registro = celdaDe(b);
 

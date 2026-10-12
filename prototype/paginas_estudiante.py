@@ -41,7 +41,15 @@ def registrar(reg):
         ("plan-trabajo.html", "12 Estudiante - Plan de trabajo", plan_trabajo),
         ("seguimiento.html", "13 Estudiante - Seguimiento (historial)", seguimiento),
         ("tareas.html", "14 Estudiante - Mis tareas", tareas),
-        ("tarea-detalle.html", "15 Estudiante - Detalle de tarea", tarea_detalle),
+        ("tarea-detalle.html", "15 Estudiante - Detalle de tarea (pendiente)", tarea_detalle),
+        ("tarea-detalle-en-revision.html", "15b Estudiante - Detalle tarea en revision",
+         tarea_detalle_en_revision),
+        ("tarea-detalle-completada-precio.html", "15c Estudiante - Detalle tarea completada (precio)",
+         tarea_detalle_completada_precio),
+        ("tarea-detalle-completada-usuarios.html", "15d Estudiante - Detalle tarea completada (usuarios)",
+         tarea_detalle_completada_usuarios),
+        ("tarea-detalle-completada-clientes.html", "15e Estudiante - Detalle tarea completada (clientes)",
+         tarea_detalle_completada_clientes),
         ("asesorias.html", "16 Estudiante - Mis asesorias", asesorias),
         ("solicitar-asesoria.html", "17 Estudiante - Solicitar asesoria", solicitar_asesoria),
         ("eventos.html", "18 Estudiante - Eventos", eventos),
@@ -657,24 +665,24 @@ def tareas():
                 ("Levantar el modelo de negocio",
                  "Enviada el 04 nov 2024 · esperando calificacion",
                  badge("Alta", "b-azul", "alerta"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle.html">'
+                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-en-revision.html">'
                  'Ver</a>'),
             ]),
             ("Completadas", [
                 ("Definir el precio de venta final",
                  "Completada el 08 nov 2024",
                  badge("Calificada 90", "b-linea"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle.html">'
+                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-completada-precio.html">'
                  'Ver</a>'),
                 ("Validar la solucion con 10 usuarios",
                  "Completada el 01 nov 2024",
                  badge("Calificada 85", "b-linea"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle.html">'
+                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-completada-usuarios.html">'
                  'Ver</a>'),
                 ("Definir clientes potenciales",
                  "Completada el 28 oct 2024",
                  badge("Calificada 92", "b-linea"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle.html">'
+                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-completada-clientes.html">'
                  'Ver</a>'),
             ]),
         ])
@@ -744,6 +752,137 @@ def tarea_detalle():
                  migas=["Inicio", "Tareas", "Detalle de tarea"],
                  sub="Detalle de la tarea asignada.",
                  acciones='<a class="btn btn-secundario" href="tareas.html">%s Volver</a>' % ico("izq", 16))
+
+
+def _archivos_cargados(archivos):
+    """Lista de evidencia ya cargada (solo lectura): sin opcion de adjuntar ni quitar."""
+    filas = ""
+    for nombre, tam, dia in archivos:
+        filas += (('<div class="def-row">' + ico("clip", 16)
+                   + '<dd style="color:#051533"><b>%s</b><br>'
+                     '<span style="font-size:12px;color:#5a6b8c">%s · %s</span></dd>'
+                   + '<dt style="flex:0 0 auto">%s</dt></div>')
+                  % (nombre, tam, dia, badge("Enviado", "b-neutra", "check")))
+    return '<div class="lista-def" style="padding:4px 0">%s</div>' % filas
+
+
+def tarea_detalle_en_revision():
+    """Tarea EN REVISION: evidencia ya enviada y sin opciones de carga."""
+    cuerpo = (
+        '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card("Levantar el modelo de negocio",
+               lista_def([
+                   ("Prioridad", badge("Alta", "b-azul", "alerta")),
+                   ("Fecha limite", "04 de noviembre de 2024"),
+                   ("Asignada por", "Carlos Mendoza"),
+                   ("Estado", badge("En revision", "b-azul", "reloj")),
+                   ("Emprendimiento", "Sabor y Sabe"),
+               ])
+               + '<div class="divisor"></div>'
+               + '<h3 style="margin-bottom:8px">Descripcion de la tarea</h3>'
+                 '<p style="font-size:13px;color:#162644">Elabora el lienzo del modelo de negocio '
+                 "de Sabor y Sabe. Adjunta el lienzo diligenciado y los apuntes de tu docente.</p>")
+        + card("Evidencia adjunta",
+               _archivos_cargados([
+                   ("lienzo-modelo-negocio.pdf", "1.4 MB", "04 nov 2024"),
+                   ("apuntes-revision.jpg", "2.1 MB", "04 nov 2024"),
+                   ("foto-tablero.jpg", "3.2 MB", "04 nov 2024"),
+               ]),
+               hint='<span>3 archivos enviados</span>')
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("En revision por el docente",
+               '<p style="font-size:13px;color:#162644">Tu evidencia fue enviada el '
+               "<b>04 de noviembre de 2024</b> y ya no puede modificarse. El docente la "
+               "revisara y te asignara una calificacion.</p>"
+               '<div class="nota-foot">La tarea quedara en Completadas cuando el docente la califique.</div>')
+        + card("Comentarios del docente",
+               '<div class="lista-def" style="padding:4px 0">'
+               '<div class="def-row" style="display:block"><dd style="color:#051533">'
+               "Tu evidencia esta en validacion. Recuerda que debe incluir la fecha de toma."
+               '</dd><dt style="flex:0 0 auto;margin-top:6px;font-size:13px">'
+               "Carlos Mendoza &middot; 04 nov 2024</dt></div></div>")
+        + "</div></div>"
+    )
+    return shell(R, "tareas", "Levantar el modelo de negocio", cuerpo,
+                 migas=["Inicio", "Tareas", "Detalle de tarea"],
+                 sub="Tarea enviada a revision. La evidencia ya esta cargada.",
+                 acciones='<a class="btn btn-secundario" href="tareas.html">%s Volver</a>' % ico("izq", 16))
+
+
+def _tarea_completada(titulo, nota, fecha_limite, fecha_done, descripcion, archivos, comentario):
+    """Detalle de una tarea COMPLETADA: calificacion, evidencia cargada y solo lectura."""
+    cuerpo = (
+        '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card(titulo,
+               lista_def([
+                   ("Prioridad", badge("Alta", "b-azul", "alerta")),
+                   ("Fecha limite", fecha_limite),
+                   ("Asignada por", "Carlos Mendoza"),
+                   ("Estado", badge("Completada · Calificada %d" % nota, "b-linea", "check")),
+                   ("Emprendimiento", "Sabor y Sabe"),
+               ])
+               + '<div class="divisor"></div>'
+               + '<h3 style="margin-bottom:8px">Descripcion de la tarea</h3>'
+                 '<p style="font-size:13px;color:#162644">%s</p>' % descripcion)
+        + card("Evidencia adjunta",
+               _archivos_cargados(archivos),
+               hint='<span>%d archivos enviados</span>' % len(archivos))
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Calificacion",
+               circular(nota, "Calificacion", "Completada el %s" % fecha_done)
+               + '<p style="font-size:13px;color:#162644;margin-top:8px">'
+                 "<b>Felicitaciones.</b> Esta tarea fue calificada y entregada y ya no puede "
+                 "modificarse.</p>")
+        + card("Comentarios del docente",
+               '<div class="lista-def" style="padding:4px 0">'
+               '<div class="def-row" style="display:block"><dd style="color:#051533">'
+               + comentario
+               + '</dd><dt style="flex:0 0 auto;margin-top:6px;font-size:13px">'
+                 "Carlos Mendoza &middot; %s</dt></div></div>" % fecha_done)
+        + "</div></div>"
+    )
+    return shell(R, "tareas", titulo, cuerpo,
+                 migas=["Inicio", "Tareas", "Detalle de tarea"],
+                 sub="Tarea completada y calificada por el docente.",
+                 acciones='<a class="btn btn-secundario" href="tareas.html">%s Volver</a>' % ico("izq", 16))
+
+
+def tarea_detalle_completada_precio():
+    return _tarea_completada(
+        "Definir el precio de venta final", 90,
+        "30 de octubre de 2024", "08 nov 2024",
+        "Define el precio de venta final de cada producto con base en el analisis de costos "
+        "y el margen acordado con tu docente.",
+        [("analisis-costos.pdf", "1.2 MB", "07 nov 2024"),
+         ("tabla-precios.xlsx", "840 KB", "07 nov 2024"),
+         ("foto-cartelera.jpg", "2.6 MB", "08 nov 2024")],
+        "Excelente analisis de costos. El precio final queda sustentado con el margen esperado.")
+
+
+def tarea_detalle_completada_usuarios():
+    return _tarea_completada(
+        "Validar la solucion con 10 usuarios", 85,
+        "27 de octubre de 2024", "01 nov 2024",
+        "Realiza la validacion de la solucion con al menos 10 usuarios y adjunta el registro "
+        "de sus respuestas y comentarios.",
+        [("registro-validaciones.pdf", "1.8 MB", "31 oct 2024"),
+         ("tabla-respuestas.xlsx", "620 KB", "01 nov 2024")],
+        "Validacion completa. Ajusta el horario de toma de datos para la siguiente ronda.")
+
+
+def tarea_detalle_completada_clientes():
+    return _tarea_completada(
+        "Definir clientes potenciales", 92,
+        "22 de octubre de 2024", "28 oct 2024",
+        "Segmenta los clientes potenciales del emprendimiento y adjunta el estudio de mercado "
+        "que respalda la segmentacion.",
+        [("estudio-mercado.pdf", "2.3 MB", "28 oct 2024"),
+         ("segmentacion-clientes.xlsx", "900 KB", "27 oct 2024")],
+        "Segmentacion clara y bien sustentada. Considera incluir una etapa de validacion.")
 
 
 # --- 12. Asesorias -----------------------------------------------------------

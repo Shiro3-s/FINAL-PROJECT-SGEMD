@@ -89,7 +89,22 @@ SHELL_CSS = """
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
 .nav{padding:16px 12px;overflow-y:auto;flex:1}
 .nav-group{margin-bottom:18px}
-.nav-label{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blanco);opacity:.6;padding:0 12px 8px}
+.nav-label{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  background:transparent;border:0;cursor:pointer;text-align:left;font-family:inherit;
+  font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--blanco);opacity:.6;padding:6px 12px 8px;transition:opacity .15s ease;
+}
+.nav-label:hover{opacity:1;text-decoration:none}
+.nav-label:focus-visible{outline:2px solid var(--azul-real);outline-offset:2px;border-radius:var(--r-sm)}
+.nav-label span{flex:1}
+.nav-label svg{flex:0 0 14px;transition:transform .2s ease}
+.nav-group.abierto .nav-label svg{transform:rotate(180deg)}
+/* Acordeon: los hijos se despliegan con max-height animado; el chevron usa el
+   icono "abajo" del kit y rota al abrir. Se respeta prefers-reduced-motion. */
+.nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.nav-group.abierto .nav-hijos{max-height:280px}
+@media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
 .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:14px;font-weight:500;margin-bottom:2px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
@@ -129,8 +144,8 @@ SHELL_CSS = """
 .page-head .acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 .crumbs{font-size:13px;color:var(--tinta-2);margin-bottom:10px}
 .crumbs a{color:var(--tinta-2)}
-@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}}
-@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.nav-label,.side-foot{display:block}.nav a{justify-content:flex-start}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
+@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}.nav-group{margin-bottom:8px}.nav-hijos{max-height:none;overflow:visible}}
+@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.side-foot{display:block}.nav a{justify-content:flex-start}.nav-label{display:flex}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
 /* Con el drawer abierto el logo del drawer tiene el protagonismo: se oculta el
    del topbar para que nunca haya dos logos visibles a la vez. */
 .shell:has(.sidebar.abierto) .topbar-mark{display:none}

@@ -73,14 +73,20 @@ def ico(nombre, tam=18, extra=""):
 NAV = {
     "estudiante": [
         ("Inicio", "home", "dashboard"),
-        ("Estado de seguimiento", "trend", "estado-seguimiento"),
-        ("Mi emprendimiento", "maleta", "emprendimientos"),
-        ("Diagnostico", "clipboard", "diagnostico"),
-        ("Plan de trabajo", "layers", "plan-trabajo"),
-        ("Seguimiento", "doc", "seguimiento"),
-        ("Tareas", "checklist", "tareas"),
-        ("Asesorias", "chat", "asesorias"),
-        ("Eventos", "calendar", "eventos"),
+        ("Mi emprendimiento", [
+            ("Mi emprendimiento", "maleta", "emprendimientos"),
+            ("Diagnostico", "clipboard", "diagnostico"),
+        ]),
+        ("Planificacion y seguimiento", [
+            ("Plan de trabajo", "layers", "plan-trabajo"),
+            ("Tareas", "checklist", "tareas"),
+            ("Seguimiento", "doc", "seguimiento"),
+            ("Estado de seguimiento", "trend", "estado-seguimiento"),
+        ]),
+        ("Acompanamiento y actividades", [
+            ("Asesorias", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+        ]),
     ],
     "docente": [
         ("Inicio", "pie", "dashboard"),
@@ -153,14 +159,42 @@ def boton_accion(icono, etiqueta, clase=""):
             % (c, accion, etiqueta, etiqueta, ico(icono, 16)))
 
 
+def _item_nav(txt, ic, clave, activo):
+    return '<a class="%s" href="%s.html">%s<span>%s</span></a>' % (
+        "activo" if clave == activo else "", clave, ico(ic), txt)
+
+
+def _nav_html(rol, activo):
+    """Renderiza el menú lateral. Cada entrada de NAV es un ítem plano
+    (txt, ic, clave) o un grupo (etiqueta, [(txt, ic, clave), ...]).
+
+    Los grupos son acordeones: la etiqueta es un boton que despliega sus
+    ítems. El grupo que contiene la página activa arranca abierto; el resto
+    arranca cerrado y recuerda su estado mientras se navega (ver lib_js)."""
+    out = []
+    for e in NAV[rol]:
+        if len(e) == 3:
+            out.append(_item_nav(e[0], e[1], e[2], activo))
+        else:
+            etiqueta, hijos = e
+            abierto = " abierto" if any(c == activo for _, _, c in hijos) else ""
+            gid = etiqueta.lower().replace(" ", "-")
+            chev = ico("abajo", 14)
+            hij = "".join(_item_nav(t, i, c, activo) for t, i, c in hijos)
+            out.append(
+                '<div class="nav-group%s" data-grupo="%s">'
+                '<button type="button" class="nav-label" aria-expanded="%s" '
+                'aria-controls="hij-%s" data-grupo="%s"><span>%s</span>%s</button>'
+                '<div class="nav-hijos" id="hij-%s">%s</div></div>'
+                % (abierto, etiqueta, "true" if abierto else "false", gid, etiqueta,
+                   etiqueta, chev, gid, hij))
+    return "".join(out)
+
+
 def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None, extra_head=""):
     """Envoltorio completo: sidebar + header + contenido."""
     etiqueta, nombre, iniciales = ROLES[rol]
-    items = "".join(
-        '<a class="%s" href="%s.html">%s<span>%s</span></a>'
-        % ("activo" if clave == activo else "", clave, ico(ic), txt)
-        for txt, ic, clave in NAV[rol]
-    )
+    items = _nav_html(rol, activo)
     m = ""
     if migas:
         # BT1: el breadcrumb no tiene enlaces muertos. "Inicio" navega al
