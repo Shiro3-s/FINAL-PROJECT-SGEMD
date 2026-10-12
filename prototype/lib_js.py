@@ -128,7 +128,7 @@ JS = r"""
     var o = $("#ov");
     if (o) o.classList.remove("visible");
   }
-  function abrirDrawer(titulo, items) {
+  function abrirDrawer(titulo, items, pie) {
     cerrarDrawer();
     var d = document.createElement("aside");
     d.className = "sg-drawer";
@@ -137,7 +137,8 @@ JS = r"""
       '<button class="icon-btn drawer-x" aria-label="Cerrar">' + icono(ICO.x, 18) + "</button></div>" +
       '<ul class="sg-drawer-lista">' + items.map(function (t) {
         return "<li>" + icono(ICO.info, 15) + "<span>" + esc(t) + "</span></li>";
-      }).join("") + "</ul>";
+      }).join("") + "</ul>" +
+      (pie || "");
     document.body.appendChild(d);
     var o = $("#ov");
     if (o) o.classList.add("visible");
@@ -543,7 +544,17 @@ JS = r"""
           "Tu docente registró un avance",
           "Se publicó un evento nuevo",
           "Recordatorio: evidencia de tarea pendiente"
-        ]);
+        ], '<div class="sg-drawer-pie">' +
+          '<button class="btn btn-acento" data-accion="ver-todas-notificaciones">' +
+          icono(ICO.doc, 16) + " Ver todas las notificaciones</button></div>");
+        break;
+
+      case "ver-todas-notificaciones":
+        /* La campana de la esquina superior derecha reemplaza al item del menu
+           lateral: "Ver todas" navega a la bandeja completa. */
+        e.preventDefault();
+        cerrarDrawer();
+        location.href = "notificaciones.html";
         break;
 
       case "cerrar-sesion":
@@ -932,9 +943,16 @@ guardar(estado);
           '<button data-accion="cerrar-sesion">Cerrar sesión</button>';
         w.parentNode.appendChild(m);
         $$("button", m).forEach(function (b) {
-          b.addEventListener("click", function () {
+          b.addEventListener("click", function (e) {
+            e.stopPropagation();
             abierto = false;
             m.remove();
+            if (b.dataset.accion === "perfil") {
+              /* El perfil se abre desde el mini menu de la esquina superior
+                 derecha; navega a la misma vista que tenia el menu lateral. */
+              location.href = "perfil.html";
+              return;
+            }
             if (b.dataset.accion === "cerrar-sesion") {
               cerrarSesion();
               return;

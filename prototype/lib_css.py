@@ -493,6 +493,8 @@ INTERACCION_CSS = (
     ".sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;"
     "border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}"
     ".sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}"
+    ".sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}"
+    ".sg-drawer-pie .btn{width:100%}"
     ".who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;"
     "background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);"
     "box-shadow:var(--shadow-3);padding:6px;display:none}"

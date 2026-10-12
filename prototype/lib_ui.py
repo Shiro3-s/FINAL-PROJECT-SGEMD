@@ -81,8 +81,6 @@ NAV = {
         ("Tareas", "checklist", "tareas"),
         ("Asesorias", "chat", "asesorias"),
         ("Eventos", "calendar", "eventos"),
-        ("Notificaciones", "bell", "notificaciones"),
-        ("Perfil", "user", "perfil"),
     ],
     "docente": [
         ("Inicio", "pie", "dashboard"),
