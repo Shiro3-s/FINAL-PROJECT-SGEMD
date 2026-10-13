@@ -551,6 +551,18 @@ CALENDARIO_CSS = (
     ".cal-celda.hoy{background:#ffd300;font-weight:700}"
     ".cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;"
     "border-radius:999px;background:#004a93}"
+    # Calendario navegable del Docente: cada dia es un boton. Se anaden
+    # selectores nuevos (.cal-btn, .cal-resumen) para no alterar el calendario
+    # estatico del Estudiante, cuyas celdas siguen siendo divs .cal-celda.
+    ".cal-envoltura{background:#ffffff}"
+    ".cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}"
+    ".cal-btn:hover{border-color:#004a93}"
+    ".cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}"
+    ".cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;"
+    "color:#ffffff;font-weight:700}"
+    ".cal-btn.activo .cal-punto{background:#ffd300}"
+    ".cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}"
+    ".cal-resumen b{font-size:16px;color:#051533}"
 )
 
 # --- Ampliaciones del rol Estudiante -----------------------------------------

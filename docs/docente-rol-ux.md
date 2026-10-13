@@ -4,10 +4,12 @@ Documentación de los cambios aplicados al **Rol Docente** del prototipo SGEMD:
 qué se refactorizó, qué componentes nuevos existen, cuál es el flujo actualizado y
 qué consideraciones técnicas hay que tener en cuenta antes de regenerar.
 
-- **Alcance:** las **17** pantallas de `prototype/docente/` (9 tras el primer refactor;
-  ver §10 para el tercer refactor que las lleva a 17). No se tocaron `admin/`,
-  `estudiante/`, `compartido/` ni las librerías `lib_*` (salvo `NAV`/`MIGAS` en
-  `lib_ui.py`, ver sección 8).
+- **Alcance:** las **23** pantallas de `prototype/docente/` (9 tras el primer refactor;
+  §10 las llevó a 17 y §11 a 23). No se tocaron `admin/`, `estudiante/` ni
+  `compartido/`; de las librerías se extendieron `lib_ui.py` (helper
+  `calendario_interactivo`, `NAV`/`MIGAS`), `lib_css.py` (CSS `.cal-*` del calendario),
+  `lib_charts.py` (`barras_h` con parámetros opcionales, salida por defecto idéntica) y
+  `lib_js.py` (el menú de usuario ofrece *Configuración* a Estudiante y Docente).
 - **Origen de los cambios:** portados al generador `prototype/paginas_docente.py`
   (ver sección *Consideraciones técnicas*), luego regenerados con `generar.py`.
 
@@ -17,7 +19,7 @@ qué consideraciones técnicas hay que tener en cuenta antes de regenerar.
 
 | # | Archivo | Pantalla |
 |---|---|---|
-| 21 | `dashboard.html` | Inicio |
+| 21 | `dashboard.html` | Inicio (métricas, avance por emprendimiento, calendario de compromisos) |
 | 22 | `asesorias.html` | Mis asesorías |
 | 23 | `asesoria-detalle.html` | Detalle de asesoría |
 | 24 | `asesoria-form.html` | Registrar asesoría |
@@ -31,9 +33,15 @@ qué consideraciones técnicas hay que tener en cuenta antes de regenerar.
 | 32 | `tarea-detalle.html` | Detalle de tarea |
 | 33 | `tarea-devolver.html` | Devolver tarea |
 | 34 | `tarea-form.html` | Asignar tarea |
-| 35 | `perfil.html` | Mi perfil |
-| 36 | `contrasena.html` | Cambiar contraseña |
-| 37 | `notificaciones.html` | Notificaciones |
+| 35 | `eventos.html` | Eventos |
+| 36 | `evento-detalle-startup.html` | Detalle del evento — Startup (+ recomendación) |
+| 37 | `evento-detalle-capacitacion.html` | Detalle del evento — Capacitación (virtual) |
+| 38 | `evento-detalle-asesoria-grupal.html` | Detalle del evento — Asesoría grupal |
+| 39 | `evento-detalle-showroom.html` | Detalle del evento — Showroom |
+| 40 | `perfil.html` | Mi perfil (dashboard de la cuenta) |
+| 41 | `configuracion.html` | Configuración |
+| 42 | `contrasena.html` | Cambiar contraseña |
+| 43 | `notificaciones.html` | Notificaciones |
 
 ---
 
@@ -371,3 +379,85 @@ detalle es un **enlace** real.
   estudiante muestra sus emprendimientos como pestañas, las pestañas de lista/expediente
   conmutan, los filtros actualizan el contador y `?f=Sin+evidencia` sigue vigente.
 - `admin/`, `estudiante/` y `compartido/` **byte-idénticos** (no se tocaron).
+
+---
+
+## 11. Cuarto refactor (2026) — Inicio, Eventos, Perfil y pestañas
+
+**Motivación.** Cerrar tres vacíos del rol: un **Inicio** más legible (gráfico pequeño
+y una tarjeta de *Compromisos de hoy* estática), un módulo **Eventos** sin detalle del
+evento ni forma de recomendarlo a estudiantes concretos, y un **Perfil** que era un
+formulario sin jerarquía. El alcance pasa de **17 a 23** pantallas (§1).
+
+### 11.1. Cambios por vista
+
+1. **Inicio (`dashboard.html`).**
+   - El gráfico **Avance por emprendimiento** deja de estar encajonado en media
+     columna: pasa a **ancho completo**, con barras **responsivas** que escalan al
+     ancho de la tarjeta y quedan centradas. El helper `barras_h` gana los parámetros
+     opcionales `ancho`, `pad_l`, `pad_r`, `alto_fila` y `responsive`; **sin
+     pasarlos, la salida es byte-idéntica** a la anterior, así que el resto de roles
+     no cambia.
+   - La tarjeta *Compromisos de hoy* se reemplaza por un **calendario interactivo**
+     (`calendario_interactivo` en `lib_ui.py`): abre en el **día de hoy**
+     (`hoy=12`), cada día es un `<button class="cal-btn">` y, al hacer clic, el panel
+     de la derecha cambia a las **asesorías, tareas y eventos de esa fecha**. Los días
+     sin compromisos muestran un **estado vacío**. El rol Estudiante conserva su
+     calendario estático: el nuevo usa solo las clases `.cal-btn` / `.cal-resumen`.
+2. **Eventos (`eventos.html`).** La tabla de eventos gana la acción **Ver evento**
+   (además de *Recomendar a estudiantes*), ambas apuntan al detalle. La tabla de
+   **recomendaciones enviadas** enlaza al evento correspondiente.
+3. **Detalle del evento (nuevas `evento-detalle-startup.html`,
+   `evento-detalle-capacitacion.html`, `evento-detalle-asesoria-grupal.html` y
+   `evento-detalle-showroom.html`).** Espejo del detalle del rol Estudiante —*en qué
+   consiste*, fecha y hora, modalidad, lugar, organizador y cupos, más el **acceso al
+   evento virtual** en el taller— con la **recomendación embebida**: un selector
+   **por emprendimiento** (marca a todo el grupo con un emprendimiento, o a todos /
+   ninguno), un **checklist individual** de estudiantes, un **mensaje opcional** y el
+   botón **Enviar recomendación** (`data-accion="guardar-recomendaciones"`). La
+   asesoría grupal añade los **pasos** y el showroom, la nota de montaje. Se
+   **elimina** `evento-recomendar.html` (una sola vista para los 4 eventos).
+4. **Perfil (`perfil.html`) y Configuración (`configuracion.html`).** *Mi perfil* pasa
+   a ser un **dashboard de la cuenta** (datos, emprendimientos asignados y estado) y
+   la edición se traslada a **Configuración** (datos, preferencias de notificación y
+   accesos de seguridad). El menú de usuario (*who*) muestra *Configuración* para los
+   roles Estudiante y Docente.
+5. **Corrección de pestañas.** El helper `_tabs` del rol delegaba en el compartido
+   `tabs_paneles` **sin invertir el orden** de sus argumentos, de modo que el
+   `data-panel` del botón quedaba con la **etiqueta** en lugar del **id-panel**: al
+   pulsar una pestaña el JS no encontraba su panel y los ocultaba todos. Ahora
+   `_tabs` invierte a `(etiqueta, id-panel)` y `data-panel` casa con
+   `data-panel-nombre`. Afectaba a *Emprendimientos asignados* (pestañas por
+   estudiante) y *Expediente del emprendimiento*.
+
+### 11.2. Datos y contrato
+
+- Nuevos datos en `paginas_docente.py`: `COMPROMISOS_DIA` (día → agenda del Inicio) y
+  `EVENTO_ARCHIVO` (evento → archivo de detalle).
+- El contrato `data-accion` no cambia: la recomendación reutiliza
+  `guardar-recomendaciones` (toast). Los enlaces de pestaña/celda del calendario no
+  emiten acciones; usan `<button>`/`<a>` reales.
+
+### 11.3. Verificación
+
+- `_auditar.py` → **0**; `_check_tipografia.py` → **0** (se ajustó un `font-size`
+  nuevo a la escala de 8 pasos); `_check_firmas.py` → **0**; `_check_pct.py` → **0**.
+- `_interaccion.py` (Chromium) → **0 problemas** en las **71** pantallas.
+- `_responsive.py` → **88** avisos, **idéntico** al estado previo (1 desborde ajeno en
+  `estudiante/configuracion.html` @1280 y 87 celdas ocultas a 375 px). El Inicio y los
+  4 detalles de evento no desbordan a 1440/1280/768/375.
+- `_estructura.py` → **1** aviso (estilos en línea, deuda preexistente); el conteo sube
+  por las celdas del calendario, sin avisos por archivo.
+- **Chromium (verificación funcional):** el gráfico pasa de ~686×178 a ~1070×293 px;
+  el calendario abre en el día 12, al hacer clic en el 21 muestra su agenda y en un día
+  vacío, el estado vacío; el selector por emprendimiento marca al grupo correcto
+  (*Sabor y Sabe* → Mariana + Diego; *Krea Textil* → Mariana + Jhon) y el envío muestra
+  el toast. Sin errores JS.
+- **jsdom:** las 23 vistas cargan con `js-listo` y 0 errores JS; se añadieron
+  comprobaciones del calendario (día de hoy por defecto, cambio de panel, estado
+  vacío) y del detalle de evento (por emprendimiento, *todos*, *ninguno*, envío).
+- **Otros roles.** `admin/`, `estudiante/` y `compartido/` conservan su **marcado y su
+  comportamiento**; el único cambio es el **CSS/JS compartido** que va incrustado en
+  cada HTML: las reglas `.cal-*` añadidas a `CALENDARIO_CSS` (que solo usa el nuevo
+  calendario docente) y el menú de usuario, que ahora ofrece *Configuración* también
+  al Docente. No hay cambios visibles para Estudiante, Administrador ni Acceso.

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rol DOCENTE - 17 pantallas.
+"""Rol DOCENTE - 23 pantallas.
 
 Reglas del rol:
   - Solo ve los emprendimientos que tiene asignados.
@@ -19,7 +19,8 @@ import re
 from lib_ui import (
     shell, metricas, tabla, toolbar, paginas, badge, campo, select, callout,
     card, estado_vacio, lista_def, steps, ico, boton_accion, lista_avisos,
-    tarjeta_emp, kanban, agenda, linea_tiempo,
+    tarjeta_emp, kanban, agenda, linea_tiempo, tabs_paneles, calendario,
+    calendario_interactivo,
 )
 from lib_charts import (
     barras, barras_h, donut, stacked_tareas, progreso_fases, circular, AZUL, AMAR,
@@ -148,8 +149,9 @@ DOCENTE_JS = """
       .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   }
 
-  /* Emprendimientos asignados: al elegir un estudiante se sustituye la lista
-     por las pestanas de sus emprendimientos (uno por emprendimiento). */
+  /* Emprendimientos asignados: el selector de estudiante queda justo encima de
+     la tabla; al elegir un estudiante se sustituye la tabla por las pestanas de
+     sus emprendimientos (uno por emprendimiento). */
   var selEst = $("#sel-estudiante");
   if (selEst) {
     var lista = $("#lista-emprendimientos");
@@ -167,13 +169,63 @@ DOCENTE_JS = """
           var t = $(".tabs button", sec);
           if (t) t.click();
         }
-      } else if (lista) {
-        var t0 = $(".tabs button", lista);
-        if (t0) t0.click();
       }
     };
     selEst.addEventListener("change", pintar);
     if (selEst.value) pintar();
+  }
+
+  /* Inicio: calendario de compromisos. Al hacer clic en un dia cambia el panel
+     visible; el dia de hoy queda seleccionado al cargar la pagina. */
+  var calDoc = $("[data-cal-doc]");
+  if (calDoc) {
+    var celdas = $$("[data-dia]", calDoc);
+    var paneles = $$("[data-dia-panel]", calDoc);
+    var rotulo = $("[data-dia-titulo]", calDoc);
+    var verDia = function (dia, etiqueta) {
+      celdas.forEach(function (c) {
+        var es = c.getAttribute("data-dia") === dia;
+        c.classList.toggle("activo", es);
+        c.setAttribute("aria-pressed", es ? "true" : "false");
+      });
+      var hay = false;
+      paneles.forEach(function (p) {
+        if (p.getAttribute("data-dia-panel") === dia) hay = true;
+      });
+      paneles.forEach(function (p) {
+        var k = p.getAttribute("data-dia-panel");
+        p.hidden = hay ? (k !== dia) : (k !== "sin");
+      });
+      if (rotulo) rotulo.textContent = etiqueta || ("Dia " + dia);
+    };
+    celdas.forEach(function (c) {
+      c.addEventListener("click", function () {
+        verDia(c.getAttribute("data-dia"), c.getAttribute("data-etiqueta"));
+      });
+    });
+    var hoyCal = $('[data-dia="' + calDoc.getAttribute("data-hoy") + '"]', calDoc);
+    if (hoyCal) {
+      verDia(calDoc.getAttribute("data-hoy"), hoyCal.getAttribute("data-etiqueta"));
+    }
+  }
+
+  /* Recomendar evento: el selector por emprendimiento marca (o quita) a todo el
+     grupo; la seleccion individual se puede ajustar despues. */
+  var rec = $("[data-recomendar]");
+  if (rec) {
+    var selGrupo = $("[data-recomendar-grupo]", rec);
+    var chks = $$("input[type=checkbox][data-est]", rec);
+    if (selGrupo) {
+      selGrupo.addEventListener("change", function () {
+        var g = selGrupo.value;
+        chks.forEach(function (c) {
+          var emps = (c.getAttribute("data-emp") || "").split("|");
+          if (g === "__todos__") c.checked = true;
+          else if (g === "__ninguno__") c.checked = false;
+          else c.checked = emps.indexOf(g) !== -1;
+        });
+      });
+    }
   }
 
   function aplicarFiltroDesdeURL() {
@@ -428,6 +480,58 @@ REVISION = {
 
 INFO_EMP = {a[0]: a for a in ASIGNADOS}
 
+# Eventos del programa para recomendar a los estudiantes. Son los mismos eventos
+# que ve el estudiante en su vista de Eventos (fuente de referencia).
+# Campos: (nombre, tipo, fecha, modalidad, organizador, cupos).
+EVENTOS = [
+    ("Startup Minuto de Dios", "Conferencia", "21 nov 2024, 08:00", "Presencial",
+     "Dirección Académica", "40 cupos"),
+    ("Capacitación en modelado de negocios", "Taller", "21 nov 2024, 14:00",
+     "Virtual", "Coordinación Académica", "120 cupos"),
+    ("Asesoría grupal de empleabilidad", "Asesoría", "26 nov 2024, 10:00",
+     "Presencial", "Bienestar Estudiantil", "25 cupos"),
+    ("Showroom de emprendimientos", "Muestra", "02 dic 2024, 09:00", "Presencial",
+     "Dirección Académica", "60 cupos"),
+]
+
+# Recomendaciones ya enviadas por el docente: (estudiante, evento, estado, fecha).
+RECOMENDACIONES = [
+    ("Mariana Lopez", "Startup Minuto de Dios", "Aceptada", "12 nov 2024"),
+    ("Diego Torres", "Capacitación en modelado de negocios", "Enviada", "11 nov 2024"),
+    ("Jhon Ospina", "Showroom de emprendimientos", "Aceptada", "10 nov 2024"),
+]
+
+# Compromisos del calendario del Inicio, por día de noviembre de 2024.
+# Formato: día -> [(hora, título, meta, badge_html)].
+COMPROMISOS_DIA = {
+    12: [
+        ("10:00", "Asesoría con Sabor y Sabe", "Mariana Lopez · Modalidad mixta",
+         badge("Confirmada", "b-azul")),
+        ("14:00", "Revisar evidencia de EcoPack", "Lucia Fernandez · 3 archivos",
+         badge("Por revisar", "b-amarillo")),
+        ("16:30", "Calificar tarea de Krea Textil", "Jhon Ospina · Evidencia",
+         badge("Pendiente", "b-linea")),
+    ],
+    20: [
+        ("09:00", "Asesoría con EcoPack", "Lucia Fernandez · Presencial",
+         badge("Por confirmar", "b-amarillo")),
+    ],
+    21: [
+        ("08:00", "Startup Minuto de Dios", "Auditorio principal, sede Norte",
+         badge("Evento", "b-azul", "calendar")),
+        ("14:00", "Capacitación en modelado de negocios", "Sala virtual institucional",
+         badge("Evento", "b-azul", "calendar")),
+    ],
+    22: [
+        ("15:30", "Asesoría con Krea Textil", "Jhon Ospina · Virtual",
+         badge("Confirmada", "b-azul")),
+    ],
+    26: [
+        ("10:00", "Asesoría grupal de empleabilidad", "Sala de reuniones 204",
+         badge("Evento", "b-azul", "calendar")),
+    ],
+}
+
 
 def estudiantes_de(emp):
     """Nombres del grupo anexado a un emprendimiento."""
@@ -526,11 +630,12 @@ def _filtro(aria, opciones, col):
 
 
 def _tabs(items):
-    btns = []
-    for i, (clave, txt) in enumerate(items):
-        btns.append('<button class="%s" data-panel="%s">%s</button>'
-                    % ("activo" if i == 0 else "", clave, txt))
-    return '<div class="tabs">%s</div>' % "".join(btns)
+    """Pestanas del rol: cada item es (id-panel, etiqueta).
+
+    Delega en el helper compartido (mismo patron que el rol Estudiante), que
+    espera (etiqueta, id-panel); aqui se invierte para conservar el orden que ya
+    usan las vistas del docente. El id-panel debe casar con data-panel-nombre."""
+    return tabs_paneles([(etiqueta, pid) for pid, etiqueta in items])
 
 
 def _panel(clave, contenido, activo=False):
@@ -593,9 +698,19 @@ def registrar(reg):
         ("tarea-detalle.html", "32 Docente - Detalle de tarea", tarea_detalle),
         ("tarea-devolver.html", "33 Docente - Devolver tarea", tarea_devolver),
         ("tarea-form.html", "34 Docente - Asignar tarea", tarea_form),
-        ("perfil.html", "35 Docente - Mi perfil", perfil),
-        ("contrasena.html", "36 Docente - Cambiar contraseña", contrasena),
-        ("notificaciones.html", "37 Docente - Notificaciones", notificaciones),
+        ("eventos.html", "35 Docente - Eventos", eventos),
+        ("evento-detalle-startup.html", "36 Docente - Detalle del evento (conferencia)",
+         evento_detalle_startup),
+        ("evento-detalle-capacitacion.html", "37 Docente - Detalle del evento (taller)",
+         evento_detalle_capacitacion),
+        ("evento-detalle-asesoria-grupal.html",
+         "38 Docente - Detalle del evento (asesoría)", evento_detalle_asesoria_grupal),
+        ("evento-detalle-showroom.html", "39 Docente - Detalle del evento (muestra)",
+         evento_detalle_showroom),
+        ("perfil.html", "40 Docente - Mi perfil", perfil),
+        ("configuracion.html", "41 Docente - Configuración", configuracion),
+        ("contrasena.html", "42 Docente - Cambiar contraseña", contrasena),
+        ("notificaciones.html", "43 Docente - Notificaciones", notificaciones),
     ]
     for i, (arch, tit, fn) in enumerate(paginas_doc):
         reg("docente", arch, tit, _envolver(fn), i)
@@ -610,11 +725,22 @@ def dashboard():
         ("trend", "Avances registrados", "23", "", 88, "+7"),
     ])
     cuerpo += _sep()
-    cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid">'
+    # La gráfica ocupa el ancho completo (barras responsivas) para que cada
+    # emprendimiento se lea grande y centrado, en lugar de quedar encajonada.
     cuerpo += card("Avance por emprendimiento", barras_h(
         "", "", [a[0] for a in ASIGNADOS], [a[3] for a in ASIGNADOS],
-        maximo=100, unidad="%"))
+        maximo=100, unidad="%", ancho=760, pad_l=200, pad_r=64, alto_fila=40,
+        responsive=True))
+    cuerpo += _sep()
+    compromisos = {}
+    for dia in sorted(COMPROMISOS_DIA):
+        compromisos[dia] = agenda([("Agenda del día", COMPROMISOS_DIA[dia])])
+    vacio = estado_vacio(
+        "Sin compromisos",
+        "No tienes asesorías, tareas ni eventos agendados para este día.",
+        icono="calendar")
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Actividad reciente", _tabla_con_titulo(
         "Actividad reciente del docente",
         ["Fecha", "Emprendimiento", "Accion registrada", "@ACC"],
@@ -626,6 +752,10 @@ def dashboard():
           _acc(_a("eye", "Ver asesoría", "asesoria-detalle.html"))],
          ["08 nov 2024", "Sabor y Sabe", "Asignaste la tarea de evidencia fotografica",
           _acc(_a("eye", "Ver tarea", "tarea-detalle.html"))]]))
+    cuerpo += card("Calendario y compromisos",
+                   calendario_interactivo("noviembre", 2024, compromisos, hoy=12,
+                                          vacio=vacio),
+                   hint="<span>Haz clic en un día</span>")
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
     cuerpo += card("Acciones rapidas", '<div class="acciones-rapidas">'
@@ -643,11 +773,6 @@ def dashboard():
                      badge("Por confirmar", "b-amarillo"))]),
         ("22 nov", [("15:30", "Krea Textil", "Jhon Ospina · Virtual",
                      badge("Confirmada", "b-azul"))]),
-    ]))
-    cuerpo += card("Compromisos de hoy", lista_def([
-        ("Asesorías por confirmar", "1 pendiente"),
-        ("Evidencias por revisar", "3 archivos"),
-        ("Avances sin calificar", "2 entregas"),
     ]))
     cuerpo += card("Carga semanal", stacked_tareas(
         [("Prioridad alta", 9, AZUL), ("Prioridad media", 14, "#162644"),
@@ -861,18 +986,6 @@ def emprendimientos():
     ])
     cuerpo += _sep()
 
-    opts = '<option value="">Todos los estudiantes</option>'
-    for est in TODOS_ESTUDIANTES:
-        if emprendimientos_de(est):
-            opts += '<option value="%s">%s</option>' % (est, est)
-    cuerpo += ('<div class="campo"><label for="sel-estudiante">Ver emprendimientos '
-               'por estudiante</label>'
-               '<select class="filtro" id="sel-estudiante" '
-               'aria-label="Ver emprendimientos por estudiante">%s</select>'
-               '<div class="ayuda">Al elegir un estudiante se muestran sus '
-               "emprendimientos como pestañas.</div></div>" % opts)
-    cuerpo += _sep()
-
     tarjetas = '<div class="emp-grid">'
     for emp, sector, etapa, avance, asesoria, act, _evid in ASIGNADOS:
         pie = ('<a class="btn btn-sm btn-secundario" href="emprendimiento-expediente.html">'
@@ -913,13 +1026,31 @@ def emprendimientos():
         ["Emprendimiento", "Estudiante", "Sector", "Etapa", "Avance",
          "Estado de revision", "Evidencia", "Ultima actividad", "@ACC"], filas))
 
-    cuerpo += ('<div id="lista-emprendimientos">'
+    opts = '<option value="">Todos los estudiantes</option>'
+    for est in TODOS_ESTUDIANTES:
+        if emprendimientos_de(est):
+            opts += '<option value="%s">%s</option>' % (est, est)
+    selector = ('<div class="campo"><label for="sel-estudiante">Ver emprendimientos '
+                'por estudiante</label>'
+                '<select class="filtro" id="sel-estudiante" '
+                'aria-label="Ver emprendimientos por estudiante">%s</select>'
+                '<div class="ayuda">Al elegir un estudiante se muestran sus '
+                "emprendimientos como pestañas.</div></div>" % opts)
+
+    # El selector queda justo encima de la tabla; al elegir un estudiante, el
+    # resultado intercambia la tabla por las pestañas de sus emprendimientos.
+    resultado = ('<div id="resultado-emprendimientos">'
+                 + '<div id="lista-emprendimientos">' + tabla_proy + "</div>"
+                 + '<div id="detalle-estudiante" hidden>'
+                 + _secciones_estudiantes() + "</div>"
+                 + "</div>")
+
+    # Pestañas Tarjetas / Tabla con el estilo del rol Estudiante.
+    cuerpo += ('<div id="vista-emprendimientos">'
                + _tabs([("tarjetas", "Tarjetas"), ("tabla", "Tabla")])
                + _panel("tarjetas", tarjetas, activo=True)
-               + _panel("tabla", tabla_proy)
+               + _panel("tabla", selector + resultado)
                + "</div>")
-    cuerpo += ('<div id="detalle-estudiante" hidden>'
-               + _secciones_estudiantes() + "</div>")
     return shell(R, "emprendimientos", "Emprendimientos asignados", cuerpo,
                  migas=["Inicio", "Emprendimientos asignados"],
                  sub="Tus emprendimientos asignados y los de cada estudiante.")
@@ -1415,51 +1546,382 @@ def tarea_form():
                  acciones=_lnk("tareas.html", "izq", "Volver", "btn btn-secundario"))
 
 
-# --- 35. Mi perfil -----------------------------------------------------------
+# --- 35. Eventos (recomendaciones a estudiantes) -----------------------------
+def _badge_modalidad(mod):
+    return badge(mod, "b-azul" if mod == "Virtual" else "b-neutra",
+                 "play" if mod == "Virtual" else "")
+
+
+# Vistas de detalle de cada evento para el docente (espejo del rol Estudiante).
+EVENTO_ARCHIVO = {
+    "Startup Minuto de Dios": "evento-detalle-startup.html",
+    "Capacitación en modelado de negocios": "evento-detalle-capacitacion.html",
+    "Asesoría grupal de empleabilidad": "evento-detalle-asesoria-grupal.html",
+    "Showroom de emprendimientos": "evento-detalle-showroom.html",
+}
+
+
+def _recomendar_form(evento):
+    """Selector para recomendar un evento por emprendimiento o por estudiante.
+
+    El desplegable marca o quita a todo el grupo de un emprendimiento (o a todos
+    los estudiantes); la lista de casillas permite ajustar uno por uno despues.
+    """
+    opts = ('<option value="__todos__">Todos mis estudiantes</option>'
+            '<option value="__ninguno__">Quitar selección</option>')
+    for emp in EMPRESAS:
+        opts += '<option value="%s">%s</option>' % (emp, emp)
+    cajas = ""
+    for est in TODOS_ESTUDIANTES:
+        emps = "|".join(emprendimientos_de(est))
+        cajas += ('<label class="chk"><input type="checkbox" data-est="%s" '
+                  'data-emp="%s"> %s</label>' % (est, emps, est))
+    return (
+        '<div data-recomendar>'
+        '<div class="campo"><label for="sel-grupo">Seleccionar por emprendimiento'
+        '</label><select class="filtro" id="sel-grupo" data-recomendar-grupo>%s</select>'
+        '</div>'
+        '<div class="nota-foot">Elige un emprendimiento para marcar todo su grupo; '
+        'después puedes ajustar la selección estudiante por estudiante.</div>'
+        '<div class="grid g-2" style="gap:0 18px">%s</div>'
+        '</div>' % (opts, cajas)
+    )
+
+
+def eventos():
+    """Eventos del programa: el docente recomienda a sus estudiantes participar.
+
+    Sigue el patron de la vista de Eventos del estudiante (tabla + calendario +
+    tarjeta lateral). Cada evento abre su detalle, con la informacion completa y
+    la recomendacion a estudiantes individuales o a todo un emprendimiento.
+    """
+    filas = []
+    for nombre, tipo, fecha, mod, org, _cupos in EVENTOS:
+        arch = EVENTO_ARCHIVO[nombre]
+        filas.append([
+            "<b>%s</b>" % nombre, tipo, fecha, _badge_modalidad(mod), org,
+            _acc(_a("eye", "Ver evento", arch),
+                 _a("enviar", "Recomendar a estudiantes", arch)),
+        ])
+    enviadas = []
+    for est, ev, estado, fecha in RECOMENDACIONES:
+        col = "b-linea" if estado == "Aceptada" else "b-amarillo"
+        enviadas.append([
+            "<b>%s</b>" % est, ev, badge(estado, col), fecha,
+            _acc(_a("eye", "Ver evento", EVENTO_ARCHIVO[ev])),
+        ])
+    cuerpo = metricas([
+        ("calendar", "Eventos disponibles", "%d" % len(EVENTOS), "", 60, None),
+        ("enviar", "Recomendaciones enviadas", "%d" % len(RECOMENDACIONES), "", 45,
+         "+2 este mes"),
+        ("check", "Recomendaciones aceptadas", "2", "", 40, None),
+    ])
+    cuerpo += _sep()
+    cuerpo += (
+        '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card("Próximos eventos", tabla(
+            ["Evento", "Tipo", "Fecha y hora", "Modalidad", "Organizador", "@ACC"],
+            filas, id="tabla-eventos"))
+        + card("Recomendaciones enviadas", tabla(
+            ["Estudiante", "Evento", "Estado", "Fecha", "@ACC"],
+            enviadas, id="tabla-recomendaciones"))
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Calendario de noviembre",
+               '<div style="border:1px solid #bbbbbb;border-radius:8px;overflow:hidden">'
+               + calendario("noviembre", 2024) + "</div>")
+        + card("Cómo recomendar un evento",
+               '<div style="font-size:13px;color:#162644">Abre <b>Ver evento</b> en '
+               "la tabla, revisa la información completa y elige a tus estudiantes: "
+               "por emprendimiento (todo el grupo) o uno por uno. Ellos reciben el "
+               "aviso en su bandeja y confirman su participación.</div>")
+        + "</div></div>"
+    )
+    return shell(R, "eventos", "Eventos", cuerpo,
+                 migas=["Inicio", "Eventos"],
+                 sub="Eventos del programa para recomendar a tus estudiantes.")
+
+
+# --- 36-39. Detalle del evento (docente) -------------------------------------
+def _evento_detalle_doc(evento, fecha, modalidad, organizador, lugar, cupos, consiste,
+                        extra_html="", virtual=False):
+    """Detalle del evento para el docente: información completa + recomendar.
+
+    Espeja el detalle que ve el Estudiante (misma información del evento), pero la
+    acción no es inscribirse: el docente recomienda el evento a estudiantes
+    individuales o a todo un emprendimiento.
+    """
+    datos = lista_def([
+        ("Fecha y hora", fecha),
+        ("Modalidad", _badge_modalidad(modalidad)),
+        ("Lugar", lugar),
+        ("Organiza", organizador),
+        ("Cupos disponibles", cupos),
+    ])
+    acceso = ""
+    if virtual:
+        acceso = card("Acceso al evento virtual",
+                      lista_def([
+                          ("Enlace", '<a href="https://meet.minutodedios.edu.co/'
+                                     'capacitacion-modelado">meet.minutodedios.edu.co/'
+                                     "capacitacion-modelado</a>"),
+                          ("ID de la reunión", "482 913 776"),
+                          ("Requisitos", "Conexión estable y audífonos."),
+                      ]),
+                      hint="<span>Los estudiantes lo reciben al confirmar</span>")
+    cuerpo = (
+        callout("En qué consiste: " + consiste, "libro")
+        + '<div style="height:20px"></div>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card(evento, datos + ('<div class="divisor"></div>' + extra_html
+                                if extra_html else ""))
+        + acceso
+        + card("Recomendar a estudiantes",
+               _recomendar_form(evento) + '<div class="divisor"></div>'
+               + _campo_libre("msg-recomendar", "Mensaje (opcional)",
+                              "Escribe un mensaje motivando la participación.")
+               + '<div style="display:flex;justify-content:flex-end;gap:10px;'
+                 'margin-top:14px">'
+               + '<a class="btn btn-secundario" href="eventos.html">Cancelar</a>'
+               + _bt("guardar-recomendaciones", "enviar", "Enviar recomendación")
+               + "</div>",
+               hint="<span>Individual o por emprendimiento</span>")
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Cómo funciona",
+               '<div style="font-size:13px;color:#162644">Elige el emprendimiento '
+               "para marcar a todo su grupo o selecciona estudiantes uno por uno, "
+               "escribe un mensaje y envía la recomendación. Cada estudiante la "
+               "recibe en su bandeja de notificaciones y confirma su "
+               "participación.</div>")
+        + card("Después de recomendar",
+               '<div style="font-size:13px;color:#162644">Sigue el estado en '
+               "<b>Eventos</b>: verás quién aceptó la recomendación y quién la "
+               "tiene pendiente.</div>")
+        + "</div></div>"
+    )
+    return shell(R, "eventos", evento, cuerpo,
+                 migas=["Inicio", "Eventos", evento],
+                 sub="Detalle del evento y recomendación a tus estudiantes.",
+                 acciones='<a class="btn btn-secundario" href="eventos.html">%s Volver</a>'
+                          % ico("izq", 16))
+
+
+def evento_detalle_startup():
+    return _evento_detalle_doc(
+        "Startup Minuto de Dios", "21 nov 2024, 08:00 - 12:00", "Presencial",
+        "Dirección Académica", "Auditorio principal, sede Norte", "40 cupos",
+        "una conferencia para presentar la ruta del programa Startup Minuto de Dios, "
+        "los criterios de evaluación y los testimonios de emprendimientos que ya "
+        "pasaron por el proceso. Al final hay un espacio de preguntas con la "
+        "dirección académica.")
+
+
+def evento_detalle_capacitacion():
+    return _evento_detalle_doc(
+        "Capacitación en modelado de negocios", "21 nov 2024, 14:00 - 16:30",
+        "Virtual", "Coordinación Académica", "Sala virtual institucional", "120 cupos",
+        "un taller virtual para construir el modelo de negocio (clientes, propuesta "
+        "de valor, canales e ingresos) con ejercicios guiados sobre el propio "
+        "emprendimiento del estudiante.",
+        virtual=True)
+
+
+def evento_detalle_asesoria_grupal():
+    return _evento_detalle_doc(
+        "Asesoría grupal de empleabilidad", "26 nov 2024, 10:00 - 11:30", "Presencial",
+        "Bienestar Estudiantil", "Sala de reuniones 204", "25 cupos",
+        "una asesoría en grupo sobre empleabilidad y emprendimiento: cómo presentar "
+        "el proyecto, armar la hoja de vida y preparar una entrevista.",
+        extra_html=steps(["Recomienda el evento a los estudiantes del grupo.",
+                          "Ellos llevan su proyecto y su hoja de vida.",
+                          "Participan y reciben la retroalimentación del grupo.",
+                          "Se registra el acta de participación."]))
+
+
+def evento_detalle_showroom():
+    return _evento_detalle_doc(
+        "Showroom de emprendimientos", "02 dic 2024, 09:00 - 15:00", "Presencial",
+        "Dirección Académica", "Plaza central, sede Norte", "60 cupos",
+        "una muestra abierta donde cada estudiante presenta su emprendimiento a "
+        "visitantes y jurados. Habrá un espacio asignado por emprendimiento y una "
+        "rúbrica de evaluación.",
+        extra_html='<div class="nota-foot">El montaje del stand está a cargo de cada '
+                   "emprendimiento; la institución entrega la mesa y la "
+                   "señalización.</div>")
+
+
+# --- 37. Mi perfil (dashboard de la cuenta) ----------------------------------
+def _tarjeta_emp_asignado(emp):
+    """Tarjeta de un emprendimiento asignado dentro del perfil del docente."""
+    a = INFO_EMP[emp]
+    sector, etapa, avance = a[1], a[2], a[3]
+    grupo = estudiantes_de(emp)
+    meta = ("1 estudiante" if len(grupo) == 1
+            else "%d estudiantes" % len(grupo)) + " · " + sector
+    return tarjeta_emp("maleta", emp, meta, avance, etapa, "%d%%" % avance)
+
+
 def perfil():
-    cuerpo = '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Datos personales", campo("Nombres", valor="Carlos Alejandro")
-                   + campo("Apellidos", valor="Mendoza Rios")
-                   + campo("Correo institucional", valor="carlos.mendoza@sgemd.edu.co",
-                           bloqueo="El correo institucional no se puede editar")
-                   + campo("Teléfono", valor="+57 300 555 0142")
-                   + campo("Título / especialidad",
-                           valor="Magíster en Innovación y Emprendimiento")
-                   + campo("Área de conocimiento", valor="Emprendimientos innovate"))
-    cuerpo += card("Ubicación", select(
-        "Región / Rectoría",
-        ["Rectoría Bogotá", "Rectoría Medellín", "Rectoría Cali"], valor="Rectoría Bogotá")
-        + select("Departamento",
-                 ["Cundinamarca", "Antioquia", "Valle del Cauca"],
-                 valor="Cundinamarca")
-        + campo("Ciudad", valor="Bogotá")
-        + select("Sede", ["Sede Norte", "Sede Centro", "Sede Sur"], valor="Sede Norte"))
-    cuerpo += "</div>"
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Seguridad", lista_def([
-        ("Contraseña", "Actualizada hace 3 meses"),
-        ("Verificación en dos pasos", "Activada"),
-        ("Último acceso", "Hoy, 07:42"),
-    ]))
-    cuerpo += card("Preferencias de notificacion",
-                   _chk("Avisos de nuevas asesorias", True)
-                   + _chk("Recordatorios de tareas por revisar", True)
-                   + _chk("Resumen semanal por correo", False))
-    cuerpo += card("Acciones",
-                   '<div class="acciones-col">'
-                   + '<button class="btn btn-primario">%s Guardar cambios</button>'
-                     % ico("check", 16)
-                   + _lnk("contrasena.html", "lock", "Cambiar contraseña",
-                          "btn btn-secundario")
-                   + "</div>")
-    cuerpo += "</div></div>"
+    """Perfil del docente: dashboard de la cuenta.
+
+    Cabecera con foto y datos, sus emprendimientos asignados y el estado de la
+    cuenta. La edición de los datos vive en Configuración (configuracion.html).
+    """
+    cuerpo = (
+        '<div class="card"><div class="card-body">'
+        '<div class="perfil-cab">'
+        '<div class="perfil-foto"><span>CM</span></div>'
+        '<div class="perfil-datos">'
+        '<h2 class="perfil-nombre">Carlos Alejandro Mendoza Rios</h2>'
+        '<div class="perfil-usuario">carlos.mendoza@sgemd.edu.co &middot; '
+        "Docente de emprendimiento</div>"
+        '<p class="perfil-bio">Acompañas a los emprendimientos del programa '
+        "Startup Minuto de Dios: revisas avances y diagnósticos, calificas tareas "
+        "y confirmas las asesorías de tus estudiantes.</p>"
+        '<div class="perfil-meta">'
+        '<span>%s DOCENTE</span>'
+        '<span>%s Rectoría Bogotá &middot; Sede Norte</span>'
+        '<span>%s %d emprendimientos asignados</span>'
+        '<span>%s %d estudiantes a cargo</span>'
+        "</div></div>"
+        '<div class="perfil-acciones">'
+        '<a class="btn btn-secundario" href="configuracion.html">%s Editar perfil</a>'
+        "</div></div></div></div>"
+        % (ico("user", 15), ico("home", 15), ico("maleta", 15), len(ASIGNADOS),
+           ico("users", 15), len(TODOS_ESTUDIANTES), ico("edit", 15))
+        + '<div style="height:20px"></div>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card("Mis emprendimientos asignados",
+               '<div class="grid g-2">'
+               + "".join(_tarjeta_emp_asignado(a[0]) for a in ASIGNADOS)
+               + "</div>")
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Estado de la cuenta", lista_def([
+            ("Estado", badge("Activo", "b-azul", "check")),
+            ("Emprendimientos asignados", "%d" % len(ASIGNADOS)),
+            ("Asesorías del mes", "14"),
+            ("Tareas por revisar", "9"),
+            ("Fecha de registro", "15 ago 2024"),
+        ]),
+            accion='<button class="btn btn-secundario btn-sm" data-accion="cerrar-sesion">%s '
+                   "Cerrar sesión</button>" % ico("salir", 15))
+        + card("Notificaciones", '<div style="font-size:13px;color:#162644">Tienes '
+               "3 avisos sin leer: una asesoría por confirmar, una evidencia por "
+               "calificar y un diagnóstico por revisar.</div>",
+               accion='<a class="btn btn-secundario btn-sm" href="notificaciones.html">%s '
+                      "Ver notificaciones</a>" % ico("bell", 15))
+        + "</div></div>"
+        + '<div style="height:20px"></div>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+        + '<a class="btn btn-acento" href="configuracion.html">%s '
+        "Editar perfil y configuración</a>" % ico("edit", 16)
+        + "</div>"
+    )
     return shell(R, "perfil", "Mi perfil", cuerpo,
                  migas=["Inicio", "Mi perfil"],
-                 sub="Actualiza tus datos de contacto y revisa tu actividad.")
+                 sub="Tu cuenta, tus emprendimientos asignados y tu actividad.")
 
 
-# --- 36. Cambiar contrasena --------------------------------------------------
+# --- 38. Configuracion (edicion del perfil) ----------------------------------
+def configuracion():
+    """Configuración del docente: datos, ubicación, cuenta y contraseña.
+
+    Es la pantalla de edición que se abre desde el perfil (dashboard). Los campos
+    institucionales los mantiene el ADMINISTRADOR.
+    """
+    cuerpo = (
+        callout("Aquí actualizas tus datos y la configuración de tu cuenta. Los "
+                "campos con el candado los mantiene el <b>ADMINISTRADOR</b> de la "
+                "institución.", "escudo")
+        + '<div style="height:20px"></div>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card("Datos personales",
+               '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Nombres", valor="Carlos Alejandro")
+               + campo("Apellidos", valor="Mendoza Rios")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + select("Tipo de documento", ["CC", "CE"], valor="CC", req=True)
+               + campo("Número de documento", valor="79 456 123",
+                       bloqueo="Solo ADMINISTRADOR puede modificarlo.")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Correo institucional", valor="carlos.mendoza@sgemd.edu.co",
+                       tipo="email", bloqueo="Solo ADMINISTRADOR puede modificarlo.")
+               + campo("Correo personal", valor="carlos.mendoza@correo.com",
+                       tipo="email")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Teléfono", valor="+57 300 555 0142", tipo="tel", req=True)
+               + campo("Título / especialidad",
+                       valor="Magíster en Innovación y Emprendimiento")
+               + "</div>"
+               + campo("Área de conocimiento", valor="Emprendimiento e innovación")
+               + '<div style="display:flex;justify-content:flex-end;gap:10px">'
+               + '<button class="btn btn-secundario" data-accion="cancelar-perfil">'
+                 "Cancelar</button>"
+               + '<button class="btn btn-primario" data-accion="guardar-perfil">%s '
+                 "Guardar cambios</button>" % ico("check", 16)
+               + "</div>")
+        + card("Ubicación",
+               '<div class="grid g-2" style="gap:0 16px">'
+               + select("Región / Rectoría",
+                        ["Rectoría Bogotá", "Rectoría Medellín", "Rectoría Cali"],
+                        valor="Rectoría Bogotá")
+               + select("Departamento",
+                        ["Cundinamarca", "Antioquia", "Valle del Cauca"],
+                        valor="Cundinamarca")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Ciudad", valor="Bogotá")
+               + select("Sede", ["Sede Norte", "Sede Centro", "Sede Sur"],
+                        valor="Sede Norte")
+               + "</div>")
+        + card("Configuraciones",
+               _chk("Avisos de nuevas asesorías", True)
+               + _chk("Recordatorios de tareas por revisar", True)
+               + _chk("Resumen semanal por correo", False)
+               + _chk("Recomendaciones de eventos a mis estudiantes", True))
+        + card("Accesos y seguridad", lista_def([
+            ("Último ingreso", "12 nov 2024, 07:42 · Bogotá"),
+            ("Estado de la cuenta", badge("Activo", "b-azul", "check")),
+            ("Rol", badge("DOCENTE", "b-azul", "user")),
+        ]))
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Foto del docente",
+               '<div style="display:flex;align-items:center;gap:16px">'
+               '<div class="perfil-foto" style="width:96px;height:96px;flex:0 0 96px">'
+               "<span>CM</span></div>"
+               '<div><div style="font-size:13px;color:#162644">Sube una imagen en '
+               "formato <b>PNG</b> o JPG, de máximo 2 MB.</div>"
+               '<div style="margin-top:10px">'
+               '<button class="btn btn-secundario btn-sm" data-accion="cambiar-foto">%s '
+               "Subir imagen</button></div></div></div>" % ico("upload", 15))
+        + card("Seguridad", lista_def([
+            ("Contraseña", "Actualizada hace 3 meses"),
+            ("Verificación en dos pasos", "Activada"),
+            ("Último acceso", "Hoy, 07:42"),
+        ]),
+            accion='<a class="btn btn-secundario btn-sm" href="contrasena.html">%s '
+                   "Cambiar contraseña</a>" % ico("lock", 15))
+        + "</div></div>"
+    )
+    return shell(R, "configuracion", "Configuración", cuerpo,
+                 migas=["Inicio", "Mi perfil", "Configuración"],
+                 sub="Edita tus datos personales, tu ubicación y la configuración "
+                     "de tu cuenta.",
+                 acciones='<a class="btn btn-secundario" href="perfil.html">%s '
+                          "Volver al perfil</a>" % ico("izq", 16))
+
+
+# --- 39. Cambiar contrasena --------------------------------------------------
 def contrasena():
     cuerpo = callout(
         "Por seguridad, la contraseña nueva debe tener al menos <b>8 caracteres</b>, "
@@ -1486,7 +1948,7 @@ def contrasena():
                  acciones=_lnk("perfil.html", "izq", "Volver", "btn btn-secundario"))
 
 
-# --- 37. Notificaciones ------------------------------------------------------
+# --- 40. Notificaciones ------------------------------------------------------
 def notificaciones():
     """Bandeja del docente: lista agrupada por urgencia, no tabla.
 
