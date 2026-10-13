@@ -261,50 +261,6 @@ Regeneración: `python generar.py`
 Las dos últimas son líneas base fuera de alcance. Los estilos en línea bajaron
 de 1031 a **897** con una pantalla más y 22 formularios.
 
----
-
-## 11. Prompt de trabajo (literal)
-
-> "en todo tenemos algunos c1,c2,c3,c4,c5 y c6, hagalo todo, tambien mire que se
-> puede mejora y si es necesario agrega vista o algo, lo agregar y tmabien en el
-> readme-admi, no suba nada a github y a stitch"
-
-> "haga todo lo que hay de c1,c2,c3,c4,c5 y c6, si ve que necesita mejora lo
-> hace, no suba nada a github y stitch todo se hace local, si es necesario agregar
-> mas vista lo hace, mire los formulario,etc"
-
-> "creo que tambien tenemos el C" (mensaje cortado)
-
-> "entonce que fase estamos y cuales falta"
-
-> "meta la mayoria en el readme-admi lo que se hizo,cambio y que se hizo
-> mientras, no suba nada a github,stitch a nada solo actualizce ese readme"
-
-> "me gustaria aumentale mas los formulario que tenga mas interatividad y mas
-> cosa, que podemos agregar en admin"
-
-> "tambien que tenga responsive y que que se adapte muy bien los cuadros, porque
-> hay algunos cuadros de click se sale o no aparece asi si no le quita un poco
-> de zoom como a 80% de menos de zoom aparece bien, asi que tocaria cuadra eso"
-
-> "agrege mas formularion que relaciones, tambien el administracion puede crea
-> docente y estudiante,recuerde que el estudiante un formulario, tambien falta
-> mas,el objetivo que la vista de administracion sirva bien, que sea navegable y
-> mas, no mostra que es un prototipo, si no que muestra mas cosa,que se llama,el
-> fomulario que tiene cuando loe dita,si lo quiere elimina si esta seguro,edita
-> bien los perfiles, si quiere descarga todo se descarga todo, tambien por
-> parte,por carrera o toda la carrera, que tenga buena practica y utilice las
-> skill que hay, tambien no olvide actualizar el readme y no se sube nada a
-> github y a stitch"
-
-**Compromiso permanente:** nada se sube a GitHub ni a Stitch. No se ejecuta
-`subir.py`, no hay `push`, no se crean ramas ni commits.
-
-**Skill usada:** `diseno-web-pro` (teoría del color, áreas táctiles, jerarquía de
-CTA, formularios) y `_aislamiento.py` para probar el aislamiento.
-
----
-
 ## 12. Bitácora de la Fase G
 
 | Bloque | Cambio | Resultado | Incidencia |
