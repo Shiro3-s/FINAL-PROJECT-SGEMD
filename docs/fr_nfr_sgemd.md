@@ -213,7 +213,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 
 * **Correctitud y Consistencia:** Se alinearon los requerimientos conflictivos de los calendarios. Aunque en el "MOMENT 1" se sugirió integración con Google Calendar[cite: 9], el "MOMENT 2" dictaminó explícitamente que todo vivirá dentro de la plataforma sin integraciones externas[cite: 9]. La matriz refleja la decisión final.
 * **Separación de Responsabilidades:** Se separaron estrictamente las reglas funcionales de negocio (como el diagnóstico) de los requisitos técnicos estructurales (JWT, Node.js, aislamientos por API)[cite: 7, 9].
-* **Recomendación:** Definir en la etapa de planeación de Sprints los campos exactos del formulario de caracterización (Modelo de Negocio, Marketing, etc.) mencionados cualitativamente por Doris[cite: 8].
+* **Recomendación:** Definir en la etapa de planeación de Sprints los campos exactos del formulario de caracterización (Modelo de Negocio, Marketing, etc.) mencionados cualitativamente por la coordinadora[cite: 8].
 
 ## 11. Resumen Ejecutivo de Requisitos
 

@@ -321,6 +321,34 @@ JS = r"""
     return slug(boton.textContent) || slug(boton.getAttribute("aria-label") || "");
   }
 
+  /* Persistencia de formularios del prototipo (PE1 perfil, EE1 editar
+     emprendimiento). Se serializa por la etiqueta del <label>, igual que el
+     diagnostico (DG4), y se ignoran los campos bloqueados por rol. */
+  function etiquetaCampo(box) {
+    var l = $("label", box);
+    return l ? l.textContent.replace(/\*/g, "").replace(/\s+/g, " ").trim() : "";
+  }
+  function serializarCampos(raiz) {
+    var datos = {};
+    $$(".campo", raiz).forEach(function (box) {
+      var c = $("input, select, textarea", box);
+      if (!c || c.disabled) return;
+      datos[etiquetaCampo(box) || c.id] = c.value;
+    });
+    return datos;
+  }
+  function restaurarCampos(raiz, datos) {
+    if (!datos || typeof datos !== "object") return;
+    var porEtiqueta = {};
+    Object.keys(datos).forEach(function (k) { porEtiqueta[k.toLowerCase()] = datos[k]; });
+    $$(".campo", raiz).forEach(function (box) {
+      var c = $("input, select, textarea", box);
+      if (!c || c.disabled) return;
+      var k = etiquetaCampo(box).toLowerCase();
+      if (porEtiqueta[k] != null) c.value = porEtiqueta[k];
+    });
+  }
+
   function abrirEditor(titulo, registro) {
     abrirModal(titulo,
       '<div class="campo"><label for="m-campo">Detalle del registro</label>' +
@@ -334,6 +362,149 @@ JS = r"""
           }
         }
       ]);
+  }
+
+  /* --- ficha de un registro (detalle real, no el modal generico) -------- */
+  /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
+     ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
+     celdas de las tablas ya traen data-label (ver lib_ui.tabla). */
+  function fichaDe(boton) {
+    var filas = [];
+    var texto = celdaDe(boton);
+    var titulo = "Detalle del registro";
+    var cont = boton.closest("tr") || boton.closest("article, li, .aviso, .card");
+    if (cont) {
+      var tds = $$("td", cont).filter(function (td) {
+        return !td.classList.contains("acc") && !td.classList.contains("sel");
+      });
+      if (tds.length) {
+        var tabla = boton.closest("table");
+        var ths = tabla ? $$("thead th", tabla) : [];
+        tds.forEach(function (td, i) {
+          var lbl = td.getAttribute("data-label");
+          if (!lbl && ths.length === tds.length) {
+            lbl = ths[i].textContent.replace(/\s+/g, " ").trim();
+          }
+          filas.push([lbl || ("Campo " + (i + 1)), td.innerHTML]);
+        });
+        var t0 = tds[0].textContent.replace(/\s+/g, " ").trim();
+        if (t0) titulo = t0;
+      } else {
+        var h = $(".ln-titulo", cont) || $(".kan-card-titulo", cont) ||
+                $(".aviso-titulo", cont) || $("h3, h4, strong, b", cont);
+        if (h) titulo = h.textContent.replace(/\s+/g, " ").trim();
+        var fecha = $(".ln-fecha", cont);
+        if (fecha) filas.push(["Fecha", fecha.textContent.replace(/\s+/g, " ").trim()]);
+        var meta = $(".ln-meta, .kan-meta, .aviso-meta", cont);
+        if (meta) filas.push(["Detalle", meta.textContent.replace(/\s+/g, " ").trim()]);
+        $$("dt", cont).forEach(function (dt) {
+          filas.push([
+            dt.textContent.replace(/\s+/g, " ").trim(),
+            dt.nextElementSibling ? dt.nextElementSibling.innerHTML : ""
+          ]);
+        });
+        var bd = $$(".badge", cont);
+        if (bd.length) {
+          filas.push(["Estado", bd.map(function (x) { return x.outerHTML; }).join(" ")]);
+        }
+      }
+    }
+    return { titulo: titulo, filas: filas, texto: texto };
+  }
+  function htmlFicha(f, nota) {
+    var h;
+    if (f.filas.length) {
+      h = '<dl class="lista-def">';
+      f.filas.forEach(function (kv) {
+        h += '<div class="def-row"><dt>' + esc(kv[0]) + '</dt><dd>' + kv[1] + '</dd></div>';
+      });
+      h += "</dl>";
+    } else {
+      h = '<p class="confirm-texto">' + esc(f.texto) + '</p>';
+    }
+    if (nota) h += '<p class="modal-aviso">' + esc(nota) + '</p>';
+    return h;
+  }
+
+  /* --- descargas reales (item 3) ---------------------------------------- */
+  function descargarArchivo(nombre, contenido, mime) {
+    try {
+      var blob = new Blob([contenido], { type: mime || "text/plain;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = nombre;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      return true;
+    } catch (err) { return false; }
+  }
+  function csvDeTabla() {
+    var t = $("main table.tabla") || $("table.tabla");
+    if (!t) return null;
+    var filas = [];
+    $$("tr", t).forEach(function (tr) {
+      var celdas = $$("th, td", tr).filter(function (c) {
+        return !c.classList.contains("acc") && !c.classList.contains("sel") && !$("input", c);
+      }).map(function (c) {
+        return '"' + c.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"';
+      });
+      if (celdas.length) filas.push(celdas.join(";"));
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  function tablaComoHTML() {
+    var t = $("main table.tabla") || $("table.tabla");
+    if (!t) return "";
+    var c = t.cloneNode(true);
+    $$("th.acc, td.acc, input, button, a.table-act", c).forEach(function (n) { n.remove(); });
+    return c.outerHTML;
+  }
+  /* Item 3: documento imprimible de la pantalla. Si hay tabla principal se
+     imprime la tabla; si no (tarjetas, kanban, linea de tiempo) se imprime una
+     copia legible del contenido, sin controles ni paneles ocultos. */
+  function vistaDocumento() {
+    var t = tablaComoHTML();
+    if (t) return t;
+    var main = $("main.content") || $("main");
+    if (!main) return "";
+    var c = main.cloneNode(true);
+    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [hidden]", c)
+      .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+    return c.innerHTML;
+  }
+  function tituloPagina() {
+    var h = $("main .page-head h1") || $("main h1");
+    return h ? h.textContent.replace(/\s+/g, " ").trim() : document.title;
+  }
+  var CSS_DOC =
+    "body{font-family:Inter,Arial,sans-serif;color:#051533;margin:36px;line-height:1.5}" +
+    "h1{font-size:20px;margin:0 0 6px}.doc-meta{color:#162644;font-size:13px;margin-bottom:18px}" +
+    "dl.lista-def{margin:0}dl.lista-def .def-row{display:flex;gap:12px;border-bottom:1px solid #bbbbbb;padding:7px 0}" +
+    "dt{width:190px;color:#162644;font-size:13px}dd{margin:0;flex:1;font-size:13px}" +
+    "table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}" +
+    "th,td{border:1px solid #bbbbbb;padding:6px 8px;text-align:left}th{background:#ffffff}" +
+    "footer{margin-top:24px;font-size:13px;color:#162644;border-top:1px solid #bbbbbb;padding-top:8px}" +
+    "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
+    ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
+    ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
+    ".kan-col,.ln-item,.aviso{margin-bottom:8px}";
+  function imprimirDocumento(titulo, cuerpoHTML) {
+    var w = window.open("", "_blank");
+    if (!w) { toast("Activa las ventanas emergentes para generar el PDF", "info"); return false; }
+    w.document.write(
+      "<!DOCTYPE html>" + "<" + 'html lang="es"><head><meta charset="utf-8"><title>' + esc(titulo) + "</title>" +
+      "<style>" + CSS_DOC + "</style></head><body><h1>" + esc(titulo) + "</h1>" +
+      '<div class="doc-meta">SGEMD &middot; Centro Progresa EPE &ndash; UNIMINUTO &middot; ' +
+      new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" }) + "</div>" +
+      (cuerpoHTML || "") +
+      "<footer>Documento generado desde el prototipo SGEMD.</footer></body>" + "</" + "html>");
+    w.document.close();
+    w.focus();
+    setTimeout(function () { try { w.print(); } catch (e) {} }, 350);
+    return true;
   }
 
   document.addEventListener("click", function (e) {
@@ -374,19 +545,39 @@ JS = r"""
       case "abrir-plan":
       case "ver-evidencia":
       case "ver-historial":
-      case "detalle":
+      case "detalle": {
+        /* Item 2: ficha con los datos reales del registro seleccionado. */
         e.preventDefault();
-        abrirModal("Detalle del registro",
-          '<p class="confirm-texto">' + esc(registro) + "</p>" +
-          '<p class="modal-aviso">Vista de prototipo. En producción aquí se cargaría el expediente completo.</p>');
+        var ficha = fichaDe(b);
+        abrirModal(ficha.titulo,
+          htmlFicha(ficha, "Vista del prototipo: los datos provienen del registro seleccionado; en producción se cargaría el expediente completo."),
+          [
+            { txt: "Cerrar", clase: "btn btn-secundario" },
+            {
+              txt: "Generar PDF", clase: "btn btn-primario", alClic: function () {
+                imprimirDocumento(ficha.titulo, htmlFicha(ficha, ""));
+              }
+            }
+          ]);
         break;
+      }
 
-      case "ver-acta":
+      case "ver-acta": {
         e.preventDefault();
-        abrirModal("Acta de la asesoría",
-          '<p class="confirm-texto">' + esc(registro) + "</p>" +
-          '<p class="modal-aviso">Vista de prototipo. En producción aquí se cargaría el acta firmada con acuerdos y compromisos.</p>');
+        var acta = fichaDe(b);
+        acta.titulo = "Acta de la asesoría";
+        abrirModal(acta.titulo,
+          htmlFicha(acta, "Acta de compromiso y confidencialidad del componente de Emprendimiento (Centro Progresa EPE — UNIMINUTO)."),
+          [
+            { txt: "Cerrar", clase: "btn btn-secundario" },
+            {
+              txt: "Descargar acta", clase: "btn btn-primario", alClic: function () {
+                imprimirDocumento(acta.titulo, htmlFicha(acta, ""));
+              }
+            }
+          ]);
         break;
+      }
 
       case "editar":
       case "editar-docente":
@@ -434,12 +625,29 @@ JS = r"""
 
       case "descargar":
       case "descargar-expediente":
-      case "descargar-pdf":
-      case "exportar":
-      case "exportar-reporte":
+      case "descargar-pdf": {
+        /* Item 3: descarga real. Se abre un documento imprimible para que el
+           usuario lo guarde como PDF (no hay backend en el prototipo). */
         e.preventDefault();
-        toast("Preparando " + (b.textContent.trim() || "la descarga") + "…", "info");
+        var rotulo = b.textContent.replace(/\s+/g, " ").trim() || "Documento";
+        imprimirDocumento(rotulo + " - " + tituloPagina(),
+          '<p class="doc-meta">' + esc(tituloPagina()) + "</p>" + vistaDocumento());
+        toast("Abriendo documento para guardar como PDF…", "info");
         break;
+      }
+
+      case "exportar":
+      case "exportar-reporte": {
+        var csv = csvDeTabla();
+        e.preventDefault();
+        if (csv) {
+          descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
+          toast("Reporte exportado (CSV)", "ok");
+        } else {
+          toast("Esta pantalla no tiene tabla para exportar", "info");
+        }
+        break;
+      }
 
       case "inscribirse":
         e.preventDefault();
@@ -470,7 +678,7 @@ JS = r"""
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
-        b.textContent = "Diagnóstico enviado ✓";
+        b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
         break;
 
@@ -515,8 +723,60 @@ JS = r"""
         }
         guardar({ solicitud: datosSol, enviada: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Solicitud enviada al docente", "ok");
-        b.textContent = "Solicitud enviada ✓";
+        b.innerHTML = "Solicitud enviada " + icono(ICO.check, 15);
         b.disabled = true;
+        break;
+
+      case "guardar-perfil":
+        /* PE1: persiste los datos personales del perfil (localStorage). */
+        e.preventDefault();
+        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        toast("Datos personales guardados", "ok");
+        break;
+
+      case "cancelar-perfil":
+        /* PE4: descarta la edición y repone lo último guardado. */
+        e.preventDefault();
+        var guardadoPerfil = store(true);
+        restaurarCampos(document, guardadoPerfil && guardadoPerfil.perfil);
+        toast("Cambios descartados", "info");
+        break;
+
+      case "actualizar-contrasena":
+        /* PE2: valida contraseña actual + nueva + confirmación. El prototipo
+           no guarda la contraseña (la spec: nunca se devuelve ni se muestra);
+           solo deja constancia de que se cambió. */
+        e.preventDefault();
+        var claves = $$('input[type="password"]', b.closest(".card") || document);
+        var vActual = claves[0] ? claves[0].value : "";
+        var vNueva = claves[1] ? claves[1].value : "";
+        var vRepetir = claves[2] ? claves[2].value : "";
+        if (!vActual || !vNueva || !vRepetir) {
+          toast("Completa la contraseña actual, la nueva y su confirmación", "error");
+          break;
+        }
+        if (vNueva.length < 8) {
+          toast("La nueva contraseña debe tener al menos 8 caracteres", "error");
+          break;
+        }
+        if (vNueva === vActual) {
+          toast("La nueva contraseña debe ser distinta de la actual", "error");
+          break;
+        }
+        if (vNueva !== vRepetir) {
+          toast("La nueva contraseña y su confirmación no coinciden", "error");
+          break;
+        }
+        guardar({ claveCambiada: new Date().toISOString().slice(0, 10) });
+        claves.forEach(function (c) { c.value = ""; });
+        toast("Contraseña actualizada correctamente", "ok");
+        break;
+
+      case "guardar-emprendimiento":
+        /* EE1: persiste los datos editables del emprendimiento. */
+        e.preventDefault();
+        guardar({ emprendimiento: serializarCampos(b.closest(".card") || document) });
+        toast("Cambios guardados en el emprendimiento", "ok");
         break;
 
       case "guardar":
@@ -569,7 +829,7 @@ JS = r"""
         }
         guardar({ completada: true, adjuntos: evArchivos });
         b.disabled = true;
-        b.textContent = "Completada ✓";
+        b.innerHTML = "Completada " + icono(ICO.check, 15);
         toast("Tarea enviada a revisión", "ok");
         break;
 
@@ -628,7 +888,7 @@ JS = r"""
     var tI = $("#tabla-inscritos");
     if (tP && tI && fila) {
       /* EV2: inscripcion real entre las dos tablas de la vista de eventos. */
-      var inscribir = fila.closest(tP) != null;
+      var inscribir = tP.contains(fila);
       moverEvento(fila, tP, tI, inscribir);
       toast(inscribir ? "Inscripción registrada. El evento aparece en tu panel." : "Inscripción cancelada",
             inscribir ? "ok" : "info");
@@ -703,7 +963,7 @@ JS = r"""
   function badgeJS(txt) {
     var s = document.createElement("span");
     s.className = "badge b-linea";
-    s.appendChild(icono(ICO.check, 12));
+    s.innerHTML = icono(ICO.check, 12);
     s.appendChild(document.createTextNode(" " + txt));
     return s;
   }
@@ -748,7 +1008,7 @@ JS = r"""
     var filas = evArchivos.map(function (f) {
       return '<div class="lista-def" style="padding:4px 0"><div class="def-row">' +
         icono(ICO.clip, 16) + "<dd style=\"color:#051533\"><b>" + esc(f.nombre) + "</b>" +
-        '<br><span style="font-size:12px;color:#5a6b8c">' + esc(f.tam) + " · " + esc(f.dia) + "</span></dd>" +
+        '<br><span style="font-size:13px;color:#162644">' + esc(f.tam) + " · " + esc(f.dia) + "</span></dd>" +
         '<dt style="flex:0 0 auto"><button class="icon-btn" data-accion="quitar-adjunto" ' +
         'data-nombre="' + esc(f.nombre) + '" aria-label="Quitar ' + esc(f.nombre) + '">' +
         icono(ICO.x, 14) + "</button></dt></div></div>";
@@ -935,14 +1195,50 @@ guardar(estado);
   }
 
   /* --- paginacion -------------------------------------------------------- */
+  /* EM5: el control ya trae `data-paginacion` (ver lib_ui.paginas). Aquí se
+     mueve de página, se actualiza "Mostrando X a Y de Z" y se recuerda la
+     página. En el prototipo los datos vienen recortados, pero el control deja
+     de ser un toast: navega, respeta los bordes y persiste el estado. */
   $$("[data-paginacion]").forEach(function (p) {
-    $$("button", p).forEach(function (b) {
-      b.addEventListener("click", function () {
-        $$("button", p).forEach(function (o) { o.classList.toggle("activo", o === b); });
-        guardar({ pagina: b.textContent.trim() });
-        toast("Página " + b.textContent.trim(), "info");
+    var total = parseInt(p.dataset.pagRegs, 10) || 0;
+    var tam = parseInt(p.dataset.pagTam, 10) || 1;
+    var nPag = parseInt(p.dataset.pagTotal, 10) || 1;
+    var actual = parseInt(p.dataset.pagActual, 10) || 1;
+    var previoPag = store(true);
+    if (previoPag && previoPag.pagina && previoPag.pagina.n) {
+      actual = Math.min(Math.max(1, previoPag.pagina.n), nPag);
+    }
+    function pintarPag() {
+      $$("button[data-pagina]", p).forEach(function (o) {
+        var v = o.dataset.pagina;
+        if (v === "prev") o.disabled = actual <= 1;
+        else if (v === "next") o.disabled = actual >= nPag;
+        else {
+          var num = parseInt(v, 10) || 1;
+          o.classList.toggle("btn-acento", num === actual);
+          o.classList.toggle("btn-secundario", num !== actual);
+          if (num === actual) o.setAttribute("aria-current", "page");
+          else o.removeAttribute("aria-current");
+        }
+      });
+      var desde = (actual - 1) * tam + 1;
+      var hasta = Math.min(actual * tam, total);
+      var t = $("[data-pag-texto]", p);
+      if (t) t.textContent = "Mostrando " + desde + " a " + hasta + " de " + total;
+      p.dataset.pagActual = actual;
+    }
+    $$("button[data-pagina]", p).forEach(function (b) {
+      b.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var v = b.dataset.pagina;
+        if (v === "prev") actual = Math.max(1, actual - 1);
+        else if (v === "next") actual = Math.min(nPag, actual + 1);
+        else actual = parseInt(v, 10) || 1;
+        pintarPag();
+        guardar({ pagina: { n: actual } });
       });
     });
+    pintarPag();
   });
 
   /* --- menu de usuario ---------------------------------------------------- */
@@ -1034,6 +1330,9 @@ guardar(estado);
     if (previo.seccionDiag != null) diagMostrar(previo.seccionDiag);
     else diagContar();
   }
+  /* PE1/EE1: restaurar los datos guardados del perfil y de la edición. */
+  if (previo && previo.perfil) restaurarCampos(document, previo.perfil);
+  if (previo && previo.emprendimiento) restaurarCampos(document, previo.emprendimiento);
   if (previo && Array.isArray(previo.adjuntos) && evLista) {
     evArchivos = previo.adjuntos;
     pintarAdjuntos();
@@ -1065,7 +1364,7 @@ guardar(estado);
   if (previo && previo.completada && $("[data-accion='marcar-completada']")) {
     var bComp = $("[data-accion='marcar-completada']");
     bComp.disabled = true;
-    bComp.textContent = "Completada ✓";
+    bComp.innerHTML = "Completada " + icono(ICO.check, 15);
   }
   document.documentElement.classList.add("js-listo");
 })();

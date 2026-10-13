@@ -1,0 +1,5 @@
+# Material local del área: contiene datos personales (Ley 1581 de 2012) → no versionar.
+docs/centroProgresa/
+docs/estudiante/
+docs/transcription_*.md
+docs/prompts/prompt_interview.md

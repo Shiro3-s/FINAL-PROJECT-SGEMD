@@ -21,7 +21,7 @@ BADGE = {
     "activo": "b-azul",
     "confirmado": "b-azul",
     "finalizada": "b-linea",
-    "en revision": "b-amarillo",
+    "en revisión": "b-amarillo",
     "pendiente": "b-amarillo",
     "vencido": "b-amarillo",
     "aprobado": "b-azul",
@@ -32,8 +32,8 @@ BADGE = {
     "oculto": "b-neutra",
 }
 
-ETAPAS = ["FASE 1 - Ideacion", "FASE 2 - Prototipo",
-          "FASE 3 - Validacion", "FASE 4 - Formalizacion"]
+ETAPAS = ["FASE 1 - Ideación", "FASE 2 - Prototipo",
+          "FASE 3 - Validación", "FASE 4 - Formalización"]
 
 DOCENTES = [
     ("DOC-014", "Carlos Mendoza", "carlos.mendoza@sgemd.edu.co", "Alimentos",
@@ -44,7 +44,7 @@ DOCENTES = [
      "4h", "6", "Activo"),
     ("DOC-011", "Ninafq Beltran", "nina.beltran@sgemd.edu.co", "Ambiental",
      "3h", "7", "Inactivo"),
-    ("DOC-010", "Rafael Nieto", "rafael.nieto@sgemd.edu.co", "Tecnologia",
+    ("DOC-010", "Rafael Nieto", "rafael.nieto@sgemd.edu.co", "Tecnología",
      "5h", "4", "Activo"),
 ]
 
@@ -52,11 +52,11 @@ ESTUDIANTES = [
     ("EST-087", "Mariana Lopez", "Alimentos", "Sabor y Sabe",
      "FASE 2 - Prototipo", 62, "Activo"),
     ("EST-086", "Jhon Ospina", "Moda", "Krea Textil",
-     "FASE 1 - Ideacion", 28, "Activo"),
+     "FASE 1 - Ideación", 28, "Activo"),
     ("EST-085", "Lucia Fernandez", "Ambiental", "EcoPack",
-     "FASE 3 - Validacion", 84, "Activo"),
+     "FASE 3 - Validación", 84, "Activo"),
     ("EST-084", "Sofia Ramirez", "Alimentos", "Aromas del Sur",
-     "FASE 1 - Ideacion", 15, "Activo"),
+     "FASE 1 - Ideación", 15, "Activo"),
     ("EST-083", "Andres Felipe", "Muebles", "Muebles Origen",
      "FASE 2 - Prototipo", 55, "Inactivo"),
 ]
@@ -65,11 +65,11 @@ EMPRENDIMIENTOS = [
     ("EMP-041", "Sabor y Sabe", "Mariana Lopez", "Alimentos", "Comercio",
      "FASE 2 - Prototipo", 62, "Carlos Mendoza"),
     ("EMP-040", "Krea Textil", "Jhon Ospina", "Moda", "Moda",
-     "FASE 1 - Ideacion", 28, "Paula Andrea Rios"),
+     "FASE 1 - Ideación", 28, "Paula Andrea Rios"),
     ("EMP-039", "EcoPack", "Lucia Fernandez", "Ambiental", "Industrial",
-     "FASE 3 - Validacion", 84, "Hector Vargas"),
+     "FASE 3 - Validación", 84, "Hector Vargas"),
     ("EMP-038", "Aromas del Sur", "Sofia Ramirez", "Alimentos", "Alimentos",
-     "FASE 1 - Ideacion", 15, "Sin asignar"),
+     "FASE 1 - Ideación", 15, "Sin asignar"),
     ("EMP-037", "Muebles Origen", "Andres Felipe", "Muebles", "Artesanal",
      "FASE 2 - Prototipo", 55, "Ninafq Beltran"),
 ]
@@ -96,7 +96,7 @@ def _sel(etiqueta, opciones, extra=""):
 def registrar(reg):
     paginas_adm = [
         ("dashboard.html", "33 Administrador - Inicio (dashboard)", dashboard),
-        ("usuarios.html", "34 Administrador - Gestion de perfiles", usuarios),
+        ("usuarios.html", "34 Administrador - Gestión de perfiles", usuarios),
         ("usuario-docente.html", "35 Administrador - Editar docente", usuario_docente),
         ("usuario-estudiante.html", "36 Administrador - Editar estudiante", usuario_estudiante),
         ("emprendimientos.html", "37 Administrador - Emprendimientos", emprendimientos),
@@ -107,8 +107,8 @@ def registrar(reg):
          seguimiento_dashboard),
         ("asignar-emprendimiento.html", "41 Administrador - Asignar emprendimiento",
          asignar_emprendimiento),
-        ("comentarios.html", "42 Administrador - Moderacion de comentarios", comentarios),
-        ("asesorias.html", "43 Administrador - Metricas de asesorias", asesorias),
+        ("comentarios.html", "42 Administrador - Moderación de comentarios", comentarios),
+        ("asesorias.html", "43 Administrador - Métricas de asesorías", asesorias),
         ("eventos.html", "44 Administrador - Eventos", eventos),
         ("evento-form.html", "45 Administrador - Crear evento", evento_form),
         ("asignaciones.html", "46 Administrador - Asignaciones", asignaciones),
@@ -140,7 +140,7 @@ def dashboard():
         "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"], [12, 19, 27, 41, 61],
         unidad=" avances"))
     cuerpo += card("Emprendimientos por sector", barras_h(
-        "", "", ["Alimentos", "Moda", "Ambiental", "Tecnologia", "Muebles"],
+        "", "", ["Alimentos", "Moda", "Ambiental", "Tecnología", "Muebles"],
         [14, 11, 9, 7, 5], color=AMAR))
     cuerpo += card("Actividad reciente", tabla(
         ["Fecha", "Accion del administrador", "@ACC"],
@@ -154,13 +154,13 @@ def dashboard():
           _acc(_b("eye", "Ver detalle"))]]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Pendientes de decision", lista_def([
+    cuerpo += card("Pendientes de decisión", lista_def([
         ("Emprendimientos sin docente", "3"),
         ("Eventos por aprobar", "2"),
         ("Comentarios reportados", "3"),
         ("Diagnosticos sin revisar", "5"),
     ]))
-    cuerpo += card("Distribucion de usuarios", donut(
+    cuerpo += card("Distribución de usuarios", donut(
         "", "", [("Docentes", 18, AZUL), ("Estudiantes", 110, AMAR)], "usuarios"))
     cuerpo += "</div></div>"
     return shell(R, "dashboard", "Inicio", cuerpo,
@@ -187,41 +187,41 @@ def usuarios():
         ("alerta", "Cuentas inactivas", "4", "", 12, None),
     ])
     cuerpo += '<div style="height:20px"></div>'
-    cuerpo += toolbar(filtros=_sel("Filtrar area", ["Todas las areas", "Alimentos",
-                                                     "Moda", "Ambiental", "Tecnologia"]))
+    cuerpo += toolbar(filtros=_sel("Filtrar área", ["Todas las áreas", "Alimentos",
+                                                     "Moda", "Ambiental", "Tecnología"]))
     cuerpo += card("Docentes", tabla(
-        ["Codigo", "Nombre", "Correo institucional", "Area", "Carga semanal",
+        ["Código", "Nombre", "Correo institucional", "Área", "Carga semanal",
          "Emprendimientos", "Estado", "@ACC"], filas_doc), sin_pad=True)
     cuerpo += card("Estudiantes", tabla(
-        ["Codigo", "Nombre", "Sector", "Emprendimiento", "Etapa", "Avance", "Estado", "@ACC"],
+        ["Código", "Nombre", "Sector", "Emprendimiento", "Etapa", "Avance", "Estado", "@ACC"],
         [[c, "<b>%s</b>" % n, sec, emp, badge(et, "b-linea"), _barra(av),
           badge(est, "b-azul" if est == "Activo" else "b-neutra"),
           _acc(_b("edit", "Editar estudiante"))] for c, n, sec, emp, et, av, est in ESTUDIANTES],
     ), sin_pad=True)
     cuerpo += paginas(1, 5, 18)
-    return shell(R, "usuarios", "Gestion de perfiles", cuerpo,
-                 migas=["Inicio", "Gestion de perfiles"],
-                 sub="Altas, edicion y estado de acceso de docentes y estudiantes.")
+    return shell(R, "usuarios", "Gestión de perfiles", cuerpo,
+                 migas=["Inicio", "Gestión de perfiles"],
+                 sub="Altas, edición y estado de acceso de docentes y estudiantes.")
 
 
 # --- 35. Editar docente ------------------------------------------------------
 def usuario_docente():
-    cuerpo = steps(["Datos", "Area y carga", "Permisos", "Confirmar"], 1)
+    cuerpo = steps(["Datos", "Área y carga", "Permisos", "Confirmar"], 1)
     cuerpo += '<div style="height:22px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Datos del docente",
-                   campo("Codigo", valor="DOC-014", bloqueo="Codigo asignado por el sistema")
+                   campo("Código", valor="DOC-014", bloqueo="Código asignado por el sistema")
                    + campo("Nombres", valor="Carlos Alejandro", req=True)
                    + campo("Apellidos", valor="Mendoza Rios", req=True)
                    + campo("Correo institucional", tipo="email",
                            valor="carlos.mendoza@sgemd.edu.co", req=True)
-                   + campo("Telefono", tipo="tel", valor="+57 300 555 0142"))
-    cuerpo += card("Area y carga", select("Area de conocimiento",
+                   + campo("Teléfono", tipo="tel", valor="+57 300 555 0142"))
+    cuerpo += card("Área y carga", select("Área de conocimiento",
                                           ["Alimentos", "Moda", "Ambiental",
-                                           "Tecnologia", "Muebles"],
+                                           "Tecnología", "Muebles"],
                                           req=True, valor="Alimentos")
-                   + campo("Horas de asesoria por semana", tipo="number", valor="3",
+                   + campo("Horas de asesoría por semana", tipo="number", valor="3",
                            ph="De 1 a 20")
                    + campo("Emprendimientos asignados", tipo="number", valor="8",
                            bloqueo="Se actualiza desde Asignaciones"))
@@ -229,9 +229,9 @@ def usuario_docente():
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Estado del acceso", lista_def([
         ("Estado", "Activo"),
-        ("Ultimo acceso", "Hoy, 07:42"),
-        ("Asesorias realizadas", "31"),
-        ("Promedio de calificacion", "89 de 100"),
+        ("Último acceso", "Hoy, 07:42"),
+        ("Asesorías realizadas", "31"),
+        ("Promedio de calificación", "89 de 100"),
     ]))
     cuerpo += card("Acciones",
                    '<div style="display:flex;flex-direction:column;gap:10px">'
@@ -244,7 +244,7 @@ def usuario_docente():
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "usuarios", "Editar docente", cuerpo,
-                 migas=["Inicio", "Gestion de perfiles", "Editar docente"],
+                 migas=["Inicio", "Gestión de perfiles", "Editar docente"],
                  sub="Actualiza los datos institutionales del docente.",
                  acciones=_btn("check", "Guardar"))
 
@@ -257,7 +257,7 @@ def usuario_estudiante():
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Datos del estudiante",
-                   campo("Codigo", valor="EST-087", bloqueo="Codigo asignado por el sistema")
+                   campo("Código", valor="EST-087", bloqueo="Código asignado por el sistema")
                    + campo("Nombres", valor="Mariana", bloqueo="Los edita el estudiante")
                    + campo("Apellidos", valor="Lopez", bloqueo="Los edita el estudiante")
                    + campo("Correo institucional", tipo="email",
@@ -274,8 +274,8 @@ def usuario_estudiante():
     cuerpo += card("Estado del acceso", lista_def([
         ("Estado", "Activo"),
         ("Fecha de registro", "12 mar 2024"),
-        ("Ultimo acceso", "Hoy, 08:02"),
-        ("Asesorias recibidas", "3"),
+        ("Último acceso", "Hoy, 08:02"),
+        ("Asesorías recibidas", "3"),
     ]))
     cuerpo += card("Acciones",
                    '<div style="display:flex;flex-direction:column;gap:10px">'
@@ -288,7 +288,7 @@ def usuario_estudiante():
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "usuarios", "Editar estudiante", cuerpo,
-                 migas=["Inicio", "Gestion de perfiles", "Editar estudiante"],
+                 migas=["Inicio", "Gestión de perfiles", "Editar estudiante"],
                  sub="Gestiona el acceso del estudiante a la plataforma.",
                  acciones=_btn("check", "Guardar"))
 
@@ -319,7 +319,7 @@ def emprendimientos():
             docente if docente != "Sin asignar" else badge("Sin asignar", "b-amarillo"),
             _acc(_b("eye", "Abrir plan"), _b("edit", "Editar")),
         ])
-    cuerpo += tabla(["Emprendimiento", "Codigo", "Estudiante", "Sector", "Tipo",
+    cuerpo += tabla(["Emprendimiento", "Código", "Estudiante", "Sector", "Tipo",
                      "Etapa", "Avance", "Docente asignado", "@ACC"], filas)
     cuerpo += paginas(1, 5, 46)
     return shell(R, "emprendimientos", "Emprendimientos", cuerpo,
@@ -335,8 +335,8 @@ def emprendimiento_plan():
     cuerpo = metricas([
         ("layers", "Fases completadas", "1", "/ 4", 25, "FASE 2 en curso"),
         ("checklist", "Tareas en curso", "4", "/ 11", 36, "2 sin responsable"),
-        ("reloj", "Dias sin avance", "6", "", 40, "Ultimo: 05 nov 2024"),
-        ("calendar", "Asesorias programadas", "3", "", 60, "1 por confirmar"),
+        ("reloj", "Días sin avance", "6", "", 40, "Último: 05 nov 2024"),
+        ("calendar", "Asesorías programadas", "3", "", 60, "1 por confirmar"),
     ])
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
@@ -356,7 +356,7 @@ def emprendimiento_plan():
          "Responsable: Mariana Lopez · 5 tareas abiertas",
          '<div style="margin-top:10px">' + badge("En curso", "b-amarillo", "reloj")
          + '</div>'),
-        ("20", "nov", "Revision tecnica con el docente",
+        ("20", "nov", "Revisión tecnica con el docente",
          "Responsable: Carlos Mendoza · Confirmado",
          '<div style="margin-top:10px">' + badge("Confirmado", "b-azul", "check")
          + '</div>'),
@@ -364,15 +364,15 @@ def emprendimiento_plan():
          "Responsable: equipo del emprendimiento · Sin asignar",
          '<div style="margin-top:10px">' + badge("Sin asignar", "b-amarillo")
          + '</div>'),
-        ("05", "dic", "Evaluacion y cierre de FASE 2",
-         "Comite academico · Pendiente",
+        ("05", "dic", "Evaluación y cierre de FASE 2",
+         "Comite académico · Pendiente",
          '<div style="margin-top:10px">' + badge("Pendiente", "b-neutra")
          + '</div>'),
     ]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Datos del emprendimiento", lista_def([
-        ("Codigo", "EMP-041"),
+        ("Código", "EMP-041"),
         ("Nombre", "Sabor y Sabe"),
         ("Tipo", "Comercio"),
         ("Sector", "Alimentos"),
@@ -401,16 +401,16 @@ def seguimiento():
                      "avances de los emprendimientos asignados.", "bombilla")
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += metricas([
-        ("trend", "Al dia", "31", "", 68, None),
+        ("trend", "Al día", "31", "", 68, None),
         ("alerta", "En riesgo", "9", "", 20, None),
-        ("alerta", "Sin avances en 15 dias", "6", "", 13, None),
+        ("alerta", "Sin avances en 15 días", "6", "", 13, None),
     ])
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Salud del seguimiento", '<div class="card-body">'
                    + distribucion([
-                       ("Al dia", "31", 68),
+                       ("Al día", "31", 68),
                        ("En riesgo", "9", 20),
                        ("Sin avances", "6", 13),
                    ])
@@ -425,7 +425,7 @@ def seguimiento():
                 "emprendimiento-plan.html",
                 "alta" if avance < 30 else "media",
                 _b("edit", "Registrar avance") + " " + _b("eye", "Ver detalle")))
-    cuerpo += card("Requieren atencion (%d)" % len(alertas),
+    cuerpo += card("Requieren atención (%d)" % len(alertas),
                    '<div class="card-body">'
                    + lista_avisos([("Sin avance reciente", alertas)])
                    + '</div>')
@@ -475,17 +475,17 @@ def seguimiento_dashboard():
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Salud de los seguimiento", donut(
-        "", "", [("Al dia", 31, AZUL), ("En riesgo", 9, AMAR),
+        "", "", [("Al día", 31, AZUL), ("En riesgo", 9, AMAR),
                  ("Inactivos", 6, "#bbbbbb")], "emprendimientos"))
     cuerpo += card("Acciones sugeridas", lista_def([
         ("Asignar docente a 3 emprendimientos", "Sin asignar"),
-        ("Contactar 6 estudiantes inactivos", "15 dias sin avance"),
-        ("Revisar 5 diagnosticos", "Sin revision"),
+        ("Contactar 6 estudiantes inactivos", "15 días sin avance"),
+        ("Revisar 5 diagnosticos", "Sin revisión"),
     ]))
     cuerpo += "</div></div>"
     return shell(R, "seguimiento", "Tablero de seguimiento", cuerpo,
                  migas=["Inicio", "Seguimiento", "Tablero"],
-                 sub="Metricas consolidadas de seguimiento institucional.",
+                 sub="Métricas consolidadas de seguimiento institucional.",
                  acciones=_btn("download", "Exportar", "reportes.html", "btn btn-secundario"))
 
 
@@ -497,24 +497,24 @@ def asignar_emprendimiento():
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Emprendimiento sin docente", tabla(
-        ["Codigo", "Emprendimiento", "Estudiante", "Sector", "Etapa", "@ACC"],
+        ["Código", "Emprendimiento", "Estudiante", "Sector", "Etapa", "@ACC"],
         [["EMP-038", "<b>Aromas del Sur</b>", "Sofia Ramirez", "Alimentos",
-          badge("FASE 1 - Ideacion", "b-linea"), _acc(_b("check", "Seleccionar"))],
+          badge("FASE 1 - Ideación", "b-linea"), _acc(_b("check", "Seleccionar"))],
          ["EMP-036", "<b>Sabores de la Costa</b>", "Daniel Rojas", "Alimentos",
-          badge("FASE 1 - Ideacion", "b-linea"), _acc(_b("check", "Seleccionar"))],
+          badge("FASE 1 - Ideación", "b-linea"), _acc(_b("check", "Seleccionar"))],
          ["EMP-034", "<b>Eco Hogar</b>", "Valeria Cruz", "Muebles",
           badge("FASE 2 - Prototipo", "b-linea"), _acc(_b("check", "Seleccionar"))]]))
     cuerpo += card("Docente disponible", tabla(
-        ["Docente", "Area", "Carga actual", "Horas disponibles", "@ACC"],
+        ["Docente", "Área", "Carga actual", "Horas disponibles", "@ACC"],
         [["Carlos Mendoza", "Alimentos", "3 h de 5 h", "2 h",
           _acc(_b("check", "Seleccionar"))],
          ["Paula Andrea Rios", "Moda", "2 h de 4 h", "2 h",
           _acc(_b("check", "Seleccionar"))],
-         ["Rafael Nieto", "Tecnologia", "5 h de 6 h", "1 h",
+         ["Rafael Nieto", "Tecnología", "5 h de 6 h", "1 h",
           _acc(_b("check", "Seleccionar"))]]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Asignacion seleccionada", lista_def([
+    cuerpo += card("Asignación seleccionada", lista_def([
         ("Emprendimiento", "Aromas del Sur"),
         ("Estudiante", "Sofia Ramirez"),
         ("Docente", "Carlos Mendoza"),
@@ -528,11 +528,11 @@ def asignar_emprendimiento():
                      % ico("x", 16)
                    + "</div>"
                      '<div class="nota-foot">El docente y el estudiante reciben una '
-                     "notificacion con la asignacion.</div>")
+                     "notificación con la asignación.</div>")
     cuerpo += "</div></div>"
     return shell(R, "asignaciones", "Asignar emprendimiento", cuerpo,
                  migas=["Inicio", "Asignaciones", "Asignar emprendimiento"],
-                 sub="Asigna un docente a los emprendimientos que aun no lo tienen.",
+                 sub="Asigna un docente a los emprendimientos que aún no lo tienen.",
                  acciones='<a class="btn btn-secundario" href="asignaciones.html">%s Volver</a>'
                           % ico("izq", 16))
 
@@ -540,7 +540,7 @@ def asignar_emprendimiento():
 # --- 42. Moderacion de comentarios -------------------------------------------
 def comentarios():
     """Dos colas lado a lado: lo reportado y lo visible. Sin tabla."""
-    cuerpo = callout("Solo los comentarios <b>reportados</b> requieren moderacion. "
+    cuerpo = callout("Solo los comentarios <b>reportados</b> requieren moderación. "
                      "Borrar un comentario es permanente.", "bombilla")
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += metricas([
@@ -551,8 +551,8 @@ def comentarios():
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Cola de moderacion (3)", lista_avisos([
-        ("Requieren decision", [
+    cuerpo += card("Cola de moderación (3)", lista_avisos([
+        ("Requieren decisión", [
             ("chat", "Comentario reportado en Sabor y Sabe",
              "Estudiante · EMP-041 · 12 nov 2024", "comentarios.html",
              "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
@@ -581,7 +581,7 @@ def comentarios():
                    + '</div></div>')
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Reglas de moderacion", lista_def([
+    cuerpo += card("Reglas de moderación", lista_def([
         ("Reportado", "3 en cola"),
         ("Visible", "27 publicados"),
         ("Oculto", "5 ocultos"),
@@ -595,43 +595,43 @@ def comentarios():
                      'Ver reportes</a>' % ico("doc", 16)
                    + "</div>")
     cuerpo += "</div></div>"
-    return shell(R, "comentarios", "Moderacion de comentarios", cuerpo,
-                 migas=["Inicio", "Moderacion de comentarios"],
+    return shell(R, "comentarios", "Moderación de comentarios", cuerpo,
+                 migas=["Inicio", "Moderación de comentarios"],
                  sub="Aprueba, oculta o borra comentarios de la comunidad.")
 
 
 # --- 43. Metricas de asesorias -----------------------------------------------
 def asesorias():
     cuerpo = metricas([
-        ("chat", "Asesorias este mes", "38", "", 84, "+9"),
+        ("chat", "Asesorías este mes", "38", "", 84, "+9"),
         ("reloj", "Promedio de respuesta", "4.2", " h", 42, "-0.6"),
-        ("checklist", "Asesorias finalizadas", "31", "", 82, None),
+        ("checklist", "Asesorías finalizadas", "31", "", 82, None),
         ("alerta", "Sin confirmar", "5", "", 22, None),
     ])
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Asesorias por mes", barras(
+    cuerpo += card("Asesorías por mes", barras(
         "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"], [18, 24, 29, 33, 38],
         unidad=" asesorías"))
-    cuerpo += card("Asesorias por sector", barras_h(
-        "", "", ["Alimentos", "Moda", "Ambiental", "Muebles", "Tecnologia"],
+    cuerpo += card("Asesorías por sector", barras_h(
+        "", "", ["Alimentos", "Moda", "Ambiental", "Muebles", "Tecnología"],
         [16, 10, 7, 3, 2], color=AMAR))
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Estado de las asesorias", donut(
+    cuerpo += card("Estado de las asesorías", donut(
         "", "", [("Finalizadas", 31, AZUL), ("Confirmadas", 7, AMAR),
                  ("Sin confirmar", 5, "#bbbbbb"), ("Canceladas", 3, "#bbbbbb")],
-        "asesorias"))
+        "asesorías"))
     cuerpo += card("Docentes con mejor respuesta", lista_def([
         ("Hector Vargas", "1.8 h promedio"),
         ("Paula Andrea Rios", "2.4 h promedio"),
         ("Carlos Mendoza", "3.1 h promedio"),
     ]))
     cuerpo += "</div></div>"
-    return shell(R, "asesorias", "Metricas de asesorias", cuerpo,
-                 migas=["Inicio", "Asesorias"],
-                 sub="Indicadores de uso y respuesta del servicio de asesorias.",
+    return shell(R, "asesorias", "Métricas de asesorías", cuerpo,
+                 migas=["Inicio", "Asesorías"],
+                 sub="Indicadores de uso y respuesta del servicio de asesorías.",
                  acciones=_btn("download", "Exportar", "reportes.html", "btn btn-secundario"))
 
 
@@ -695,30 +695,30 @@ def evento_form():
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Datos del evento",
-                   campo("Titulo del evento", valor="Taller de costos y precios", req=True)
+                   campo("Título del evento", valor="Taller de costos y precios", req=True)
                    + select("Dirigido a", ["Todos los estudiantes",
                                            "Solo Alimentos", "Solo Moda",
                                            "Solo Ambiental", "Solo Muebles"],
                             req=True, valor="Alimentos")
-                   + campo("Descripcion", alto=True,
+                   + campo("Descripción", alto=True,
                            valor="Taller practico para calcular el costo de insumos y "
                                  "definir el punto de equilibrio de un emprendimiento.",
                            ph="De que tratara el evento")
-                   + campo("Cupo maximo", tipo="number", valor="40",
-                           ph="Numero de asistentes"))
+                   + campo("Cupo máximo", tipo="number", valor="40",
+                           ph="Número de asistentes"))
     cuerpo += card("Fecha y lugar",
                    campo("Fecha", tipo="date", valor="2024-11-18", req=True)
                    + campo("Hora de inicio", tipo="time", valor="09:00", req=True)
                    + campo("Hora de cierre", tipo="time", valor="11:00", req=True)
                    + campo("Lugar", valor="Auditorio A")
-                   + campo("Link de inscripcion",
+                   + campo("Link de inscripción",
                            valor="sgemd.edu.co/eventos/taller-costos"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Visibilidad", lista_def([
         ("Visibilidad", "Visible para-Alimentos"),
         ("Confirmaciones", "32 de 40"),
-        ("Recordatorio", "Un dia antes"),
+        ("Recordatorio", "Un día antes"),
     ]))
     cuerpo += card("Acciones",
                    '<div style="display:flex;flex-direction:column;gap:10px">'
@@ -757,7 +757,7 @@ def asignaciones():
                        ("H. Vargas", "9 h", 75),
                        ("N. Beltran", "11 h", 92),
                    ])
-                   + '<p class="nota-foot">Cupo maximo de 12 h por docente. '
+                   + '<p class="nota-foot">Cupo máximo de 12 h por docente. '
                      'Ninafq Beltran tiene 1 h libre.</p></div>')
     cuerpo += card("Pendientes de asignar", tabla(
         ["Emprendimiento", "Estudiante", "Sector", "Horas sugeridas", "@ACC"],
@@ -789,17 +789,17 @@ def asignaciones():
 
 # --- 47. Diagnosticos --------------------------------------------------------
 def diagnosticos():
-    """Grafico de puntajes + cola de revision. No es una tabla de resultados."""
+    """Gráfico de puntajes + cola de revisión. No es una tabla de resultados."""
     cuerpo = metricas([
         ("clipboard", "Respondidos", "94", "", 88, "+8"),
-        ("reloj", "Sin revision", "5", "", 22, None),
+        ("reloj", "Sin revisión", "5", "", 22, None),
         ("medalla", "Promedio", "74", "", 74, "+2"),
     ])
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Puntaje por emprendimiento", '<div class="card-body">'
-                   + barras_h("", "Ultimo diagnostico registrado", [
+                   + barras_h("", "Último diagnóstico registrado", [
                        "EcoPack", "Sabor y Sabe", "Aromas del Sur",
                        "Krea Textil", "Muebles Origen"],
                        [91, 78, 64, 71, 70], maximo=100)
@@ -815,9 +815,9 @@ def diagnosticos():
                      'entre 70 y 89 puntos.</p></div>')
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Pendientes de revision", '<div class="card-body">'
+    cuerpo += card("Pendientes de revisión", '<div class="card-body">'
                    + lista_avisos([
-                       ("Sin revision del docente", [
+                       ("Sin revisión del docente", [
                            ("clipboard", "Aromas del Sur · Sofia Ramirez",
                             "Sin docente asignado · 02 nov 2024",
                             "diagnosticos.html", "alta",
@@ -842,40 +842,40 @@ def diagnosticos():
     cuerpo += "</div></div>"
     return shell(R, "diagnosticos", "Diagnosticos respondidos", cuerpo,
                  migas=["Inicio", "Diagnosticos"],
-                 sub="Resultados del diagnostico de los estudiantes.")
+                 sub="Resultados del diagnóstico de los estudiantes.")
 
 
 # --- 48. Exportar reportes ---------------------------------------------------
 def reportes():
     cuerpo = card("Tipo de reporte", tabla(
-        ["Reporte", "Descripcion", "Formato", "Ultima generacion", "@ACC"],
-        [[badge("Seguimiento", "b-linea"), "Avances y calificacion por emprendimiento",
+        ["Reporte", "Descripción", "Formato", "Última generación", "@ACC"],
+        [[badge("Seguimiento", "b-linea"), "Avances y calificación por emprendimiento",
           "CSV y PDF", "12 nov 2024", _acc(_b("download", "Descargar"), _b("eye", "Vista previa"))],
-         [badge("Asesorias", "b-linea"), "Uso y respuesta del servicio de asesorias",
+         [badge("Asesorías", "b-linea"), "Uso y respuesta del servicio de asesorías",
           "CSV y PDF", "11 nov 2024", _acc(_b("download", "Descargar"), _b("eye", "Vista previa"))],
          [badge("Emprendimientos", "b-linea"), "Inventario completo con sector y etapa",
           "CSV y PDF", "10 nov 2024", _acc(_b("download", "Descargar"), _b("eye", "Vista previa"))],
-         [badge("Diagnosticos", "b-linea"), "Puntajes del diagnostico por estudiante",
+         [badge("Diagnosticos", "b-linea"), "Puntajes del diagnóstico por estudiante",
           "CSV y PDF", "08 nov 2024", _acc(_b("download", "Descargar"), _b("eye", "Vista previa"))]]),
         sin_pad=True)
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += card("Filtros del reporte", select("Formato", ["CSV", "PDF", "XLSX"], req=True,
                                                  valor="CSV")
-                   + select("Periodo", ["Ultimos 30 dias", "Ultimos 3 meses",
+                   + select("Periodo", ["Últimos 30 días", "Últimos 3 meses",
                                         "Todo el periodo"], req=True,
-                            valor="Ultimos 3 meses")
+                            valor="Últimos 3 meses")
                    + select("Docente", ["Todos los docentes", "Carlos Mendoza",
                                         "Paula Andrea Rios", "Hector Vargas"], req=True,
                             valor="Todos los docentes")
                    + campo("Enviar por correo", tipo="email",
                            valor="ana.restrepo@sgemd.edu.co"))
-    cuerpo += card("Resumen de la exportacion",
+    cuerpo += card("Resumen de la exportación",
                    lista_def([
                        ("Emprendimientos incluidos", "46"),
                        ("Estudiantes incluidos", "110"),
-                       ("Estimacion de filas", "1.284"),
-                       ("Ultimo archivo generado", "12 nov 2024, 09:20"),
+                       ("Estimación de filas", "1.284"),
+                       ("Último archivo generado", "12 nov 2024, 09:20"),
                    ]))
     cuerpo += card("Acciones",
                    '<div style="display:flex;flex-direction:column;gap:10px">'
@@ -906,22 +906,22 @@ def perfil():
                    + campo("Correo institucional", tipo="email",
                            valor="ana.restrepo@sgemd.edu.co",
                            bloqueo="El correo institucional no se puede editar")
-                   + campo("Telefono", tipo="tel", valor="+57 301 555 0199"))
+                   + campo("Teléfono", tipo="tel", valor="+57 301 555 0199"))
     cuerpo += card("Zona horaria", campo("Zona horaria", valor="America/Bogota")
                    + campo("Cargo", valor="Administradora del programa",
-                           bloqueo="El cargo lo asigna la institucion"))
+                           bloqueo="El cargo lo asigna la institución"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid" style="gap:20px">'
     cuerpo += card("Seguridad", lista_def([
-        ("Contrasena", "Actualizada hace 2 meses"),
-        ("Verificacion en dos pasos", "Activada"),
-        ("Ultimo acceso", "Hoy, 07:15"),
+        ("Contraseña", "Actualizada hace 2 meses"),
+        ("Verificación en dos pasos", "Activada"),
+        ("Último acceso", "Hoy, 07:15"),
     ]))
     cuerpo += card("Acciones",
                    '<div style="display:flex;flex-direction:column;gap:10px">'
                    + '<button class="btn btn-primario">%s Guardar cambios</button>'
                      % ico("check", 16)
-                   + '<button class="btn btn-secundario">%s Cambiar contrasena</button>'
+                   + '<button class="btn btn-secundario">%s Cambiar contraseña</button>'
                      % ico("lock", 16)
                    + "</div>")
     cuerpo += "</div></div>"
@@ -932,10 +932,10 @@ def perfil():
 
 # --- 50. Notificaciones ------------------------------------------------------
 def notificaciones():
-    """Bandeja del administrador: registro de trabajo por dia, no tabla.
+    """Bandeja del administrador: registro de trabajo por día, no tabla.
 
-    Aqui el objetivo es trazabilidad (que se aprobo, cuando y quien), asi que
-    la pantalla es un historial agrupado por fecha y las metricas son de
+    Aquí el objetivo es trazabilidad (que se aprobo, cuando y quien), asi que
+    la pantalla es un historial agrupado por fecha y las métricas son de
     gobernanza, no de pendientes del rol.
     """
     dias = [
@@ -944,7 +944,7 @@ def notificaciones():
              "Asignaciones · Sin docente asignado",
              '<a class="btn btn-sm btn-primario" href="asignar-emprendimiento.html">'
              'Asignar</a>'),
-            ("09:40", "5 diagnosticos sin revision",
+            ("09:40", "5 diagnosticos sin revisión",
              "Diagnosticos · Enviados por estudiantes",
              '<a class="btn btn-sm btn-primario" href="diagnosticos.html">'
              'Revisar</a>'),
@@ -955,7 +955,7 @@ def notificaciones():
              '<a class="btn btn-sm btn-secundario" href="eventos.html">'
              'Aprobar</a>'),
             ("11:05", "Moderaste 3 comentarios reportados",
-             "Moderacion · Cola de reportes",
+             "Moderación · Cola de reportes",
              '<a class="btn btn-sm btn-secundario" href="comentarios.html">'
              'Ver cola</a>'),
         ]),
@@ -976,10 +976,10 @@ def notificaciones():
     ])
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += agenda(dias)
-    cuerpo += '<p class="nota-foot">El registro conserva 90 dias y se puede '\
+    cuerpo += '<p class="nota-foot">El registro conserva 90 días y se puede '\
               'exportar desde Reportes.</p>'
     return shell(R, "notificaciones", "Notificaciones", cuerpo,
                  migas=["Inicio", "Notificaciones"],
                  sub="Registro de aprobaciones y decisiones del equipo.",
                  acciones='<button class="btn btn-secundario">%s Marcar todo '
-                          'como leido</button>' % ico("check", 16))
+                          'como leído</button>' % ico("check", 16))

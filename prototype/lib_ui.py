@@ -75,38 +75,38 @@ NAV = {
         ("Inicio", "home", "dashboard"),
         ("Mi emprendimiento", [
             ("Mi emprendimiento", "maleta", "emprendimientos"),
-            ("Diagnostico", "clipboard", "diagnostico"),
+            ("Diagnóstico", "clipboard", "diagnostico"),
         ]),
-        ("Planificacion y seguimiento", [
+        ("Planificación y seguimiento", [
             ("Plan de trabajo", "layers", "plan-trabajo"),
             ("Tareas", "checklist", "tareas"),
             ("Seguimiento", "doc", "seguimiento"),
             ("Estado de seguimiento", "trend", "estado-seguimiento"),
         ]),
         ("Acompanamiento y actividades", [
-            ("Asesorias", "chat", "asesorias"),
+            ("Asesorías", "chat", "asesorias"),
             ("Eventos", "calendar", "eventos"),
         ]),
     ],
     "docente": [
         ("Inicio", "pie", "dashboard"),
-        ("Mis asesorias", "chat", "asesorias"),
+        ("Mis asesorías", "chat", "asesorias"),
         ("Emprendimientos asignados", "maleta", "emprendimientos"),
         ("Seguimiento", "trend", "seguimiento"),
-        ("Diagnostico", "clipboard", "diagnostico"),
+        ("Diagnóstico", "clipboard", "diagnostico"),
         ("Tareas", "checklist", "tareas"),
         ("Notificaciones", "bell", "notificaciones"),
         ("Perfil", "user", "perfil"),
     ],
     "administrador": [
         ("Inicio", "grid", "dashboard"),
-        ("Gestion de perfiles", "users", "usuarios"),
+        ("Gestión de perfiles", "users", "usuarios"),
         ("Emprendimientos", "maleta", "emprendimientos"),
         ("Seguimiento", "trend", "seguimiento"),
         ("Asignaciones", "sliders", "asignaciones"),
         ("Diagnosticos", "clipboard", "diagnosticos"),
         ("Eventos", "calendar", "eventos"),
-        ("Asesorias", "chat", "asesorias"),
+        ("Asesorías", "chat", "asesorias"),
         ("Reportes", "download", "reportes"),
         ("Notificaciones", "bell", "notificaciones"),
         ("Perfil", "user", "perfil"),
@@ -152,7 +152,7 @@ ICONO_ACCION = {
 
 
 def boton_accion(icono, etiqueta, clase=""):
-    """Boton de accion de tabla: icono + etiqueta accesible + data-accion."""
+    """Botón de accion de tabla: icono + etiqueta accesible + data-accion."""
     accion = ICONO_ACCION.get(icono, "accion")
     c = ' class="%s"' % clase if clase else ""
     return ('<button%s data-accion="%s" title="%s" aria-label="%s">%s</button>'
@@ -161,14 +161,22 @@ def boton_accion(icono, etiqueta, clase=""):
 
 def _item_nav(txt, ic, clave, activo):
     return '<a class="%s" href="%s.html">%s<span>%s</span></a>' % (
-        "activo" if clave == activo else "", clave, ico(ic), txt)
+        "activo" if clave == activo else "", clave, ico(ic, 16), txt)
+
+
+_ACENTOS_ID = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
+
+
+def _slug_id(texto):
+    """Identificador seguro (sin tildes ni espacios) a partir de un rótulo."""
+    return texto.lower().translate(_ACENTOS_ID).replace(" ", "-")
 
 
 def _nav_html(rol, activo):
     """Renderiza el menú lateral. Cada entrada de NAV es un ítem plano
     (txt, ic, clave) o un grupo (etiqueta, [(txt, ic, clave), ...]).
 
-    Los grupos son acordeones: la etiqueta es un boton que despliega sus
+    Los grupos son acordeones: la etiqueta es un botón que despliega sus
     ítems. El grupo que contiene la página activa arranca abierto; el resto
     arranca cerrado y recuerda su estado mientras se navega (ver lib_js)."""
     out = []
@@ -178,15 +186,15 @@ def _nav_html(rol, activo):
         else:
             etiqueta, hijos = e
             abierto = " abierto" if any(c == activo for _, _, c in hijos) else ""
-            gid = etiqueta.lower().replace(" ", "-")
-            chev = ico("abajo", 14)
+            gid = _slug_id(etiqueta)
+            chev = ico("abajo", 12)
             hij = "".join(_item_nav(t, i, c, activo) for t, i, c in hijos)
             out.append(
                 '<div class="nav-group%s" data-grupo="%s">'
                 '<button type="button" class="nav-label" aria-expanded="%s" '
                 'aria-controls="hij-%s" data-grupo="%s"><span>%s</span>%s</button>'
                 '<div class="nav-hijos" id="hij-%s">%s</div></div>'
-                % (abierto, etiqueta, "true" if abierto else "false", gid, etiqueta,
+                % (abierto, gid, "true" if abierto else "false", gid, gid,
                    etiqueta, chev, gid, hij))
     return "".join(out)
 
@@ -232,7 +240,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
     </div>
     <nav class="nav">%(items)s</nav>
     <div class="side-foot"><div class="side-card">
-      <b>Institucion Minuto de Dios</b>
+      <b>Institución Minuto de Dios</b>
       <span>Modulo %(rol)s</span>
     </div></div>
   </aside>
@@ -323,7 +331,7 @@ def _etiqueta(c):
 def tabla(cabeceras, filas, con_checkbox=False, id=""):
     """cabeceras: lista de 'Etiqueta' | ('num','Etiqueta') | '@ACC'.
     filas: listas de HTML con la misma longitud que cabeceras.
-    id: id opcional para la <table>, usado por EV2 (inscripcion a eventos)."""
+    id: id opcional para la <table>, usado por EV2 (inscripción a eventos)."""
     cab = ""
     if con_checkbox:
         cab += ('<th scope="col" style="width:44px">'
@@ -360,22 +368,50 @@ def toolbar(buscar=True, filtros="", acciones="", extra=""):
     return '<div class="toolbar">%s%s%s</div>' % (s, filtros, extra or acciones)
 
 
-def paginas(desde, hasta, total):
+def paginas(desde, hasta, total, pag=1, tam=None):
+    """Control de paginación con estado real.
+
+    EM5: antes "Anterior/Siguiente" no traían `data-paginacion` (el gancho que
+    el kit JS usa), así que solo mostraban un toast. Ahora el control publica
+    su página actual y su tamaño de página, y `lib_js` lo mueve, actualiza el
+    rango "Mostrando X a Y de Z" y recuerda la página en `localStorage`.
+    """
+    tam = tam or max(1, hasta - desde + 1)
+    n_pag = max(1, (total + tam - 1) // tam)
+    pag = min(max(1, pag), n_pag)
+    mostrados = "%d a %d" % ((pag - 1) * tam + 1, min(pag * tam, total))
+    botones = (
+        '<button class="btn btn-secundario btn-sm" data-pagina="prev"%s>%s Anterior</button>'
+        % (" disabled" if pag <= 1 else "", ico("izq", 14))
+    )
+    for n in range(1, n_pag + 1):
+        botones += (
+            '<button class="btn btn-sm %s" data-pagina="%d"%s>%d</button>'
+            % ("btn-acento" if n == pag else "btn-secundario", n,
+               ' aria-current="page"' if n == pag else "", n)
+        )
+    botones += (
+        '<button class="btn btn-secundario btn-sm" data-pagina="next"%s>Siguiente %s</button>'
+        % (" disabled" if pag >= n_pag else "", ico("der", 14))
+    )
     return (
-        '<div class="paginacion"><span>Mostrando %d a %d de %d</span>'
-        '<div class="pag"><button class="btn btn-secundario btn-sm">%s Anterior</button>'
-        '<button class="btn btn-secundario btn-sm">Siguiente %s</button></div></div>'
-        % (desde, hasta, total, ico("izq", 14), ico("der", 14))
+        '<div class="paginacion" data-paginacion data-pag-actual="%d" data-pag-total="%d" '
+        'data-pag-tam="%d" data-pag-regs="%d">'
+        '<span data-pag-texto>Mostrando %s de %d</span><div class="pag">%s</div></div>'
+        % (pag, n_pag, tam, total, mostrados, total, botones)
     )
 
 
 def badge(texto, tipo="neutra", icono=None):
+    # Los llamados pasan el tipo como "b-azul" pero el helper ya antepone "b-";
+    # sin normalizar salia "b-b-azul", que no existe en el CSS (badge sin color).
+    tipo = tipo[2:] if tipo.startswith("b-") else tipo
     return '<span class="badge b-%s">%s%s</span>' % (
         tipo, ico(icono, 12) if icono else "", texto)
 
 
 def _fid(prefijo="f"):
-    """Id unico por control, para que cada label este asociado al input correcto."""
+    """Id único por control, para que cada label este asociado al input correcto."""
     global _CONTADOR
     _CONTADOR += 1
     return "%s%d" % (prefijo, _CONTADOR)
@@ -466,6 +502,17 @@ def tabs(items, activo=0):
     return h + "</div>"
 
 
+def tabs_paneles(items, activo=0):
+    """Pestanas que alternan paneles: cada item es (etiqueta, id-panel) y debe
+    existir un contenedor con data-panel-nombre="id-panel". El JS del kit
+    sincroniza la clase activa, alterna los paneles y recuerda la seleccion."""
+    h = '<div class="tabs">'
+    for i, (etiqueta, pid) in enumerate(items):
+        h += '<button class="%s" data-panel="%s">%s</button>' % (
+            "activo" if i == activo else "", pid, etiqueta)
+    return h + "</div>"
+
+
 # --- Bloques de listado alternativos -----------------------------------------
 # Complementan a tabla() para que las pantallas de un mismo rol no repitan
 # siempre el mismo arquetipo visual: lista agrupada por urgencia, tablero,
@@ -478,7 +525,7 @@ def _aviso(estado):
 
 
 def aviso_grupo(titulo, items):
-    """items: (icono, titulo, meta, href, estado, acciones_html)."""
+    """items: (icono, título, meta, href, estado, acciones_html)."""
     h = ('<section class="aviso-grp"><div class="aviso-grp-head">'
          '<h3 class="aviso-grp-titulo">%s</h3>'
          '<span class="aviso-grp-n">%d</span></div>' % (titulo, len(items)))
@@ -492,13 +539,13 @@ def aviso_grupo(titulo, items):
 
 
 def lista_avisos(grupos):
-    """grupos: lista de (titulo, items) tal como los recibe aviso_grupo."""
+    """grupos: lista de (título, items) tal como los recibe aviso_grupo."""
     return '<div class="avisos">' + "".join(
         aviso_grupo(t, it) for t, it in grupos) + "</div>"
 
 
 def kanban(columnas):
-    """columnas: lista de (titulo, [(titulo, meta, badge_html, pie_html)])."""
+    """columnas: lista de (título, [(título, meta, badge_html, pie_html)])."""
     h = '<div class="kanban">'
     for titulo, tarjetas in columnas:
         h += ('<section class="kan-col"><div class="kan-head">'
@@ -515,7 +562,7 @@ def kanban(columnas):
 
 
 def linea_tiempo(items):
-    """items: lista de (dia, mes, titulo, meta, extra_html)."""
+    """items: lista de (día, mes, título, meta, extra_html)."""
     h = '<ol class="linea">'
     for dia, mes, titulo, meta, extra in items:
         h += ('<li class="ln-item"><div class="ln-fecha"><b>%s</b><span>%s</span></div>'
@@ -526,7 +573,7 @@ def linea_tiempo(items):
 
 
 def agenda(dias):
-    """dias: lista de (etiqueta, [(hora, titulo, meta, badge_html)])."""
+    """días: lista de (etiqueta, [(hora, título, meta, badge_html)])."""
     h = '<div class="agenda">'
     for etiqueta, eventos in dias:
         n = len(eventos)

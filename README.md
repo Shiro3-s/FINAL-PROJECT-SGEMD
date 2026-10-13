@@ -6,9 +6,11 @@
 >
 > El proyecto se construye **DESDE CERO**. No se debe asumir que hay que conservar errores, estructuras innecesarias ni tablas obsoletas del proyecto anterior.
 
+> **Actualización (2026-10-12):** se incorporó el **alcance ampliado** que salió del proceso real de atención (reunión con el área de Emprendimiento) y de las anotaciones del equipo: **validación y activación del emprendedor**, **correo de bienvenida**, **diagnóstico *data-driven* desde Excel**, **caracterización y valoración**, **acta de compromiso y confidencialidad**, **notificaciones** y **rol de auditor (propuesto)**. El detalle, las reglas nuevas y los puntos por cerrar están en la [§16](#16-fuentes-y-trazabilidad-del-alcance-ampliado). Las secciones [2](#2-roles), [3](#3-funcionalidades-del-mvp), [5](#5-modelo-de-datos), [6](#6-reglas-de-negocio), [7](#7-api), [8](#8-frontend), [11](#11-decisiones-importantes), [12](#12-mvp-mínimo) y [13](#13-criterios-de-aceptación) fueron actualizadas.
+
 ---
 
-> **Nota sobre esta rama:** si estás viendo esto en la rama `prototype/stitch`, aquí además del documento de especificación vive el **prototipo navegable de SGEMD**: 50 pantallas generadas en Stitch, un `index.html` índice para recorrerlas y el pipeline en Python que las genera, audita y publica.
+> **Nota sobre esta rama:** si estás viendo esto en la rama `prototype/stitch`, aquí además del documento de especificación vive el **prototipo navegable de SGEMD**: 54 pantallas HTML generadas desde Python (51 ya publicadas en Stitch), un `index.html` índice para recorrerlas y el pipeline en Python que las genera, audita y publica.
 >
 > Empieza por **[PROTOTIPO-STITCH.md](PROTOTIPO-STITCH.md)**: qué contiene la rama y cómo usarla.
 >
@@ -33,6 +35,7 @@
 13. [Criterios de aceptación](#13-criterios-de-aceptación)
 14. [Orden recomendado de construcción](#14-orden-recomendado-de-construcción)
 15. [Estado final esperado](#15-estado-final-esperado)
+16. [Fuentes y trazabilidad del alcance ampliado](#16-fuentes-y-trazabilidad-del-alcance-ampliado)
 
 ---
 
@@ -74,6 +77,9 @@ Existe **un único campo de rol** en el usuario, con valores:
 - `1 = Administrador`
 - `2 = Estudiante`
 - `3 = Docente/Mentor`
+- `4 = Auditor` — **propuesto por el equipo, pendiente de definir** (ver [§16](#16-fuentes-y-trazabilidad-del-alcance-ampliado)). Su alcance, permisos y qué información puede consultar **aún no están cerrados**.
+
+> **Nota:** mientras el alcance del rol de auditor no se defina, el sistema opera con **tres** roles funcionales (1–3). No implementar el rol 4 hasta cerrar su alcance ([§11](#11-decisiones-importantes)).
 
 ### Administrador (rol 1)
 
@@ -185,17 +191,54 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 - **Información que maneja:** nombre, descripción, tipo, modalidad, fecha/horario, capacidad, estado, participantes.
 - **Flujo:** el admin crea el evento; el usuario se registra; se muestra la lista.
 
+### Validación y activación del emprendedor
+
+- **Quién lo usa:** el emprendedor (estudiante) y el personal administrativo (rol de apoyo, p. ej. la asesora del área de Emprendimiento).
+- **Qué puede hacer:** el estudiante completa la información requerida; el administrativo **valida** al emprendedor y **activa** su acceso completo.
+- **Información que maneja:** estado de validación/activación del usuario, responsable, fechas y observaciones.
+- **Flujo:** inscripción → completar información → **notificación al administrativo** → programación de asesoría → reunión → **validación** → **activación** (habilitación de funcionalidades). El detalle está en la [§16](#16-fuentes-y-trazabilidad-del-alcance-ampliado).
+- **Nota:** hasta no ser validado, el usuario opera en modo **limitado** (p. ej. el módulo de Diagnóstico permanece bloqueado). El **alcance exacto del acceso previo** es una [decisión pendiente](#11-decisiones-importantes).
+- **Regla de suspensión:** 3 inasistencias a asesorías o 4 meses de incumplimiento → suspensión de 4 meses.
+
+### Correo de bienvenida
+
+- **Quién lo usa:** automático (lo dispara el backend) tras el registro.
+- **Qué puede hacer:** enviar un **correo de bienvenida** al estudiante después de registrarse, con las instrucciones del proceso.
+- **Flujo:** registro exitoso → el backend envía el correo vía SMTP (mismo canal que la verificación OTP).
+
+### Diagnóstico, Caracterización y Valoración
+
+- **Quién lo usa:** estudiante (diligencia), docente/admin y administrativo (consultan y descargan).
+- **Qué puede hacer:** diligenciar el formulario de **caracterización y valoración**; **generar automáticamente** la caracterización y la **valoración/diagnóstico** a partir de las respuestas; consultar un **resumen**, **filtrar** y **descargar** un informe.
+- **Información que maneja:** **banco de preguntas** (definido en un archivo **Excel**), respuestas, sector económico, resultados por sección, fortalezas y oportunidades de mejora.
+- **Flujo:** el estudiante responde → el sistema genera el diagnóstico y muestra **feedback inmediato** (fortalezas / lo que falta) → el administrativo/docente consulta el resumen y descarga el informe.
+- **Regla:** las preguntas **no se hardcodean**; se cargan desde el Excel (fuente única) y el diagnóstico se **deriva** de las respuestas ([§6](#6-reglas-de-negocio)).
+
+### Acta de compromiso y confidencialidad
+
+- **Quién lo usa:** estudiante (descarga, diligencia, firma y sube), administrativo/asesora (revisa y aprueba).
+- **Qué puede hacer:** descargar la plantilla, subir el acta firmada y quedar en estado **en revisión**.
+- **Información que maneja:** archivo del acta, estado (pendiente/en revisión/aprobada/rechazada), observaciones y fechas.
+- **Flujo:** el estudiante descarga, firma y sube → queda **en revisión** → el administrativo aprueba o rechaza. El acta **aprobada** es **precondición para asignar docente** ([§6](#6-reglas-de-negocio)).
+
+### Notificaciones
+
+- **Quién lo usa:** todos (destinatarios); el sistema las emite.
+- **Qué puede hacer:** notificar al **personal administrativo** cuando el emprendedor completa el registro/la información, completa el diagnóstico o solicita una asesoría; y notificar al **estudiante** cuando lo validan, cambia el estado del acta, le asignan docente o le crean tareas/asesorías.
+- **Información que maneja:** destinatario, tipo, mensaje, leída/no leída, fecha.
+- **Flujo:** un evento dispara la notificación; el usuario la consulta y la marca como leída. (Complementa las notificaciones en tiempo real de [Asesorías](#asesorías) y [Tareas](#tareas--plan-de-trabajo).)
+
 ---
 
 ## 4. Arquitectura propuesta
 
 La nueva implementación es **desde cero** y no debe conservar estructuras innecesarias ni errores del proyecto anterior.
 
-> **Diagrama de componentes:** se agregó el diagrama de componentes del proyecto en `docs/component-diagram.drawio`, que refleja la arquitectura propuesta (Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura).
+> **Diagrama de componentes:** se agregó el diagrama de componentes del proyecto en `docs/diagrama-componentes.drawio`, que refleja la arquitectura propuesta (Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura).
 >
-> **Diagrama de clases:** en `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Muestra la estructura interna del dominio: 18 clases con atributos, visibilidad, métodos y multiplicidades, derivadas del modelo de datos de la [sección 5](#5-modelo-de-datos). Incluye trazabilidad requisito → clase y la revisión crítica contra los FR/NFR.
+> **Diagrama de clases:** en `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Muestra la estructura interna del dominio: 20 clases con atributos, visibilidad, métodos y multiplicidades, y 31 relaciones, derivadas del modelo de datos de la [sección 5](#5-modelo-de-datos). Incluye trazabilidad requisito → clase y la revisión crítica contra los FR/NFR.
 >
-> **Diagrama entidad-relación:** en `docs/diagrama-entidades.md` (fuente Mermaid), `.png` y `.drawio` editable. Representa el modelo de datos objetivo: **29 tablas y 42 relaciones** (16 de negocio con comportamiento + 13 catálogos de lectura), derivadas de la [sección 5](#5-modelo-de-datos) y corregidas con `docs/diagrama-clases.md`.
+> **Modelo de datos:** el modelo objetivo es de **29 tablas y 42 relaciones** (16 de negocio con comportamiento + 13 catálogos de lectura), descritas en la [sección 5](#5-modelo-de-datos) y corregidas con `docs/diagrama-clases.md`.
 
 ### Frontend
 
@@ -274,7 +317,7 @@ SGEMD/
 
 > Diseño **conceptual** objetivo. No es una réplica del `schema.sql` anterior. No implementar la BD todavía; solo usar como guía. No incluir secretos ni datos sensibles en los scripts.
 >
-> **Diagrama entidad-relación:** la versión corregida del modelo está en `docs/diagrama-entidades.drawio` (con `.md` y `.png`), que aplica **snake_case** a todas las columnas, vincula `codigosverificacion` por `usuario_id`, modela los módulos como `habilitaciones` por persona y agrega `adjuntos` con sus tres tablas pivote.
+> **Convenciones del modelo:** la versión corregida aplica **snake_case** a todas las columnas, vincula `codigosverificacion` por `usuario_id`, modela los módulos como `habilitaciones` por persona y agrega `adjuntos` con sus tres tablas pivote.
 
 ### Catalogos (referenciados por claves foráneas)
 
@@ -338,12 +381,17 @@ SGEMD/
 - **Fks:** Usuarios_idUsuarios → usuarios (estudiante solicitante); Docentes_idDocentes (opcional) → usuarios; Modalidad_idModalidad → modalidad; Fecha_y_Horarios_idFecha_y_Horarios → fecha_y_Horarios.
 - **Relaciones/cardinalidades:** Estudiante **1 → N** asesorías; Docente **1 → N** asesorías; Modalidad **1 → N** asesorías.
 
-#### `diagnosticos`
+#### `diagnosticos` (encabezado), `preguntas_diagnostico` y `respuestas_diagnostico`
 
-- **Propósito:** resultado de un diagnóstico del emprendimiento (muchos campos de evaluación). Estructura en desarrollo. Matriz de indicadores técnicos a definir y priorizar.
-- **Campos importantes:** idDiagnosticos, FechaEmprendimiento y numerosos indicadores (escala/booleanos) y textos.
-- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; SectorEconomico_idSectorEconomico → sectoreconomico.
-- **Relaciones:** Emprendimiento **1 → 1** (o **1 → N**) diagnóstico.
+- **Propósito:** el diagnóstico deja de ser una única tabla "en desarrollo" con campos sueltos y pasa a ser **data-driven**:
+  - `diagnosticos`: **encabezado** del diagnóstico (emprendimiento, sector, fecha, estado, url del informe generado).
+  - `preguntas_diagnostico`: **banco de preguntas** cargado desde un archivo **Excel** (sección, orden, enunciado, tipo, opciones, activa).
+  - `respuestas_diagnostico`: **respuestas** del emprendedor, con FK a la pregunta y al encabezado.
+- **Campos importantes:** `diagnosticos` (idDiagnosticos, FechaDiagnostico, Estado, UrlInforme); `preguntas_diagnostico` (idPregunta, Seccion, Orden, Enunciado, Tipo, Opciones, Activa); `respuestas_diagnostico` (idRespuesta, Valor, FechaRespuesta).
+- **Fks:** `diagnosticos.Emprendimiento_idEmprendimiento` → emprendimiento; `diagnosticos.SectorEconomico_idSectorEconomico` → sectoreconomico; `respuestas_diagnostico.Preguntas_idPregunta` → preguntas_diagnostico; `respuestas_diagnostico.Diagnosticos_idDiagnosticos` → diagnosticos.
+- **Relaciones:** Emprendimiento **1 → N** diagnósticos (encabezados); Diagnóstico **1 → N** respuestas; Pregunta **1 → N** respuestas.
+
+> Esto resuelve el hallazgo del equipo: *"la definición actual del diagnóstico no está bien estructurada ni relacionada con los demás componentes"*. La matriz de indicadores se sustituye por **preguntas + respuestas** ([§6](#6-reglas-de-negocio), [§16](#16-fuentes-y-trazabilidad-del-alcance-ampliado)).
 
 #### `eventos` y `usuarios_has_Eventos`
 
@@ -356,6 +404,34 @@ SGEMD/
 - **Propósito:** almacenar los códigos de verificación de correo para validarlos de forma segura.
 - **Campos:** idCodigo, CorreoInstitucional, Codigo, Expiracion, Usado (0/1).
 - **Relaciones:** varios códigos pueden corresponder a un usuario (por correo). Es la base del flujo REAL de verificación.
+
+#### `caracterizacion` / `valoracion` (resultado del formulario)
+
+- **Propósito:** almacenar el **resultado estructurado por secciones** generado a partir de las respuestas del formulario (caracterización + valoración), con soporte para el **informe descargable**.
+- **Campos:** id, Seccion, Resultado, Puntaje, Fortalezas, Oportunidades, Fecha, UrlInforme.
+- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; Diagnosticos_idDiagnosticos (opcional) → diagnosticos.
+- **Relaciones:** Emprendimiento **1 → N** caracterizaciones/valoraciones; Diagnóstico **0..1 → N** resultados.
+
+#### `actas` (acta de compromiso y confidencialidad)
+
+- **Propósito:** almacenar el acta firmada y su **estado de revisión**. Complementa el campo `emprendimiento.ActaCompromiso`.
+- **Campos:** idActa, UrlArchivo, Estado (pendiente/en revisión/aprobada/rechazada), Observaciones, FechaCarga, FechaRevision.
+- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; Usuarios_idRevisor (opcional) → usuarios.
+- **Relaciones:** Emprendimiento **1 → N** actas (histórico); Usuario (revisor) **1 → N** actas revisadas.
+
+#### `notificaciones`
+
+- **Propósito:** avisos dirigidos a usuarios/admin (registro, diagnóstico, asesoría, validación, tareas).
+- **Campos:** idNotificaciones, Tipo, Mensaje, Leida (0/1), FechaCreacion.
+- **Fks:** Usuarios_idUsuarios → usuarios (**destinatario**).
+- **Relaciones:** Usuario **1 → N** notificaciones.
+
+#### `habilitaciones` (desbloqueo de módulos por persona)
+
+- **Propósito:** controlar **qué partes de la plataforma** están habilitadas para cada usuario; es la base del "desbloqueo" tras la validación. (Ya referenciado en la nota del [§5](#5-modelo-de-datos): los módulos se modelan como `habilitaciones` por persona.)
+- **Campos:** idHabilitacion, Estado (habilitado/no), Fecha.
+- **Fks:** Usuarios_idUsuarios → usuarios; Modulos_idModulos → modulos.
+- **Relaciones:** Usuario **1 → N** habilitaciones; Módulo **1 → N** habilitaciones.
 
 ### Tablas del proyecto anterior consideradas **obsoletas / no necesarias para el MVP**
 
@@ -420,6 +496,22 @@ SGEMD/
 
 - R24: todo endpoint de negocio valida autenticación y rol en backend.
 - R25: el alcance (propiedad) se valida en backend, no solo en la UI.
+
+**Validación y activación**
+
+- R26: la **validación del emprendedor** por el administrativo es **condición** para habilitar el acceso completo (ver [§16](#16-fuentes-y-trazabilidad-del-alcance-ampliado)).
+- R27: solo un usuario autorizado (admin/administrativo) puede validar, activar o rechazar a un emprendedor.
+- R28: el **acta de compromiso aprobada** es **precondición** para asignar docente.
+- R29: 3 inasistencias a asesorías o 4 meses de incumplimiento → suspensión de 4 meses.
+
+**Diagnóstico**
+
+- R30: las preguntas del diagnóstico provienen del **banco de preguntas** (Excel); **no se hardcodean**.
+- R31: el diagnóstico/caracterización/valoración se **deriva** de las respuestas; **no** se digita a mano.
+
+**Notificaciones**
+
+- R32: se notifica al **administrativo** ante registro/información, diagnóstico y solicitud de asesoría; y al **estudiante** ante validación, cambio de estado del acta y creación de tareas/asesorías.
 
 ---
 
@@ -516,6 +608,28 @@ SGEMD/
 | POST   | `/diagnosis`     | teacher/admin | Crear                    |
 | PUT    | `/diagnosis/:id` | teacher/admin | Editar                   |
 | DELETE | `/diagnosis/:id` | teacher/admin | Eliminar                 |
+| GET    | `/diagnosis/form`      | auth          | Banco de preguntas (secciones, desde Excel) |
+| POST   | `/diagnosis/me`        | student       | Enviar respuestas y generar diagnóstico     |
+| GET    | `/diagnosis/:id/report` | auth (alcance) | Informe descargable (PDF)                  |
+| GET    | `/characterization/me` | auth          | Caracterización/valoración del emprendedor  |
+
+### validación y activación
+
+| Método | Ruta                     | Rol                    | Propósito                            |
+| ------ | ------------------------ | ---------------------- | ------------------------------------ |
+| POST   | `/users/:id/validate`    | admin/administrativo   | Validar y **activar** al emprendedor |
+| POST   | `/users/:id/reject`      | admin/administrativo   | Rechazar la validación               |
+| POST   | `/acta`                  | auth (estudiante)      | Subir el acta firmada                |
+| GET    | `/acta/:id`              | auth (alcance)         | Consultar estado del acta            |
+| PUT    | `/acta/:id/review`       | admin/administrativo   | Aprobar/rechazar el acta             |
+
+### notificaciones
+
+| Método | Ruta                        | Rol  | Propósito                  |
+| ------ | --------------------------- | ---- | -------------------------- |
+| GET    | `/notifications`            | auth | Listar notificaciones propias |
+| PUT    | `/notifications/:id/read`   | auth | Marcar como leída          |
+| PUT    | `/notifications/read-all`   | auth | Marcar todas como leídas   |
 
 ### dashboard
 
@@ -552,6 +666,8 @@ SGEMD/
 | Gestión de docentes                      | Lista de docentes y sus asignaciones.                                                                                                                    |
 | Gestión de emprendimientos               | Lista de todos los emprendimientos, ver detalle, crear, editar etapa/datos.                                                                              |
 | Asignaciones                             | Crear/ver/eliminar/reasignar asignaciones (docente + estudiante + emprendimiento).                                                                       |
+| Validación de emprendedores              | Validar/activar o rechazar emprendedores; revisar y aprobar el **acta de compromiso**.                                                                    |
+| Gestión de diagnóstico                   | Banco de preguntas (Excel), resumen del diagnóstico, filtros e **informe descargable**.                                                                    |
 | Gradar/s see Aspirante (plan de trabajo) | Plan de trabajo por emprendimiento (opcional).                                                                                                           |
 | Perfil                                   | Datos propios del admin.                                                                                                                                 |
 
@@ -578,6 +694,9 @@ SGEMD/
 | Tareas / plan de trabajo | Ver sus tareas y marcarlas como completadas.                                                                      |
 | Progreso                 | Etapa actual y avance de tareas.                                                                                  |
 | Diagnóstico              | Ver su diagnóstico.                                                                                               |
+| Caracterización/valoración | Diligenciar el formulario (por secciones) y ver el **feedback inmediato** (fortalezas / lo que falta).           |
+| Acta de compromiso       | Descargar la plantilla, subir el acta firmada y consultar su **estado de revisión**.                              |
+| Notificaciones           | Ver sus avisos (validación, acta, tareas, asesorías) y marcarlos como leídos.                                     |
 | Perfil                   | Editar sus datos propios.                                                                                         |
 
 **Componentes compartidos:** Login, Register, PrivateRoute, sidebars por rol, menú de usuario, cliente `api.js`, componentes de UI (tarjetas, tablas, formularios, gráficos).
@@ -654,6 +773,11 @@ SGEMD/
 - Inclusión del módulo de **eventos** y de **diagnóstico** en el MVP (Confirmado).
 - Recuperación de contraseña (Confirmado).
 - Módulo de comparativa de emprendimientos (Opcional/Post-MVP).
+- **Alcance del rol de auditor (rol 4):** permisos y qué información consulta. **Pendiente** (§16).
+- **Validación del emprendedor:** campos obligatorios del registro, criterios de aprobación y **qué funcionalidades están disponibles antes** de la validación. **Pendiente** (§16).
+- **Diagnóstico:** rúbrica respuestas → fortalezas/oportunidades; formato y contenido del **informe descargable**; filtros necesarios. **Pendiente** (§16).
+- **Acta de compromiso:** tiempo de revisión y qué ocurre si se rechaza. **Pendiente** (§16).
+- **Documentos de referencia no disponibles:** `control.pdf` y el **Excel de preguntas** (§16).
 
 ---
 
@@ -671,12 +795,15 @@ SGEMD/
 - Dashboards por rol con métricas reales. Paginación en listas.
 - Base de datos inicializada completa (todas las tablas) en Docker. Sin scripts de migración.
 - Seguridad: secretos en entorno, `.env` ignorado, validación en backend.
+- Validación y activación del emprendedor por el administrativo (desbloqueo). Correo de bienvenida. Notificaciones básicas.
 
 ### P1 — Importante
 
-- Diagnóstico de emprendimiento.
+- Diagnóstico de emprendimiento (data-driven desde Excel, con generar resumen e informe descargable).
+- Caracterización y valoración del emprendimiento. Feedback inmediato.
+- Acta de compromiso y confidencialidad (subida + revisión).
 - Eventos (creación y registro de asistencia manual).
-- Mejoras de perfil (avatar, datos extendidos).
+- Mejoras de perfil (avatar, datos extendidos: programa y centro educativo ya modelados).
 - Plan de trabajo agrupado por etapas.
 
 ### P2 — Opcional / post-MVP
@@ -685,6 +812,7 @@ SGEMD/
 - Evaluación de habilidades (no estaba funcional).
 - Notificaciones/push.
 - Internacionalización.
+- Rol de auditor (una vez definido su alcance).
 
 ---
 
@@ -704,6 +832,10 @@ Pruebas funcionales para considerar el MVP terminado:
 10. Un estudiante **no puede** ver ni modificar recursos de otros; un docente **no puede** ver emprendimientos ajenos.
 11. El sistema **no expone** credenciales, secretos, ni códigos OTP en ninguna respuesta.
 12. La base de datos se **inicializa completa** en un entorno Docker limpio (todas las tablas necesarias). El diseño es totalmente responsive.
+13. Un emprendedor con el **registro completo** queda pendiente y **no accede** a las funcionalidades hasta que el administrativo lo **valide y active**.
+14. El emprendedor puede **diligenciar el formulario de diagnóstico** (cargado desde Excel), y el sistema **genera** la caracterización/valoración con **feedback inmediato** e **informe descargable**.
+15. El emprendedor puede **subir el acta de compromiso** firmada y el administrativo puede **aprobarla/rechazarla**.
+16. Se generan **notificaciones** al administrativo (registro, diagnóstico, asesoría) y al estudiante (validación, acta, tareas/asesorías).
 
 ---
 
@@ -747,6 +879,54 @@ Cuando el MVP esté terminado, el proyecto debe verse así:
 - **DECISIONES DE DISEÑO:** opciones de arquitectura/modelo ya recomendadas (secciones 4-5, 11 "confirmadas").
 - **PROBLEMAS DEL PROYECTO ANTERIOR:** lo que debe evitarse (sección 10).
 - **DECISIONES PENDIENTES:** lo que la nueva IA debe consultar antes de implementar (sección 11 "abiertas").
+
+---
+
+## 16. Fuentes y trazabilidad del alcance ampliado
+
+> Esta sección documenta el **alcance ampliado** que salió del proceso real de atención (reunión con el área de Emprendimiento) y de las anotaciones del equipo. Es la referencia para **validar qué falta por implementar** respecto de las secciones actualizadas.
+
+### 16.1 Flujo de registro, validación y activación
+
+1. **Inscripción:** el emprendedor se registra en la plataforma.
+2. **Completar información:** diligencia los datos requeridos.
+3. **Notificación:** el sistema notifica al administrativo (p. ej. la asesora del área).
+4. **Programación de asesoría:** el administrativo se comunica con el emprendedor para acordar la reunión.
+5. **Reunión:** se realiza la asesoría.
+6. **Validación:** el administrativo verifica y **valida** al emprendedor.
+7. **Activación:** aprobado → se **habilitan** las funcionalidades de la plataforma.
+
+- **Acceso previo:** mientras no esté validado, el usuario opera en **modo limitado** (p. ej. Diagnóstico bloqueado).
+- **Suspensión:** 3 inasistencias a asesorías o 4 meses de incumplimiento → suspensión de 4 meses.
+
+### 16.2 Puntos por cerrar (bloquean implementación)
+
+- **Campos obligatorios** del registro y **criterios de validación** del emprendedor.
+- **Funcionalidades disponibles antes** de la validación.
+- **Permisos** del rol de **auditor** (rol 4).
+- **Rúbrica** del diagnóstico (respuestas → fortalezas/oportunidades) y **formato del informe descargable**.
+- **Tiempo de revisión** del acta y qué pasa si se rechaza.
+- **Estructura definitiva** de las tablas y relaciones ([§5](#5-modelo-de-datos)).
+
+### 16.3 Documentos de referencia
+
+| Documento | Uso previsto | Estado |
+| --------- | ------------ | ------ |
+| `control.pdf` | Referencia para el formulario de registro. | ⚠️ No está en el repositorio |
+| `ficha de carácter y formulación.pdf` | Referencia para caracterización y formulación. | ⚠️ Material local del área (no versionado); falta confirmar equivalencia |
+| `Valoración y Diagnóstico.pdf` | Referencia para el diagnóstico y su valoración. | ✅ Material local del área (no versionado) |
+| **Archivo Excel de preguntas** | Fuente para estructurar el formulario de diagnóstico. | ⚠️ Pendiente |
+
+### 16.4 Documentación de trabajo (esta rama)
+
+- **Material local del área (no versionado):** inventario de insumos, flujo real de atención y pendientes del estudiante — se mantienen fuera del repositorio por contener datos personales.
+- `docs/CONSOLIDACION-ANOTACIONES.md` — anotaciones del equipo reorganizadas (diagnóstico, registro/validación, roles, BD, Git).
+- `CORRECCIONES-VISTAS-ESTUDIANTE.md` — hallazgos validados del prototipo.
+
+### 16.5 Sobre datos sensibles y Git
+
+- Los insumos del área contienen **datos personales** (nombres, cédulas, teléfonos, correos) → aplica la **Ley 1581 de 2012**. **No** versionar estos archivos sin autorización; usar datos ficticios.
+- Se propone una **rama de inyección de datos** para centralizar la carga y evitar que cada integrante la introduzca manualmente.
 
 ---
 

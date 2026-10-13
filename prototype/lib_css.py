@@ -87,28 +87,30 @@ SHELL_CSS = """
 .brand-text{text-align:center}
 .brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
-.nav{padding:16px 12px;overflow-y:auto;flex:1}
-.nav-group{margin-bottom:18px}
+.nav{padding:10px 10px 8px;overflow-y:auto;flex:1}
+.nav-group{margin-bottom:6px}
 .nav-label{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;
   background:transparent;border:0;cursor:pointer;text-align:left;font-family:inherit;
-  font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--blanco);opacity:.6;padding:6px 12px 8px;transition:opacity .15s ease;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blanco);opacity:.55;padding:4px 10px 4px;transition:opacity .15s ease;
 }
 .nav-label:hover{opacity:1;text-decoration:none}
 .nav-label:focus-visible{outline:2px solid var(--azul-real);outline-offset:2px;border-radius:var(--r-sm)}
 .nav-label span{flex:1}
-.nav-label svg{flex:0 0 14px;transition:transform .2s ease}
+.nav-label svg{flex:0 0 12px;transition:transform .2s ease}
 .nav-group.abierto .nav-label svg{transform:rotate(180deg)}
 /* Acordeon: los hijos se despliegan con max-height animado; el chevron usa el
-   icono "abajo" del kit y rota al abrir. Se respeta prefers-reduced-motion. */
+   icono "abajo" del kit y rota al abrir. Se respeta prefers-reduced-motion.
+   El max-height se ajusta al grupo mas largo (4 hijos) para que la animacion
+   no quede con una cola muerta antes de terminar de abrir. */
 .nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
-.nav-group.abierto .nav-hijos{max-height:280px}
+.nav-group.abierto .nav-hijos{max-height:190px}
 @media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
-.nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:14px;font-weight:500;margin-bottom:2px}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.25;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
-.nav a svg{flex:0 0 18px}
+.nav a svg{flex:0 0 16px}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}

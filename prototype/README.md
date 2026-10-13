@@ -1,7 +1,7 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-50 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
+54 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
@@ -25,7 +25,7 @@ pantallas globales de acceso.
   - [2. Qué contiene](#2-qué-contiene)
   - [3. Las vistas por rol](#3-las-vistas-por-rol)
     - [3.1 Acceso global (4)](#31-acceso-global-4)
-    - [3.2 Estudiante (16)](#32-estudiante-16)
+    - [3.2 Estudiante (16 vistas, 20 archivos)](#32-estudiante-16-vistas-20-archivos)
     - [3.3 Docente (12)](#33-docente-12)
     - [3.4 Administrador (18)](#34-administrador-18)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
@@ -53,7 +53,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 50 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 54 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -85,13 +85,18 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 
 ## 2. Qué contiene
 
-| Carpeta | Pantallas | Contenido |
+| Carpeta | Archivos | Contenido |
 |---|---|---|
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
-| `estudiante/` | 16 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, notificaciones |
+| `estudiante/` | 20 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, notificaciones |
 | `docente/` | 12 | Inicio, asesorías, expedientes, seguimiento, diagnósticos, tareas, perfil, notificaciones |
 | `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
-| **Total** | **50** | más `index.html` como índice local |
+| **Total** | **54** | más `index.html` como índice local |
+
+Son **50 vistas lógicas** repartidas en **54 archivos**: el estudiante aporta cuatro
+archivos extra porque su *detalle de tarea* (#15) se reproduce en cinco estados
+(`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
+`completada-usuarios` y `completada-clientes`).
 
 Elementos de interfaz comunes a todo el prototipo:
 
@@ -118,7 +123,7 @@ Elementos de interfaz comunes a todo el prototipo:
 | 03 | Verificar OTP | Código de 8 dígitos; explica que el perfil queda *Limitado* hasta la activación |
 | 04 | Recuperar contraseña | Correo + documento; respuesta genérica para no revelar qué cuentas existen |
 
-### 3.2 Estudiante (16)
+### 3.2 Estudiante (16 vistas, 20 archivos)
 
 | # | Vista | Qué resuelve |
 |---|---|---|
@@ -259,8 +264,10 @@ anchos intermedios usan scroll horizontal deliberado.
 
 ## 6. Logo
 
-Fuente única: [`../docs/Logo_sinfondo.png`](../docs/Logo_sinfondo.png) (PNG RGBA, sin
-fondo). `_marca/preparar_logo.py` deriva de ahí las variantes que usa el prototipo:
+Las variantes del logo viven en `_marca/`. El PNG fuente original
+(`docs/Logo_sinfondo.png`), del que las derivaba `_marca/preparar_logo.py`, **ya no
+está en el repositorio**, así que los archivos versionados de `_marca/` son la
+fuente de verdad:
 
 | Archivo | Uso |
 |---|---|
@@ -280,9 +287,9 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 50 pantallas + index.html
+├── generar.py              Orquestador: emite las 54 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
-├── paginas_estudiante.py   16 pantallas del estudiante
+├── paginas_estudiante.py   20 pantallas del estudiante
 ├── paginas_docente.py      12 pantallas del docente
 ├── paginas_admin.py        18 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
@@ -318,10 +325,10 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 50 pantallas + index.html)
+# Generar (emite las 54 pantallas + index.html)
 python generar.py
 
-# Derivar las variantes de logo desde docs/Logo_sinfondo.png
+# Regenerar las variantes de logo desde el PNG fuente (hoy fuera del repo)
 python _marca\preparar_logo.py
 
 # Publicar en Stitch
@@ -337,8 +344,12 @@ python _reconciliar.py
 
 ## 9. Validación automática
 
-El prototipo no se dio por bueno "a ojo": hay ocho auditorías y todas dan **0
-problemas** sobre las 50 pantallas.
+El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 54
+pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
+hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una
+salvedad: `_estructura.py` marca el presupuesto de **estilos inline** por encima
+del umbral (`PRESUPUESTO_INLINE`), que queda registrado como deuda pendiente y no
+bloquea la navegación.
 
 | Script | Qué comprueba |
 |---|---|
@@ -359,7 +370,9 @@ Dos scripts más son de apoyo, no de verificación:
 | `_analisis_controles.py` / `_analisis_inline.py` | Catálogo de controles a hacer interactivos y de estilos inline a extraer |
 
 Las de navegador usan `file://` a propósito: reproducen exactamente cómo se verá la
-pantalla en Stitch, sin servidor de por medio.
+pantalla en Stitch, sin servidor de por medio. Requieren Playwright (`pip install
+playwright` y `playwright install chromium`); en la última pasada no estaba
+instalado, así que no se ejecutaron.
 
 ---
 
@@ -367,8 +380,10 @@ pantalla en Stitch, sin servidor de por medio.
 
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
-- **Total:** 51 pantallas en el proyecto — las 50 de interfaz más una de marca
-  (`_marca/logo-color-1200.png`).
+- **Total:** 51 documentos — 50 pantallas de interfaz más una de marca
+  (`_marca/logo-color-1200.png`). El prototipo local ya genera **54 archivos HTML**;
+  los cuatro estados extra de *detalle de tarea* no se subieron, así que Stitch
+  conserva esos 50.
 - **Comentario:** el enlace se actualizó al recrear el proyecto. El anterior
   (`projects/8880818071963426152`) se borró por un error; se creó uno nuevo en
   Stitch y se resubieron las 51 pantallas.
@@ -405,7 +420,7 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
   porque se generaron así; un usuario real no debe depender de eso.
 - **Responsive validado en navegador de escritorio.** Chromium con viewport
   emulado; no se probó en Safari ni en un móvil físico.
-- **La tipografía depende de internet.** Si Google Fonts no responde, las 50
+- **La tipografía depende de internet.** Si Google Fonts no responde, las 54
   pantallas se ven con la fuente del sistema. El diseño aguanta el cambio, pero las
   medidas no son idénticas a las capturadas.
 
@@ -416,4 +431,3 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
 - [`DESIGN.md`](DESIGN.md) — guía de diseño completa (paleta, tipografía, componentes)
 - [`../README.md`](../README.md) — especificación maestra del SGEMD
 - [`../docs/fr_nfr_sgemd.md`](../docs/fr_nfr_sgemd.md) — requisitos funcionales y no funcionales
-- [`../docs/estructura_de_vistas_sgemd.md`](../docs/estructura_de_vistas_sgemd.md) — inventario de vistas
