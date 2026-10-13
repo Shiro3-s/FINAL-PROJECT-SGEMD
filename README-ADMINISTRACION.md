@@ -1,8 +1,18 @@
-# README-ADMI — Mejora vista Administrador SGEMD
+# SGEMD — Panel de Administración
 
-Documento de control de la mejora del rol **Administrador** en `prototype/`.
-Trabajo **100 % local**: no se sube a Stitch, no se hace `push` a GitHub, no se
-ejecuta `subir.py`. Todo queda en el working tree.
+Documento de control de la mejora del rol **Administrador** del prototipo
+(`prototype/`). Está en la raíz para que se lea al abrir la rama.
+
+**Dónde vive este trabajo:** rama `administracion`, tag `v1.0.0-admin`.
+Ese fue el cambio de alcance: mientras se construía, el trabajo era solo local
+y así quedó registrado en los prompts de la sección 11. Desde esta rama ya está
+publicado en GitHub para revisión del equipo.
+
+**Lo que sigue sin moverse:** nada se sube a Stitch y no se ejecuta `subir.py`.
+El HTML se genera y se versiona, pero no se publica en Stitch.
+
+**Cómo verlo:** abrir `prototype/index.html` y entrar como **Ana Restrepo**
+(administradora). Para regenerar: `cd prototype` y `python generar.py`.
 
 ---
 
@@ -317,5 +327,32 @@ CTA, formularios) y `_aislamiento.py` para probar el aislamiento.
 
 ## 13. GitHub / Stitch
 
-**No se sube nada.** No se ejecuta `subir.py`, no hay `push`, no se crean ramas
-ni commits. Los cambios viven en el working tree para revisión manual.
+### Qué se publicó y qué no
+
+| | |
+| --- | --- |
+| Rama | `administracion` — commit `7735e7c`, 74 archivos |
+| Tag | `v1.0.0-admin` (anotado, apunta al mismo commit) |
+| `main` y las demás ramas | **sin tocar** |
+| `docs/Docs-centro-progresa/` | **fuera**, ignorado por `.gitignore` |
+| Stitch | **fuera**: no se ejecuta `subir.py` |
+
+Para abrirla: https://github.com/Shiro3-s/FINAL-PROJECT-SGEMD/tree/administracion
+
+### Por qué los documentos de Centro Progresa no se versionaron
+
+`docs/Docs-centro-progresa/` trae material de otra institución —el formato del
+acta de compromiso, el xlsx de proyectos con nombres y correos de estudiantes, y
+los PDF de caracterización y diagnóstico—. Se usaron como fuente para
+construir el flujo, pero son documentos de un tercero y contienen datos
+personales, así que quedaron fuera por `.gitignore` en lugar de subirse.
+
+Si alguien necesita tenerlos en el repositorio, es una línea: quitar ese bloque
+del `.gitignore` y hacer `git add -f`.
+
+### Nota sobre las reglas de publicación
+
+La instrucción original durante la construcción era "no suba nada a github y a
+stitch", y así se aplicó: el trabajo se hizo sin `push` hasta que se pidió
+publicar. El único cambio de alcance es este: la rama `administracion` y su
+tag. La regla de Stitch sigue igual.

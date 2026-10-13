@@ -8,7 +8,24 @@
 
 ---
 
-> **Nota sobre esta rama:** si estás viendo esto en la rama `prototype/stitch`, aquí además del documento de especificación vive el **prototipo navegable de SGEMD**: 50 pantallas generadas en Stitch, un `index.html` índice para recorrerlas y el pipeline en Python que las genera, audita y publica.
+> ### 📌 ¿Estás en la rama `administracion`? Empieza por acá
+>
+> Este `README.md` es la **especificación general** del proyecto y es la misma
+> que en `main`. Lo propio del panel de administración está en otro documento:
+>
+> # 👉 **[README-ADMINISTRACION.md](README-ADMINISTRACION.md)**
+>
+> Qué cambió en el rol administrador, los formularios del flujo de atención de
+> Centro Progresa, los validadores que se escribieron, las decisiones y la
+> bitácora de incidencias. **59 pantallas generadas, 27 del administrador.**
+>
+> Para verlo: `prototype/index.html` → entrar como **Ana Restrepo**. Para
+> regenerarlo: `cd prototype` y `python generar.py`.
+>
+> Rama: `administracion` · Tag: `v1.0.0-admin` · `main` y las demás ramas sin tocar.
+> Nada se publica en Stitch.
+
+> **Nota sobre la rama `prototype/stitch`:** si estás viendo esto en esa rama, aquí además del documento de especificación vive el **prototipo navegable de SGEMD**: 50 pantallas generadas en Stitch, un `index.html` índice para recorrerlas y el pipeline en Python que las genera, audita y publica.
 >
 > Empieza por **[PROTOTIPO-STITCH.md](PROTOTIPO-STITCH.md)**: qué contiene la rama y cómo usarla.
 >
