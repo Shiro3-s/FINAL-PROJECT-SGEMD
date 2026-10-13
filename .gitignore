@@ -1,0 +1,8 @@
+# Documentacion institucional de terceros: NO se versiona.
+#
+# docs/Docs-centro-progresa/ trae documentos del area de Emprendimiento de
+# Centro Progresa EPE (formato del acta de compromiso, el xlsx de proyectos con
+# nombres y correos de estudiantes, y PDFs de caracterizacion y diagnostico).
+# Son material de otra institucion y contienen datos personales: se usan para
+# trabajar, pero no se publican en el repositorio.
+docs/Docs-centro-progresa/

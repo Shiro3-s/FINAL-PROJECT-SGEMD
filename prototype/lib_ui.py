@@ -109,6 +109,50 @@ NAV = {
     ],
 }
 
+# Menu agrupado por genero. Solo el administrador lo usa: con 11 entradas
+# planas la sidebar obligaba a leer toda la lista para llegar a una pantalla.
+# La taxonomia ordena las pantallas por dominio y el genero de la pantalla
+# activa queda abierto. `None` como titulo marca el enlace suelto (Inicio).
+NAV_GRUPOS = {
+    "administrador": [
+        ("Inicio", "grid", "dashboard"),
+        ("Usuarios y accesos", "users", [
+            ("Gestion de perfiles", "users", "usuarios"),
+            ("Ficha del docente", "users", "usuario-docente"),
+            ("Ficha del estudiante", "user", "usuario-estudiante"),
+            ("Sedes y carreras", "libro", "sedes-carreras"),
+        ]),
+        ("Emprendimientos", "maleta", [
+            ("Emprendimientos", "maleta", "emprendimientos"),
+            ("Plan de trabajo", "layers", "emprendimiento-plan"),
+            ("Seguimiento", "trend", "seguimiento"),
+            ("Tablero de seguimiento", "grid", "seguimiento-dashboard"),
+            ("Asignaciones", "sliders", "asignaciones"),
+            ("Asignar emprendimiento", "sliders", "asignar-emprendimiento"),
+            ("Diagnosticos", "clipboard", "diagnosticos"),
+        ]),
+        ("Acompanamiento", "chat", [
+            ("Asesorias", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+            ("Crear evento", "plus", "evento-form"),
+            ("Trazabilidad", "engranaje", "trazabilidad"),
+            ("Inscripciones", "clipboard", "inscripciones"),
+            ("Formulario 1", "clipboard", "inscripcion-form"),
+            ("Expediente", "doc", "inscripcion-detalle"),
+            ("Actas", "doc", "actas"),
+            ("Formulario 2", "doc", "caracterizacion-form"),
+            ("Diagnostico", "medalla", "diagnostico-generado"),
+        ]),
+        ("Sistema", "engranaje", [
+            ("Reportes", "download", "reportes"),
+            ("Moderacion", "chat", "comentarios"),
+            ("Notificaciones", "bell", "notificaciones"),
+            ("Perfil", "user", "perfil"),
+            ("Ayuda", "bombilla", "ayuda"),
+        ]),
+    ],
+}
+
 ROLES = {
     "estudiante": ("ESTUDIANTE", "Mariana Lopez", "ML"),
     "docente": ("DOCENTE", "Carlos Mendoza", "CM"),
@@ -155,14 +199,47 @@ def boton_accion(icono, etiqueta, clase=""):
             % (c, accion, etiqueta, etiqueta, ico(icono, 16)))
 
 
-def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None, extra_head=""):
-    """Envoltorio completo: sidebar + header + contenido."""
+def _nav_enlace(txt, ic, clave, activo):
+    return ('<a class="%s" href="%s.html">%s<span>%s</span></a>'
+            % ("activo" if clave == activo else "", clave, ico(ic), txt))
+
+
+def nav_items(rol, activo):
+    """HTML del <nav>. Usa NAV_GRUPOS si el rol lo tiene; si no, lista plana."""
+    grupos = NAV_GRUPOS.get(rol)
+    if not grupos:
+        return "".join(_nav_enlace(txt, ic, clave, activo)
+                       for txt, ic, clave in NAV[rol])
+    out = []
+    for g in grupos:
+        # Formato de grupo: (titulo, icono, [hijos]). Enlace suelto: (txt, ic, clave).
+        if len(g) == 3 and isinstance(g[2], list):
+            titulo, ic, hijos = g
+        else:
+            out.append(_nav_enlace(*g, activo))
+            continue
+        abierto = any(clave == activo for _, _, clave in hijos)
+        out.append('<div class="nav-group%s">' % (" abierto" if abierto else ""))
+        out.append('<button type="button" class="nav-label" aria-expanded="%s">%s'
+                   '<span>%s</span>%s</button>'
+                   % ("true" if abierto else "false", ico(ic, 16), titulo, ico("abajo", 14)))
+        out.append('<div class="nav-sub">%s</div>'
+                   % "".join(_nav_enlace(t, i, c, activo) for t, i, c in hijos))
+        out.append("</div>")
+    return "".join(out)
+
+
+def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None,
+          extra_head="", producto=None):
+    """Envoltorio completo: sidebar + header + contenido.
+
+    `producto` decide si la pantalla habla en clave de producto, sin explicar que
+    es un prototipo. Por defecto solo el administrador lo pide: es el panel que
+    se entrega, y sus textos de ayuda tienen que describir la operacion real."""
+    if producto is None:
+        producto = rol == "administrador"
     etiqueta, nombre, iniciales = ROLES[rol]
-    items = "".join(
-        '<a class="%s" href="%s.html">%s<span>%s</span></a>'
-        % ("activo" if clave == activo else "", clave, ico(ic), txt)
-        for txt, ic, clave in NAV[rol]
-    )
+    items = nav_items(rol, activo)
     m = ""
     if migas:
         m = '<div class="crumbs">' + " &rsaquo; ".join(
@@ -174,7 +251,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
         encabezado += '<p class="sub">%s</p>' % sub
     cab = '<div class="page-head">%s<div class="acciones">%s</div></div>' % (encabezado, acciones)
     return """<!DOCTYPE html>
-<html lang="es">
+<html lang="es"%(inmersion)s>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -219,6 +296,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
 </body>
 </html>""" % {
         "titulo": titulo,
+        "inmersion": ' data-inmersion="producto"' if producto else "",
         "css": CSS,
         "logo": LOGO_TILE,
         "items": items,
@@ -259,13 +337,21 @@ def metricas(items):
     return "".join(out)
 
 
-def th(c):
-    """Construye un <th>. Acepta 'Etiqueta', ('num','Etiqueta') o '@ACC'."""
+def th(c, clase="", ordenable=False):
+    """Construye un <th>. Acepta 'Etiqueta', ('num','Etiqueta') o '@ACC'.
+
+    Con `ordenable` la cabecera envuelve su texto en un boton de ordenar: el
+    JS lo lee por `data-accion="ordenar"` y ordena el <tbody> al pulsarlo."""
+    k = ' class="%s"' % clase if clase else ""
+    if ordenable and c != "@ACC":
+        etiqueta = c[1] if isinstance(c, tuple) else c
+        return ('<th scope="col"%s><button type="button" data-accion="ordenar" '
+                'title="Ordenar por %s">%s</button></th>' % (k, etiqueta, etiqueta))
     if c == "@ACC":
-        return '<th scope="col" class="acc">Acciones</th>'
+        return '<th scope="col" class="acc%s">Acciones</th>' % k
     if isinstance(c, tuple):
-        return '<th scope="col" class="%s">%s</th>' % (c[0], c[1])
-    return '<th scope="col">%s</th>' % c
+        return '<th scope="col" class="%s%s">%s</th>' % (c[0], k, c[1])
+    return '<th scope="col"%s>%s</th>' % (k, c)
 
 
 def _etiqueta(c):
@@ -281,42 +367,83 @@ def _etiqueta(c):
     return re.sub(r"<[^>]+>", "", str(c)).strip()
 
 
-def tabla(cabeceras, filas, con_checkbox=False):
+def tabla(cabeceras, filas, con_checkbox=False, id=None, tbody_attr="",
+          ancha=False, oculta=None, ordenable=False):
     """cabeceras: lista de 'Etiqueta' | ('num','Etiqueta') | '@ACC'.
-    filas: listas de HTML con la misma longitud que cabeceras."""
+    filas: listas de HTML con la misma longitud que cabeceras.
+    `tbody_attr` cuelga atributos del <tbody>: lo usa el CRUD generico de
+    lib_js para repintar las filas cuando se crea, edita o borra algo.
+    `ancha` (8 columnas o mas) pasa la tabla a vista ficha tambien en tablet,
+    donde una tabla tan ancha obliga a desplazar y esconde los botones.
+    `oculta` dict {'lg': [2, 5], 'md': [2, 5], 'sm': [3]} marca las columnas que
+    sobran por debajo de 1600px, de 1280px y de 1024px; el dato sigue en el
+    modal de detalle. `ordenable` pone un boton de orden en cada cabecera."""
+    attr = ' id="%s" data-tabla' % id if id else " data-tabla"
+    md = set((oculta or {}).get("md", ()))
+    sm = set((oculta or {}).get("sm", ()))
+    lg = set((oculta or {}).get("lg", ()))
+
+    def plegada(i):
+        """Clase de la columna segun la banda en la que se esconde.
+
+        La celda se escribe siempre: se oculta con CSS en su banda, no se
+        borra del HTML. Asi el dato sigue en el DOM (y en el CSV) y el indice de
+        columna que usan las facetas no cambia al plegarse.
+        """
+        return " oc-md" if i in md else (" oc-sm" if i in sm else
+                                        (" oc-lg" if i in lg else ""))
+
     cab = ""
     if con_checkbox:
-        cab += ('<th scope="col" style="width:44px">'
-                '<input type="checkbox" aria-label="Seleccionar todo" '
-                'style="accent-color:#004a93;width:16px;height:16px"></th>')
-    cab += "".join(th(c) for c in cabeceras)
-    sel = ('<td class="sel"><input type="checkbox" aria-label="Seleccionar fila" '
-           'style="accent-color:#004a93;width:16px;height:16px"></td>') if con_checkbox else ""
+        # Sin estilos en linea: la casilla se dimensiona desde la hoja, que es
+        # donde viven el resto de medidas de la tabla.
+        cab += ('<th scope="col" class="sel"><input type="checkbox" '
+                'aria-label="Seleccionar todo"></th>')
+    cab += "".join(th(c, plegada(i).strip(), ordenable=ordenable)
+                   for i, c in enumerate(cabeceras))
+    sel = ('<td class="sel"><input type="checkbox" aria-label="Seleccionar fila">'
+           "</td>") if con_checkbox else ""
     etiquetas = [_etiqueta(c) for c in cabeceras]
     body = ""
     for f in filas:
         celdas = ""
-        for c, x, eti in zip(cabeceras, f, etiquetas):
+        for i, (c, x, eti) in enumerate(zip(cabeceras, f, etiquetas)):
+            pl = plegada(i)
             if c == "@ACC":
-                celdas += '<td class="acc" data-label="%s">%s</td>' % (eti, x)
+                celdas += '<td class="acc%s" data-label="%s">%s</td>' % (pl, eti, x)
             elif isinstance(c, tuple) and c[0] == "num":
-                celdas += '<td class="num" data-label="%s">%s</td>' % (eti, x)
+                celdas += '<td class="num%s" data-label="%s">%s</td>' % (pl, eti, x)
             else:
-                celdas += '<td data-label="%s">%s</td>' % (eti, x)
+                # Sin columna plegada no se emite atributo class: el HTML de los
+                # otros roles tiene que quedar byte a byte igual.
+                cab = ' class="%s"' % pl.strip() if pl.strip() else ""
+                celdas += '<td%s data-label="%s">%s</td>' % (cab, eti, x)
         body += "<tr>%s%s</tr>" % (sel, celdas)
+    clase_t = "tabla ancha" if ancha else "tabla"
+    clase_c = "card tabla-envoltura ancha" if ancha else "card tabla-envoltura"
+    clase_s = "tabla-scroll ancha" if ancha else "tabla-scroll"
     return (
-        '<div class="card tabla-envoltura"><div class="tabla-scroll">'
-        '<table class="tabla"><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
-        "</div></div>" % (cab, body)
+        '<div class="%s"><div class="%s">'
+        '<table class="%s"%s><thead><tr>%s</tr></thead><tbody%s>%s</tbody></table>'
+        "</div></div>" % (clase_c, clase_s, clase_t, attr, cab, tbody_attr, body)
     )
 
 
-def toolbar(buscar=True, filtros="", acciones="", extra=""):
+def toolbar(buscar=True, filtros="", acciones="", extra="", ph="Buscar"):
     s = ""
     if buscar:
-        s += ('<div class="buscador crece">%s<input type="text" placeholder="Buscar" aria-label="Buscar"></div>'
-              % ico("search", 16))
+        s += ('<div class="buscador crece">%s<input type="text" placeholder="%s" '
+              'aria-label="%s" data-busca></div>' % (ico("search", 16), ph, ph))
     return '<div class="toolbar">%s%s%s</div>' % (s, filtros, extra or acciones)
+
+
+def boton_exportar(etiqueta="Exportar CSV", tipo="csv", tabla_id=None, clase="btn btn-secundario"):
+    """Boton de descarga real. `tipo`: csv (tabla por id) o reporte (imprimible)."""
+    extra = ' data-export="%s"' % tipo
+    if tabla_id:
+        extra += ' data-tabla="%s"' % tabla_id
+    return ('<button class="%s" data-accion="exportar"%s>%s %s</button>'
+            % (clase, extra, ico("download", 16), etiqueta))
 
 
 def paginas(desde, hasta, total):
@@ -333,6 +460,33 @@ def badge(texto, tipo="neutra", icono=None):
         tipo, ico(icono, 12) if icono else "", texto)
 
 
+def chip(texto, col=None, activo=False, valor=None):
+    """Chip de faceta. `col` acota la columna; `valor` es el texto a buscar."""
+    attrs = ""
+    if col is not None:
+        attrs += ' data-filtro-col="%s"' % col
+    if valor is not None:
+        attrs += ' data-chip="%s"' % valor
+    return ('<button type="button" class="chip%s"%s>%s</button>'
+            % (" activo" if activo else "", attrs, texto))
+
+
+def zona_filtros(cuerpo, filtros="", ph="Buscar", acciones="", chips="", buscar=True):
+    """Barra de facetas + tabla dentro de una [data-tabla-zona].
+
+    Agrupa buscador, select/chips y la tabla para que lib_js los combine en un
+    solo filtro y cuente el resultado en el contador. `cuerpo` es el HTML de la
+    tabla (o cualquier listado con filas).
+    """
+    html = toolbar(buscar=buscar, filtros=filtros, acciones=acciones, ph=ph)
+    if chips:
+        html += '<div class="facetas">%s</div>' % chips
+    html += cuerpo
+    return ('<div data-tabla-zona>%s'
+            '<div class="resultados" data-resultados aria-live="polite"></div>'
+            "</div>" % html)
+
+
 def _fid(prefijo="f"):
     """Id unico por control, para que cada label este asociado al input correcto."""
     global _CONTADOR
@@ -343,7 +497,15 @@ def _fid(prefijo="f"):
 _CONTADOR = 0
 
 
-def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False):
+def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False,
+          requerido=False):
+    """Campo de formulario.
+
+    `req` marca el asterisco (siempre, en todos los roles). `requerido` anade el
+    atributo `required` de HTML, que es lo que lee el validador de lib_js: sin el,
+    un select o un textarea "obligatorio" no se comprueban nunca. Se deja fuera a
+    proposito del resto de pantallas para no cambiar su comportamiento.
+    """
     i = _fid("f")
     h = '<div class="campo"><label for="%s">%s%s</label>' % (
         i, label, '<span class="req">*</span>' if req else "")
@@ -351,23 +513,26 @@ def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", 
         h += ('<input id="%s" type="text" value="%s" disabled>'
               '<div class="bloqueo">%s%s</div></div>' % (i, valor, ico("lock", 12), bloqueo))
     elif alto:
-        h += '<textarea id="%s" placeholder="%s">%s</textarea>' % (i, ph, valor)
+        h += '<textarea id="%s" placeholder="%s"%s>%s</textarea>' % (
+            i, ph, " required" if req and requerido else "", valor)
         if ayuda:
             h += '<div class="ayuda">%s%s</div>' % (ico("alerta", 13), ayuda)
         h += "</div>"
     else:
         h += '<input id="%s" type="%s" value="%s" placeholder="%s"%s>' % (
-            i, tipo, valor, ph, " required" if req else "")
+            i, tipo, valor, ph, " required" if req and requerido else "")
         if ayuda:
             h += '<div class="ayuda">%s%s</div>' % (ico("alerta", 13), ayuda)
         h += "</div>"
     return h
 
 
-def select(label, opciones, req=False, bloqueo="", valor=None):
+def select(label, opciones, req=False, bloqueo="", valor=None, requerido=False):
+    """Lista desplegable. `requerido` anade el atributo `required` (ver campo)."""
     i = _fid("s")
-    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s>' % (
+    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s%s>' % (
         i, label, '<span class="req">*</span>' if req else "", i,
+        " required" if req and requerido else "",
         " disabled" if bloqueo else "")
     for o in opciones:
         sel = " selected" if valor and o == valor else ""
@@ -377,6 +542,63 @@ def select(label, opciones, req=False, bloqueo="", valor=None):
         h += '<div class="bloqueo">%s%s</div>' % (ico("lock", 12), bloqueo)
     h += "</div>"
     return h
+
+
+def campo_check(label, ayuda="", marcado=False, requerido=False):
+    """Casilla de verificacion. El texto envuelve al input, asi que el control
+    ya tiene etiqueta implicita para el auditor de interaccion."""
+    h = '<label class="chk"><input type="checkbox"%s%s> <span><b>%s</b>%s</span></label>' % (
+        " checked" if marcado else "", " required" if requerido else "",
+        label, ('<span class="hint">%s</span>' % ayuda) if ayuda else "")
+    return '<div class="campo">%s</div>' % h
+
+
+def campo_radio_cards(label, opciones, valor=None, nombre=None):
+    """Grupo de opciones excluyentes que se muestran como tarjetas pulsables.
+
+    Es el formato que ya tenian pensado en el CSS (.radio-card) para cuando un
+    catalogueo se elige de una lista corta y conviene ver todas las opciones."""
+    global _RADIO
+    _RADIO += 1
+    nombre = nombre or "radio%d" % _RADIO
+    h = ('<fieldset class="campo"><legend>%s</legend><div class="radios">' % label)
+    for o in opciones:
+        marca = " checked" if valor and o == valor else ""
+        h += ('<label class="radio-card%s"><input type="radio" name="%s" value="%s"%s>'
+              "<span>%s</span></label>" % (
+                  " sel" if valor and o == valor else "", nombre,
+                  str(o).replace('"', "&quot;"), marca, o))
+    return h + "</div></fieldset>"
+
+
+def campo_archivo(label, ayuda="", acepta=".pdf,.jpg,.png", requerido=False):
+    """Zona de arrastrar y soltar. El input real es invisible debajo: el texto
+    lo pone el contenedor, que es lo que se ve."""
+    i = _fid("a")
+    return (
+        '<div class="campo"><label for="%s">%s%s</label>'
+        '<div class="drop" data-archivo><input id="%s" type="file" accept="%s" hidden%s>'
+        "%s%s</div></div>" % (
+            i, label, '<span class="req">*</span>' if requerido else "",
+            i, acepta, " required" if requerido else "",
+            ico("clip", 26), "<b>Arrastra el archivo aqui</b> o pulsa para elegirlo"
+            if not ayuda else ayuda))
+
+
+def grupo_campos(titulo, campos, nota=""):
+    """Agrupa campos bajo un subtitulo dentro de un formulario largo."""
+    cab = "<h3 class='sub-grupo'>%s</h3>" % titulo if titulo else ""
+    pie = '<p class="nota-foot">%s</p>' % nota if nota else ""
+    return '<section class="grupo-campos">%s%s%s</section>' % (cab, campos, pie)
+
+
+def contador(texto_max=0):
+    """Marcador de caracteres; lib_js lo enlaza al textarea que tenga
+    data-contador apuntando a su id."""
+    return ('<span class="contador" data-contador-for aria-live="polite"></span>')
+
+
+_RADIO = 0
 
 
 def callout(txt, icono="alerta"):

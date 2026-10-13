@@ -88,8 +88,15 @@ SHELL_CSS = """
 .brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
 .nav{padding:16px 12px;overflow-y:auto;flex:1}
-.nav-group{margin-bottom:18px}
-.nav-label{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blanco);opacity:.6;padding:0 12px 8px}
+.nav-group{margin-bottom:8px}
+.nav-label{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blanco);opacity:.6;padding:8px 12px}
+.nav-label:hover{opacity:.95}
+.nav-label span{flex:1;text-align:left}
+.nav-group.abierto .nav-label{opacity:1}
+.nav-label svg:last-child{transition:transform .2s;flex:0 0 auto}
+.nav-group.abierto .nav-label svg:last-child{transform:rotate(180deg)}
+.nav-sub{display:none;padding-left:6px}
+.nav-group.abierto .nav-sub{display:block}
 .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:14px;font-weight:500;margin-bottom:2px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
@@ -129,8 +136,8 @@ SHELL_CSS = """
 .page-head .acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 .crumbs{font-size:13px;color:var(--tinta-2);margin-bottom:10px}
 .crumbs a{color:var(--tinta-2)}
-@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}}
-@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.nav-label,.side-foot{display:block}.nav a{justify-content:flex-start}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
+@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav-label,.side-foot{display:none}.nav a{justify-content:center}.nav a span{display:none}.nav-sub{display:block;padding-left:0}.nav-group{margin-bottom:4px}}
+@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.side-foot{display:block}.nav-label{display:flex}.nav a span{display:inline}.nav a{justify-content:flex-start}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
 /* Con el drawer abierto el logo del drawer tiene el protagonismo: se oculta el
    del topbar para que nunca haya dos logos visibles a la vez. */
 .shell:has(.sidebar.abierto) .topbar-mark{display:none}
@@ -193,6 +200,8 @@ COMPONENTES_CSS = """
 .barra{height:6px;background:var(--azul-15);border-radius:var(--r-full);overflow:hidden;margin-top:12px}
 .barra span{display:block;height:100%;background:var(--azul-real);border-radius:var(--r-full)}
 .barra.amarilla span{background:var(--amarillo)}
+.barra.avance{min-width:110px;margin-top:0}
+.pct{font-size:13px;color:var(--azul-prof);margin-left:8px}
 
 table.tabla{width:100%;border-collapse:collapse;font-size:14px}
 table.tabla thead th{
@@ -205,12 +214,31 @@ table.tabla tbody td{padding:12px 16px;border-bottom:1px solid var(--gris);verti
 table.tabla tbody tr:nth-child(even){background:var(--noche-03)}
 table.tabla tbody tr:hover{background:var(--azul-06)}
 table.tabla .num{text-align:right;font-variant-numeric:tabular-nums}
+table.tabla .sel{width:44px}
+table.tabla input[type=checkbox]{accent-color:#004a93;width:16px;height:16px;margin:0}
 table.tabla .acc{text-align:right;white-space:nowrap}
-table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
+table.tabla .acc button,.table-act{display:inline-flex;width:40px;height:40px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
 .tabla-scroll{overflow-x:auto}
 .tabla-envoltura{overflow:hidden}
+
+/* Columna de acciones fija. La tabla de administracion tiene hasta 9 columnas y
+   a 1280px no caben: sin esto los botones de crear, editar y eliminar quedan
+   fuera de la pantalla y solo se ven bajando el zoom. El thead ya se pegaba
+   arriba (position:sticky); aqui se pega a la derecha. El fondo sigue el color
+   de la fila para que no se vea el dato por debajo al desplazar. */
+table.tabla thead th.acc{position:sticky;right:0;z-index:3;box-shadow:-10px 0 10px -10px var(--tinta-2)}
+table.tabla tbody td.acc{position:sticky;right:0;z-index:1;background:var(--blanco);box-shadow:-10px 0 10px -10px var(--tinta-2)}
+table.tabla tbody tr:nth-child(even) td.acc{background:var(--noche-03)}
+table.tabla tbody tr:hover td.acc{background:var(--azul-06)}
+
+/* Plegado de columnas: tabla() marca las celdas sobrantes con .oc-lg (se
+   ocultan por debajo de 1600px), .oc-md (por debajo de 1280px) o .oc-sm (por
+   debajo de 1024px). Los datos no se pierden, salen en el modal de detalle. */
+@media (max-width:1599px){table.tabla .oc-lg{display:none}}
+@media (max-width:1279px){table.tabla .oc-md{display:none}}
+@media (max-width:1023px){table.tabla .oc-sm{display:none}}
 
 /* La tabla de administracion tiene 9 columnas. A 16px de padding horizontal por
    celda se pasa del ancho disponible y obliga a desplazar en horizontal, asi que
@@ -222,7 +250,36 @@ table.tabla tbody tr:last-child td{border-bottom:none}
 /* Vista tarjeta. A 375px una tabla de hasta 9 columnas no cabe ni con scroll
    horizontal: el dato queda fuera de pantalla y el usuario no lo ve. Se apila
    una fila por tarjeta y cada celda imprime su cabecera con attr(data-label),
-   que lib_ui.tabla() escribe en cada celda del cuerpo. */
+   que lib_ui.tabla() escribe en cada celda del cuerpo.
+
+   Una tabla marcada como ancha (class="tabla ancha", la que declara 8 columnas o
+   mas) entra antes, a 1023px: en tablet una tabla de 9 columnas tampoco cabe y
+   el desplazamiento horizontal esconde justo los botones de accion. */
+@media (max-width:1023px){
+  table.tabla.ancha{display:block;width:100%}
+  table.tabla.ancha thead{display:none}
+  table.tabla.ancha tbody{display:block}
+  table.tabla.ancha tbody tr{display:block;background:var(--blanco);
+    border:1px solid var(--gris);border-radius:var(--r-md);
+    box-shadow:var(--shadow-1);margin-bottom:12px;overflow:hidden}
+  table.tabla.ancha tbody tr:nth-child(even),table.tabla.ancha tbody tr:hover{background:var(--blanco)}
+  table.tabla.ancha tbody tr:last-child{margin-bottom:0}
+  table.tabla.ancha tbody td{display:flex;align-items:flex-start;gap:12px;width:100%;
+    padding:10px 14px;border-bottom:1px solid var(--gris);text-align:left;
+    white-space:normal;overflow-wrap:anywhere;position:static;box-shadow:none}
+  table.tabla.ancha tbody td::before{content:attr(data-label);flex:0 0 38%;
+    font-size:13px;font-weight:600;color:var(--azul-real);line-height:1.4;
+    text-transform:uppercase;letter-spacing:.04em}
+  table.tabla.ancha tbody td.acc{justify-content:flex-start;background:var(--blanco)}
+  /* En vista ficha cada celda es una linea: no se pliega ninguna columna o el
+     dato desapareceria del movil. */
+  table.tabla .oc-lg,table.tabla .oc-md,table.tabla .oc-sm{display:flex}
+  table.tabla.ancha tbody td.sel{display:none}
+  table.tabla.ancha tbody tr td:last-child{border-bottom:none}
+  .tabla-envoltura.ancha{background:var(--blanco);border:0;box-shadow:none;padding:0;overflow:visible}
+  .tabla-scroll.ancha{overflow-x:visible}
+}
+
 @media (max-width:767px){
   .tabla-envoltura{background:var(--blanco);border:0;box-shadow:none;padding:0;overflow:visible}
   .tabla-scroll{overflow-x:visible}
@@ -236,11 +293,12 @@ table.tabla tbody tr:last-child td{border-bottom:none}
   table.tabla tbody tr:last-child{margin-bottom:0}
   table.tabla tbody td{display:flex;align-items:flex-start;gap:12px;width:100%;
     padding:10px 14px;border-bottom:1px solid var(--gris);text-align:left;
-    white-space:normal;overflow-wrap:anywhere}
+    white-space:normal;overflow-wrap:anywhere;position:static;box-shadow:none}
   table.tabla tbody td::before{content:attr(data-label);flex:0 0 38%;
     font-size:13px;font-weight:600;color:var(--azul-real);line-height:1.4;
     text-transform:uppercase;letter-spacing:.04em}
-  table.tabla tbody td.acc{justify-content:flex-start}
+  table.tabla tbody td.acc{justify-content:flex-start;background:var(--blanco)}
+  table.tabla .oc-lg,table.tabla .oc-md,table.tabla .oc-sm{display:flex}
   table.tabla tbody td.sel{display:none}
   table.tabla tbody tr td:last-child{border-bottom:none}
 }
@@ -251,6 +309,8 @@ table.tabla tbody tr:last-child td{border-bottom:none}
 .buscador input::placeholder{color:var(--gris)}
 .buscador svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--azul-real)}
 select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}
+[data-tabla-zona] .toolbar select.filtro{min-width:0;max-width:100%}
+@media (max-width:1023px){[data-tabla-zona] .toolbar select.filtro{flex:1 1 100%}}
 .paginacion{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2);flex-wrap:wrap}
 .paginacion .pag{margin-left:auto;display:flex;gap:6px}
 
@@ -285,8 +345,10 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 }
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
-.chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
+.chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px;max-width:100%;overflow-wrap:anywhere}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
+.chk span{min-width:0}
+.chk .hint{display:block;font-size:12px;color:var(--tinta-2)}
 .radio-card{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
 .radio-card.sel{border-color:var(--azul-real);background:var(--azul-06);box-shadow:0 0 0 1px var(--azul-real)}
 .radio-card input{accent-color:var(--azul-real);margin-top:2px}
@@ -309,9 +371,11 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 .def-row{display:flex;gap:16px;padding:11px 0;border-bottom:1px solid var(--gris);font-size:14px}
 .def-row:last-child{border-bottom:none}
 .def-row dt{flex:0 0 210px;color:var(--tinta-2);font-weight:500}
-.def-row dd{margin:0;color:var(--tinta);font-weight:500}
+.def-row dd{margin:0;color:var(--tinta);font-weight:500;min-width:0;overflow-wrap:anywhere}
 /* El dt reserva 210px fijos: a 375px no deja sitio para el valor y la fila se
    sale. En movil el par se apila. */
+@media (max-width:479px){.kanban.oculto-movil{display:none}}
+.kanban.oculto-movil{display:block}
 @media (max-width:767px){.def-row{flex-direction:column;gap:2px}.def-row dt{flex:0 0 auto}}
 
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--gris);margin-bottom:20px;overflow-x:auto}
@@ -342,8 +406,12 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 .notif p{font-size:13px;color:var(--tinta-2)}
 .notif time{font-size:13px;color:var(--gris);display:block;margin-top:5px}
 
-.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:var(--r-full);border:1px solid var(--gris);background:var(--blanco);font-size:13px;font-weight:600;color:var(--tinta-2)}
-.chip.on{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:var(--r-full);border:1px solid var(--gris);background:var(--blanco);font-size:13px;font-weight:600;color:var(--tinta-2);cursor:pointer;font-family:var(--sans)}
+.chip:hover{border-color:var(--azul-real);color:var(--azul-real)}
+.chip.on,.chip.activo{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}
+.facetas{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.facetas-lbl{font-size:13px;font-weight:600;color:var(--tinta-2)}
+.resultados{font-size:13px;font-weight:600;color:var(--tinta-2);white-space:nowrap}
 .chart-titulo{font-size:14px;font-weight:600;color:var(--tinta);margin-bottom:2px}
 .chart-sub{font-size:13px;color:var(--tinta-2);margin-bottom:12px}
 .leyenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--tinta-2)}
@@ -387,6 +455,8 @@ LISTADOS_CSS = """
 .kan-foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2)}
 .kan-empty{font-size:13px;color:var(--gris);text-align:center;padding:18px 0;border:1px dashed var(--gris);border-radius:var(--r-sm)}
 @media (max-width:1023px){.kanban{grid-template-columns:1fr}}
+@media (max-width:479px){.kan-col{min-width:0}
+  .kan-head h3,.kan-titulo{overflow-wrap:anywhere}}
 
 .linea{list-style:none;margin:0;padding:0}
 .ln-item{display:flex;gap:18px;position:relative;padding-bottom:18px}
@@ -503,7 +573,62 @@ INTERACCION_CSS = (
     ".topbar-right{position:relative}"
     ".campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}"
     "[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}"
+    ".form-acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}"
+    ".form-acciones .btn{flex:1 1 auto}"
+    ".sep{height:20px}"
+    ".sep-lg{height:22px}"
+    ".search-lista{position:absolute;left:0;right:0;top:100%;z-index:70;margin-top:4px;"
+    "background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);"
+    "box-shadow:var(--shadow-3);padding:4px;max-height:280px;overflow:auto}"
+    ".search-lista a{display:flex;align-items:center;gap:8px;padding:8px 10px;"
+    "border-radius:var(--r-sm);font-size:14px;color:var(--tinta);text-decoration:none}"
+    ".search-lista a:hover{background:var(--azul-06);color:var(--azul-real)}"
+    "/* Area tactil: 40 px en escritorio y 44 px en pantallas "
+    "tactiles (guia de diseno). Antes 32 px. */"
+    "@media (pointer:coarse){table.tabla .acc button,.table-act,"
+    ".acciones-cell .acc-enlace,.icon-btn{width:44px;height:44px}}"
+    "@media (max-width:767px){table.tabla .acc button,.table-act,"
+    ".acciones-cell .acc-enlace,.icon-btn{width:44px;height:44px}}"
+    ".barra-masiva{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 14px;"
+    "margin-bottom:12px;border:1px solid var(--azul-real);border-radius:var(--r-md);"
+    "background:var(--azul-06)}"
+    ".barra-masiva b{font-size:13px;color:var(--tinta)}"
+    "th button[data-accion=ordenar]{display:inline-flex;align-items:center;"
+    "background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;"
+    "gap:6px;text-transform:inherit;letter-spacing:inherit}"
+    "th button[data-accion=ordenar]:hover{color:var(--amarillo)}"
+    "td.celda-edit,input.celda-edit{width:100%;min-width:80px;font:inherit;"
+    "border:1px solid var(--azul-real);border-radius:var(--r-sm);padding:4px 6px}"
+    ".radio-card .sel{font-weight:600}"
+    ".radios{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px}"
+    "@media (max-width:479px){.radios{grid-template-columns:1fr}}"
+    "fieldset.campo{border:0;margin:0;padding:0}"
+    "fieldset.campo legend{padding:0;margin-bottom:6px;font-size:13px;font-weight:600;"
+    "color:var(--tinta-2)}"
+    ".grupo-campos{padding-bottom:6px}"
+    ".sub-grupo{font-size:13px;font-weight:700;color:var(--azul-real);text-transform:uppercase;"
+    "letter-spacing:.06em;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--gris)}"
+    ".contador{font-size:12px;color:var(--tinta-2);margin-left:8px}"
+    ".drop{cursor:pointer}"
+    ".drop.arrastrando{border-color:var(--azul-real);background:var(--azul-06)}"
+    ".drop b{display:block;margin-top:6px;font-size:14px}"
+    ".form-aviso{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;"
+    "color:var(--tinta-2)}"
+    ".g-gap{gap:20px}"
+    ".col-acciones{display:flex;flex-direction:column;gap:10px}"
+    ".fila-acciones{display:flex;gap:6px}"
+    ".acciones-cell .acc-enlace{display:inline-flex;align-items:center;justify-content:center;"
+    "width:40px;height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);"
+    "color:var(--azul-real);text-decoration:none}"
+    ".acciones-cell .acc-enlace:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}"
+    ".acceso-ok{display:flex;align-items:center;gap:8px;margin:14px 0 0;padding:12px 14px;"
+    "border-radius:var(--r-md);font-size:13px;font-weight:600;"
+    "background:var(--azul-06);border:1px solid var(--azul-real);color:var(--tinta)}"
+    ".acceso-ok[hidden]{display:none}"
     "button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}"
+    ".btn:disabled{opacity:.55;cursor:not-allowed}"
+    ".btn-primary:disabled:hover{background:var(--azul-real)}"
+    ".barra-masiva button:disabled{opacity:.5}"
     "tr.seleccionada{background:var(--azul-06)}"
     ".kanban-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}"
     ".k-card.arrastrando{opacity:.45}"

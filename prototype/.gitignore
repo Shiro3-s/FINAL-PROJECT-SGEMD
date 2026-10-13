@@ -6,3 +6,7 @@ _subida.log
 _scan.txt
 _subidas_proyecto_anterior.json
 _duplicados.md
+
+# Salidas del control de aislamiento: son un hash de una ejecucion concreta,
+# no fuente. El script _aislamiento.py las regenera cuando hacen falta.
+_aislamiento_*.txt

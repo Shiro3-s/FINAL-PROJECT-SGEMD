@@ -1,7 +1,7 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-50 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
+53 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
@@ -27,7 +27,7 @@ pantallas globales de acceso.
     - [3.1 Acceso global (4)](#31-acceso-global-4)
     - [3.2 Estudiante (16)](#32-estudiante-16)
     - [3.3 Docente (12)](#33-docente-12)
-    - [3.4 Administrador (18)](#34-administrador-18)
+    - [3.4 Administrador (21)](#34-administrador-21)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
   - [5. Sistema de diseño](#5-sistema-de-diseño)
     - [Paleta cerrada](#paleta-cerrada)
@@ -53,7 +53,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 50 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 53 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -90,8 +90,8 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
 | `estudiante/` | 16 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, notificaciones |
 | `docente/` | 12 | Inicio, asesorías, expedientes, seguimiento, diagnósticos, tareas, perfil, notificaciones |
-| `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
-| **Total** | **50** | más `index.html` como índice local |
+| `admin/` | 21 | Inicio, gestión de perfiles, sedes y carreras, emprendimientos, seguimiento, asignaciones, trazabilidad, moderación, métricas, eventos, reportes, ayuda, perfil, notificaciones |
+| **Total** | **53** | más `index.html` como índice local |
 
 Elementos de interfaz comunes a todo el prototipo:
 
@@ -156,7 +156,7 @@ Elementos de interfaz comunes a todo el prototipo:
 | 31 | Mi perfil | Datos y carga académica |
 | 32 | Notificaciones | Avisos del sistema |
 
-### 3.4 Administrador (18)
+### 3.4 Administrador (21)
 
 | # | Vista | Qué resuelve |
 |---|---|---|
@@ -164,7 +164,7 @@ Elementos de interfaz comunes a todo el prototipo:
 | 34 | Gestión de perfiles | Alta, edición y baja de docentes y estudiantes |
 | 35 | Editar docente | Formulario de docente |
 | 36 | Editar estudiante | Formulario de estudiante + documento |
-| 37 | Emprendimientos | Los 46 emprendimientos del programa |
+| 37 | Emprendimientos | Los 90 emprendimientos del programa |
 | 38 | Plan de trabajo del emprendimiento | Vista completa del plan |
 | 39 | Seguimiento (lista) | Filtros por rol, estado y fecha |
 | 40 | Tablero de seguimiento | Consolidado de avances del programa |
@@ -174,10 +174,13 @@ Elementos de interfaz comunes a todo el prototipo:
 | 44 | Eventos | Listado y estado de aprobación |
 | 45 | Crear evento | Formulario de evento con validación |
 | 46 | Asignaciones | Historial de asignaciones docente ↔ emprendimiento |
-| 47 | Diagnósticos respondidos | Todos los diagnósticos del programa |
-| 48 | Exportar reportes | Reportes en CSV/Excel |
-| 49 | Mi perfil | Datos del administrador |
-| 50 | Notificaciones | Avisos del sistema |
+| 47 | Trazabilidad de asignaciones | Bitácora de una asignación y sus asesorías |
+| 48 | Diagnósticos respondidos | Todos los diagnósticos del programa |
+| 49 | Exportar reportes | Reportes CSV/Excel por sede, carrera y tratamiento |
+| 50 | Sedes y carreras | Oferta académica por sede |
+| 51 | Mi perfil | Datos del administrador |
+| 52 | Notificaciones | Avisos del sistema |
+| 53 | Ayuda y soporte | Preguntas frecuentes del panel |
 
 ---
 
@@ -280,11 +283,11 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 50 pantallas + index.html
+├── generar.py              Orquestador: emite las 53 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
 ├── paginas_estudiante.py   16 pantallas del estudiante
 ├── paginas_docente.py      12 pantallas del docente
-├── paginas_admin.py        18 pantallas del administrador
+├── paginas_admin.py        21 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
 ├── lib_css.py              Tokens, paleta, responsive, componentes
 ├── lib_js.py               Interacciones (filtros, menús, modales, toasts)
@@ -318,7 +321,7 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 50 pantallas + index.html)
+# Generar (emite las 53 pantallas + index.html)
 python generar.py
 
 # Derivar las variantes de logo desde docs/Logo_sinfondo.png
@@ -338,7 +341,7 @@ python _reconciliar.py
 ## 9. Validación automática
 
 El prototipo no se dio por bueno "a ojo": hay ocho auditorías y todas dan **0
-problemas** sobre las 50 pantallas.
+problemas** sobre las 53 pantallas.
 
 | Script | Qué comprueba |
 |---|---|
@@ -348,6 +351,7 @@ problemas** sobre las 50 pantallas.
 | `_check_tipografia.py` | Escala de ocho pasos, mínimo 13 px, interlineado ≥ 1.15 |
 | `_check_pct.py` | Literales con `%` sueltos que romperían el formateo |
 | `_responsive.py` | 1440/1280/768/375 px: sin desbordes, sin celdas ocultas ni sin etiqueta |
+| `_check_enlaces.py` | Que cada `href`/`src` relativo apunte a un archivo existente (enlaces muertos) |
 | `_interaccion.py` | Chromium real: filtros, menús, modales, formularios, avisos de error |
 | `_accesos.py` | Los tres accesos de punta a punta, incluido el rechazo de contraseña mala |
 
@@ -367,7 +371,7 @@ pantalla en Stitch, sin servidor de por medio.
 
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
-- **Total:** 51 pantallas en el proyecto — las 50 de interfaz más una de marca
+- **Total:** 54 pantallas en el proyecto — las 53 de interfaz más una de marca
   (`_marca/logo-color-1200.png`).
 - **Comentario:** el enlace se actualizó al recrear el proyecto. El anterior
   (`projects/8880818071963426152`) se borró por un error; se creó uno nuevo en
