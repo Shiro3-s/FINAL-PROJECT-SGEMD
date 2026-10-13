@@ -26,7 +26,7 @@ pantallas globales de acceso.
   - [3. Las vistas por rol](#3-las-vistas-por-rol)
     - [3.1 Acceso global (4)](#31-acceso-global-4)
     - [3.2 Estudiante (19 vistas, 26 archivos)](#32-estudiante-19-vistas-26-archivos)
-    - [3.3 Docente (12)](#33-docente-12)
+    - [3.3 Docente (9)](#33-docente-9)
     - [3.4 Administrador (18)](#34-administrador-18)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
   - [5. Sistema de diseño](#5-sistema-de-diseño)
@@ -89,7 +89,7 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 |---|---|---|
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
 | `estudiante/` | 26 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
-| `docente/` | 12 | Inicio, asesorías, expedientes, seguimiento, diagnósticos, tareas, perfil, notificaciones |
+| `docente/` | 9 | Inicio, asesorías, expedientes, diagnóstico, tareas, perfil, notificaciones |
 | `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
 | **Total** | **60** | más `index.html` como índice local |
 
@@ -152,29 +152,27 @@ Elementos de interfaz comunes a todo el prototipo:
 | 19b | Configuración | Edita datos personales, académicos, contraseña y foto |
 | 20 | Notificaciones | Cada aviso enlaza a su vista; incluye filtros y campana |
 
-### 3.3 Docente (12)
+### 3.3 Docente (9)
 
 | # | Vista | Qué resuelve |
 |---|---|---|
 | 21 | Inicio | Emprendimientos asignados y tareas pendientes |
-| 22 | Mis asesorías | Agenda y estado de las sesiones |
-| 23 | Registrar asesoría | **Confirma fecha y hora**; deja observaciones |
-| 24 | Emprendimientos asignados | Solo los que tiene asignados |
-| 25 | Expediente del emprendimiento | Historial completo: avances, tareas, asesorías, diagnóstico |
-| 26 | Seguimiento (lista) | Filtra por entrepreneurship y estado |
-| 27 | Tablero de seguimiento | Avance y recomendaciones por dimensiones |
-| 28 | Registrar avance y calificar | Calificación con evidencia y comentarios |
-| 29 | Revisión del diagnóstico | Lectura del resultado y recomendaciones al estudiante |
-| 30 | Tareas asignadas | Crea, asigna y califica tareas |
-| 31 | Mi perfil | Datos y carga académica |
-| 32 | Notificaciones | Avisos del sistema |
+| 22 | Mis asesorías | Agenda y estado de las sesiones; genera asesorías por estudiante o por proyecto |
+| 23 | Registrar asesoría | **Confirma fecha y hora**; deja observaciones; elige estudiante y emprendimiento |
+| 24 | Emprendimientos asignados | Solo los que tiene asignados; grupos (un emprendimiento puede tener varios estudiantes) y columna de evidencia |
+| 25 | Expediente del emprendimiento | Historial completo: avances, tareas, asesorías, diagnóstico, estudiantes del grupo |
+| 26 | Revisión del diagnóstico | Lectura del resultado y recomendaciones al estudiante |
+| 27 | Tareas asignadas | Crea, asigna y califica tareas |
+| 28 | Mi perfil | Datos personales, título/especialidad y ubicación |
+| 29 | Notificaciones | Avisos del sistema |
 
-> **Refactor UX/UI del Rol Docente:** las 12 pantallas fueron rediseñadas
-> (filtros funcionales, modales de calificación/asignación/asesoría, pestañas,
-> bitácora de comentarios, accesibilidad). El CSS/JS del rol va **embebido en cada
-> HTML** y se genera desde `paginas_docente.py` (helper `_inyectar`), así que correr
-> `python generar.py` **reproduce** los cambios sin pérdida. Detalle en
-> [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md).
+> **Refactor UX/UI del Rol Docente:** las 9 pantallas fueron rediseñadas
+> (filtros funcionales, modales de calificación/asignación/asesoría y de avance,
+> pestañas, bitácora de comentarios, accesibilidad). El menú lateral usa los
+> **mismos grupos/acordeón que el rol Estudiante**. El CSS/JS del rol va
+> **embebido en cada HTML** y se genera desde `paginas_docente.py` (helper
+> `_inyectar`), así que correr `python generar.py` **reproduce** los cambios sin
+> pérdida. Detalle en [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md).
 
 ### 3.4 Administrador (18)
 
@@ -211,8 +209,9 @@ razón de que las vistas no sean idénticas entre roles.
   docente ni horario confirmado.
 - **BR-003 — el estudiante edita poco.** Solo nombre, descripción y redes. Tipo,
   sector, etapa y acta son de solo lectura.
-- **Seguimiento del estudiante es de solo lectura.** El docente registra y califica;
-  el estudiante consulta.
+- **Seguimiento del estudiante es de solo lectura.** El docente registra y califica
+  avances (desde el modal «Registrar avance» y la columna de evidencia); el estudiante
+  consulta.
 - **Toda tarea exige evidencia** para cerrarse.
 - **Toda eliminación pide confirmación** antes de ejecutarse.
 - **El docente solo ve sus emprendimientos asignados**; el administrador ve todos.
@@ -305,7 +304,7 @@ prototype/
 ├── generar.py              Orquestador: emite las 60 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
 ├── paginas_estudiante.py   26 pantallas del estudiante
-├── paginas_docente.py      12 pantallas del docente
+├── paginas_docente.py      9 pantallas del docente
 ├── paginas_admin.py        18 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
 ├── lib_css.py              Tokens, paleta, responsive, componentes

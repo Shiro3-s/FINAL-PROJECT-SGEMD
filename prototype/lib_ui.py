@@ -90,13 +90,14 @@ NAV = {
     ],
     "docente": [
         ("Inicio", "pie", "dashboard"),
-        ("Mis asesorías", "chat", "asesorias"),
-        ("Emprendimientos asignados", "maleta", "emprendimientos"),
-        ("Seguimiento", "trend", "seguimiento"),
-        ("Diagnóstico", "clipboard", "diagnostico"),
-        ("Tareas", "checklist", "tareas"),
-        ("Notificaciones", "bell", "notificaciones"),
-        ("Perfil", "user", "perfil"),
+        ("Mis emprendimientos", [
+            ("Emprendimientos asignados", "maleta", "emprendimientos"),
+            ("Diagnóstico", "clipboard", "diagnostico"),
+        ]),
+        ("Acompañamiento y actividades", [
+            ("Asesorías", "chat", "asesorias"),
+            ("Tareas", "checklist", "tareas"),
+        ]),
     ],
     "administrador": [
         ("Inicio", "grid", "dashboard"),
@@ -149,12 +150,10 @@ MIGAS = {
     "docente": {
         "inicio": "dashboard.html",
         "mis asesorías": "asesorias.html",
+        "asesorías": "asesorias.html",
         "registrar asesoría": "asesoria-form.html",
         "emprendimientos asignados": "emprendimientos.html",
         "sabor y sabe": "emprendimiento-expediente.html",
-        "seguimiento": "seguimiento.html",
-        "tablero": "seguimiento-dashboard.html",
-        "registrar avance": "seguimiento-notas.html",
         "diagnóstico": "diagnostico.html",
         "tareas": "tareas.html",
         "mi perfil": "perfil.html",

@@ -254,3 +254,55 @@ Tareas (asignar y calificar con evidencia) → Perfil/Notificaciones.
 3. `docs/docente-rol-ux.md` + actualizaciones en `docs/estructura_de_vistas_sgemd.md`
    y `prototype/README.md`. ✅
 4. En el chat: resumen + DIFF/extractos de las pantallas clave.
+
+---
+
+## 12. Segundo refactor (2026) — vistas docente alineadas a Estudiante
+
+> Ajuste posterior pedido por el equipo. Cambia el alcance de 12 a **9** pantallas.
+> Todo se aplicó en el generador y se regeneró con `python generar.py`.
+
+1. **Menú igual al del Estudiante.** `NAV["docente"]` pasa de plano a
+   `Inicio` + grupo **Mis emprendimientos** (*Emprendimientos asignados*,
+   *Diagnóstico*) + grupo **Acompañamiento y actividades** (*Asesorías*, *Tareas*).
+   Notificaciones y Perfil dejan el menú lateral (van en la barra superior).
+   `MIGAS["docente"]` pierde Seguimiento. Archivos: `lib_ui.py` (solo `NAV`/`MIGAS`).
+2. **Se elimina Seguimiento:** `seguimiento.html`, `seguimiento-dashboard.html`,
+   `seguimiento-notas.html` y su dataset `SEGUIMIENTO`. Los archivos se borran de
+   `prototype/docente/`.
+3. **Emprendimientos:** fuera la tarjeta «En fase 2 o 3»; modelo **N:N** con
+   `ESTUDIANTES_EMP` (un emprendimiento con varios estudiantes, un estudiante con
+   varios emprendimientos); tarjeta y tabla muestran el grupo; **columna Evidencia**
+   (*Con evidencia* / *Sin evidencia*) y **filtro por evidencia**.
+4. **Asesorías:** **filtro por estudiante**; nueva acción **Generar asesoría**
+   (modal: *un estudiante* o *un proyecto completo* → anexa a todo el grupo);
+   `asesoria-form.html` permite **elegir estudiante y emprendimiento**.
+5. **Expediente:** tarjeta *Estudiantes del grupo*; acciones *Registrar avance*
+   (modal nuevo) y *Generar asesoría*.
+6. **Perfil:** sin KPIs, sin Zona horaria ni Firma electrónica; + **Título /
+   especialidad** y tarjeta **Ubicación** (región/rectoría, departamento, ciudad, sede).
+7. **Notificaciones:** el aviso de evidencia apunta a `emprendimiento-expediente.html`.
+
+### Verificación de este segundo refactor
+
+- `python _auditar.py` → **0**; `python _check_tipografia.py` → **0**.
+- `python _estructura.py` → **1** aviso: presupuesto de estilos en línea (1025 / 699),
+  deuda **preexistente y transversal** (el estado base ya daba 1058; el grueso está en
+  `estudiante/` y `admin/`, no en `docente/`). Los avisos por archivo desaparecieron
+  tras corregir el bug de inyección (ver abajo).
+- **Bug de navegabilidad corregido:** `_inyectar()` insertaba el `<script>` del rol en
+  el **primer** `</body>`, que en `lib_js` está dentro de un string de
+  `imprimirDocumento`; el bundle caía dentro de `lib_js` y el parser cerraba el
+  `<script>` antes de tiempo, dejando **toda la vista sin JavaScript**. Ahora se inserta
+  antes del **último** `</body>` (`html.rsplit("</body>", 1)`). Detalle en
+  [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md) §9.
+- **DOM real (jsdom):** las 9 pantallas cargan con `js-listo` y 0 errores JS; acordeón,
+  burger, campana→drawer, modales, filtros (estudiante/evidencia), pestañas y `?f=`
+  verificados. `estudiante/` y `admin/` siguen funcionando.
+- **Navegador real (`_interaccion.py`, Chromium):** **0 problemas** en las 60 pantallas.
+  Se ajustó la sonda de toast del verificador (tomaba un `.nav-label`/paginación como si
+  fuera un botón inerte); ver `../docs/docente-rol-ux.md` §9.
+- **Responsive (`_responsive.py`):** 88 avisos, deuda preexistente (base ya 83). El único
+  delta es `docente/emprendimientos.html` (40 → 45 celdas ocultas a 375 px), porque su
+  tabla se oculta entera a ese ancho y se le sumó la columna *Evidencia*. Sin desbordes
+  nuevos en docente.
