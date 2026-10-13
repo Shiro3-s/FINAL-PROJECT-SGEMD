@@ -226,6 +226,7 @@ table.tabla tbody tr:nth-child(even){background:var(--noche-03)}
 table.tabla tbody tr:hover{background:var(--azul-06)}
 table.tabla .num{text-align:right;font-variant-numeric:tabular-nums}
 table.tabla .acc{text-align:right;white-space:nowrap}
+.acciones-cell{display:flex;align-items:center;justify-content:flex-end}
 table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
@@ -305,7 +306,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
-.drop.sobre{border-color:var(--azul-real);background:var(--azul-real-10);color:var(--azul-real)}
+.drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
@@ -490,7 +491,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Seguimiento</b></div><div class="page-head"><h1>Seguimiento</h1><p class="sub">Salud del seguimiento de los 46 emprendimientos.</p><div class="acciones"></div></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>Vista institucional del seguimiento. El docente registra los avances de los emprendimientos asignados.</div></div><div class="sep sep-20"></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div><div class="metrica-lbl">Al día</div><div class="metrica-val">31<span class="u"></span></div></div></div><div class="barra"><span style="width:68%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">En riesgo</div><div class="metrica-val">9<span class="u"></span></div></div></div><div class="barra"><span style="width:20%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">Sin avances en 15 días</div><div class="metrica-val">6<span class="u"></span></div></div></div><div class="barra"><span style="width:13%"></span></div></div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Salud del seguimiento</h3><span class="hint"></span></div><div class="card-body"><div class="card-body"><div class="dist"><div class="dist-row"><span class="dist-lbl">Al día</span><span class="dist-bar"><i style="width:68%"></i></span><span class="dist-val">31</span></div><div class="dist-row"><span class="dist-lbl">En riesgo</span><span class="dist-bar"><i style="width:20%"></i></span><span class="dist-val">9</span></div><div class="dist-row"><span class="dist-lbl">Sin avances</span><span class="dist-bar"><i style="width:13%"></i></span><span class="dist-val">6</span></div></div><p class="nota-foot">31 de 46 emprendimientos avanzan dentro del plazo de la fase actual.</p></div></div></div><div class="card"><div class="card-head"><h3>Requieren atención (3)</h3><span class="hint"></span></div><div class="card-body"><div class="card-body"><div class="avisos"><section class="aviso-grp"><div class="aviso-grp-head"><h3 class="aviso-grp-titulo">Sin avance reciente</h3><span class="aviso-grp-n">3</span></div><article class="aviso u-alta"><span class="aviso-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div class="aviso-txt"><a class="aviso-titulo" href="emprendimiento-plan.html">Krea Textil · Jhon Ospina</a><div class="aviso-meta">FASE 1 - Ideación · Paula Andrea Rios · 28% de avance</div></div><div class="aviso-acc"><button data-accion="editar" title="Registrar avance" aria-label="Registrar avance"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button> <button data-accion="ver" title="Ver detalle" aria-label="Ver detalle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></article><article class="aviso u-alta"><span class="aviso-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div class="aviso-txt"><a class="aviso-titulo" href="emprendimiento-plan.html">Aromas del Sur · Sofia Ramirez</a><div class="aviso-meta">FASE 1 - Ideación · Sin asignar · 15% de avance</div></div><div class="aviso-acc"><button data-accion="editar" title="Registrar avance" aria-label="Registrar avance"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button> <button data-accion="ver" title="Ver detalle" aria-label="Ver detalle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></article><article class="aviso u-media"><span class="aviso-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div class="aviso-txt"><a class="aviso-titulo" href="emprendimiento-plan.html">Muebles Origen · Andres Felipe</a><div class="aviso-meta">FASE 2 - Prototipo · Ninafq Beltran · 55% de avance</div></div><div class="aviso-acc"><button data-accion="editar" title="Registrar avance" aria-label="Registrar avance"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button> <button data-accion="ver" title="Ver detalle" aria-label="Ver detalle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></article></section></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Docentes con mayor carga</h3><span class="hint"></span></div><div class="card-body"><div class="card-body"><div class="dist"><div class="dist-row"><span class="dist-lbl">Paula Rios</span><span class="dist-bar"><i style="width:50%"></i></span><span class="dist-val">6</span></div><div class="dist-row"><span class="dist-lbl">Carlos Mendoza</span><span class="dist-bar"><i style="width:42%"></i></span><span class="dist-val">5</span></div><div class="dist-row"><span class="dist-lbl">Hector Vargas</span><span class="dist-bar"><i style="width:33%"></i></span><span class="dist-val">4</span></div><div class="dist-row"><span class="dist-lbl">Ninafq Beltran</span><span class="dist-bar"><i style="width:25%"></i></span><span class="dist-val">3</span></div></div></div></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="fila-col"><a class="btn btn-secundario" href="seguimiento-dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg> Ver tablero</a><a class="btn btn-secundario" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Exportar</a></div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Seguimiento</b></div><div class="page-head"><h1>Seguimiento</h1><p class="sub">Salud del seguimiento de los 46 emprendimientos.</p><div class="acciones"></div></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>Vista institucional del seguimiento. El docente registra los avances de los emprendimientos asignados.</div></div><div class="sep sep-20"></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div><div class="metrica-lbl">Al día</div><div class="metrica-val">31<span class="u"></span></div></div></div><div class="barra"><span style="width:68%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">En riesgo</div><div class="metrica-val">9<span class="u"></span></div></div></div><div class="barra"><span style="width:20%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">Sin avances en 15 días</div><div class="metrica-val">6<span class="u"></span></div></div></div><div class="barra"><span style="width:13%"></span></div></div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Salud del seguimiento</h3><span class="hint"></span></div><div class="card-body"><div class="card-body"><div class="dist"><div class="dist-row"><span class="dist-lbl">Al día</span><span class="dist-bar"><i style="width:68%"></i></span><span class="dist-val">31</span></div><div class="dist-row"><span class="dist-lbl">En riesgo</span><span class="dist-bar"><i style="width:20%"></i></span><span class="dist-val">9</span></div><div class="dist-row"><span class="dist-lbl">Sin avances</span><span class="dist-bar"><i style="width:13%"></i></span><span class="dist-val">6</span></div></div><p class="nota-foot">31 de 46 emprendimientos avanzan dentro del plazo de la fase actual.</p></div></div></div><div class="card"><div class="card-head"><h3>Requieren atención (3)</h3><span class="hint"></span></div><div class="card-body"><div class="card-body"><div class="avisos"><section class="aviso-grp"><div class="aviso-grp-head"><h3 class="aviso-grp-titulo">Sin avance reciente</h3><span class="aviso-grp-n">3</span></div><article class="aviso u-alta"><span class="aviso-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div class="aviso-txt"><a class="aviso-titulo" href="emprendimiento-plan.html">Krea Textil · Jhon Ospina</a><div class="aviso-meta">FASE 1 - Ideación · Paula Andrea Rios · 28% de avance</div></div><div class="aviso-acc"><button data-accion="editar" title="Registrar avance" aria-label="Registrar avance"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button> <button data-accion="ver" title="Ver detalle" aria-label="Ver detalle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></article><article class="aviso u-alta"><span class="aviso-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div class="aviso-txt"><a class="aviso-titulo" href="emprendimiento-plan.html">Aromas del Sur · Sofia Ramirez</a><div class="aviso-meta">FASE 1 - Ideación · Sin asignar · 15% de avance</div></div><div class="aviso-acc"><button data-accion="editar" title="Registrar avance" aria-label="Registrar avance"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button> <button data-accion="ver" title="Ver detalle" aria-label="Ver detalle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></article><article class="aviso u-media"><span class="aviso-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div class="aviso-txt"><a class="aviso-titulo" href="emprendimiento-plan.html">Muebles Origen · Andres Felipe</a><div class="aviso-meta">FASE 2 - Prototipo · Ninafq Beltran · 55% de avance</div></div><div class="aviso-acc"><button data-accion="editar" title="Registrar avance" aria-label="Registrar avance"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button> <button data-accion="ver" title="Ver detalle" aria-label="Ver detalle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></article></section></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Docentes con mayor carga</h3><span class="hint"></span></div><div class="card-body"><div class="card-body"><div class="dist"><div class="dist-row"><span class="dist-lbl">Paula Rios</span><span class="dist-bar"><i style="width:50%"></i></span><span class="dist-val">6</span></div><div class="dist-row"><span class="dist-lbl">Carlos Mendoza</span><span class="dist-bar"><i style="width:42%"></i></span><span class="dist-val">5</span></div><div class="dist-row"><span class="dist-lbl">Hector Vargas</span><span class="dist-bar"><i style="width:33%"></i></span><span class="dist-val">4</span></div><div class="dist-row"><span class="dist-lbl">Ninafq Beltran</span><span class="dist-bar"><i style="width:25%"></i></span><span class="dist-val">3</span></div></div></div></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="fila-col"><a class="btn btn-secundario" href="seguimiento-dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg> Ver tablero</a><button class="btn btn-secundario" data-accion="exportar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Exportar seguimiento</button></div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -578,7 +579,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       var el = document.createElement("button");
       el.className = b.clase || "btn btn-secundario";
       el.textContent = b.txt;
-      el.addEventListener("click", function () {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
         if (b.alClic) b.alClic(velo);
         if (b.cerrar !== false) cerrarModal();
       });
@@ -586,7 +588,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     });
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    $(".modal-x", velo).addEventListener("click", cerrarModal);
+    $(".modal-x", velo).addEventListener("click", function (e) {
+      e.stopPropagation();
+      cerrarModal();
+    });
     velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
     var foco = $(".modal input, .modal select, .modal textarea, .modal-foot button", velo);
     if (foco) foco.focus();
@@ -635,14 +640,17 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
   /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
      de solicitudes y por la revision de emprendimientos. */
-  function rechazarConMotivo(titulo, aviso, msgOk) {
+  function rechazarConMotivo(titulo, aviso, msgOk, alRechazar) {
     abrirModal(titulo,
       '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
       '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
       '<p class="modal-aviso">' + esc(aviso) + "</p>",
       [
         { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () { toast(msgOk, "ok"); } }
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () {
+            toast(msgOk, "ok");
+            if (alRechazar) alRechazar();
+          } }
       ]);
   }
 
@@ -767,7 +775,9 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   function aplicarFiltros() {
     var zona = $("[data-tabla-zona]") || document;
     var tabla = $("table.tabla", zona);
-    var selects = $$("select", zona).filter(function (s) { return s.dataset.filtro !== "off"; });
+    var selects = $$("select.filtro, select[data-filtro]", zona).filter(function (s) {
+      return s.dataset.filtro !== "off";
+    });
     var chips = $$(".chip.activo", zona).map(function (c) { return c.dataset.chip; });
     var input = $(".buscador input", zona);
     var q = ((input && input.value) || "").trim().toLowerCase();
@@ -924,6 +934,47 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     ]);
   }
 
+  /* Nueva/editar asesoria: reusa el formulario #form-asesoria y, al editar,
+     prefilla los campos con los data-* de la fila. */
+  function abrirFormAsesoria(boton) {
+    var d = boton ? boton.dataset : null;
+    var editar = !!(d && d.cod);
+    abrirFormulario(editar ? "Editar asesoría" : "Nueva asesoría",
+      "form-asesoria", boton,
+      editar ? "Guardar cambios" : "Crear asesoría",
+      editar ? "Cambios guardados en la asesoría" : "Asesoría creada");
+    if (editar && d) {
+      var m = $(".modal");
+      if (!m) return;
+      [["estudiante", d.estu], ["docente", d.doc], ["fecha", d.fecha],
+       ["hora", d.hora], ["tema", d.tema], ["modalidad", d.mod],
+       ["estado", d.estado]].forEach(function (p) {
+        var el = m.querySelector("[name='" + p[0] + "']");
+        if (el && p[1]) el.value = p[1];
+      });
+    }
+  }
+
+  /* A07: edicion de emprendimiento desde el registro maestro. Reusa el
+     formulario #form-emprendimiento y prefilla con los data-* de la fila. */
+  function abrirFormEmprendimiento(boton) {
+    var d = boton ? boton.dataset : null;
+    if (!d || !d.emp) return;
+    abrirFormulario("Editar emprendimiento", "form-emprendimiento", boton,
+      "Guardar cambios", "Cambios guardados en el emprendimiento");
+    var m = $(".modal");
+    if (!m) return;
+    /* El campo "Código" se pinta con bloqueo (sin name): se setea directo. */
+    var cod = m.querySelector("input[disabled]");
+    if (cod && d.cod) cod.value = d.cod;
+    [["nombre", d.emp], ["estudiante", d.estu],
+     ["sector", d.sector], ["tipo", d.tipo], ["etapa", d.etapa],
+     ["avance", d.avance], ["docente", d.doc]].forEach(function (p) {
+      var el = m.querySelector("[name='" + p[0] + "']");
+      if (el && p[1]) el.value = p[1];
+    });
+  }
+
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
   /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
      ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
@@ -986,6 +1037,70 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     return h;
   }
 
+  /* --- kanban (A03) -------------------------------------------------------- */
+  /* Mueve una tarjeta entre columnas del kanban de eventos, ajusta su pie
+     (badge + acciones) y actualiza los contadores y las notas de columna vacia. */
+  function kanbanColumnas(titulo) {
+    var col = null;
+    $$(".kan-col").forEach(function (c) {
+      var t = c.querySelector(".kan-titulo");
+      if (t && t.textContent === titulo) col = c;
+    });
+    return col;
+  }
+  function kanbanContar() {
+    $$(".kan-col").forEach(function (c) {
+      var n = c.querySelector(".kan-n");
+      if (n) n.textContent = String(c.querySelectorAll(".kan-card").length);
+    });
+  }
+  function kanbanMover(card, tituloDestino, badgeHTML, pieHTML) {
+    var pie = card.querySelector(".kan-foot");
+    if (pie) pie.innerHTML = (badgeHTML || "") + (pieHTML || "");
+    var origen = card.closest(".kan-col");
+    var destino = kanbanColumnas(tituloDestino);
+    if (destino) {
+      var v = destino.querySelector(".kan-empty");
+      if (v) destino.insertBefore(card, v);
+      else destino.appendChild(card);
+    }
+    if (origen && !origen.querySelector(".kan-card") &&
+        !origen.querySelector(".kan-empty")) {
+      var e = document.createElement("div");
+      e.className = "kan-empty";
+      e.textContent = "Sin pendientes";
+      origen.appendChild(e);
+    }
+    kanbanContar();
+  }
+  function editarEventoLink() {
+    return '<a class="btn btn-sm btn-secundario" href="evento-form.html">Editar</a>';
+  }
+  function botonAprobarEvento(b) {
+    var d = b.dataset;
+    var f = {
+      titulo: "Detalle del evento",
+      filas: [
+        ["Evento", esc(d.titulo || "")],
+        ["Fecha y hora", esc(d.fecha || "")],
+        ["Lugar", esc(d.lugar || "")],
+        ["Confirmados", esc((d.confirmados || "") + " confirmaciones")],
+        ["Dirigido a", esc(d.sector || "")],
+      ],
+    };
+    var nota = "Se publicará y notificará a los estudiantes del sector correspondiente.";
+    abrirModal("Aprobar evento", htmlFicha(f, nota), [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Publicar y notificar", clase: "btn btn-primario", alClic: function () {
+          var card = b.closest(".kan-card");
+          kanbanMover(card, "Publicado",
+            '<span class="badge b-azul">' + icono(ICO.check, 12) + " Publicado</span>",
+            editarEventoLink());
+          toast("Evento publicado y notificado a los estudiantes", "ok");
+        } }
+    ]);
+  }
+
   /* --- descargas reales (item 3) ---------------------------------------- */
   function descargarArchivo(nombre, contenido, mime) {
     try {
@@ -1014,6 +1129,29 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       if (celdas.length) filas.push(celdas.join(";"));
     });
     return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* A27: pantallas sin tabla (metricas, tableros) exportan un resumen de los
+     indicadores mostrados en lugar de no exportar nada. */
+  function csvDeMetricas() {
+    var tiles = $$(".metricas .metrica, .grid.g-4 > .metrica, .metrica");
+    var filas = [];
+    tiles.forEach(function (t) {
+      var lbl = $(".metrica-lbl", t), val = $(".metrica-val", t);
+      if (lbl && val) {
+        filas.push('"' + lbl.textContent.trim().replace(/"/g, '""') + '";' +
+          '"' + val.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"');
+      }
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* F1 (vista #10): plantilla de exportacion de reportes. Se descarga con la
+     misma cabecera que el reporte maestro para cargar la informacion luego. */
+  function csvPlantillaReporte() {
+    var filas = [
+      '"Emprendimiento";"Docente";"Estudiante";"Sector";"Etapa";"% de avance";"Horas trabajadas";"Nota promedio"',
+      '"";"";"";"";"";"";"";""',
+    ];
+    return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
     var t = $("main table.tabla") || $("table.tabla");
@@ -1179,6 +1317,63 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         revisarEmprendimiento(b);
         break;
 
+      case "nueva-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-emprendimiento":
+        /* A07: abre el formulario real de edicion del emprendimiento. */
+        e.preventDefault();
+        abrirFormEmprendimiento(b);
+        break;
+
+      case "ver-instrumento": {
+        /* A16: desplega el instrumento del diagnostico (solo lectura). */
+        e.preventDefault();
+        var instr = document.getElementById("contenido-instrumento");
+        if (!instr) { toast("Instrumento no disponible", "error"); break; }
+        abrirModal("Instrumento del diagnóstico", instr.innerHTML,
+          [{ txt: "Cerrar", clase: "btn btn-primario" }]);
+        break;
+      }
+
+      case "cancelar-asesoria": {
+        e.preventDefault();
+        var dd = b.dataset;
+        confirmar("Cancelar asesoría",
+          "Se cancelará la asesoría de " + (dd.estu || "se") +
+          " del " + (dd.fecha || "esa fecha") +
+          (dd.hora ? " a las " + dd.hora : "") + ". ¿Confirmas?",
+          function () { toast("Asesoría cancelada", "ok"); });
+        break;
+      }
+
+      case "aprobar-evento": {
+        e.preventDefault();
+        botonAprobarEvento(b);
+        break;
+      }
+
+      case "rechazar-evento": {
+        e.preventDefault();
+        var cardEv = b.closest(".kan-card");
+        rechazarConMotivo("Rechazar evento",
+          "El evento volverá a borrador y su autor será notificado.",
+          "Evento rechazado",
+          function () {
+            kanbanMover(cardEv, "Borrador",
+              '<span class="badge b-neutra">' + icono(ICO.alerta, 12) + " Rechazado</span>",
+              editarEventoLink());
+          });
+        break;
+      }
+
       case "editar":
       case "registrar-avance":
       case "asignar":
@@ -1236,7 +1431,9 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
       case "exportar":
       case "exportar-reporte": {
-        var csv = csvDeTabla();
+        /* A27: exporta CSV de la tabla de la pantalla y, si no hay tabla
+           (paginas de metricas/tablero), un resumen de las metricas. */
+        var csv = csvDeTabla() || csvDeMetricas();
         e.preventDefault();
         if (csv) {
           descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
@@ -1272,12 +1469,14 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         break;
 
       case "enviar-diagnostico":
-        /* DG4: persiste el envio del cuestionario completo. */
+        /* DG4: persiste el envio del cuestionario completo. Al terminar se
+           vuelve a la pagina de resultados (E001: re-responder y regresar). */
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
         b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
+        setTimeout(function () { location.href = "diagnostico-resultados.html"; }, 750);
         break;
 
       case "guardar-borrador":
@@ -1328,7 +1527,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       case "guardar-perfil":
         /* PE1: persiste los datos personales del perfil (localStorage). */
         e.preventDefault();
-        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        var activo = document.querySelector(".campos-perfil") || b.closest(".card") || document;
+        guardar({ perfil: serializarCampos(activo) });
         toast("Datos personales guardados", "ok");
         break;
 
@@ -1453,7 +1653,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
       case "cerrar-sesion":
         e.preventDefault();
-        cerrarSesion();
+        confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
         break;
 
       case "marcar-todas-como-leidas":
@@ -1467,9 +1667,57 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
             porLeer++;
           }
         });
+        $$(".aviso").forEach(function (aviso) {
+          var leer = $('[data-accion="aprobar"]', aviso);
+          if (leer && !leer.classList.contains("hecho")) {
+            leer.classList.add("hecho");
+            leer.setAttribute("aria-pressed", "true");
+            porLeer++;
+          }
+        });
         if (typeof notifRefrescar === "function") notifRefrescar();
         if (typeof notifPersistir === "function") notifPersistir();
         toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
+        break;
+
+        /* F1 (vista #10): los botones de las pantallas de flujo sin accion
+         asignada ahora ejecutan su transicion correspondiente. */
+      case "confirmar-asignacion":
+        e.preventDefault();
+        confirmar("Confirmar asignación",
+          "Se confirmará la asignación de Carlos Mendoza como docente de Aromas del Sur (2 h por semana).",
+          function () {
+            toast("Asignación confirmada", "ok");
+            setTimeout(function () { window.location.href = "asignaciones.html"; }, 750);
+          });
+        break;
+
+      case "publicar-evento":
+        e.preventDefault();
+        confirmar("Publicar evento",
+          "El evento quedará visible para docentes y estudiantes. ¿Publicar?",
+          function () {
+            toast("Evento publicado", "ok");
+            setTimeout(function () { window.location.href = "eventos.html"; }, 750);
+          });
+        break;
+
+      case "generar-reporte":
+        e.preventDefault();
+        confirmar("Generar reporte",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          function () { toast("Reporte en cola de generación", "info"); });
+        break;
+
+      case "descargar-plantilla":
+        e.preventDefault();
+        descargarArchivo("plantilla-reporte.csv", csvPlantillaReporte(), "text/csv;charset=utf-8");
+        toast("Plantilla descargada", "ok");
+        break;
+
+      case "asignar-tarea":
+        e.preventDefault();
+        abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
         break;
 
       default:
@@ -1888,7 +2136,7 @@ guardar(estado);
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {
-              cerrarSesion();
+              confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");

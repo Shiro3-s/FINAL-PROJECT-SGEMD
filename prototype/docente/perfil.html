@@ -226,6 +226,7 @@ table.tabla tbody tr:nth-child(even){background:var(--noche-03)}
 table.tabla tbody tr:hover{background:var(--azul-06)}
 table.tabla .num{text-align:right;font-variant-numeric:tabular-nums}
 table.tabla .acc{text-align:right;white-space:nowrap}
+.acciones-cell{display:flex;align-items:center;justify-content:flex-end}
 table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
@@ -305,7 +306,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
-.drop.sobre{border-color:var(--azul-real);background:var(--azul-real-10);color:var(--azul-real)}
+.drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
@@ -490,7 +491,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Mi perfil</b></div><div class="page-head"><h1>Mi perfil</h1><p class="sub">Actualiza tus datos de contacto y revisa tu actividad.</p><div class="acciones"></div></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg></span><div><div class="metrica-lbl">Emprendimientos asignados</div><div class="metrica-val">8<span class="u"></span></div></div></div><div class="barra"><span style="width:62%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><div><div class="metrica-lbl">Asesorías realizadas</div><div class="metrica-val">31<span class="u"></span></div></div></div><div class="barra"><span style="width:78%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m15.5 13.5 1.5 8.5-5-3-5 3 1.5-8.5"/></svg></span><div><div class="metrica-lbl">Promedio de calificación</div><div class="metrica-val">89<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +2</span></div><div class="barra"><span style="width:89%"></span></div></div></div><div style="height:20px"></div><div class="grid g-2-1"><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Datos personales</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f61">Nombres</label><input id="f61" type="text" value="Carlos Alejandro" placeholder=""></div><div class="campo"><label for="f62">Apellidos</label><input id="f62" type="text" value="Mendoza Rios" placeholder=""></div><div class="campo"><label for="f63">Correo institucional</label><input id="f63" type="text" value="carlos.mendoza@sgemd.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>El correo institucional no se puede editar</div></div><div class="campo"><label for="f64">Teléfono</label><input id="f64" type="text" value="+57 300 555 0142" placeholder=""></div><div class="campo"><label for="f65">Área de conocimiento</label><input id="f65" type="text" value="Emprendimientos innovate" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Zona horaria y firma</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f66">Zona horaria</label><input id="f66" type="text" value="America/Bogota" placeholder=""></div><div class="campo"><label for="f67">Firmaelectronica</label><input id="f67" type="text" value="Carlos Mendoza - Docente de Emprendimientos" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>La firmaelectronica se solicita al programa</div></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Seguridad</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Contraseña</dt><dd>Actualizada hace 3 meses</dd></div><div class="def-row"><dt>Verificación en dos pasos</dt><dd>Activada</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 07:42</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-primario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Guardar cambios</button><button class="btn btn-secundario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Cambiar contraseña</button></div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Mi perfil</b></div><div class="page-head"><h1>Mi perfil</h1><p class="sub">Actualiza tus datos de contacto y revisa tu actividad.</p><div class="acciones"></div></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg></span><div><div class="metrica-lbl">Emprendimientos asignados</div><div class="metrica-val">8<span class="u"></span></div></div></div><div class="barra"><span style="width:62%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><div><div class="metrica-lbl">Asesorías realizadas</div><div class="metrica-val">31<span class="u"></span></div></div></div><div class="barra"><span style="width:78%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m15.5 13.5 1.5 8.5-5-3-5 3 1.5-8.5"/></svg></span><div><div class="metrica-lbl">Promedio de calificación</div><div class="metrica-val">89<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +2</span></div><div class="barra"><span style="width:89%"></span></div></div></div><div style="height:20px"></div><div class="grid g-2-1"><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Datos personales</h3><span class="hint"></span></div><div class="card-body"><div class="campos-perfil"><div class="campo"><label for="f68">Nombres</label><input id="f68" type="text" value="Carlos Alejandro" placeholder=""></div><div class="campo"><label for="f69">Apellidos</label><input id="f69" type="text" value="Mendoza Rios" placeholder=""></div><div class="campo"><label for="f70">Correo institucional</label><input id="f70" type="text" value="carlos.mendoza@sgemd.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>El correo institucional no se puede editar</div></div><div class="campo"><label for="f71">Teléfono</label><input id="f71" type="text" value="+57 300 555 0142" placeholder=""></div><div class="campo"><label for="f72">Área de conocimiento</label><input id="f72" type="text" value="Emprendimientos innovate" placeholder=""></div></div></div></div><div class="card"><div class="card-head"><h3>Zona horaria y firma</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f73">Zona horaria</label><input id="f73" type="text" value="America/Bogota" placeholder=""></div><div class="campo"><label for="f74">Firmaelectronica</label><input id="f74" type="text" value="Carlos Mendoza - Docente de Emprendimientos" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>La firmaelectronica se solicita al programa</div></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Seguridad</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Contraseña</dt><dd>Actualizada hace 3 meses</dd></div><div class="def-row"><dt>Verificación en dos pasos</dt><dd>Activada</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 07:42</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Cambiar contraseña</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-3 g-col"><div class="campo"><label for="f75">Contraseña actual</label><input id="f75" type="password" value="" placeholder="••••••••"></div><div class="campo"><label for="f76">Nueva contraseña</label><input id="f76" type="password" value="" placeholder="Mínimo 8 caracteres"></div><div class="campo"><label for="f77">Repetir nueva contraseña</label><input id="f77" type="password" value="" placeholder="••••••••"></div></div><div style="display:flex;justify-content:flex-end"><button class="btn btn-secundario" data-accion="actualizar-contrasena"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Actualizar contraseña</button></div></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="fila-col"><button class="btn btn-primario" data-accion="guardar-perfil"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Guardar cambios</button></div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -578,7 +579,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       var el = document.createElement("button");
       el.className = b.clase || "btn btn-secundario";
       el.textContent = b.txt;
-      el.addEventListener("click", function () {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
         if (b.alClic) b.alClic(velo);
         if (b.cerrar !== false) cerrarModal();
       });
@@ -586,7 +588,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     });
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    $(".modal-x", velo).addEventListener("click", cerrarModal);
+    $(".modal-x", velo).addEventListener("click", function (e) {
+      e.stopPropagation();
+      cerrarModal();
+    });
     velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
     var foco = $(".modal input, .modal select, .modal textarea, .modal-foot button", velo);
     if (foco) foco.focus();
@@ -635,14 +640,17 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
   /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
      de solicitudes y por la revision de emprendimientos. */
-  function rechazarConMotivo(titulo, aviso, msgOk) {
+  function rechazarConMotivo(titulo, aviso, msgOk, alRechazar) {
     abrirModal(titulo,
       '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
       '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
       '<p class="modal-aviso">' + esc(aviso) + "</p>",
       [
         { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () { toast(msgOk, "ok"); } }
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () {
+            toast(msgOk, "ok");
+            if (alRechazar) alRechazar();
+          } }
       ]);
   }
 
@@ -767,7 +775,9 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   function aplicarFiltros() {
     var zona = $("[data-tabla-zona]") || document;
     var tabla = $("table.tabla", zona);
-    var selects = $$("select", zona).filter(function (s) { return s.dataset.filtro !== "off"; });
+    var selects = $$("select.filtro, select[data-filtro]", zona).filter(function (s) {
+      return s.dataset.filtro !== "off";
+    });
     var chips = $$(".chip.activo", zona).map(function (c) { return c.dataset.chip; });
     var input = $(".buscador input", zona);
     var q = ((input && input.value) || "").trim().toLowerCase();
@@ -924,6 +934,47 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     ]);
   }
 
+  /* Nueva/editar asesoria: reusa el formulario #form-asesoria y, al editar,
+     prefilla los campos con los data-* de la fila. */
+  function abrirFormAsesoria(boton) {
+    var d = boton ? boton.dataset : null;
+    var editar = !!(d && d.cod);
+    abrirFormulario(editar ? "Editar asesoría" : "Nueva asesoría",
+      "form-asesoria", boton,
+      editar ? "Guardar cambios" : "Crear asesoría",
+      editar ? "Cambios guardados en la asesoría" : "Asesoría creada");
+    if (editar && d) {
+      var m = $(".modal");
+      if (!m) return;
+      [["estudiante", d.estu], ["docente", d.doc], ["fecha", d.fecha],
+       ["hora", d.hora], ["tema", d.tema], ["modalidad", d.mod],
+       ["estado", d.estado]].forEach(function (p) {
+        var el = m.querySelector("[name='" + p[0] + "']");
+        if (el && p[1]) el.value = p[1];
+      });
+    }
+  }
+
+  /* A07: edicion de emprendimiento desde el registro maestro. Reusa el
+     formulario #form-emprendimiento y prefilla con los data-* de la fila. */
+  function abrirFormEmprendimiento(boton) {
+    var d = boton ? boton.dataset : null;
+    if (!d || !d.emp) return;
+    abrirFormulario("Editar emprendimiento", "form-emprendimiento", boton,
+      "Guardar cambios", "Cambios guardados en el emprendimiento");
+    var m = $(".modal");
+    if (!m) return;
+    /* El campo "Código" se pinta con bloqueo (sin name): se setea directo. */
+    var cod = m.querySelector("input[disabled]");
+    if (cod && d.cod) cod.value = d.cod;
+    [["nombre", d.emp], ["estudiante", d.estu],
+     ["sector", d.sector], ["tipo", d.tipo], ["etapa", d.etapa],
+     ["avance", d.avance], ["docente", d.doc]].forEach(function (p) {
+      var el = m.querySelector("[name='" + p[0] + "']");
+      if (el && p[1]) el.value = p[1];
+    });
+  }
+
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
   /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
      ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
@@ -986,6 +1037,70 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     return h;
   }
 
+  /* --- kanban (A03) -------------------------------------------------------- */
+  /* Mueve una tarjeta entre columnas del kanban de eventos, ajusta su pie
+     (badge + acciones) y actualiza los contadores y las notas de columna vacia. */
+  function kanbanColumnas(titulo) {
+    var col = null;
+    $$(".kan-col").forEach(function (c) {
+      var t = c.querySelector(".kan-titulo");
+      if (t && t.textContent === titulo) col = c;
+    });
+    return col;
+  }
+  function kanbanContar() {
+    $$(".kan-col").forEach(function (c) {
+      var n = c.querySelector(".kan-n");
+      if (n) n.textContent = String(c.querySelectorAll(".kan-card").length);
+    });
+  }
+  function kanbanMover(card, tituloDestino, badgeHTML, pieHTML) {
+    var pie = card.querySelector(".kan-foot");
+    if (pie) pie.innerHTML = (badgeHTML || "") + (pieHTML || "");
+    var origen = card.closest(".kan-col");
+    var destino = kanbanColumnas(tituloDestino);
+    if (destino) {
+      var v = destino.querySelector(".kan-empty");
+      if (v) destino.insertBefore(card, v);
+      else destino.appendChild(card);
+    }
+    if (origen && !origen.querySelector(".kan-card") &&
+        !origen.querySelector(".kan-empty")) {
+      var e = document.createElement("div");
+      e.className = "kan-empty";
+      e.textContent = "Sin pendientes";
+      origen.appendChild(e);
+    }
+    kanbanContar();
+  }
+  function editarEventoLink() {
+    return '<a class="btn btn-sm btn-secundario" href="evento-form.html">Editar</a>';
+  }
+  function botonAprobarEvento(b) {
+    var d = b.dataset;
+    var f = {
+      titulo: "Detalle del evento",
+      filas: [
+        ["Evento", esc(d.titulo || "")],
+        ["Fecha y hora", esc(d.fecha || "")],
+        ["Lugar", esc(d.lugar || "")],
+        ["Confirmados", esc((d.confirmados || "") + " confirmaciones")],
+        ["Dirigido a", esc(d.sector || "")],
+      ],
+    };
+    var nota = "Se publicará y notificará a los estudiantes del sector correspondiente.";
+    abrirModal("Aprobar evento", htmlFicha(f, nota), [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Publicar y notificar", clase: "btn btn-primario", alClic: function () {
+          var card = b.closest(".kan-card");
+          kanbanMover(card, "Publicado",
+            '<span class="badge b-azul">' + icono(ICO.check, 12) + " Publicado</span>",
+            editarEventoLink());
+          toast("Evento publicado y notificado a los estudiantes", "ok");
+        } }
+    ]);
+  }
+
   /* --- descargas reales (item 3) ---------------------------------------- */
   function descargarArchivo(nombre, contenido, mime) {
     try {
@@ -1014,6 +1129,29 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       if (celdas.length) filas.push(celdas.join(";"));
     });
     return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* A27: pantallas sin tabla (metricas, tableros) exportan un resumen de los
+     indicadores mostrados en lugar de no exportar nada. */
+  function csvDeMetricas() {
+    var tiles = $$(".metricas .metrica, .grid.g-4 > .metrica, .metrica");
+    var filas = [];
+    tiles.forEach(function (t) {
+      var lbl = $(".metrica-lbl", t), val = $(".metrica-val", t);
+      if (lbl && val) {
+        filas.push('"' + lbl.textContent.trim().replace(/"/g, '""') + '";' +
+          '"' + val.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"');
+      }
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* F1 (vista #10): plantilla de exportacion de reportes. Se descarga con la
+     misma cabecera que el reporte maestro para cargar la informacion luego. */
+  function csvPlantillaReporte() {
+    var filas = [
+      '"Emprendimiento";"Docente";"Estudiante";"Sector";"Etapa";"% de avance";"Horas trabajadas";"Nota promedio"',
+      '"";"";"";"";"";"";"";""',
+    ];
+    return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
     var t = $("main table.tabla") || $("table.tabla");
@@ -1179,6 +1317,63 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         revisarEmprendimiento(b);
         break;
 
+      case "nueva-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-emprendimiento":
+        /* A07: abre el formulario real de edicion del emprendimiento. */
+        e.preventDefault();
+        abrirFormEmprendimiento(b);
+        break;
+
+      case "ver-instrumento": {
+        /* A16: desplega el instrumento del diagnostico (solo lectura). */
+        e.preventDefault();
+        var instr = document.getElementById("contenido-instrumento");
+        if (!instr) { toast("Instrumento no disponible", "error"); break; }
+        abrirModal("Instrumento del diagnóstico", instr.innerHTML,
+          [{ txt: "Cerrar", clase: "btn btn-primario" }]);
+        break;
+      }
+
+      case "cancelar-asesoria": {
+        e.preventDefault();
+        var dd = b.dataset;
+        confirmar("Cancelar asesoría",
+          "Se cancelará la asesoría de " + (dd.estu || "se") +
+          " del " + (dd.fecha || "esa fecha") +
+          (dd.hora ? " a las " + dd.hora : "") + ". ¿Confirmas?",
+          function () { toast("Asesoría cancelada", "ok"); });
+        break;
+      }
+
+      case "aprobar-evento": {
+        e.preventDefault();
+        botonAprobarEvento(b);
+        break;
+      }
+
+      case "rechazar-evento": {
+        e.preventDefault();
+        var cardEv = b.closest(".kan-card");
+        rechazarConMotivo("Rechazar evento",
+          "El evento volverá a borrador y su autor será notificado.",
+          "Evento rechazado",
+          function () {
+            kanbanMover(cardEv, "Borrador",
+              '<span class="badge b-neutra">' + icono(ICO.alerta, 12) + " Rechazado</span>",
+              editarEventoLink());
+          });
+        break;
+      }
+
       case "editar":
       case "registrar-avance":
       case "asignar":
@@ -1236,7 +1431,9 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
       case "exportar":
       case "exportar-reporte": {
-        var csv = csvDeTabla();
+        /* A27: exporta CSV de la tabla de la pantalla y, si no hay tabla
+           (paginas de metricas/tablero), un resumen de las metricas. */
+        var csv = csvDeTabla() || csvDeMetricas();
         e.preventDefault();
         if (csv) {
           descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
@@ -1272,12 +1469,14 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         break;
 
       case "enviar-diagnostico":
-        /* DG4: persiste el envio del cuestionario completo. */
+        /* DG4: persiste el envio del cuestionario completo. Al terminar se
+           vuelve a la pagina de resultados (E001: re-responder y regresar). */
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
         b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
+        setTimeout(function () { location.href = "diagnostico-resultados.html"; }, 750);
         break;
 
       case "guardar-borrador":
@@ -1328,7 +1527,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       case "guardar-perfil":
         /* PE1: persiste los datos personales del perfil (localStorage). */
         e.preventDefault();
-        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        var activo = document.querySelector(".campos-perfil") || b.closest(".card") || document;
+        guardar({ perfil: serializarCampos(activo) });
         toast("Datos personales guardados", "ok");
         break;
 
@@ -1453,7 +1653,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
       case "cerrar-sesion":
         e.preventDefault();
-        cerrarSesion();
+        confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
         break;
 
       case "marcar-todas-como-leidas":
@@ -1467,9 +1667,57 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
             porLeer++;
           }
         });
+        $$(".aviso").forEach(function (aviso) {
+          var leer = $('[data-accion="aprobar"]', aviso);
+          if (leer && !leer.classList.contains("hecho")) {
+            leer.classList.add("hecho");
+            leer.setAttribute("aria-pressed", "true");
+            porLeer++;
+          }
+        });
         if (typeof notifRefrescar === "function") notifRefrescar();
         if (typeof notifPersistir === "function") notifPersistir();
         toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
+        break;
+
+        /* F1 (vista #10): los botones de las pantallas de flujo sin accion
+         asignada ahora ejecutan su transicion correspondiente. */
+      case "confirmar-asignacion":
+        e.preventDefault();
+        confirmar("Confirmar asignación",
+          "Se confirmará la asignación de Carlos Mendoza como docente de Aromas del Sur (2 h por semana).",
+          function () {
+            toast("Asignación confirmada", "ok");
+            setTimeout(function () { window.location.href = "asignaciones.html"; }, 750);
+          });
+        break;
+
+      case "publicar-evento":
+        e.preventDefault();
+        confirmar("Publicar evento",
+          "El evento quedará visible para docentes y estudiantes. ¿Publicar?",
+          function () {
+            toast("Evento publicado", "ok");
+            setTimeout(function () { window.location.href = "eventos.html"; }, 750);
+          });
+        break;
+
+      case "generar-reporte":
+        e.preventDefault();
+        confirmar("Generar reporte",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          function () { toast("Reporte en cola de generación", "info"); });
+        break;
+
+      case "descargar-plantilla":
+        e.preventDefault();
+        descargarArchivo("plantilla-reporte.csv", csvPlantillaReporte(), "text/csv;charset=utf-8");
+        toast("Plantilla descargada", "ok");
+        break;
+
+      case "asignar-tarea":
+        e.preventDefault();
+        abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
         break;
 
       default:
@@ -1888,7 +2136,7 @@ guardar(estado);
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {
-              cerrarSesion();
+              confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");

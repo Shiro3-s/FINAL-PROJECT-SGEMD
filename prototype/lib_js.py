@@ -98,7 +98,8 @@ JS = r"""
       var el = document.createElement("button");
       el.className = b.clase || "btn btn-secundario";
       el.textContent = b.txt;
-      el.addEventListener("click", function () {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
         if (b.alClic) b.alClic(velo);
         if (b.cerrar !== false) cerrarModal();
       });
@@ -106,7 +107,10 @@ JS = r"""
     });
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    $(".modal-x", velo).addEventListener("click", cerrarModal);
+    $(".modal-x", velo).addEventListener("click", function (e) {
+      e.stopPropagation();
+      cerrarModal();
+    });
     velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
     var foco = $(".modal input, .modal select, .modal textarea, .modal-foot button", velo);
     if (foco) foco.focus();
@@ -155,14 +159,17 @@ JS = r"""
 
   /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
      de solicitudes y por la revision de emprendimientos. */
-  function rechazarConMotivo(titulo, aviso, msgOk) {
+  function rechazarConMotivo(titulo, aviso, msgOk, alRechazar) {
     abrirModal(titulo,
       '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
       '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
       '<p class="modal-aviso">' + esc(aviso) + "</p>",
       [
         { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () { toast(msgOk, "ok"); } }
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () {
+            toast(msgOk, "ok");
+            if (alRechazar) alRechazar();
+          } }
       ]);
   }
 
@@ -287,7 +294,9 @@ JS = r"""
   function aplicarFiltros() {
     var zona = $("[data-tabla-zona]") || document;
     var tabla = $("table.tabla", zona);
-    var selects = $$("select", zona).filter(function (s) { return s.dataset.filtro !== "off"; });
+    var selects = $$("select.filtro, select[data-filtro]", zona).filter(function (s) {
+      return s.dataset.filtro !== "off";
+    });
     var chips = $$(".chip.activo", zona).map(function (c) { return c.dataset.chip; });
     var input = $(".buscador input", zona);
     var q = ((input && input.value) || "").trim().toLowerCase();
@@ -444,6 +453,47 @@ JS = r"""
     ]);
   }
 
+  /* Nueva/editar asesoria: reusa el formulario #form-asesoria y, al editar,
+     prefilla los campos con los data-* de la fila. */
+  function abrirFormAsesoria(boton) {
+    var d = boton ? boton.dataset : null;
+    var editar = !!(d && d.cod);
+    abrirFormulario(editar ? "Editar asesoría" : "Nueva asesoría",
+      "form-asesoria", boton,
+      editar ? "Guardar cambios" : "Crear asesoría",
+      editar ? "Cambios guardados en la asesoría" : "Asesoría creada");
+    if (editar && d) {
+      var m = $(".modal");
+      if (!m) return;
+      [["estudiante", d.estu], ["docente", d.doc], ["fecha", d.fecha],
+       ["hora", d.hora], ["tema", d.tema], ["modalidad", d.mod],
+       ["estado", d.estado]].forEach(function (p) {
+        var el = m.querySelector("[name='" + p[0] + "']");
+        if (el && p[1]) el.value = p[1];
+      });
+    }
+  }
+
+  /* A07: edicion de emprendimiento desde el registro maestro. Reusa el
+     formulario #form-emprendimiento y prefilla con los data-* de la fila. */
+  function abrirFormEmprendimiento(boton) {
+    var d = boton ? boton.dataset : null;
+    if (!d || !d.emp) return;
+    abrirFormulario("Editar emprendimiento", "form-emprendimiento", boton,
+      "Guardar cambios", "Cambios guardados en el emprendimiento");
+    var m = $(".modal");
+    if (!m) return;
+    /* El campo "Código" se pinta con bloqueo (sin name): se setea directo. */
+    var cod = m.querySelector("input[disabled]");
+    if (cod && d.cod) cod.value = d.cod;
+    [["nombre", d.emp], ["estudiante", d.estu],
+     ["sector", d.sector], ["tipo", d.tipo], ["etapa", d.etapa],
+     ["avance", d.avance], ["docente", d.doc]].forEach(function (p) {
+      var el = m.querySelector("[name='" + p[0] + "']");
+      if (el && p[1]) el.value = p[1];
+    });
+  }
+
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
   /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
      ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
@@ -506,6 +556,70 @@ JS = r"""
     return h;
   }
 
+  /* --- kanban (A03) -------------------------------------------------------- */
+  /* Mueve una tarjeta entre columnas del kanban de eventos, ajusta su pie
+     (badge + acciones) y actualiza los contadores y las notas de columna vacia. */
+  function kanbanColumnas(titulo) {
+    var col = null;
+    $$(".kan-col").forEach(function (c) {
+      var t = c.querySelector(".kan-titulo");
+      if (t && t.textContent === titulo) col = c;
+    });
+    return col;
+  }
+  function kanbanContar() {
+    $$(".kan-col").forEach(function (c) {
+      var n = c.querySelector(".kan-n");
+      if (n) n.textContent = String(c.querySelectorAll(".kan-card").length);
+    });
+  }
+  function kanbanMover(card, tituloDestino, badgeHTML, pieHTML) {
+    var pie = card.querySelector(".kan-foot");
+    if (pie) pie.innerHTML = (badgeHTML || "") + (pieHTML || "");
+    var origen = card.closest(".kan-col");
+    var destino = kanbanColumnas(tituloDestino);
+    if (destino) {
+      var v = destino.querySelector(".kan-empty");
+      if (v) destino.insertBefore(card, v);
+      else destino.appendChild(card);
+    }
+    if (origen && !origen.querySelector(".kan-card") &&
+        !origen.querySelector(".kan-empty")) {
+      var e = document.createElement("div");
+      e.className = "kan-empty";
+      e.textContent = "Sin pendientes";
+      origen.appendChild(e);
+    }
+    kanbanContar();
+  }
+  function editarEventoLink() {
+    return '<a class="btn btn-sm btn-secundario" href="evento-form.html">Editar</a>';
+  }
+  function botonAprobarEvento(b) {
+    var d = b.dataset;
+    var f = {
+      titulo: "Detalle del evento",
+      filas: [
+        ["Evento", esc(d.titulo || "")],
+        ["Fecha y hora", esc(d.fecha || "")],
+        ["Lugar", esc(d.lugar || "")],
+        ["Confirmados", esc((d.confirmados || "") + " confirmaciones")],
+        ["Dirigido a", esc(d.sector || "")],
+      ],
+    };
+    var nota = "Se publicará y notificará a los estudiantes del sector correspondiente.";
+    abrirModal("Aprobar evento", htmlFicha(f, nota), [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Publicar y notificar", clase: "btn btn-primario", alClic: function () {
+          var card = b.closest(".kan-card");
+          kanbanMover(card, "Publicado",
+            '<span class="badge b-azul">' + icono(ICO.check, 12) + " Publicado</span>",
+            editarEventoLink());
+          toast("Evento publicado y notificado a los estudiantes", "ok");
+        } }
+    ]);
+  }
+
   /* --- descargas reales (item 3) ---------------------------------------- */
   function descargarArchivo(nombre, contenido, mime) {
     try {
@@ -534,6 +648,29 @@ JS = r"""
       if (celdas.length) filas.push(celdas.join(";"));
     });
     return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* A27: pantallas sin tabla (metricas, tableros) exportan un resumen de los
+     indicadores mostrados en lugar de no exportar nada. */
+  function csvDeMetricas() {
+    var tiles = $$(".metricas .metrica, .grid.g-4 > .metrica, .metrica");
+    var filas = [];
+    tiles.forEach(function (t) {
+      var lbl = $(".metrica-lbl", t), val = $(".metrica-val", t);
+      if (lbl && val) {
+        filas.push('"' + lbl.textContent.trim().replace(/"/g, '""') + '";' +
+          '"' + val.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"');
+      }
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* F1 (vista #10): plantilla de exportacion de reportes. Se descarga con la
+     misma cabecera que el reporte maestro para cargar la informacion luego. */
+  function csvPlantillaReporte() {
+    var filas = [
+      '"Emprendimiento";"Docente";"Estudiante";"Sector";"Etapa";"% de avance";"Horas trabajadas";"Nota promedio"',
+      '"";"";"";"";"";"";"";""',
+    ];
+    return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
     var t = $("main table.tabla") || $("table.tabla");
@@ -699,6 +836,63 @@ JS = r"""
         revisarEmprendimiento(b);
         break;
 
+      case "nueva-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-emprendimiento":
+        /* A07: abre el formulario real de edicion del emprendimiento. */
+        e.preventDefault();
+        abrirFormEmprendimiento(b);
+        break;
+
+      case "ver-instrumento": {
+        /* A16: desplega el instrumento del diagnostico (solo lectura). */
+        e.preventDefault();
+        var instr = document.getElementById("contenido-instrumento");
+        if (!instr) { toast("Instrumento no disponible", "error"); break; }
+        abrirModal("Instrumento del diagnóstico", instr.innerHTML,
+          [{ txt: "Cerrar", clase: "btn btn-primario" }]);
+        break;
+      }
+
+      case "cancelar-asesoria": {
+        e.preventDefault();
+        var dd = b.dataset;
+        confirmar("Cancelar asesoría",
+          "Se cancelará la asesoría de " + (dd.estu || "se") +
+          " del " + (dd.fecha || "esa fecha") +
+          (dd.hora ? " a las " + dd.hora : "") + ". ¿Confirmas?",
+          function () { toast("Asesoría cancelada", "ok"); });
+        break;
+      }
+
+      case "aprobar-evento": {
+        e.preventDefault();
+        botonAprobarEvento(b);
+        break;
+      }
+
+      case "rechazar-evento": {
+        e.preventDefault();
+        var cardEv = b.closest(".kan-card");
+        rechazarConMotivo("Rechazar evento",
+          "El evento volverá a borrador y su autor será notificado.",
+          "Evento rechazado",
+          function () {
+            kanbanMover(cardEv, "Borrador",
+              '<span class="badge b-neutra">' + icono(ICO.alerta, 12) + " Rechazado</span>",
+              editarEventoLink());
+          });
+        break;
+      }
+
       case "editar":
       case "registrar-avance":
       case "asignar":
@@ -756,7 +950,9 @@ JS = r"""
 
       case "exportar":
       case "exportar-reporte": {
-        var csv = csvDeTabla();
+        /* A27: exporta CSV de la tabla de la pantalla y, si no hay tabla
+           (paginas de metricas/tablero), un resumen de las metricas. */
+        var csv = csvDeTabla() || csvDeMetricas();
         e.preventDefault();
         if (csv) {
           descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
@@ -792,12 +988,14 @@ JS = r"""
         break;
 
       case "enviar-diagnostico":
-        /* DG4: persiste el envio del cuestionario completo. */
+        /* DG4: persiste el envio del cuestionario completo. Al terminar se
+           vuelve a la pagina de resultados (E001: re-responder y regresar). */
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
         b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
+        setTimeout(function () { location.href = "diagnostico-resultados.html"; }, 750);
         break;
 
       case "guardar-borrador":
@@ -848,7 +1046,8 @@ JS = r"""
       case "guardar-perfil":
         /* PE1: persiste los datos personales del perfil (localStorage). */
         e.preventDefault();
-        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        var activo = document.querySelector(".campos-perfil") || b.closest(".card") || document;
+        guardar({ perfil: serializarCampos(activo) });
         toast("Datos personales guardados", "ok");
         break;
 
@@ -973,7 +1172,7 @@ JS = r"""
 
       case "cerrar-sesion":
         e.preventDefault();
-        cerrarSesion();
+        confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
         break;
 
       case "marcar-todas-como-leidas":
@@ -987,9 +1186,57 @@ JS = r"""
             porLeer++;
           }
         });
+        $$(".aviso").forEach(function (aviso) {
+          var leer = $('[data-accion="aprobar"]', aviso);
+          if (leer && !leer.classList.contains("hecho")) {
+            leer.classList.add("hecho");
+            leer.setAttribute("aria-pressed", "true");
+            porLeer++;
+          }
+        });
         if (typeof notifRefrescar === "function") notifRefrescar();
         if (typeof notifPersistir === "function") notifPersistir();
         toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
+        break;
+
+        /* F1 (vista #10): los botones de las pantallas de flujo sin accion
+         asignada ahora ejecutan su transicion correspondiente. */
+      case "confirmar-asignacion":
+        e.preventDefault();
+        confirmar("Confirmar asignación",
+          "Se confirmará la asignación de Carlos Mendoza como docente de Aromas del Sur (2 h por semana).",
+          function () {
+            toast("Asignación confirmada", "ok");
+            setTimeout(function () { window.location.href = "asignaciones.html"; }, 750);
+          });
+        break;
+
+      case "publicar-evento":
+        e.preventDefault();
+        confirmar("Publicar evento",
+          "El evento quedará visible para docentes y estudiantes. ¿Publicar?",
+          function () {
+            toast("Evento publicado", "ok");
+            setTimeout(function () { window.location.href = "eventos.html"; }, 750);
+          });
+        break;
+
+      case "generar-reporte":
+        e.preventDefault();
+        confirmar("Generar reporte",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          function () { toast("Reporte en cola de generación", "info"); });
+        break;
+
+      case "descargar-plantilla":
+        e.preventDefault();
+        descargarArchivo("plantilla-reporte.csv", csvPlantillaReporte(), "text/csv;charset=utf-8");
+        toast("Plantilla descargada", "ok");
+        break;
+
+      case "asignar-tarea":
+        e.preventDefault();
+        abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
         break;
 
       default:
@@ -1408,7 +1655,7 @@ guardar(estado);
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {
-              cerrarSesion();
+              confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");

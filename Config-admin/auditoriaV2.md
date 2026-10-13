@@ -113,14 +113,23 @@ mapeo intención→destino**, no de maquetación.
    Vinculado a A05 por el arreglo del wiring de `data-filtro`.)*
 2. 🔴 **A03/A04** — Aprobación real de eventos y de emprendimientos/solicitudes. *(A04: vistas #2 y #3 —
    bandeja "Solicitudes pendientes" y revisión de emprendimiento creadas; falta aplicar el cambio real.
-   A03 pendiente.)*
-3. 🔴 **E001** — "Volver a responder" en `diagnostico-resultados.html` (navegación).
-4. 🟠 **A05** — Cablear filtros `select.filtro` (`_sel` → `data-filtro`).
-5. 🟠 **A06/A07/A27/A15/A16** — Redireccionamientos y acciones desviadas.
-6. 🟠 **F1/F2** — Acciones sin `data-accion` y confirmación de cierre de sesión.
-7. 🟡 **A29/A32** — Deuda CSS (`.acciones-cell` inexistente, `--azul-real-10` inexistente).
-8. 🟡 **A12** — Limpiar entradas stale en `_subidas.json`.
-9. 🟡 **A25/A14/A26** — Consistencia de métricas y del drawer de notificaciones.
+   A03: vista #6 de Etapa 3 — creada en el kanban de `eventos()`; pendiente solo la persistencia real.)*
+3. 🔴 **A08** — CRUD de asesorías. *(Vista #5 de Etapa 3 — creado: programación con Nuevo/Ver/Editar/
+   Cancelar en `asesorias()`; falta la persistencia real y el reflejo en el docente.)*
+4. 🔴 **E001** — "Volver a responder" en `diagnostico-resultados.html` (navegación). *(Vista #7 de
+   Etapa 3 — arreglado: enlace real a `diagnostico.html` y regreso a resultados tras reenviar.)*
+5. 🟠 **A05** — Cablear filtros `select.filtro` (`_sel` → `data-filtro`). *(Vista #8 de Etapa 3 —
+   hecho: `_sel()` emite `data-filtro`, primera opción con `value=""` y acote por columna vía
+   `data_filtro_col()`; `aplicarFiltros` restringido a `select.filtro`/`[data-filtro]`.)*
+6. 🟠 **A06/A07/A27/A15/A16** — Redireccionamientos y acciones desviadas. *(Vista #9 de Etapa 3 —
+   hecho: "Abrir plan" navega, "Editar" abre modal real, "Exportar" descarga CSV (con fallback a
+   métricas sin tabla), comentarios usan anclas `#cola`, y "Ver instrumento" abre modal.)*
+7. 🟠 **F1/F2** — Acciones sin `data-accion` y confirmación de cierre de sesión. *(Vista #10 de
+   Etapa 3 — hecho: los 8 botones inertes de F1 quedaron cableados a sus `case` y el cierre de sesión
+   de F2 pide `confirmar()`. El estado "sesión expirada"/403 se dejó fuera por decisión del usuario.)*
+8. 🟡 **A29/A32** — Deuda CSS (`.acciones-cell` inexistente, `--azul-real-10` inexistente).
+9. 🟡 **A12** — Limpiar entradas stale en `_subidas.json`.
+10. 🟡 **A25/A14/A26** — Consistencia de métricas y del drawer de notificaciones.
 
 ---
 
@@ -170,5 +179,113 @@ mapeo intención→destino**, no de maquetación.
   selectores `[data-filtro]` y `select[data-filtro]` de `lib_js.py` ahora excluyen `data-filtro="off"`
   (`:not([data-filtro='off'])`), como ya hacía la línea 290 — antes un elemento con `data-filtro="off"`
   recibía listeners de click/cambio y disparaba `aplicarFiltros()`. Verificado en navegador: 10
-  selects visibles sin filtrar filas; modal + Confirmar/Cancelar correctos; sin errores de consola;
-  y sin regresión en `estudiante/emprendimientos.html` (filtro por etapa 2→1 fila).
+selects visibles sin filtrar filas; modal + Confirmar/Cancelar correctos; sin errores de consola;
+   y sin regresión en `estudiante/emprendimientos.html` (filtro por etapa 2→1 fila).
+
+- **A08 — Programación de asesorías (vista #5, Etapa 3).** En `asesorias()` (admin) se conservan las
+  métricas y los gráficos existentes y se agrega debajo la tarjeta **"Programación de asesorías"**:
+  botón **Nueva asesoría** en la cabecera + tabla (Estudiante, Docente, **Fecha · hora**, Tema,
+  Modalidad, Estado con badge, @ACC). Acciones por fila: **Ver** (ficha genérica `fichaDe`),
+  **Editar** (modal con formulario prellenado), **Cancelar** (confirmación "Se cancelará la asesoría
+  de X del Y a las Z…"). Datos `ASESORIAS` con fecha en ISO y amo con `_fmt_fecha()` para la vista;
+  `campo()`/`select()` ahora aceptan `name=""` (`lib_ui.py`) para que `abrirFormAsesoria()` prellene
+  por `[name=…]`. BADGE ampliado (`programada` b-amarillo, `confirmada`/`en curso` b-azul,
+  `finalizada` b-linea, `cancelada` b-neutra). Habilitado solo crear/editar/cancelar (sin borrado
+  físico). Verificado en navegador: modal Nueva asesoría, prefill de Editar completo (incluida la
+  fecha ISO), ficha de Ver, confirmación de Cancelar y toast únicos. _(Pendiente: persistencia real y
+  reflejo en la agenda del docente.)_
+
+- **F-transversal — Duplicados de toast en modales genéricos.** Los botones del pie generados por
+  `abrirModal()` («Cancelar», «Confirmar», «Guardar cambios», etc.) no llevan `data-accion` pero el
+  dispatcher los reprocesaba por su texto (`accionDe` → slug): «Cancelar» caía en `case "cancelar"`
+  (toast "Cancelado"), «Confirmar»/«Aprobar» en el `default` (toast con el propio texto). Resultado:
+  cada acción de cualquier modal mostraba **dos toasts**. Se corrige con `e.stopPropagation()` en los
+  listeners de los botones del pie y de `.modal-x` (`lib_js.py`, `abrirModal`), de modo que los
+clics generados por el modal nunca llegan al dispatcher del documento. Verificado: cada acción de
+   la vista #5 emite un único toast. Beneficia a las vistas #2, #3 y #4.
+
+- **A03 — Aprobación de eventos (vista #6, Etapa 3).** En el kanban de `eventos()` el botón "Aprobar"
+  que antes navegaba a `evento-form.html` ahora es **Aprobar evento** (btn-primario, con los datos del
+  evento en `data-*`: titulo, fecha, lugar, confirmados, sector) más **Rechazar** (btn-secundario).
+  - **Aprobar evento** → `botonAprobarEvento()` arma el modal de aprobación con la **ficha** (Evento,
+    Fecha y hora, Lugar, Confirmados, Dirigido a) y el aviso "Se publicará y notificará a los
+    estudiantes del sector correspondiente"; al confirmar la tarjeta pasa de "Por aprobar" a
+    **Publicado** con badge `b-azul Publicado` y pie "Editar", y se muestra el toast. Si "Por aprobar"
+    queda vacía se muestra la nota "Sin pendientes" y los contadores de columna se actualizan.
+  - **Rechazar** → `rechazarConMotivo()` (extendido con un cuarto parámetro opcional `alRechazar`)
+    mueve la tarjeta a la columna **Borrador** con badge `b-neutra Rechazado` y pie "Editar".
+  - Helpers de kanban (`kanbanColumnas`, `kanbanContar`, `kanbanMover`) y `editarEventoLink()` en
+    `lib_js.py`; helper `_evento()` en `paginas_admin.py`.
+  Verificado en navegador: clases de botón correctas, modal de aprobación con ficha + aviso,
+  movimiento a Publicado/Borrador con badge y contadores, toast único y nota de columna vacía; sin
+  errores de consola. _(Pendiente: persistencia real y reflejo en la agenda del estudiante.)*
+
+- **E001 — "Volver a responder" en el diagnóstico (vista #7, Etapa 3).** El botón inerte de
+  `diagnostico_resultados()` ahora es un enlace real `a.btn.btn-primario href="diagnostico.html"`
+  (rehacer el diagnóstico desde cero). Al terminar, `enviar-diagnostico` (`lib_js.py`) persiste el
+  envío, muestra el toast y tras 750 ms navega de vuelta a `diagnostico-resultados.html`. Verificado
+  en navegador: clic en "Volver a responder" abre el formulario (5 secciones), avanzar hasta
+  "Enviar diagnóstico" hace el toast y regresa automáticamente a los resultados. Sin errores de
+  consola.
+
+- **A05 — Filtros de tablas del admin cableados (vista #8, Etapa 3).** `_sel()` (`paginas_admin.py`)
+  ahora emite `data-filtro="<slug>"`, pone `value=""` en la primera opción ("Todos/Todas…") y acepta
+  `data_filtro_col(n)` para acotar por columna (0-based). Cableado: usuarios "Filtrar área" (sin
+  columna: aplica a las dos tablas por texto de fila) y emprendimientos sector→col 3,
+  etapa→col 5, docente→col 7. Además se corrigió un bug transversal: `aplicarFiltros` (`lib_js.py`)
+  consideraba como filtros todos los `<select>` de la página (incluidos los de formularios ocultos),
+  lo que ocultaba filas al primer cambio una vez escuchaba cualquier filtro; ahora solo
+  `select.filtro`/`select[data-filtro]` (los `data-filtro="off"` de `_sel_estado` siguen excluidos).
+Verificado en navegador en usuarios (Moda → [1,5], Tecnología → [1,5], limpiar → [5,5]) y
+   emprendimientos (FASE 2 → 2, Sin asignar → 1, limpiar → 5); página de estudiante sin regresión.
+   Sin errores de consola.
+
+- **A06/A07/A27/A15/A16 — Acciones y redireccionamientos corregidos (vista #9, Etapa 3).** Nuevos
+  helpers en `paginas_admin.py`: `_exportar(etiqueta)` (botón `data-accion="exportar"`) y `_emp(...)`
+  (botón con `data-*` de la fila). En `emprendimientos()`: "Abrir plan" pasó de `boton_accion("eye")`
+  a `<a class="table-act" href="emprendimiento-plan.html">`, y "Editar" a `_emp("editar-emprendimiento")`
+  que abre el formulario real embebido `#form-emprendimiento` (nombre, código bloqueado, estudiante,
+  sector, tipo, etapa, avance, docente) vía `abrirFormEmprendimiento()`; se corrigió que el código —
+  campo sin `name` porque se pinta con `bloqueo` — se prefilla con `input[disabled]`. En
+  `comentarios()` se añadió `<div id="cola">` y los 3 avisos + "Moderar cola" pasaron a ancla `#cola`
+  (scroll) en vez de recargar la misma página. En `diagnosticos()` "Ver instrumento" abre modal
+  (`#contenido-instrumento` + case `ver-instrumento`) con las 5 secciones y 22 preguntas reales. Los
+  botones "Exportar" de `asesorias()`, `seguimiento()`, `seguimiento-dashboard()` y `asignaciones()`
+  (antes navegaban a `reportes.html`) ahora descargan CSV vía `exportar`: el case usa
+  `csvDeTabla() || csvDeMetricas()` (nuevo fallback para pantallas sin tabla que resume
+  `.metrica-lbl`/`.metrica-val`; `seguimiento` y su tablero no tienen `<table>`). Verificado en
+  navegador: modal de edición prefilleado completo (EMP-041), instrumento con sus 22 preguntas,
+  anclas `#cola`, y CSVs descargados correctos en las 4 páginas (7, 3, 4 y 4 filas). Sin errores de
+  consola.
+
+- **F1 — Acciones inertes cableadas (vista #10, Etapa 3).** Se conectó cada botón sin acción a su
+  `case` en `lib_js.py`. En `paginas_admin.py`: `perfil()` reorganizó las tarjetas — "Guardar
+  cambios" (`data-accion="guardar-perfil"`) quedó en la tarjeta "Acciones" y se añadió una tarjeta
+  **"Cambiar contraseña"** con 3 campos (`Contraseña actual`, `Nueva contraseña`, `Repetir nueva
+  contraseña`) y botón `data-accion="actualizar-contrasena"` (el patrón general ya usado en la
+  estudiante), envolviendo los datos editables en `<div class="campos-perfil">`; en
+  `asignar_emprendimiento()` "Confirmar asignación" → `confirmar-asignacion`; en `evento_form()`
+  "Publicar evento" → `publicar-evento`; en `reportes()` "Generar reporte" → `generar-reporte` y
+  "Descargar plantilla" → `descargar-plantilla`; en `notificaciones()` "Marcar todo como leído" →
+  `marcar-todas-como-leidas`. En `paginas_docente.py`: `tareas()` ganó el formulario embebido
+  `#form-tarea` (Título, Emprendimiento, Estudiante, Prioridad, Vence el, Puntos, Descripción) y
+  "Asignar tarea" → `asignar-tarea`; `perfil()` replicó el cambio de la admin; `notificaciones()`
+  quedó cableado igual. En `lib_js.py` se añadió `csvPlantillaReporte()` (cabecera de 8 columnas +
+  fila vacía); `guardar-perfil` ahora toma `.campos-perfil` con fallback a `.card` (la estudiante no
+  tiene ese contenedor); y los `case` nuevos: `confirmar-asignacion` y `publicar-evento` (confirmar +
+  toast + volver a su lista a los 750 ms), `generar-reporte` (confirmar + toast de encolado),
+  `descargar-plantilla` (descarga CSV real), `asignar-tarea` (`abrirFormulario`), y
+  `marcar-todas-como-leidas` extendido para marcar también los `.aviso` con botón `aprobar` (los
+  avisos del docente), dejando el toast informativo "No hay notificaciones sin leer" en las
+  pantallas basadas en agenda (admin). Verificado en navegador: modal "Asignar tarea" (7 campos +
+  toast "Tarea asignada"), "Actualizar contraseña" (valida vacío/nueva<8/coincidencia → éxito y
+  limpia), "Guardar cambios" persiste con clave por pantalla y excluye los campos bloqueados,
+  "Descargar plantilla" descarga CSV real, "Generar reporte"/"Publicar evento"/"Confirmar
+  asignación" abren confirmación y actúan, "Marcar todo" marca 4 avisos (docente) o informa (admin),
+  y la estudiante sigue persistiendo sin regresión. Sin errores de consola.
+
+- **F2 — Confirmación de cierre de sesión (vista #10, Etapa 3).** El `case "cerrar-sesion"` del
+  dispatcher y el enlace del mini menú `.who` quedaron envueltos en
+  `confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion)`. Verificado en
+  navegador: el mini menú muestra el modal y "Cancelar" mantiene la sesión. *(El estado "sesión
+  expirada"/403 se dejó fuera por decisión del usuario; ver §5 ítem 7.)*

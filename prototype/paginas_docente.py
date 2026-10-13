@@ -490,6 +490,7 @@ def tareas():
                "<option>Media</option><option>Baja</option></select>")
     cuerpo = callout("La tarea se considera <b>completada</b> cuando el estudiante "
                      "adjunta al menos una evidencia.", "bombilla")
+    cuerpo += '<div id="form-tarea" hidden>' + _cuerpo_tarea() + "</div>"
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += toolbar(filtros=filtros)
     cuerpo += tabla(["Tarea", "Emprendimiento", "Estudiante", "Prioridad", "Vence",
@@ -498,8 +499,23 @@ def tareas():
     return shell(R, "tareas", "Tareas asignadas", cuerpo,
                  migas=["Inicio", "Tareas"],
                  sub="Revisa y califica las entregas con evidencia de tus estudiantes.",
-                 acciones='<button class="btn btn-primario">%s Asignar tarea</button>'
+                 acciones='<button class="btn btn-primario" data-accion="asignar-tarea">'
+                          '%s Asignar tarea</button>'
                           % ico("plus", 16))
+
+def _cuerpo_tarea():
+    emps = ["Sabor y Sabe", "Krea Textil", "EcoPack", "Aromas del Sur"]
+    ests = ["Mariana Lopez", "Jhon Ospina", "Lucia Fernandez", "Sofia Ramirez"]
+    return ('<div class="grid g-2 g-col">'
+            + campo("Título de la tarea", ph="Ej.: Presentación de pitch", req=True)
+            + select("Emprendimiento", ["- Elegir -"] + emps)
+            + select("Estudiante", ["- Elegir -"] + ests)
+            + select("Prioridad", ["Baja", "Media", "Alta"], valor="Media")
+            + campo("Vence el", tipo="date")
+            + campo("Puntos", tipo="number", valor="100")
+            + "</div>"
+            + campo("Descripción (opcional)", alto=True,
+                    ph="Detalla qué debe entregar el estudiante"))
 
 
 # --- 31. Mi perfil -----------------------------------------------------------
@@ -512,12 +528,15 @@ def perfil():
     cuerpo += '<div style="height:20px"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid" style="gap:20px">'
-    cuerpo += card("Datos personales", campo("Nombres", valor="Carlos Alejandro")
+    cuerpo += card("Datos personales",
+                   '<div class="campos-perfil">'
+                   + campo("Nombres", valor="Carlos Alejandro")
                    + campo("Apellidos", valor="Mendoza Rios")
                    + campo("Correo institucional", valor="carlos.mendoza@sgemd.edu.co",
                            bloqueo="El correo institucional no se puede editar")
                    + campo("Teléfono", valor="+57 300 555 0142")
-                   + campo("Área de conocimiento", valor="Emprendimientos innovate"))
+                   + campo("Área de conocimiento", valor="Emprendimientos innovate")
+                   + "</div>")
     cuerpo += card("Zona horaria y firma", campo("Zona horaria", valor="America/Bogota")
                    + campo("Firmaelectronica",
                            valor="Carlos Mendoza - Docente de Emprendimientos",
@@ -529,12 +548,19 @@ def perfil():
         ("Verificación en dos pasos", "Activada"),
         ("Último acceso", "Hoy, 07:42"),
     ]))
+    cuerpo += card("Cambiar contraseña",
+                   '<div class="grid g-3 g-col">'
+                   + campo("Contraseña actual", tipo="password", ph="••••••••")
+                   + campo("Nueva contraseña", tipo="password", ph="Mínimo 8 caracteres")
+                   + campo("Repetir nueva contraseña", tipo="password", ph="••••••••")
+                   + "</div>"
+                   '<div style="display:flex;justify-content:flex-end">'
+                   + '<button class="btn btn-secundario" data-accion="actualizar-contrasena">'
+                     '%s Actualizar contraseña</button></div>' % ico("lock", 16))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
-                   + '<button class="btn btn-primario">%s Guardar cambios</button>'
-                     % ico("check", 16)
-                   + '<button class="btn btn-secundario">%s Cambiar contraseña</button>'
-                     % ico("lock", 16)
+                   '<div class="fila-col">'
+                   + '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                     '%s Guardar cambios</button>' % ico("check", 16)
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "perfil", "Mi perfil", cuerpo,
@@ -595,5 +621,6 @@ def notificaciones():
     return shell(R, "notificaciones", "Notificaciones", cuerpo,
                  migas=["Inicio", "Notificaciones"],
                  sub="Lo que debes revisar, ordenado por urgencia.",
-                 acciones='<button class="btn btn-secundario">%s Marcar todo '
-                          'como leído</button>' % ico("check", 16))
+                 acciones='<button class="btn btn-secundario" data-accion='
+                          '"marcar-todas-como-leidas">%s Marcar todo como leído</button>'
+                          % ico("check", 16))

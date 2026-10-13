@@ -226,6 +226,7 @@ table.tabla tbody tr:nth-child(even){background:var(--noche-03)}
 table.tabla tbody tr:hover{background:var(--azul-06)}
 table.tabla .num{text-align:right;font-variant-numeric:tabular-nums}
 table.tabla .acc{text-align:right;white-space:nowrap}
+.acciones-cell{display:flex;align-items:center;justify-content:flex-end}
 table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
@@ -305,7 +306,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
-.drop.sobre{border-color:var(--azul-real);background:var(--azul-real-10);color:var(--azul-real)}
+.drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
@@ -490,7 +491,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Gestión de perfiles</b></div><div class="page-head"><h1>Gestión de perfiles</h1><p class="sub">Altas, edición y estado de acceso de docentes y estudiantes.</p><div class="acciones"></div></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>Los perfiles de estudiante se editan desde su cuenta. El administrador solo puede cambiar el estado de acceso (Activo, Limitado o Inactivo).</div></div><div class="sep sep-20"></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="metrica-lbl">Docentes</div><div class="metrica-val">18<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +1</span></div><div class="barra"><span style="width:45%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="metrica-lbl">Estudiantes</div><div class="metrica-val">110<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +11</span></div><div class="barra"><span style="width:92%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">Cuentas inactivas</div><div class="metrica-val">4<span class="u"></span></div></div></div><div class="barra"><span style="width:12%"></span></div></div></div><div class="sep sep-20"></div><div class="toolbar"><div class="buscador crece"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Buscar" aria-label="Buscar"></div><select class="filtro" aria-label="Filtrar área"><option>Todas las áreas</option><option>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option></select></div><div class="card"><div class="card-head"><h3>Docentes</h3><button class="btn btn-primario btn-sm" data-accion="nuevo-docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nuevo docente</button><span class="hint"></span></div><div class="card-body sin-pad"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Correo institucional</th><th scope="col">Área</th><th scope="col">Carga semanal</th><th scope="col">Emprendimientos</th><th scope="col">Estado</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Código"><b>DOC-014</b></td><td data-label="Nombre"><b>Carlos Mendoza</b></td><td data-label="Correo institucional">carlos.mendoza@sgemd.edu.co</td><td data-label="Área">Alimentos</td><td data-label="Carga semanal">3 h h</td><td data-label="Emprendimientos">8</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-014" data-nombre="Carlos Mendoza" aria-label="Estado de la cuenta de Carlos Mendoza"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-013</b></td><td data-label="Nombre"><b>Paula Andrea Rios</b></td><td data-label="Correo institucional">paula.rios@sgemd.edu.co</td><td data-label="Área">Moda</td><td data-label="Carga semanal">2h h</td><td data-label="Emprendimientos">5</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-013" data-nombre="Paula Andrea Rios" aria-label="Estado de la cuenta de Paula Andrea Rios"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-012</b></td><td data-label="Nombre"><b>Hector Vargas</b></td><td data-label="Correo institucional">hector.vargas@sgemd.edu.co</td><td data-label="Área">Muebles</td><td data-label="Carga semanal">4h h</td><td data-label="Emprendimientos">6</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-012" data-nombre="Hector Vargas" aria-label="Estado de la cuenta de Hector Vargas"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-011</b></td><td data-label="Nombre"><b>Ninafq Beltran</b></td><td data-label="Correo institucional">nina.beltran@sgemd.edu.co</td><td data-label="Área">Ambiental</td><td data-label="Carga semanal">3h h</td><td data-label="Emprendimientos">7</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-011" data-nombre="Ninafq Beltran" aria-label="Estado de la cuenta de Ninafq Beltran"><option>Activo</option><option>Limitado</option><option selected>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-010</b></td><td data-label="Nombre"><b>Rafael Nieto</b></td><td data-label="Correo institucional">rafael.nieto@sgemd.edu.co</td><td data-label="Área">Tecnología</td><td data-label="Carga semanal">5h h</td><td data-label="Emprendimientos">4</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-010" data-nombre="Rafael Nieto" aria-label="Estado de la cuenta de Rafael Nieto"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr></tbody></table></div></div></div></div><div class="card"><div class="card-head"><h3>Estudiantes</h3><button class="btn btn-primario btn-sm" data-accion="nuevo-estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nuevo estudiante</button><span class="hint"></span></div><div class="card-body sin-pad"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Sector</th><th scope="col">Emprendimiento</th><th scope="col">Etapa</th><th scope="col">Avance</th><th scope="col">Estado</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Código">EST-087</td><td data-label="Nombre"><b>Mariana López</b></td><td data-label="Sector">Alimentos</td><td data-label="Emprendimiento">Sabor y Sabe</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:62%"></span></div><span style="font-size:13px;color:#162644">62%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-087" data-nombre="Mariana López" aria-label="Estado de la cuenta de Mariana López"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-086</td><td data-label="Nombre"><b>Jhon Ospina</b></td><td data-label="Sector">Moda</td><td data-label="Emprendimiento">Krea Textil</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:28%"></span></div><span style="font-size:13px;color:#162644">28%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-086" data-nombre="Jhon Ospina" aria-label="Estado de la cuenta de Jhon Ospina"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-085</td><td data-label="Nombre"><b>Lucia Fernandez</b></td><td data-label="Sector">Ambiental</td><td data-label="Emprendimiento">EcoPack</td><td data-label="Etapa"><span class="badge b-linea">FASE 3 - Validación</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:84%"></span></div><span style="font-size:13px;color:#162644">84%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-085" data-nombre="Lucia Fernandez" aria-label="Estado de la cuenta de Lucia Fernandez"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-084</td><td data-label="Nombre"><b>Sofia Ramirez</b></td><td data-label="Sector">Alimentos</td><td data-label="Emprendimiento">Aromas del Sur</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:15%"></span></div><span style="font-size:13px;color:#162644">15%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-084" data-nombre="Sofia Ramirez" aria-label="Estado de la cuenta de Sofia Ramirez"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-083</td><td data-label="Nombre"><b>Andres Felipe</b></td><td data-label="Sector">Muebles</td><td data-label="Emprendimiento">Muebles Origen</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:55%"></span></div><span style="font-size:13px;color:#162644">55%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-083" data-nombre="Andres Felipe" aria-label="Estado de la cuenta de Andres Felipe"><option>Activo</option><option>Limitado</option><option selected>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr></tbody></table></div></div></div></div><div class="paginacion" data-paginacion data-pag-actual="1" data-pag-total="4" data-pag-tam="5" data-pag-regs="18"><span data-pag-texto>Mostrando 1 a 5 de 18</span><div class="pag"><button class="btn btn-secundario btn-sm" data-pagina="prev" disabled><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Anterior</button><button class="btn btn-sm btn-acento" data-pagina="1" aria-current="page">1</button><button class="btn btn-sm btn-secundario" data-pagina="2">2</button><button class="btn btn-sm btn-secundario" data-pagina="3">3</button><button class="btn btn-sm btn-secundario" data-pagina="4">4</button><button class="btn btn-secundario btn-sm" data-pagina="next">Siguiente <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div></div><div id="form-docente" hidden><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del docente</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f68">Código</label><input id="f68" type="text" value="DOC-014" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Código asignado por el sistema</div></div><div class="campo"><label for="f69">Nombres<span class="req">*</span></label><input id="f69" type="text" value="Carlos Alejandro" placeholder="" required></div><div class="campo"><label for="f70">Apellidos<span class="req">*</span></label><input id="f70" type="text" value="Mendoza Rios" placeholder="" required></div><div class="campo"><label for="f71">Correo institucional<span class="req">*</span></label><input id="f71" type="email" value="carlos.mendoza@sgemd.edu.co" placeholder="" required></div><div class="campo"><label for="f72">Teléfono</label><input id="f72" type="tel" value="+57 300 555 0142" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Área y carga</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s73">Área de conocimiento<span class="req">*</span></label><select id="s73"><option selected>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option><option>Muebles</option></select></div><div class="campo"><label for="f74">Horas de asesoría por semana</label><input id="f74" type="number" value="3" placeholder="De 1 a 20"></div><div class="campo"><label for="f75">Emprendimientos asignados</label><input id="f75" type="text" value="8" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Se actualiza desde Asignaciones</div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Estado</dt><dd>Activo</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 07:42</dd></div><div class="def-row"><dt>Asesorías realizadas</dt><dd>31</dd></div><div class="def-row"><dt>Promedio de calificación</dt><dd>89 de 100</dd></div></dl></div></div></div></div></div><div id="form-estudiante" hidden><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>El estudiante edita su cuenta. El administrador solo puede <b>cambiar el estado de acceso</b> (Activo, Limitado o Inactivo).</div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del estudiante</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f76">Código</label><input id="f76" type="text" value="EST-087" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Código asignado por el sistema</div></div><div class="campo"><label for="f77">Nombres</label><input id="f77" type="text" value="Mariana" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Los edita el estudiante</div></div><div class="campo"><label for="f78">Apellidos</label><input id="f78" type="text" value="López" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Los edita el estudiante</div></div><div class="campo"><label for="f79">Correo institucional</label><input id="f79" type="text" value="mariana.lopez@sgemd.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Los edita el estudiante</div></div></div></div><div class="card"><div class="card-head"><h3>Emprendimiento y etapa</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Emprendimiento</dt><dd>Sabor y Sabe</dd></div><div class="def-row"><dt>Sector</dt><dd>Alimentos</dd></div><div class="def-row"><dt>Etapa</dt><dd>FASE 2 - Prototipo</dd></div><div class="def-row"><dt>Docente asignado</dt><dd>Carlos Mendoza</dd></div></dl></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Estado</dt><dd>Activo</dd></div><div class="def-row"><dt>Fecha de registro</dt><dd>12 mar 2024</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 08:02</dd></div><div class="def-row"><dt>Asesorías recibidas</dt><dd>3</dd></div></dl></div></div></div></div></div><div id="form-nuevo-docente" hidden><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><div>El docente recibirá un correo de activación en su cuenta institucional para definir su contraseña.</div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del docente</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f80">Nombres<span class="req">*</span></label><input id="f80" type="text" value="" placeholder="" required></div><div class="campo"><label for="f81">Apellidos<span class="req">*</span></label><input id="f81" type="text" value="" placeholder="" required></div><div class="campo"><label for="f82">Correo institucional<span class="req">*</span></label><input id="f82" type="email" value="" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Debe ser una cuenta @sgemd.edu.co</div></div><div class="campo"><label for="f83">Teléfono</label><input id="f83" type="tel" value="" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Área y carga</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s84">Área de conocimiento<span class="req">*</span></label><select id="s84"><option selected>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option><option>Muebles</option></select></div><div class="campo"><label for="f85">Horas de asesoría por semana</label><input id="f85" type="number" value="" placeholder="De 1 a 20"></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s86">Estado de la cuenta<span class="req">*</span></label><select id="s86"><option selected>Activo</option><option>Limitado</option></select></div><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg> Limitado deja la cuenta creada pero sin acceso hasta que la habilites.</div></div></div></div></div></div><div id="form-nuevo-estudiante" hidden><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><div>El estudiante recibirá un correo de activación en su cuenta institucional para definir su contraseña.</div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del estudiante</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f87">Nombres<span class="req">*</span></label><input id="f87" type="text" value="" placeholder="" required></div><div class="campo"><label for="f88">Apellidos<span class="req">*</span></label><input id="f88" type="text" value="" placeholder="" required></div><div class="campo"><label for="f89">Correo institucional<span class="req">*</span></label><input id="f89" type="email" value="" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Debe ser una cuenta @sgemd.edu.co</div></div><div class="campo"><label for="f90">Teléfono</label><input id="f90" type="tel" value="" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Emprendimiento y sector</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s91">Sector<span class="req">*</span></label><select id="s91"><option selected>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option><option>Muebles</option></select></div><div class="campo"><label for="f92">Nombre del emprendimiento</label><input id="f92" type="text" value="" placeholder="Ej.: Sabor y Sabe"></div><div class="campo"><label for="s93">Etapa<span class="req">*</span></label><select id="s93"><option selected>FASE 1 - Ideación</option><option>FASE 2 - Prototipo</option><option>FASE 3 - Validación</option><option>FASE 4 - Formalización</option></select></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s94">Estado de la cuenta<span class="req">*</span></label><select id="s94"><option selected>Activo</option><option>Limitado</option></select></div><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg> Limitado deja la cuenta creada pero sin acceso hasta que la habilites.</div></div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Gestión de perfiles</b></div><div class="page-head"><h1>Gestión de perfiles</h1><p class="sub">Altas, edición y estado de acceso de docentes y estudiantes.</p><div class="acciones"></div></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>Los perfiles de estudiante se editan desde su cuenta. El administrador solo puede cambiar el estado de acceso (Activo, Limitado o Inactivo).</div></div><div class="sep sep-20"></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="metrica-lbl">Docentes</div><div class="metrica-val">18<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +1</span></div><div class="barra"><span style="width:45%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="metrica-lbl">Estudiantes</div><div class="metrica-val">110<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +11</span></div><div class="barra"><span style="width:92%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">Cuentas inactivas</div><div class="metrica-val">4<span class="u"></span></div></div></div><div class="barra"><span style="width:12%"></span></div></div></div><div class="sep sep-20"></div><div class="toolbar"><div class="buscador crece"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Buscar" aria-label="Buscar"></div><select class="filtro" data-filtro="filtrar-area" aria-label="Filtrar área" ><option value="">Todas las áreas</option><option>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option></select></div><div class="card"><div class="card-head"><h3>Docentes</h3><button class="btn btn-primario btn-sm" data-accion="nuevo-docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nuevo docente</button><span class="hint"></span></div><div class="card-body sin-pad"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Correo institucional</th><th scope="col">Área</th><th scope="col">Carga semanal</th><th scope="col">Emprendimientos</th><th scope="col">Estado</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Código"><b>DOC-014</b></td><td data-label="Nombre"><b>Carlos Mendoza</b></td><td data-label="Correo institucional">carlos.mendoza@sgemd.edu.co</td><td data-label="Área">Alimentos</td><td data-label="Carga semanal">3 h h</td><td data-label="Emprendimientos">8</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-014" data-nombre="Carlos Mendoza" aria-label="Estado de la cuenta de Carlos Mendoza"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-013</b></td><td data-label="Nombre"><b>Paula Andrea Rios</b></td><td data-label="Correo institucional">paula.rios@sgemd.edu.co</td><td data-label="Área">Moda</td><td data-label="Carga semanal">2h h</td><td data-label="Emprendimientos">5</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-013" data-nombre="Paula Andrea Rios" aria-label="Estado de la cuenta de Paula Andrea Rios"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-012</b></td><td data-label="Nombre"><b>Hector Vargas</b></td><td data-label="Correo institucional">hector.vargas@sgemd.edu.co</td><td data-label="Área">Muebles</td><td data-label="Carga semanal">4h h</td><td data-label="Emprendimientos">6</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-012" data-nombre="Hector Vargas" aria-label="Estado de la cuenta de Hector Vargas"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-011</b></td><td data-label="Nombre"><b>Ninafq Beltran</b></td><td data-label="Correo institucional">nina.beltran@sgemd.edu.co</td><td data-label="Área">Ambiental</td><td data-label="Carga semanal">3h h</td><td data-label="Emprendimientos">7</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-011" data-nombre="Ninafq Beltran" aria-label="Estado de la cuenta de Ninafq Beltran"><option>Activo</option><option>Limitado</option><option selected>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código"><b>DOC-010</b></td><td data-label="Nombre"><b>Rafael Nieto</b></td><td data-label="Correo institucional">rafael.nieto@sgemd.edu.co</td><td data-label="Área">Tecnología</td><td data-label="Carga semanal">5h h</td><td data-label="Emprendimientos">4</td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="DOC-010" data-nombre="Rafael Nieto" aria-label="Estado de la cuenta de Rafael Nieto"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-docente" title="Editar docente" aria-label="Editar docente"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr></tbody></table></div></div></div></div><div class="card"><div class="card-head"><h3>Estudiantes</h3><button class="btn btn-primario btn-sm" data-accion="nuevo-estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nuevo estudiante</button><span class="hint"></span></div><div class="card-body sin-pad"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Sector</th><th scope="col">Emprendimiento</th><th scope="col">Etapa</th><th scope="col">Avance</th><th scope="col">Estado</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Código">EST-087</td><td data-label="Nombre"><b>Mariana López</b></td><td data-label="Sector">Alimentos</td><td data-label="Emprendimiento">Sabor y Sabe</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:62%"></span></div><span style="font-size:13px;color:#162644">62%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-087" data-nombre="Mariana López" aria-label="Estado de la cuenta de Mariana López"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-086</td><td data-label="Nombre"><b>Jhon Ospina</b></td><td data-label="Sector">Moda</td><td data-label="Emprendimiento">Krea Textil</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:28%"></span></div><span style="font-size:13px;color:#162644">28%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-086" data-nombre="Jhon Ospina" aria-label="Estado de la cuenta de Jhon Ospina"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-085</td><td data-label="Nombre"><b>Lucia Fernandez</b></td><td data-label="Sector">Ambiental</td><td data-label="Emprendimiento">EcoPack</td><td data-label="Etapa"><span class="badge b-linea">FASE 3 - Validación</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:84%"></span></div><span style="font-size:13px;color:#162644">84%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-085" data-nombre="Lucia Fernandez" aria-label="Estado de la cuenta de Lucia Fernandez"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-084</td><td data-label="Nombre"><b>Sofia Ramirez</b></td><td data-label="Sector">Alimentos</td><td data-label="Emprendimiento">Aromas del Sur</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:15%"></span></div><span style="font-size:13px;color:#162644">15%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-084" data-nombre="Sofia Ramirez" aria-label="Estado de la cuenta de Sofia Ramirez"><option selected>Activo</option><option>Limitado</option><option>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr><tr><td data-label="Código">EST-083</td><td data-label="Nombre"><b>Andres Felipe</b></td><td data-label="Sector">Muebles</td><td data-label="Emprendimiento">Muebles Origen</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td data-label="Avance"><div class="barra" style="min-width:110px"><span style="width:55%"></span></div><span style="font-size:13px;color:#162644">55%</span></td><td data-label="Estado"><select class="sel-estado" data-filtro="off" data-cod="EST-083" data-nombre="Andres Felipe" aria-label="Estado de la cuenta de Andres Felipe"><option>Activo</option><option>Limitado</option><option selected>Inactivo</option></select></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-estudiante" title="Editar estudiante" aria-label="Editar estudiante"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr></tbody></table></div></div></div></div><div class="paginacion" data-paginacion data-pag-actual="1" data-pag-total="4" data-pag-tam="5" data-pag-regs="18"><span data-pag-texto>Mostrando 1 a 5 de 18</span><div class="pag"><button class="btn btn-secundario btn-sm" data-pagina="prev" disabled><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Anterior</button><button class="btn btn-sm btn-acento" data-pagina="1" aria-current="page">1</button><button class="btn btn-sm btn-secundario" data-pagina="2">2</button><button class="btn btn-sm btn-secundario" data-pagina="3">3</button><button class="btn btn-sm btn-secundario" data-pagina="4">4</button><button class="btn btn-secundario btn-sm" data-pagina="next">Siguiente <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div></div><div id="form-docente" hidden><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del docente</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f78">Código</label><input id="f78" type="text" value="DOC-014" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Código asignado por el sistema</div></div><div class="campo"><label for="f79">Nombres<span class="req">*</span></label><input id="f79" type="text" value="Carlos Alejandro" placeholder="" required></div><div class="campo"><label for="f80">Apellidos<span class="req">*</span></label><input id="f80" type="text" value="Mendoza Rios" placeholder="" required></div><div class="campo"><label for="f81">Correo institucional<span class="req">*</span></label><input id="f81" type="email" value="carlos.mendoza@sgemd.edu.co" placeholder="" required></div><div class="campo"><label for="f82">Teléfono</label><input id="f82" type="tel" value="+57 300 555 0142" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Área y carga</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s83">Área de conocimiento<span class="req">*</span></label><select id="s83"><option selected>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option><option>Muebles</option></select></div><div class="campo"><label for="f84">Horas de asesoría por semana</label><input id="f84" type="number" value="3" placeholder="De 1 a 20"></div><div class="campo"><label for="f85">Emprendimientos asignados</label><input id="f85" type="text" value="8" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Se actualiza desde Asignaciones</div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Estado</dt><dd>Activo</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 07:42</dd></div><div class="def-row"><dt>Asesorías realizadas</dt><dd>31</dd></div><div class="def-row"><dt>Promedio de calificación</dt><dd>89 de 100</dd></div></dl></div></div></div></div></div><div id="form-estudiante" hidden><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>El estudiante edita su cuenta. El administrador solo puede <b>cambiar el estado de acceso</b> (Activo, Limitado o Inactivo).</div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del estudiante</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f86">Código</label><input id="f86" type="text" value="EST-087" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Código asignado por el sistema</div></div><div class="campo"><label for="f87">Nombres</label><input id="f87" type="text" value="Mariana" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Los edita el estudiante</div></div><div class="campo"><label for="f88">Apellidos</label><input id="f88" type="text" value="López" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Los edita el estudiante</div></div><div class="campo"><label for="f89">Correo institucional</label><input id="f89" type="text" value="mariana.lopez@sgemd.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Los edita el estudiante</div></div></div></div><div class="card"><div class="card-head"><h3>Emprendimiento y etapa</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Emprendimiento</dt><dd>Sabor y Sabe</dd></div><div class="def-row"><dt>Sector</dt><dd>Alimentos</dd></div><div class="def-row"><dt>Etapa</dt><dd>FASE 2 - Prototipo</dd></div><div class="def-row"><dt>Docente asignado</dt><dd>Carlos Mendoza</dd></div></dl></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Estado</dt><dd>Activo</dd></div><div class="def-row"><dt>Fecha de registro</dt><dd>12 mar 2024</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 08:02</dd></div><div class="def-row"><dt>Asesorías recibidas</dt><dd>3</dd></div></dl></div></div></div></div></div><div id="form-nuevo-docente" hidden><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><div>El docente recibirá un correo de activación en su cuenta institucional para definir su contraseña.</div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del docente</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f90">Nombres<span class="req">*</span></label><input id="f90" type="text" value="" placeholder="" required></div><div class="campo"><label for="f91">Apellidos<span class="req">*</span></label><input id="f91" type="text" value="" placeholder="" required></div><div class="campo"><label for="f92">Correo institucional<span class="req">*</span></label><input id="f92" type="email" value="" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Debe ser una cuenta @sgemd.edu.co</div></div><div class="campo"><label for="f93">Teléfono</label><input id="f93" type="tel" value="" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Área y carga</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s94">Área de conocimiento<span class="req">*</span></label><select id="s94"><option selected>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option><option>Muebles</option></select></div><div class="campo"><label for="f95">Horas de asesoría por semana</label><input id="f95" type="number" value="" placeholder="De 1 a 20"></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s96">Estado de la cuenta<span class="req">*</span></label><select id="s96"><option selected>Activo</option><option>Limitado</option></select></div><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg> Limitado deja la cuenta creada pero sin acceso hasta que la habilites.</div></div></div></div></div></div><div id="form-nuevo-estudiante" hidden><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><div>El estudiante recibirá un correo de activación en su cuenta institucional para definir su contraseña.</div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos del estudiante</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f97">Nombres<span class="req">*</span></label><input id="f97" type="text" value="" placeholder="" required></div><div class="campo"><label for="f98">Apellidos<span class="req">*</span></label><input id="f98" type="text" value="" placeholder="" required></div><div class="campo"><label for="f99">Correo institucional<span class="req">*</span></label><input id="f99" type="email" value="" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Debe ser una cuenta @sgemd.edu.co</div></div><div class="campo"><label for="f100">Teléfono</label><input id="f100" type="tel" value="" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Emprendimiento y sector</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s101">Sector<span class="req">*</span></label><select id="s101"><option selected>Alimentos</option><option>Moda</option><option>Ambiental</option><option>Tecnología</option><option>Muebles</option></select></div><div class="campo"><label for="f102">Nombre del emprendimiento</label><input id="f102" type="text" value="" placeholder="Ej.: Sabor y Sabe"></div><div class="campo"><label for="s103">Etapa<span class="req">*</span></label><select id="s103"><option selected>FASE 1 - Ideación</option><option>FASE 2 - Prototipo</option><option>FASE 3 - Validación</option><option>FASE 4 - Formalización</option></select></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Estado del acceso</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="s104">Estado de la cuenta<span class="req">*</span></label><select id="s104"><option selected>Activo</option><option>Limitado</option></select></div><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg> Limitado deja la cuenta creada pero sin acceso hasta que la habilites.</div></div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -578,7 +579,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       var el = document.createElement("button");
       el.className = b.clase || "btn btn-secundario";
       el.textContent = b.txt;
-      el.addEventListener("click", function () {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
         if (b.alClic) b.alClic(velo);
         if (b.cerrar !== false) cerrarModal();
       });
@@ -586,7 +588,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     });
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    $(".modal-x", velo).addEventListener("click", cerrarModal);
+    $(".modal-x", velo).addEventListener("click", function (e) {
+      e.stopPropagation();
+      cerrarModal();
+    });
     velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
     var foco = $(".modal input, .modal select, .modal textarea, .modal-foot button", velo);
     if (foco) foco.focus();
@@ -635,14 +640,17 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
   /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
      de solicitudes y por la revision de emprendimientos. */
-  function rechazarConMotivo(titulo, aviso, msgOk) {
+  function rechazarConMotivo(titulo, aviso, msgOk, alRechazar) {
     abrirModal(titulo,
       '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
       '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
       '<p class="modal-aviso">' + esc(aviso) + "</p>",
       [
         { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () { toast(msgOk, "ok"); } }
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () {
+            toast(msgOk, "ok");
+            if (alRechazar) alRechazar();
+          } }
       ]);
   }
 
@@ -767,7 +775,9 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   function aplicarFiltros() {
     var zona = $("[data-tabla-zona]") || document;
     var tabla = $("table.tabla", zona);
-    var selects = $$("select", zona).filter(function (s) { return s.dataset.filtro !== "off"; });
+    var selects = $$("select.filtro, select[data-filtro]", zona).filter(function (s) {
+      return s.dataset.filtro !== "off";
+    });
     var chips = $$(".chip.activo", zona).map(function (c) { return c.dataset.chip; });
     var input = $(".buscador input", zona);
     var q = ((input && input.value) || "").trim().toLowerCase();
@@ -924,6 +934,47 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     ]);
   }
 
+  /* Nueva/editar asesoria: reusa el formulario #form-asesoria y, al editar,
+     prefilla los campos con los data-* de la fila. */
+  function abrirFormAsesoria(boton) {
+    var d = boton ? boton.dataset : null;
+    var editar = !!(d && d.cod);
+    abrirFormulario(editar ? "Editar asesoría" : "Nueva asesoría",
+      "form-asesoria", boton,
+      editar ? "Guardar cambios" : "Crear asesoría",
+      editar ? "Cambios guardados en la asesoría" : "Asesoría creada");
+    if (editar && d) {
+      var m = $(".modal");
+      if (!m) return;
+      [["estudiante", d.estu], ["docente", d.doc], ["fecha", d.fecha],
+       ["hora", d.hora], ["tema", d.tema], ["modalidad", d.mod],
+       ["estado", d.estado]].forEach(function (p) {
+        var el = m.querySelector("[name='" + p[0] + "']");
+        if (el && p[1]) el.value = p[1];
+      });
+    }
+  }
+
+  /* A07: edicion de emprendimiento desde el registro maestro. Reusa el
+     formulario #form-emprendimiento y prefilla con los data-* de la fila. */
+  function abrirFormEmprendimiento(boton) {
+    var d = boton ? boton.dataset : null;
+    if (!d || !d.emp) return;
+    abrirFormulario("Editar emprendimiento", "form-emprendimiento", boton,
+      "Guardar cambios", "Cambios guardados en el emprendimiento");
+    var m = $(".modal");
+    if (!m) return;
+    /* El campo "Código" se pinta con bloqueo (sin name): se setea directo. */
+    var cod = m.querySelector("input[disabled]");
+    if (cod && d.cod) cod.value = d.cod;
+    [["nombre", d.emp], ["estudiante", d.estu],
+     ["sector", d.sector], ["tipo", d.tipo], ["etapa", d.etapa],
+     ["avance", d.avance], ["docente", d.doc]].forEach(function (p) {
+      var el = m.querySelector("[name='" + p[0] + "']");
+      if (el && p[1]) el.value = p[1];
+    });
+  }
+
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
   /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
      ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
@@ -986,6 +1037,70 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     return h;
   }
 
+  /* --- kanban (A03) -------------------------------------------------------- */
+  /* Mueve una tarjeta entre columnas del kanban de eventos, ajusta su pie
+     (badge + acciones) y actualiza los contadores y las notas de columna vacia. */
+  function kanbanColumnas(titulo) {
+    var col = null;
+    $$(".kan-col").forEach(function (c) {
+      var t = c.querySelector(".kan-titulo");
+      if (t && t.textContent === titulo) col = c;
+    });
+    return col;
+  }
+  function kanbanContar() {
+    $$(".kan-col").forEach(function (c) {
+      var n = c.querySelector(".kan-n");
+      if (n) n.textContent = String(c.querySelectorAll(".kan-card").length);
+    });
+  }
+  function kanbanMover(card, tituloDestino, badgeHTML, pieHTML) {
+    var pie = card.querySelector(".kan-foot");
+    if (pie) pie.innerHTML = (badgeHTML || "") + (pieHTML || "");
+    var origen = card.closest(".kan-col");
+    var destino = kanbanColumnas(tituloDestino);
+    if (destino) {
+      var v = destino.querySelector(".kan-empty");
+      if (v) destino.insertBefore(card, v);
+      else destino.appendChild(card);
+    }
+    if (origen && !origen.querySelector(".kan-card") &&
+        !origen.querySelector(".kan-empty")) {
+      var e = document.createElement("div");
+      e.className = "kan-empty";
+      e.textContent = "Sin pendientes";
+      origen.appendChild(e);
+    }
+    kanbanContar();
+  }
+  function editarEventoLink() {
+    return '<a class="btn btn-sm btn-secundario" href="evento-form.html">Editar</a>';
+  }
+  function botonAprobarEvento(b) {
+    var d = b.dataset;
+    var f = {
+      titulo: "Detalle del evento",
+      filas: [
+        ["Evento", esc(d.titulo || "")],
+        ["Fecha y hora", esc(d.fecha || "")],
+        ["Lugar", esc(d.lugar || "")],
+        ["Confirmados", esc((d.confirmados || "") + " confirmaciones")],
+        ["Dirigido a", esc(d.sector || "")],
+      ],
+    };
+    var nota = "Se publicará y notificará a los estudiantes del sector correspondiente.";
+    abrirModal("Aprobar evento", htmlFicha(f, nota), [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Publicar y notificar", clase: "btn btn-primario", alClic: function () {
+          var card = b.closest(".kan-card");
+          kanbanMover(card, "Publicado",
+            '<span class="badge b-azul">' + icono(ICO.check, 12) + " Publicado</span>",
+            editarEventoLink());
+          toast("Evento publicado y notificado a los estudiantes", "ok");
+        } }
+    ]);
+  }
+
   /* --- descargas reales (item 3) ---------------------------------------- */
   function descargarArchivo(nombre, contenido, mime) {
     try {
@@ -1014,6 +1129,29 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       if (celdas.length) filas.push(celdas.join(";"));
     });
     return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* A27: pantallas sin tabla (metricas, tableros) exportan un resumen de los
+     indicadores mostrados en lugar de no exportar nada. */
+  function csvDeMetricas() {
+    var tiles = $$(".metricas .metrica, .grid.g-4 > .metrica, .metrica");
+    var filas = [];
+    tiles.forEach(function (t) {
+      var lbl = $(".metrica-lbl", t), val = $(".metrica-val", t);
+      if (lbl && val) {
+        filas.push('"' + lbl.textContent.trim().replace(/"/g, '""') + '";' +
+          '"' + val.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"');
+      }
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* F1 (vista #10): plantilla de exportacion de reportes. Se descarga con la
+     misma cabecera que el reporte maestro para cargar la informacion luego. */
+  function csvPlantillaReporte() {
+    var filas = [
+      '"Emprendimiento";"Docente";"Estudiante";"Sector";"Etapa";"% de avance";"Horas trabajadas";"Nota promedio"',
+      '"";"";"";"";"";"";"";""',
+    ];
+    return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
     var t = $("main table.tabla") || $("table.tabla");
@@ -1179,6 +1317,63 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         revisarEmprendimiento(b);
         break;
 
+      case "nueva-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-emprendimiento":
+        /* A07: abre el formulario real de edicion del emprendimiento. */
+        e.preventDefault();
+        abrirFormEmprendimiento(b);
+        break;
+
+      case "ver-instrumento": {
+        /* A16: desplega el instrumento del diagnostico (solo lectura). */
+        e.preventDefault();
+        var instr = document.getElementById("contenido-instrumento");
+        if (!instr) { toast("Instrumento no disponible", "error"); break; }
+        abrirModal("Instrumento del diagnóstico", instr.innerHTML,
+          [{ txt: "Cerrar", clase: "btn btn-primario" }]);
+        break;
+      }
+
+      case "cancelar-asesoria": {
+        e.preventDefault();
+        var dd = b.dataset;
+        confirmar("Cancelar asesoría",
+          "Se cancelará la asesoría de " + (dd.estu || "se") +
+          " del " + (dd.fecha || "esa fecha") +
+          (dd.hora ? " a las " + dd.hora : "") + ". ¿Confirmas?",
+          function () { toast("Asesoría cancelada", "ok"); });
+        break;
+      }
+
+      case "aprobar-evento": {
+        e.preventDefault();
+        botonAprobarEvento(b);
+        break;
+      }
+
+      case "rechazar-evento": {
+        e.preventDefault();
+        var cardEv = b.closest(".kan-card");
+        rechazarConMotivo("Rechazar evento",
+          "El evento volverá a borrador y su autor será notificado.",
+          "Evento rechazado",
+          function () {
+            kanbanMover(cardEv, "Borrador",
+              '<span class="badge b-neutra">' + icono(ICO.alerta, 12) + " Rechazado</span>",
+              editarEventoLink());
+          });
+        break;
+      }
+
       case "editar":
       case "registrar-avance":
       case "asignar":
@@ -1236,7 +1431,9 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
       case "exportar":
       case "exportar-reporte": {
-        var csv = csvDeTabla();
+        /* A27: exporta CSV de la tabla de la pantalla y, si no hay tabla
+           (paginas de metricas/tablero), un resumen de las metricas. */
+        var csv = csvDeTabla() || csvDeMetricas();
         e.preventDefault();
         if (csv) {
           descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
@@ -1272,12 +1469,14 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         break;
 
       case "enviar-diagnostico":
-        /* DG4: persiste el envio del cuestionario completo. */
+        /* DG4: persiste el envio del cuestionario completo. Al terminar se
+           vuelve a la pagina de resultados (E001: re-responder y regresar). */
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
         b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
+        setTimeout(function () { location.href = "diagnostico-resultados.html"; }, 750);
         break;
 
       case "guardar-borrador":
@@ -1328,7 +1527,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       case "guardar-perfil":
         /* PE1: persiste los datos personales del perfil (localStorage). */
         e.preventDefault();
-        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        var activo = document.querySelector(".campos-perfil") || b.closest(".card") || document;
+        guardar({ perfil: serializarCampos(activo) });
         toast("Datos personales guardados", "ok");
         break;
 
@@ -1453,7 +1653,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 
       case "cerrar-sesion":
         e.preventDefault();
-        cerrarSesion();
+        confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
         break;
 
       case "marcar-todas-como-leidas":
@@ -1467,9 +1667,57 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
             porLeer++;
           }
         });
+        $$(".aviso").forEach(function (aviso) {
+          var leer = $('[data-accion="aprobar"]', aviso);
+          if (leer && !leer.classList.contains("hecho")) {
+            leer.classList.add("hecho");
+            leer.setAttribute("aria-pressed", "true");
+            porLeer++;
+          }
+        });
         if (typeof notifRefrescar === "function") notifRefrescar();
         if (typeof notifPersistir === "function") notifPersistir();
         toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
+        break;
+
+        /* F1 (vista #10): los botones de las pantallas de flujo sin accion
+         asignada ahora ejecutan su transicion correspondiente. */
+      case "confirmar-asignacion":
+        e.preventDefault();
+        confirmar("Confirmar asignación",
+          "Se confirmará la asignación de Carlos Mendoza como docente de Aromas del Sur (2 h por semana).",
+          function () {
+            toast("Asignación confirmada", "ok");
+            setTimeout(function () { window.location.href = "asignaciones.html"; }, 750);
+          });
+        break;
+
+      case "publicar-evento":
+        e.preventDefault();
+        confirmar("Publicar evento",
+          "El evento quedará visible para docentes y estudiantes. ¿Publicar?",
+          function () {
+            toast("Evento publicado", "ok");
+            setTimeout(function () { window.location.href = "eventos.html"; }, 750);
+          });
+        break;
+
+      case "generar-reporte":
+        e.preventDefault();
+        confirmar("Generar reporte",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          function () { toast("Reporte en cola de generación", "info"); });
+        break;
+
+      case "descargar-plantilla":
+        e.preventDefault();
+        descargarArchivo("plantilla-reporte.csv", csvPlantillaReporte(), "text/csv;charset=utf-8");
+        toast("Plantilla descargada", "ok");
+        break;
+
+      case "asignar-tarea":
+        e.preventDefault();
+        abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
         break;
 
       default:
@@ -1888,7 +2136,7 @@ guardar(estado);
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {
-              cerrarSesion();
+              confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");

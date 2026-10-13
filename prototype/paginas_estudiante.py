@@ -728,7 +728,7 @@ def diagnostico_resultados():
                  migas=["Inicio", "Diagnóstico", "Resultado"],
                  sub="Puntaje, comportamiento entrepreneurial y recomendaciones del docente.",
                  acciones='<button class="btn btn-secundario" data-accion="descargar">%s Descargar PDF</button>' % ico("download", 16)
-                          + '<button class="btn btn-primario">%s Volver a responder</button>' % ico("clipboard", 16))
+                          + '<a class="btn btn-primario" href="diagnostico.html">%s Volver a responder</a>' % ico("clipboard", 16))
 
 
 # --- 8. Plan de trabajo ------------------------------------------------------

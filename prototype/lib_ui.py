@@ -430,7 +430,7 @@ def _fid(prefijo="f"):
 _CONTADOR = 0
 
 
-def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False):
+def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False, name=""):
     i = _fid("f")
     h = '<div class="campo"><label for="%s">%s%s</label>' % (
         i, label, '<span class="req">*</span>' if req else "")
@@ -438,24 +438,27 @@ def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", 
         h += ('<input id="%s" type="text" value="%s" disabled>'
               '<div class="bloqueo">%s%s</div></div>' % (i, valor, ico("lock", 12), bloqueo))
     elif alto:
-        h += '<textarea id="%s" placeholder="%s">%s</textarea>' % (i, ph, valor)
+        h += '<textarea id="%s"%s placeholder="%s">%s</textarea>' % (
+            i, (' name="%s"' % name) if name else "", ph, valor)
         if ayuda:
             h += '<div class="ayuda">%s%s</div>' % (ico("alerta", 13), ayuda)
         h += "</div>"
     else:
-        h += '<input id="%s" type="%s" value="%s" placeholder="%s"%s>' % (
-            i, tipo, valor, ph, " required" if req else "")
+        h += '<input id="%s" type="%s" value="%s" placeholder="%s"%s%s>' % (
+            i, tipo, valor, ph, (" name=\"%s\"" % name) if name else "",
+            " required" if req else "")
         if ayuda:
             h += '<div class="ayuda">%s%s</div>' % (ico("alerta", 13), ayuda)
         h += "</div>"
     return h
 
 
-def select(label, opciones, req=False, bloqueo="", valor=None):
+def select(label, opciones, req=False, bloqueo="", valor=None, name=""):
     i = _fid("s")
-    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s>' % (
+    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s%s>' % (
         i, label, '<span class="req">*</span>' if req else "", i,
-        " disabled" if bloqueo else "")
+        " disabled" if bloqueo else "",
+        (' name="%s"' % name) if name else "")
     for o in opciones:
         sel = " selected" if valor and o == valor else ""
         h += '<option%s>%s</option>' % (sel, o)

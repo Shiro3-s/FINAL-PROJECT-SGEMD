@@ -8,6 +8,8 @@ Reglas del rol:
   - Exporta reportes en CSV y PDF.
 """
 
+import unicodedata
+
 from lib_ui import (
     shell, metricas, tabla, toolbar, paginas, badge, campo, select, callout,
     card, estado_vacio, lista_def, steps, ico, boton_accion, ico, agenda, distribucion,
@@ -30,6 +32,11 @@ BADGE = {
     "borrado": "b-neutra",
     "visible": "b-azul",
     "oculto": "b-neutra",
+    "programada": "b-amarillo",
+    "confirmada": "b-azul",
+    "en curso": "b-azul",
+    "finalizada": "b-linea",
+    "cancelada": "b-neutra",
 }
 
 ETAPAS = ["FASE 1 - Ideación", "FASE 2 - Prototipo",
@@ -101,6 +108,36 @@ SOLIC_CITAS = [
      "Validación de mercado para nueva línea"),
 ]
 
+# Programa de asesorias (A08): fields = cod, estudiante, docente, fecha (ISO),
+# hora, tema, modalidad, estado. Los nombres deben existir en ESTUDIANTES/DOCENTES
+# para poder prefiltarlos en el formulario de edicion.
+ASESORIAS = [
+    ("ASE-012", "Mariana López", "Carlos Mendoza", "2024-11-12", "10:00",
+     "Revisión del prototipo de empaque", "Virtual", "Programada"),
+    ("ASE-011", "Lucia Fernandez", "Hector Vargas", "2024-11-13", "14:00",
+     "Asesoría sobre costos de producción", "Presencial", "Confirmada"),
+    ("ASE-010", "Jhon Ospina", "Paula Andrea Rios", "2024-11-14", "09:00",
+     "Validación de mercado para nueva línea", "Virtual", "En curso"),
+    ("ASE-009", "Sofia Ramirez", "Carlos Mendoza", "2024-11-08", "16:00",
+     "Plan financiero y fuentes de financiación", "Virtual", "Finalizada"),
+    ("ASE-008", "Andres Felipe", "Ninafq Beltran", "2024-11-07", "11:00",
+     "Costos y margen en la línea de muebles", "Presencial", "Cancelada"),
+    ("ASE-007", "Mariana López", "Hector Vargas", "2024-11-06", "15:00",
+     "Impacto ambiental del empaque", "Virtual", "Finalizada"),
+]
+
+_MESES = ["ene", "feb", "mar", "abr", "may", "jun",
+          "jul", "ago", "sep", "oct", "nov", "dic"]
+
+
+def _fmt_fecha(iso):
+    """Convierte 2024-11-12 a '12 nov 2024' para mostrar en tabla/cancelacion."""
+    try:
+        anio, mes, dia = iso.split("-")
+        return "%d %s %s" % (int(dia), _MESES[int(mes) - 1], anio)
+    except (ValueError, AttributeError):
+        return iso
+
 
 def _b(icono, etiqueta):
     return boton_accion(icono, etiqueta)
@@ -140,14 +177,55 @@ def _sel_estado(cod, nombre, estado):
             % (cod, nombre, nombre, opciones))
 
 
+def _asesoria(accion, icono, etiqueta, cod="", estu="", doc="", fecha="", hora="",
+              tema="", mod="", est=""):
+    """Boton por fila del programa de asesorias; los datos opcionales viajan en
+    data-* para prefill del modal de edicion o para el mensaje de cancelacion."""
+    extra = "".join(' data-%s="%s"' % (k, v) for k, v in (
+        ("cod", cod), ("estu", estu), ("doc", doc), ("fecha", fecha),
+        ("hora", hora), ("tema", tema), ("mod", mod), ("estado", est)) if v)
+    return ('<button data-accion="%s"%s title="%s" aria-label="%s">%s</button>'
+            % (accion, extra, etiqueta, etiqueta, ico(icono, 16)))
+
+
+def _evento(accion, icono, etiqueta, titulo="", fecha="", lugar="",
+            confirmados="", sector="", primario=False):
+    """Boton de aprobacion/rechazo de eventos pendientes (A03); los datos del
+    evento viajan en data-* para armar la ficha del modal de aprobacion."""
+    extra = "".join(' data-%s="%s"' % (k, v) for k, v in (
+        ("titulo", titulo), ("fecha", fecha), ("lugar", lugar),
+        ("confirmados", confirmados), ("sector", sector)) if v)
+    cls = "btn-primario" if primario else "btn-secundario"
+    return ('<button class="btn btn-sm %s" data-accion="%s"%s title="%s" '
+            'aria-label="%s">%s</button>'
+            % (cls, accion, extra, etiqueta, etiqueta, ico(icono, 14)))
+
+
 def _barra(pct):
     return ('<div class="barra" style="min-width:110px"><span style="width:%d%%"></span></div>'
             '<span style="font-size:13px;color:#162644">%d%%</span>' % (pct, pct))
 
 
 def _sel(etiqueta, opciones, extra=""):
-    return '<select class="filtro" aria-label="%s">%s%s</select>' % (
-        etiqueta, "".join("<option>%s</option>" % o for o in opciones), extra)
+    """Select de filtro de tabla. Emite data-filtro para que el JS lo escuche;
+    la primera opcion ('Todos/Todas...') va con value='' para no filtrar."""
+    primero, resto = opciones[0], opciones[1:]
+    pops = '<option value="">%s</option>' % primero + "".join(
+        "<option>%s</option>" % o for o in resto)
+    return '<select class="filtro" data-filtro="%s" aria-label="%s" %s>%s</select>' % (
+        _slug(etiqueta), etiqueta, extra, pops)
+
+
+def _slug(txt):
+    """Versión Python del slug JS (para data-filtro)."""
+    s = "".join(ch for ch in unicodedata.normalize("NFD", txt)
+                if unicodedata.category(ch) != "Mn")
+    return "-".join(s.lower().split())
+
+
+def data_filtro_col(col):
+    """Acota un filtro a la columna (indice 0-based) de la tabla."""
+    return 'data-filtro-col="%d"' % col
 
 
 def registrar(reg):
@@ -179,6 +257,25 @@ def registrar(reg):
 
 def _btn(icono, texto, href="#", clase="btn btn-primario"):
     return '<a class="%s" href="%s">%s %s</a>' % (clase, href, ico(icono, 16), texto)
+
+
+def _exportar(etiqueta, clase="btn btn-secundario"):
+    """Boton de exportacion real (A27): dispara el caso JS 'exportar' (CSV de la
+    tabla o, si no hay tabla, resumen de metricas) en vez de navegar a reportes."""
+    return ('<button class="%s" data-accion="exportar">%s %s</button>'
+            % (clase, ico("download", 16), etiqueta))
+
+
+def _emp(accion, icono, etiqueta, cod="", emp="", estu="", sector="", tipo="",
+         etapa="", avance="", docente=""):
+    """Boton por fila del registro de emprendimientos; los datos viajan en
+    data-* para el prefill del modal de edicion (A07)."""
+    extra = "".join(' data-%s="%s"' % (k, v) for k, v in (
+        ("cod", cod), ("emp", emp), ("estu", estu), ("sector", sector),
+        ("tipo", tipo), ("etapa", etapa), ("avance", avance),
+        ("doc", docente)) if v)
+    return ('<button data-accion="%s"%s title="%s" aria-label="%s">%s</button>'
+            % (accion, extra, etiqueta, etiqueta, ico(icono, 16)))
 
 
 # --- 33. Dashboard -----------------------------------------------------------
@@ -473,9 +570,11 @@ def emprendimientos():
     ])
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += toolbar(filtros=_sel("Filtrar sector", ["Todos los sectores", "Alimentos",
-                                                      "Moda", "Ambiental", "Muebles"])
-                      + _sel("Filtrar etapa", ["Todas las etapas"] + ETAPAS)
-                      + _sel("Filtrar docente", ["Todos los docentes", "Sin asignar"]))
+                                                      "Moda", "Ambiental", "Muebles"],
+                                  data_filtro_col(3))
+                      + _sel("Filtrar etapa", ["Todas las etapas"] + ETAPAS, data_filtro_col(5))
+                      + _sel("Filtrar docente", ["Todos los docentes", "Sin asignar"],
+                             data_filtro_col(7)))
     filas = []
     for cod, emp, estu, sector, tipo, etapa, avance, docente in EMPRENDIMIENTOS:
         filas.append([
@@ -485,10 +584,15 @@ def emprendimientos():
             tipo, badge(etapa, "b-linea"), _barra(avance),
             docente if docente != "Sin asignar" else badge("Sin asignar", "b-amarillo"),
             _acc(_revisar(cod, emp, estu, sector, tipo, etapa, docente),
-                 _b("eye", "Abrir plan"), _b("edit", "Editar")),
+                 '<a class="table-act" href="emprendimiento-plan.html" '
+                 'title="Abrir plan" aria-label="Abrir plan">%s</a>' % ico("eye", 16),
+                 _emp("editar-emprendimiento", "edit", "Editar emprendimiento",
+                      cod=cod, emp=emp, estu=estu, sector=sector, tipo=tipo,
+                      etapa=etapa, avance=str(avance), docente=docente)),
         ])
     cuerpo += tabla(["Emprendimiento", "Código", "Estudiante", "Sector", "Tipo",
                      "Etapa", "Avance", "Docente asignado", "@ACC"], filas)
+    cuerpo += '<div id="form-emprendimiento" hidden>' + _cuerpo_emprendimiento() + "</div>"
     cuerpo += paginas(1, 5, 46)
     return shell(R, "emprendimientos", "Emprendimientos", cuerpo,
                  migas=["Inicio", "Emprendimientos"],
@@ -610,8 +714,7 @@ def seguimiento():
                    '<div class="fila-col">'
                    + _btn("grid", "Ver tablero", "seguimiento-dashboard.html",
                           "btn btn-secundario")
-                   + _btn("download", "Exportar", "reportes.html",
-                          "btn btn-secundario")
+                   + _exportar("Exportar seguimiento")
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "seguimiento", "Seguimiento", cuerpo,
@@ -654,7 +757,7 @@ def seguimiento_dashboard():
     return shell(R, "seguimiento", "Tablero de seguimiento", cuerpo,
                  migas=["Inicio", "Seguimiento", "Tablero"],
                  sub="Métricas consolidadas de seguimiento institucional.",
-                 acciones=_btn("download", "Exportar", "reportes.html", "btn btn-secundario"))
+                 acciones=_exportar("Exportar tablero"))
 
 
 # --- 41. Asignar emprendimiento ---------------------------------------------
@@ -690,8 +793,8 @@ def asignar_emprendimiento():
     ]))
     cuerpo += card("Acciones",
                    '<div class="fila-col">'
-                   + '<button class="btn btn-primario">%s Confirmar asignación</button>'
-                     % ico("check", 16)
+                   + '<button class="btn btn-primario" data-accion="confirmar-asignacion">'
+                     '%s Confirmar asignación</button>' % ico("check", 16)
                    + '<button class="btn btn-secundario">%s Cancelar</button>'
                      % ico("x", 16)
                    + "</div>"
@@ -719,16 +822,17 @@ def comentarios():
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
+    cuerpo += '<div id="cola"></div>'
     cuerpo += card("Cola de moderación (3)", lista_avisos([
         ("Requieren decisión", [
             ("chat", "Comentario reportado en Sabor y Sabe",
-             "Estudiante · EMP-041 · 12 nov 2024", "comentarios.html",
+             "Estudiante · EMP-041 · 12 nov 2024", "#cola",
              "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
             ("chat", "Lenguaje inapropiado en Krea Textil",
-             "Docente · EMP-040 · 12 nov 2024", "comentarios.html",
+             "Docente · EMP-040 · 12 nov 2024", "#cola",
              "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
             ("chat", "Comentario duplicado en EcoPack",
-             "Estudiante · EMP-039 · 11 nov 2024", "comentarios.html",
+             "Estudiante · EMP-039 · 11 nov 2024", "#cola",
              "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
         ]),
     ]))
@@ -757,7 +861,7 @@ def comentarios():
     ]))
     cuerpo += card("Acciones",
                    '<div class="fila-col">'
-                   + '<a class="btn btn-primario" href="comentarios.html">%s '
+                   + '<a class="btn btn-primario" href="#cola">%s '
                      'Moderar cola</a>' % ico("check", 16)
                    + '<a class="btn btn-secundario" href="reportes.html">%s '
                      'Ver reportes</a>' % ico("doc", 16)
@@ -768,7 +872,97 @@ def comentarios():
                  sub="Aprueba, oculta o borra comentarios de la comunidad.")
 
 
-# --- 43. Metricas de asesorias -----------------------------------------------
+# --- 43. Metricas y programa de asesorias ------------------------------------
+def _cuerpo_asesoria_form():
+    """Formulario de crear/editar asesoria. Se abre en un modal desde asesorias();
+    los campos llevan name para prefiltarlos al editar."""
+    cuerpo = '<div class="grid">'
+    cuerpo += select("Estudiante", [e[1] for e in ESTUDIANTES], req=True,
+                     name="estudiante")
+    cuerpo += select("Docente asignado", [d[1] for d in DOCENTES], req=True,
+                     name="docente")
+    cuerpo += '<div class="grid g-2">'
+    cuerpo += campo("Fecha", tipo="date", req=True, name="fecha")
+    cuerpo += campo("Hora", tipo="time", req=True, name="hora")
+    cuerpo += "</div>"
+    cuerpo += campo("Tema", ph="P. ej. Plan financiero del emprendimiento",
+                    req=True, name="tema")
+    cuerpo += select("Modalidad", ["Virtual", "Presencial"], valor="Virtual",
+                     name="modalidad")
+    cuerpo += select("Estado", ["Programada", "Confirmada", "En curso",
+                                "Finalizada", "Cancelada"], valor="Programada",
+                     name="estado")
+    cuerpo += "</div>"
+    return cuerpo
+
+
+def _instrumento():
+    """Resumen de solo lectura del instrumento del diagnóstico (A16): se
+    desplega en un modal desde diagnosticos() para poder consultar las
+    preguntas del cuestionario de 5 secciones / 22 preguntas."""
+    secciones = [
+        ("Perfil del emprendimiento", [
+            "¿Cuál es el nombre de tu emprendimiento?",
+            "¿Qué tipo de emprendimiento es?",
+            "¿A qué sector productivo pertenece?",
+            "¿Qué producto o servicio ofreces?",
+            "¿En qué etapa del programa está tu emprendimiento?"]),
+        ("Problema o necesidad", [
+            "¿Qué problema concreto resuelve tu producto o servicio?",
+            "¿A quién le ocurre ese problema?",
+            "¿Cómo lo resuelven hoy (sin tu producto)?",
+            "¿Qué tan urgente es el problema para tu cliente?"]),
+        ("Propuesta de valor", [
+            "¿Cuál es tu propuesta de valor en una frase?",
+            "¿Qué beneficio concreto entrega al cliente?",
+            "¿Qué te diferencia de la competencia?",
+            "¿Qué necesidad principal cubre?"]),
+        ("Mercado objetivo", [
+            "¿Quién es tu cliente ideal (perfil)?",
+            "¿Cuántos clientes potenciales estimas?",
+            "¿Cuál es tu estrategia de precio?",
+            "¿Qué canales usarás para llegarles?"]),
+        ("Capacidad operativa y financiera", [
+            "¿Con cuántas personas cuenta el equipo?",
+            "¿Cuál es tu capacidad de producción actual?",
+            "¿Llevas registro de costos y ventas?",
+            "¿Qué inversión necesitas para crecer?",
+            "¿Cuál es tu meta de ventas del próximo mes?"]),
+    ]
+    uls = []
+    for i, (tit, preguntas) in enumerate(secciones, 1):
+        items = "".join("<li>%s</li>" % p for p in preguntas)
+        uls.append('<p><b>Sección %d · %s</b></p><ul style="margin:0 0 12px">%s</ul>'
+                   % (i, tit, items))
+    return ('<div class="suave">Cuestionario de 5 secciones y 22 preguntas que '
+            "responde el estudiante al iniciar su plan.</div>" + "".join(uls))
+
+
+def _cuerpo_emprendimiento():
+    """Formulario de edicion de emprendimiento (A07). Se abre en un modal desde
+    emprendimientos(); los campos llevan name para prefiltarlos al editar."""
+    cuerpo = '<div class="grid">'
+    cuerpo += campo("Emprendimiento", valor="EcoPack", req=True, name="nombre")
+    cuerpo += campo("Código", valor="EMP-039",
+                    bloqueo="Código asignado por el sistema", name="codigo")
+    cuerpo += select("Estudiante", [e[1] for e in ESTUDIANTES], req=True,
+                     name="estudiante")
+    cuerpo += '<div class="grid g-2">'
+    cuerpo += select("Sector", ["Alimentos", "Moda", "Ambiental", "Muebles"],
+                     req=True, name="sector")
+    cuerpo += select("Tipo", ["Comercio", "Moda", "Industrial", "Alimentos",
+                              "Artesanal"], req=True, name="tipo")
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid g-2">'
+    cuerpo += select("Etapa", ETAPAS, req=True, name="etapa")
+    cuerpo += campo("Avance (%)", tipo="number", valor="62", req=True, name="avance")
+    cuerpo += "</div>"
+    cuerpo += select("Docente asignado", [d[1] for d in DOCENTES] + ["Sin asignar"],
+                     valor="Sin asignar", name="docente")
+    cuerpo += "</div>"
+    return cuerpo
+
+
 def asesorias():
     cuerpo = metricas([
         ("chat", "Asesorías este mes", "38", "", 84, "+9"),
@@ -797,10 +991,29 @@ def asesorias():
         ("Carlos Mendoza", "3.1 h promedio"),
     ]))
     cuerpo += "</div></div>"
+    cuerpo += '<div class="sep sep-20"></div>'
+    filas = []
+    for cod, estu, doc, fecha, hora, tema, mod, est in ASESORIAS:
+        filas.append([
+            "<b>%s</b>" % estu, doc, "%s · %s" % (_fmt_fecha(fecha), hora), tema,
+            mod, badge(est, BADGE.get(est.lower(), "b-neutra")),
+            _acc(_asesoria("ver", "eye", "Ver asesoría"),
+                 _asesoria("editar-asesoria", "edit", "Editar asesoría",
+                           cod=cod, estu=estu, doc=doc, fecha=fecha, hora=hora,
+                           tema=tema, mod=mod, est=est),
+                 _asesoria("cancelar-asesoria", "x", "Cancelar asesoría",
+                           estu=estu, fecha=_fmt_fecha(fecha), hora=hora,
+                           tema=tema)),
+        ])
+    cuerpo += card("Programación de asesorías", tabla(
+        ["Estudiante", "Docente", "Fecha · hora", "Tema", "Modalidad",
+         "Estado", "@ACC"], filas),
+        accion=_nuevo("nueva-asesoria", "Nueva asesoría"), sin_pad=True)
+    cuerpo += '<div id="form-asesoria" hidden>' + _cuerpo_asesoria_form() + "</div>"
     return shell(R, "asesorias", "Métricas de asesorías", cuerpo,
                  migas=["Inicio", "Asesorías"],
-                 sub="Indicadores de uso y respuesta del servicio de asesorías.",
-                 acciones=_btn("download", "Exportar", "reportes.html", "btn btn-secundario"))
+                 sub="Indicadores de uso, respuesta y programación del servicio de asesorías.",
+                 acciones=_exportar("Exportar asesorías"))
 
 
 # --- 44. Eventos -------------------------------------------------------------
@@ -818,8 +1031,12 @@ def eventos():
             ("<b>Jornada de mentoria</b>",
              "25 nov 2024, 08:30 · Sala 2 · 14 confirmados",
              badge("1 solicitud", "b-amarillo", "reloj"),
-             '<a class="btn btn-sm btn-primario" href="evento-form.html">'
-             'Aprobar</a>'),
+             _evento("aprobar-evento", "check", "Aprobar evento",
+                     titulo="Jornada de mentoria", fecha="25 nov 2024, 08:30",
+                     lugar="Sala 2", confirmados="14", sector="Alimentos",
+                     primario=True)
+             + _evento("rechazar-evento", "x", "Rechazar",
+                       titulo="Jornada de mentoria")),
         ]),
         ("Borrador", [
             ("<b>Charla: marco legal para negocios</b>",
@@ -890,8 +1107,8 @@ def evento_form():
     ]))
     cuerpo += card("Acciones",
                    '<div class="fila-col">'
-                   + '<button class="btn btn-primario">%s Publicar evento</button>'
-                     % ico("enviar", 16)
+                   + '<button class="btn btn-primario" data-accion="publicar-evento">'
+                     '%s Publicar evento</button>' % ico("enviar", 16)
                    + '<button class="btn btn-secundario">%s Guardar borrador</button>'
                      % ico("doc", 16)
                    + '<a class="btn btn-secundario" href="eventos.html">%s Cancelar</a>'
@@ -946,8 +1163,7 @@ def asignaciones():
     cuerpo += card("Acciones",
                    '<div class="fila-col">'
                    + _btn("plus", "Asignar emprendimiento", "asignar-emprendimiento.html")
-                   + _btn("download", "Exportar", "reportes.html",
-                          "btn btn-secundario")
+                   + _exportar("Exportar asignaciones")
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "asignaciones", "Asignaciones", cuerpo,
@@ -1004,9 +1220,10 @@ def diagnosticos():
                    '<div class="fila-col">'
                    + _btn("download", "Exportar resultados", "reportes.html",
                           "btn btn-secundario")
-                   + _btn("doc", "Ver instrumento", "reportes.html",
-                          "btn btn-secundario")
+                   + '<button class="btn btn-secundario" data-accion="ver-instrumento">%s '
+                     'Ver instrumento</button>' % ico("doc", 16)
                    + "</div>")
+    cuerpo += '<div id="contenido-instrumento" hidden>' + _instrumento() + "</div>"
     cuerpo += "</div></div>"
     return shell(R, "diagnosticos", "Diagnosticos respondidos", cuerpo,
                  migas=["Inicio", "Diagnosticos"],
@@ -1047,10 +1264,10 @@ def reportes():
                    ]))
     cuerpo += card("Acciones",
                    '<div class="fila-col">'
-                   + '<button class="btn btn-primario">%s Generar reporte</button>'
-                     % ico("download", 16)
-                   + '<button class="btn btn-secundario">%s Descargar plantilla</button>'
-                     % ico("doc", 16)
+                   + '<button class="btn btn-primario" data-accion="generar-reporte">'
+                     '%s Generar reporte</button>' % ico("download", 16)
+                   + '<button class="btn btn-secundario" data-accion="descargar-plantilla">'
+                     '%s Descargar plantilla</button>' % ico("doc", 16)
                    + "</div>")
     cuerpo += "</div>"
     return shell(R, "reportes", "Exportar reportes", cuerpo,
@@ -1069,12 +1286,15 @@ def perfil():
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos personales", campo("Nombres", valor="Ana", req=True)
+    cuerpo += card("Datos personales",
+                   '<div class="campos-perfil">'
+                   + campo("Nombres", valor="Ana", req=True)
                    + campo("Apellidos", valor="Restrepo", req=True)
                    + campo("Correo institucional", tipo="email",
                            valor="ana.restrepo@sgemd.edu.co",
                            bloqueo="El correo institucional no se puede editar")
-                   + campo("Teléfono", tipo="tel", valor="+57 301 555 0199"))
+                   + campo("Teléfono", tipo="tel", valor="+57 301 555 0199")
+                   + "</div>")
     cuerpo += card("Zona horaria", campo("Zona horaria", valor="America/Bogota")
                    + campo("Cargo", valor="Administradora del programa",
                            bloqueo="El cargo lo asigna la institución"))
@@ -1085,12 +1305,19 @@ def perfil():
         ("Verificación en dos pasos", "Activada"),
         ("Último acceso", "Hoy, 07:15"),
     ]))
+    cuerpo += card("Cambiar contraseña",
+                   '<div class="grid g-3 g-col">'
+                   + campo("Contraseña actual", tipo="password", ph="••••••••")
+                   + campo("Nueva contraseña", tipo="password", ph="Mínimo 8 caracteres")
+                   + campo("Repetir nueva contraseña", tipo="password", ph="••••••••")
+                   + "</div>"
+                   '<div style="display:flex;justify-content:flex-end">'
+                   + '<button class="btn btn-secundario" data-accion="actualizar-contrasena">'
+                     '%s Actualizar contraseña</button></div>' % ico("lock", 16))
     cuerpo += card("Acciones",
                    '<div class="fila-col">'
-                   + '<button class="btn btn-primario">%s Guardar cambios</button>'
-                     % ico("check", 16)
-                   + '<button class="btn btn-secundario">%s Cambiar contraseña</button>'
-                     % ico("lock", 16)
+                   + '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                     '%s Guardar cambios</button>' % ico("check", 16)
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "perfil", "Mi perfil", cuerpo,
@@ -1149,5 +1376,6 @@ def notificaciones():
     return shell(R, "notificaciones", "Notificaciones", cuerpo,
                  migas=["Inicio", "Notificaciones"],
                  sub="Registro de aprobaciones y decisiones del equipo.",
-                 acciones='<button class="btn btn-secundario">%s Marcar todo '
-                          'como leído</button>' % ico("check", 16))
+                 acciones='<button class="btn btn-secundario" data-accion='
+                          '"marcar-todas-como-leidas">%s Marcar todo como leído</button>'
+                          % ico("check", 16))
