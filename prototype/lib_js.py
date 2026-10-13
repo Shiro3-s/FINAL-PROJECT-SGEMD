@@ -153,6 +153,46 @@ JS = r"""
     ]);
   }
 
+  /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
+     de solicitudes y por la revision de emprendimientos. */
+  function rechazarConMotivo(titulo, aviso, msgOk) {
+    abrirModal(titulo,
+      '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
+      '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
+      '<p class="modal-aviso">' + esc(aviso) + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () { toast(msgOk, "ok"); } }
+      ]);
+  }
+
+  /* Revision de emprendimiento: lee los datos de la fila (dataset) y ofrece
+     aprobar o rechazar. Los botones abren un segundo modal, por eso llevan
+     cerrar:false (abrirModal ya reemplaza el modal abierto). */
+  function revisarEmprendimiento(boton) {
+    var d = boton.dataset;
+    abrirModal("Revisar emprendimiento",
+      '<p class="confirm-texto"><b>Emprendimiento:</b> ' + esc(d.emp || "") + "<br>" +
+      "<b>Código:</b> " + esc(d.cod || "") + "<br>" +
+      "<b>Estudiante:</b> " + esc(d.estu || "") + "<br>" +
+      "<b>Sector:</b> " + esc(d.sector || "") + "<br>" +
+      "<b>Tipo:</b> " + esc(d.tipo || "") + "<br>" +
+      "<b>Etapa:</b> " + esc(d.etapa || "") + "<br>" +
+      "<b>Docente:</b> " + esc(d.docente || "") + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", cerrar: false, alClic: function () {
+            rechazarConMotivo("Rechazar emprendimiento",
+              "Se notificará al estudiante con este motivo.", "Emprendimiento rechazado");
+          } },
+        { txt: "Aprobar", clase: "btn btn-primario", cerrar: false, alClic: function () {
+            confirmar("Aprobar emprendimiento",
+              "El emprendimiento " + (d.emp || "") + " pasará a estado Aprobado y quedará listo para asignar docente.",
+              function () { toast("Emprendimiento aprobado", "ok"); });
+          } }
+      ]);
+  }
+
   /* --- barra lateral ---------------------------------------------------- */
   var sb = $("#sb"), ov = $("#ov");
   function abrirSB(abrir) {
@@ -278,13 +318,39 @@ JS = r"""
     if (r) r.textContent = n + (n === 1 ? " resultado" : " resultados");
     guardar({ filtros: n });
   }
-  $$("[data-filtro], .chip").forEach(function (c) {
+  $$("[data-filtro]:not([data-filtro='off']), .chip").forEach(function (c) {
     c.addEventListener("click", function () {
       c.classList.toggle("activo");
       aplicarFiltros();
     });
   });
-  $$("select[data-filtro]").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+  $$("select[data-filtro]:not([data-filtro='off'])").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+
+  /* --- estado de cuenta (Activo/Limitado/Inactivo) ----------------------- */
+  $$("select.sel-estado").forEach(function (s) {
+    var actual = s.value;
+    s.addEventListener("change", function () {
+      var nuevo = s.value, nombre = s.dataset.nombre || "la cuenta";
+      s.value = actual;
+      var aviso = nuevo === "Inactivo"
+        ? "La cuenta perderá el acceso hasta que la reactives."
+        : (nuevo === "Limitado"
+            ? "La cuenta conserva su registro pero con acceso restringido."
+            : "La cuenta recuperará el acceso completo.");
+      abrirModal("Cambiar estado de la cuenta",
+        '<p class="confirm-texto">¿Cambiar el acceso de <b>' + esc(nombre) +
+        '</b> a <b>' + esc(nuevo) + '</b>?</p>' +
+        '<p class="modal-aviso">' + aviso + '</p>',
+        [
+          { txt: "Cancelar", clase: "btn btn-secundario" },
+          { txt: "Confirmar", clase: "btn btn-primario", alClic: function () {
+              actual = nuevo;
+              s.value = nuevo;
+              toast("Estado actualizado a " + nuevo, "ok");
+          } }
+        ]);
+    });
+  });
 
   /* --- seleccion de filas ------------------------------------------------ */
   $$("table.tabla").forEach(function (t) {
@@ -362,6 +428,20 @@ JS = r"""
           }
         }
       ]);
+  }
+
+  /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
+     para fusionar en la pantalla de gestion los formularios de edicion de
+     docente/estudiante, que antes eran paginas aparte. */
+  function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
+    var plantilla = document.getElementById(idForm);
+    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, plantilla.innerHTML, [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
+        toast(mensaje || "Cambios guardados", "ok");
+      } }
+    ]);
   }
 
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
@@ -579,9 +659,47 @@ JS = r"""
         break;
       }
 
-      case "editar":
       case "editar-docente":
+        e.preventDefault();
+        abrirFormulario("Editar docente", "form-docente", b);
+        break;
+
       case "editar-estudiante":
+        e.preventDefault();
+        abrirFormulario("Editar estudiante", "form-estudiante", b);
+        break;
+
+      case "nuevo-docente":
+        e.preventDefault();
+        abrirFormulario("Nuevo docente", "form-nuevo-docente", b,
+          "Crear docente", "Docente creado. Se enviará el correo de activación.");
+        break;
+
+      case "nuevo-estudiante":
+        e.preventDefault();
+        abrirFormulario("Nuevo estudiante", "form-nuevo-estudiante", b,
+          "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
+        break;
+
+      case "solicitud-aprobar":
+        e.preventDefault();
+        confirmar("Aprobar solicitud",
+          "Se aplicará el cambio y se notificará al solicitante. ¿Confirmas la aprobación?",
+          function () { toast("Solicitud aprobada", "ok"); });
+        break;
+
+      case "solicitud-rechazar":
+        e.preventDefault();
+        rechazarConMotivo("Rechazar solicitud",
+          "El solicitante recibirá este motivo en su notificación.", "Solicitud rechazada");
+        break;
+
+      case "revisar-emprendimiento":
+        e.preventDefault();
+        revisarEmprendimiento(b);
+        break;
+
+      case "editar":
       case "registrar-avance":
       case "asignar":
       case "editar-sensores":
@@ -1165,9 +1283,12 @@ JS = r"""
   });
 
   /* --- arrastrar y soltar (kanban) --------------------------------------- */
+  /* Solo en Admin y Estudiante: la vista de Docente conserva su tablero
+     inerte a propósito (no se toca ese rol). */
+  if (location.pathname.indexOf("/docente/") === -1) {
   $$(".kanban, [data-kanban]").forEach(function (tablero) {
     var arrastre = null;
-    $$(".k-col, .kanban-col", tablero).forEach(function (col) {
+    $$(".kan-col", tablero).forEach(function (col) {
       col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("sobre"); });
       col.addEventListener("dragleave", function () { col.classList.remove("sobre"); });
       col.addEventListener("drop", function (e) {
@@ -1176,21 +1297,22 @@ JS = r"""
         if (!arrastre) return;
         col.appendChild(arrastre);
         var estado = { tablero: tablero.dataset.kanban || "kanban", tareas: [] };
-        $$(".kanban-col", tablero).forEach(function (c) {
-          $$(".k-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
+        $$(".kan-col", tablero).forEach(function (c) {
+          $$(".kan-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
         });
 guardar(estado);
         toast("Tarea movida a " + nombreCol(col), "ok");
       });
     });
-    $$(".k-card", tablero).forEach(function (k) {
+    $$(".kan-card", tablero).forEach(function (k) {
       k.setAttribute("draggable", "true");
       k.addEventListener("dragstart", function () { arrastre = k; k.classList.add("arrastrando"); });
       k.addEventListener("dragend", function () { k.classList.remove("arrastrando"); arrastre = null; });
     });
   });
+  }
   function nombreCol(col) {
-    var h = $(".k-col-t, .kanban-col-t, h3, .hint", col);
+    var h = $(".kan-titulo, h3, .hint", col);
     return (h && h.textContent.replace(/\s+/g, " ").trim()) || "la columna";
   }
 

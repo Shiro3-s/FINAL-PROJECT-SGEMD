@@ -90,6 +90,7 @@ small{font-size:13px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -176,6 +177,32 @@ small{font-size:13px}
 @media (max-width:1023px){.g-3,.g-2-1,.g-1-2{grid-template-columns:1fr}}
 @media (max-width:767px){.g-4,.g-3,.g-2{grid-template-columns:1fr}}
 
+/* Utilidades de espaciado y de fila: sustituyen los estilos en linea que se
+   repetian en las vistas (separadores de altura fija, filas de botones, textos
+   secundarios). Mantienen la paleta via tokens. */
+.sep-8{height:8px}
+.sep-12{height:12px}
+.sep-16{height:16px}
+.sep-20{height:20px}
+.sep-22{height:22px}
+.sep-24{height:24px}
+.sep-28{height:28px}
+.g-col{gap:0 16px}
+.suave{font-size:13px;color:var(--tinta-2)}
+.fuerte{font-size:13px;color:var(--tinta)}
+.fila-acciones{display:flex;gap:10px}
+.fila-6{display:flex;gap:6px}
+.fila-fin{display:flex;justify-content:flex-end;gap:10px}
+.fila-col{display:flex;flex-direction:column;gap:10px}
+.kpi-caja{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px}
+.kpi-caja .k-lbl{font-size:13px;color:var(--tinta-2)}
+.kpi-caja .k-val{font-size:20px;font-weight:700;color:var(--tinta)}
+.fila-paso{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--gris)}
+.mt-8{margin-top:8px}
+.mt-10{margin-top:10px}
+.mt-14{margin-top:14px}
+.pt-8{padding-top:8px}
+
 .metrica{padding:20px}
 .metrica-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
 .metrica-ico{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-sm);background:var(--azul-08);color:var(--azul-real);display:flex;align-items:center;justify-content:center}
@@ -244,6 +271,7 @@ table.tabla tbody tr:last-child td{border-bottom:none}
 .buscador input::placeholder{color:var(--gris)}
 .buscador svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--azul-real)}
 select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}
+select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 8px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tinta);background:var(--blanco);cursor:pointer}
 .paginacion{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2);flex-wrap:wrap}
 .paginacion .pag{margin-left:auto;display:flex;gap:6px}
 
@@ -433,7 +461,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 @media (max-width:767px){.fila-simple{flex-wrap:wrap}}
 
 @media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
-.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kanban-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.k-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}</style>
+.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}</style>
 </head>
 <body>
 <div class="shell">
@@ -442,15 +470,15 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
       <div class="brand-text"><div class="brand-name">SGEMD</div>
       <div class="brand-sub">Emprendimiento Minuto de Dios</div></div>
     </div>
-    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Inicio</span></a><a class="" href="usuarios.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de perfiles</span></a><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Emprendimientos</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Seguimiento</span></a><a class="" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Asignaciones</span></a><a class="" href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnosticos</span></a><a class="" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Reportes</span></a><a class="" href="notificaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificaciones</span></a><a class="activo" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></a></nav>
+    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Inicio</span></a><a class="" href="solicitudes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Solicitudes</span><span class="nav-badge">10</span></a><div class="nav-group" data-grupo="usuarios-y-asignaciones"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-usuarios-y-asignaciones" data-grupo="usuarios-y-asignaciones"><span>Usuarios y asignaciones</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-usuarios-y-asignaciones"><a class="" href="usuarios.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de perfiles</span></a><a class="" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Asignaciones</span></a></div></div><div class="nav-group" data-grupo="emprendimientos-y-seguimiento"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-emprendimientos-y-seguimiento" data-grupo="emprendimientos-y-seguimiento"><span>Emprendimientos y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-emprendimientos-y-seguimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Emprendimientos</span></a><a class="" href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnósticos</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Seguimiento</span></a></div></div><div class="nav-group" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompañamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div><div class="nav-group" data-grupo="institucional"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-institucional" data-grupo="institucional"><span>Institucional</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-institucional"><a class="" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Reportes</span></a></div></div><a class="" href="notificaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificaciones</span></a><a class="activo" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></a></nav>
     <div class="side-foot"><div class="side-card">
       <b>Institución Minuto de Dios</b>
-      <span>Modulo ADMINISTRADOR</span>
+      <span>Módulo ADMINISTRADOR</span>
     </div></div>
   </aside>
   <div class="main">
     <header class="topbar">
-      <button class="burger" data-accion="menu" aria-label="Abrir menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+      <button class="burger" data-accion="menu" aria-label="Abrir menú" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
       <div class="topbar-mark" aria-hidden="true"></div>
       <div class="search"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
@@ -462,7 +490,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Mi perfil</b></div><div class="page-head"><h1>Mi perfil</h1><p class="sub">Actualiza tus datos y revisa tu actividad.</p><div class="acciones"></div></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="metrica-lbl">Usuarios gestionados</div><div class="metrica-val">128<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +12</span></div><div class="barra"><span style="width:84%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m15.5 13.5 1.5 8.5-5-3-5 3 1.5-8.5"/></svg></span><div><div class="metrica-lbl">Reportes generados</div><div class="metrica-val">24<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +4</span></div><div class="barra"><span style="width:62%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">Decisiones pendientes</div><div class="metrica-val">6<span class="u"></span></div></div></div><div class="barra"><span style="width:20%"></span></div></div></div><div style="height:20px"></div><div class="grid g-2-1"><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Datos personales</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f93">Nombres<span class="req">*</span></label><input id="f93" type="text" value="Ana" placeholder="" required></div><div class="campo"><label for="f94">Apellidos<span class="req">*</span></label><input id="f94" type="text" value="Restrepo" placeholder="" required></div><div class="campo"><label for="f95">Correo institucional</label><input id="f95" type="text" value="ana.restrepo@sgemd.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>El correo institucional no se puede editar</div></div><div class="campo"><label for="f96">Teléfono</label><input id="f96" type="tel" value="+57 301 555 0199" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Zona horaria</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f97">Zona horaria</label><input id="f97" type="text" value="America/Bogota" placeholder=""></div><div class="campo"><label for="f98">Cargo</label><input id="f98" type="text" value="Administradora del programa" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>El cargo lo asigna la institución</div></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Seguridad</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Contraseña</dt><dd>Actualizada hace 2 meses</dd></div><div class="def-row"><dt>Verificación en dos pasos</dt><dd>Activada</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 07:15</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-primario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Guardar cambios</button><button class="btn btn-secundario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Cambiar contraseña</button></div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Mi perfil</b></div><div class="page-head"><h1>Mi perfil</h1><p class="sub">Actualiza tus datos y revisa tu actividad.</p><div class="acciones"></div></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="metrica-lbl">Usuarios gestionados</div><div class="metrica-val">128<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +12</span></div><div class="barra"><span style="width:84%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m15.5 13.5 1.5 8.5-5-3-5 3 1.5-8.5"/></svg></span><div><div class="metrica-lbl">Reportes generados</div><div class="metrica-val">24<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> +4</span></div><div class="barra"><span style="width:62%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><div><div class="metrica-lbl">Decisiones pendientes</div><div class="metrica-val">6<span class="u"></span></div></div></div><div class="barra"><span style="width:20%"></span></div></div></div><div class="sep sep-20"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos personales</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f108">Nombres<span class="req">*</span></label><input id="f108" type="text" value="Ana" placeholder="" required></div><div class="campo"><label for="f109">Apellidos<span class="req">*</span></label><input id="f109" type="text" value="Restrepo" placeholder="" required></div><div class="campo"><label for="f110">Correo institucional</label><input id="f110" type="text" value="ana.restrepo@sgemd.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>El correo institucional no se puede editar</div></div><div class="campo"><label for="f111">Teléfono</label><input id="f111" type="tel" value="+57 301 555 0199" placeholder=""></div></div></div><div class="card"><div class="card-head"><h3>Zona horaria</h3><span class="hint"></span></div><div class="card-body"><div class="campo"><label for="f112">Zona horaria</label><input id="f112" type="text" value="America/Bogota" placeholder=""></div><div class="campo"><label for="f113">Cargo</label><input id="f113" type="text" value="Administradora del programa" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>El cargo lo asigna la institución</div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Seguridad</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Contraseña</dt><dd>Actualizada hace 2 meses</dd></div><div class="def-row"><dt>Verificación en dos pasos</dt><dd>Activada</dd></div><div class="def-row"><dt>Último acceso</dt><dd>Hoy, 07:15</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="fila-col"><button class="btn btn-primario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Guardar cambios</button><button class="btn btn-secundario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Cambiar contraseña</button></div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -605,6 +633,46 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
     ]);
   }
 
+  /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
+     de solicitudes y por la revision de emprendimientos. */
+  function rechazarConMotivo(titulo, aviso, msgOk) {
+    abrirModal(titulo,
+      '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
+      '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
+      '<p class="modal-aviso">' + esc(aviso) + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () { toast(msgOk, "ok"); } }
+      ]);
+  }
+
+  /* Revision de emprendimiento: lee los datos de la fila (dataset) y ofrece
+     aprobar o rechazar. Los botones abren un segundo modal, por eso llevan
+     cerrar:false (abrirModal ya reemplaza el modal abierto). */
+  function revisarEmprendimiento(boton) {
+    var d = boton.dataset;
+    abrirModal("Revisar emprendimiento",
+      '<p class="confirm-texto"><b>Emprendimiento:</b> ' + esc(d.emp || "") + "<br>" +
+      "<b>Código:</b> " + esc(d.cod || "") + "<br>" +
+      "<b>Estudiante:</b> " + esc(d.estu || "") + "<br>" +
+      "<b>Sector:</b> " + esc(d.sector || "") + "<br>" +
+      "<b>Tipo:</b> " + esc(d.tipo || "") + "<br>" +
+      "<b>Etapa:</b> " + esc(d.etapa || "") + "<br>" +
+      "<b>Docente:</b> " + esc(d.docente || "") + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", cerrar: false, alClic: function () {
+            rechazarConMotivo("Rechazar emprendimiento",
+              "Se notificará al estudiante con este motivo.", "Emprendimiento rechazado");
+          } },
+        { txt: "Aprobar", clase: "btn btn-primario", cerrar: false, alClic: function () {
+            confirmar("Aprobar emprendimiento",
+              "El emprendimiento " + (d.emp || "") + " pasará a estado Aprobado y quedará listo para asignar docente.",
+              function () { toast("Emprendimiento aprobado", "ok"); });
+          } }
+      ]);
+  }
+
   /* --- barra lateral ---------------------------------------------------- */
   var sb = $("#sb"), ov = $("#ov");
   function abrirSB(abrir) {
@@ -730,13 +798,39 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
     if (r) r.textContent = n + (n === 1 ? " resultado" : " resultados");
     guardar({ filtros: n });
   }
-  $$("[data-filtro], .chip").forEach(function (c) {
+  $$("[data-filtro]:not([data-filtro='off']), .chip").forEach(function (c) {
     c.addEventListener("click", function () {
       c.classList.toggle("activo");
       aplicarFiltros();
     });
   });
-  $$("select[data-filtro]").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+  $$("select[data-filtro]:not([data-filtro='off'])").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+
+  /* --- estado de cuenta (Activo/Limitado/Inactivo) ----------------------- */
+  $$("select.sel-estado").forEach(function (s) {
+    var actual = s.value;
+    s.addEventListener("change", function () {
+      var nuevo = s.value, nombre = s.dataset.nombre || "la cuenta";
+      s.value = actual;
+      var aviso = nuevo === "Inactivo"
+        ? "La cuenta perderá el acceso hasta que la reactives."
+        : (nuevo === "Limitado"
+            ? "La cuenta conserva su registro pero con acceso restringido."
+            : "La cuenta recuperará el acceso completo.");
+      abrirModal("Cambiar estado de la cuenta",
+        '<p class="confirm-texto">¿Cambiar el acceso de <b>' + esc(nombre) +
+        '</b> a <b>' + esc(nuevo) + '</b>?</p>' +
+        '<p class="modal-aviso">' + aviso + '</p>',
+        [
+          { txt: "Cancelar", clase: "btn btn-secundario" },
+          { txt: "Confirmar", clase: "btn btn-primario", alClic: function () {
+              actual = nuevo;
+              s.value = nuevo;
+              toast("Estado actualizado a " + nuevo, "ok");
+          } }
+        ]);
+    });
+  });
 
   /* --- seleccion de filas ------------------------------------------------ */
   $$("table.tabla").forEach(function (t) {
@@ -814,6 +908,20 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
           }
         }
       ]);
+  }
+
+  /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
+     para fusionar en la pantalla de gestion los formularios de edicion de
+     docente/estudiante, que antes eran paginas aparte. */
+  function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
+    var plantilla = document.getElementById(idForm);
+    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, plantilla.innerHTML, [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
+        toast(mensaje || "Cambios guardados", "ok");
+      } }
+    ]);
   }
 
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
@@ -1031,9 +1139,47 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         break;
       }
 
-      case "editar":
       case "editar-docente":
+        e.preventDefault();
+        abrirFormulario("Editar docente", "form-docente", b);
+        break;
+
       case "editar-estudiante":
+        e.preventDefault();
+        abrirFormulario("Editar estudiante", "form-estudiante", b);
+        break;
+
+      case "nuevo-docente":
+        e.preventDefault();
+        abrirFormulario("Nuevo docente", "form-nuevo-docente", b,
+          "Crear docente", "Docente creado. Se enviará el correo de activación.");
+        break;
+
+      case "nuevo-estudiante":
+        e.preventDefault();
+        abrirFormulario("Nuevo estudiante", "form-nuevo-estudiante", b,
+          "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
+        break;
+
+      case "solicitud-aprobar":
+        e.preventDefault();
+        confirmar("Aprobar solicitud",
+          "Se aplicará el cambio y se notificará al solicitante. ¿Confirmas la aprobación?",
+          function () { toast("Solicitud aprobada", "ok"); });
+        break;
+
+      case "solicitud-rechazar":
+        e.preventDefault();
+        rechazarConMotivo("Rechazar solicitud",
+          "El solicitante recibirá este motivo en su notificación.", "Solicitud rechazada");
+        break;
+
+      case "revisar-emprendimiento":
+        e.preventDefault();
+        revisarEmprendimiento(b);
+        break;
+
+      case "editar":
       case "registrar-avance":
       case "asignar":
       case "editar-sensores":
@@ -1617,9 +1763,12 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
   });
 
   /* --- arrastrar y soltar (kanban) --------------------------------------- */
+  /* Solo en Admin y Estudiante: la vista de Docente conserva su tablero
+     inerte a propósito (no se toca ese rol). */
+  if (location.pathname.indexOf("/docente/") === -1) {
   $$(".kanban, [data-kanban]").forEach(function (tablero) {
     var arrastre = null;
-    $$(".k-col, .kanban-col", tablero).forEach(function (col) {
+    $$(".kan-col", tablero).forEach(function (col) {
       col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("sobre"); });
       col.addEventListener("dragleave", function () { col.classList.remove("sobre"); });
       col.addEventListener("drop", function (e) {
@@ -1628,21 +1777,22 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
         if (!arrastre) return;
         col.appendChild(arrastre);
         var estado = { tablero: tablero.dataset.kanban || "kanban", tareas: [] };
-        $$(".kanban-col", tablero).forEach(function (c) {
-          $$(".k-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
+        $$(".kan-col", tablero).forEach(function (c) {
+          $$(".kan-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
         });
 guardar(estado);
         toast("Tarea movida a " + nombreCol(col), "ok");
       });
     });
-    $$(".k-card", tablero).forEach(function (k) {
+    $$(".kan-card", tablero).forEach(function (k) {
       k.setAttribute("draggable", "true");
       k.addEventListener("dragstart", function () { arrastre = k; k.classList.add("arrastrando"); });
       k.addEventListener("dragend", function () { k.classList.remove("arrastrando"); arrastre = null; });
     });
   });
+  }
   function nombreCol(col) {
-    var h = $(".k-col-t, .kanban-col-t, h3, .hint", col);
+    var h = $(".kan-titulo, h3, .hint", col);
     return (h && h.textContent.replace(/\s+/g, " ").trim()) || "la columna";
   }
 

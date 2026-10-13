@@ -83,7 +83,7 @@ NAV = {
             ("Seguimiento", "doc", "seguimiento"),
             ("Estado de seguimiento", "trend", "estado-seguimiento"),
         ]),
-        ("Acompanamiento y actividades", [
+        ("Acompañamiento y actividades", [
             ("Asesorías", "chat", "asesorias"),
             ("Eventos", "calendar", "eventos"),
         ]),
@@ -100,21 +100,30 @@ NAV = {
     ],
     "administrador": [
         ("Inicio", "grid", "dashboard"),
-        ("Gestión de perfiles", "users", "usuarios"),
-        ("Emprendimientos", "maleta", "emprendimientos"),
-        ("Seguimiento", "trend", "seguimiento"),
-        ("Asignaciones", "sliders", "asignaciones"),
-        ("Diagnosticos", "clipboard", "diagnosticos"),
-        ("Eventos", "calendar", "eventos"),
-        ("Asesorías", "chat", "asesorias"),
-        ("Reportes", "download", "reportes"),
+        ("Solicitudes", "checklist", "solicitudes", "10"),
+        ("Usuarios y asignaciones", [
+            ("Gestión de perfiles", "users", "usuarios"),
+            ("Asignaciones", "sliders", "asignaciones"),
+        ]),
+        ("Emprendimientos y seguimiento", [
+            ("Emprendimientos", "maleta", "emprendimientos"),
+            ("Diagnósticos", "clipboard", "diagnosticos"),
+            ("Seguimiento", "trend", "seguimiento"),
+        ]),
+        ("Acompañamiento y actividades", [
+            ("Asesorías", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+        ]),
+        ("Institucional", [
+            ("Reportes", "download", "reportes"),
+        ]),
         ("Notificaciones", "bell", "notificaciones"),
         ("Perfil", "user", "perfil"),
     ],
 }
 
 ROLES = {
-    "estudiante": ("ESTUDIANTE", "Mariana Lopez", "ML"),
+    "estudiante": ("ESTUDIANTE", "Mariana López", "ML"),
     "docente": ("DOCENTE", "Carlos Mendoza", "CM"),
     "administrador": ("ADMINISTRADOR", "Ana Restrepo", "AR"),
 }
@@ -159,9 +168,10 @@ def boton_accion(icono, etiqueta, clase=""):
             % (c, accion, etiqueta, etiqueta, ico(icono, 16)))
 
 
-def _item_nav(txt, ic, clave, activo):
-    return '<a class="%s" href="%s.html">%s<span>%s</span></a>' % (
-        "activo" if clave == activo else "", clave, ico(ic, 16), txt)
+def _item_nav(txt, ic, clave, activo, badge=""):
+    bd = '<span class="nav-badge">%s</span>' % badge if badge else ""
+    return '<a class="%s" href="%s.html">%s<span>%s</span>%s</a>' % (
+        "activo" if clave == activo else "", clave, ico(ic, 16), txt, bd)
 
 
 _ACENTOS_ID = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
@@ -174,15 +184,15 @@ def _slug_id(texto):
 
 def _nav_html(rol, activo):
     """Renderiza el menú lateral. Cada entrada de NAV es un ítem plano
-    (txt, ic, clave) o un grupo (etiqueta, [(txt, ic, clave), ...]).
+    (txt, ic, clave [, badge]) o un grupo (etiqueta, [(txt, ic, clave), ...]).
 
     Los grupos son acordeones: la etiqueta es un botón que despliega sus
     ítems. El grupo que contiene la página activa arranca abierto; el resto
     arranca cerrado y recuerda su estado mientras se navega (ver lib_js)."""
     out = []
     for e in NAV[rol]:
-        if len(e) == 3:
-            out.append(_item_nav(e[0], e[1], e[2], activo))
+        if len(e) >= 3:
+            out.append(_item_nav(e[0], e[1], e[2], activo, e[3] if len(e) > 3 else ""))
         else:
             etiqueta, hijos = e
             abierto = " abierto" if any(c == activo for _, _, c in hijos) else ""
@@ -241,12 +251,12 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
     <nav class="nav">%(items)s</nav>
     <div class="side-foot"><div class="side-card">
       <b>Institución Minuto de Dios</b>
-      <span>Modulo %(rol)s</span>
+      <span>Módulo %(rol)s</span>
     </div></div>
   </aside>
   <div class="main">
     <header class="topbar">
-      <button class="burger" data-accion="menu" aria-label="Abrir menu" aria-expanded="false">%(ico_menu)s</button>
+      <button class="burger" data-accion="menu" aria-label="Abrir menú" aria-expanded="false">%(ico_menu)s</button>
       <div class="topbar-mark" aria-hidden="true"></div>
       <div class="search">%(ico_search)s
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
@@ -478,6 +488,12 @@ def lista_def(filas):
     for k, v in filas:
         h += '<div class="def-row"><dt>%s</dt><dd>%s</dd></div>' % (k, v)
     return h + "</dl>"
+
+
+def espacio(px=20):
+    """Separador vertical de altura fija. Sustituye los <div style="height:Npx">
+    dispersos en las vistas; la clase se resuelve en lib_css (.sep-N)."""
+    return '<div class="sep sep-%d"></div>' % px
 
 
 def steps(items, actual=0):

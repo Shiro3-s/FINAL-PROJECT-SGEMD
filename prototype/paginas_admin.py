@@ -11,7 +11,7 @@ Reglas del rol:
 from lib_ui import (
     shell, metricas, tabla, toolbar, paginas, badge, campo, select, callout,
     card, estado_vacio, lista_def, steps, ico, boton_accion, ico, agenda, distribucion,
-    lista_avisos, kanban, linea_tiempo,
+    lista_avisos, kanban, linea_tiempo, tabs_paneles,
 )
 from lib_charts import barras, barras_h, lineas, donut, AZUL, AMAR
 
@@ -49,7 +49,7 @@ DOCENTES = [
 ]
 
 ESTUDIANTES = [
-    ("EST-087", "Mariana Lopez", "Alimentos", "Sabor y Sabe",
+    ("EST-087", "Mariana López", "Alimentos", "Sabor y Sabe",
      "FASE 2 - Prototipo", 62, "Activo"),
     ("EST-086", "Jhon Ospina", "Moda", "Krea Textil",
      "FASE 1 - Ideación", 28, "Activo"),
@@ -62,7 +62,7 @@ ESTUDIANTES = [
 ]
 
 EMPRENDIMIENTOS = [
-    ("EMP-041", "Sabor y Sabe", "Mariana Lopez", "Alimentos", "Comercio",
+    ("EMP-041", "Sabor y Sabe", "Mariana López", "Alimentos", "Comercio",
      "FASE 2 - Prototipo", 62, "Carlos Mendoza"),
     ("EMP-040", "Krea Textil", "Jhon Ospina", "Moda", "Moda",
      "FASE 1 - Ideación", 28, "Paula Andrea Rios"),
@@ -74,6 +74,33 @@ EMPRENDIMIENTOS = [
      "FASE 2 - Prototipo", 55, "Ninafq Beltran"),
 ]
 
+# Bandeja de solicitudes pendientes (D1/D2/D4).
+SOLIC_DESBLOQUEOS = [
+    ("EST-083", "Andres Felipe", "Estudiante", "Cuenta inactiva por 90 días sin acceso",
+     "05 nov 2024"),
+    ("DOC-011", "Ninafq Beltran", "Docente", "Bloqueo por intentos fallidos de acceso",
+     "04 nov 2024"),
+    ("EST-079", "Camilo Rojas", "Estudiante", "Reactivar para retomar su emprendimiento",
+     "02 nov 2024"),
+    ("EST-076", "Valentina Ortega", "Estudiante", "Cuenta limitada a petición; solicita reactivar",
+     "01 nov 2024"),
+]
+
+SOLIC_PARALELOS = [
+    ("EST-086", "Jhon Ospina", "Krea Textil", "Krea Accesorios", "Moda", "06 nov 2024"),
+    ("EST-084", "Sofia Ramirez", "Aromas del Sur", "Café del Sur", "Alimentos", "05 nov 2024"),
+    ("EST-081", "Diego Peralta", "Muebles Origen", "Muebles Origen Kids", "Muebles", "03 nov 2024"),
+]
+
+SOLIC_CITAS = [
+    ("Mariana López", "Sabor y Sabe", "Carlos Mendoza", "12 nov 2024, 10:00",
+     "Revisión del prototipo de empaque"),
+    ("Lucia Fernandez", "EcoPack", "Hector Vargas", "13 nov 2024, 14:00",
+     "Asesoría sobre costos de producción"),
+    ("Jhon Ospina", "Krea Textil", "Paula Andrea Rios", "14 nov 2024, 09:00",
+     "Validación de mercado para nueva línea"),
+]
+
 
 def _b(icono, etiqueta):
     return boton_accion(icono, etiqueta)
@@ -81,6 +108,36 @@ def _b(icono, etiqueta):
 
 def _acc(*items):
     return '<div class="acciones-cell">%s</div>' % "".join(items)
+
+
+def _nuevo(accion, etiqueta):
+    """Boton primario de alta para la cabecera de una tarjeta."""
+    return ('<button class="btn btn-primario btn-sm" data-accion="%s">%s %s</button>'
+            % (accion, ico("plus", 16), etiqueta))
+
+
+def _solic(accion, icono, etiqueta):
+    """Boton de accion de la bandeja de solicitudes (Aprobar/Rechazar)."""
+    return ('<button data-accion="%s" title="%s" aria-label="%s">%s</button>'
+            % (accion, etiqueta, etiqueta, ico(icono, 16)))
+
+
+def _revisar(cod, emp, estu, sector, tipo, etapa, docente):
+    """Boton por fila para abrir la revision de un emprendimiento (datos en dataset)."""
+    return ('<button data-accion="revisar-emprendimiento" title="Revisar" aria-label="Revisar" '
+            'data-emp="%s" data-cod="%s" data-estu="%s" data-sector="%s" data-tipo="%s" '
+            'data-etapa="%s" data-docente="%s">%s</button>'
+            % (emp, cod, estu, sector, tipo, etapa, docente, ico("check", 16)))
+
+
+def _sel_estado(cod, nombre, estado):
+    """Selector de estado de acceso por fila (Activo/Limitado/Inactivo).
+    data-filtro='off' evita que el buscador/filtros de tabla lo tomen como filtro."""
+    opciones = "".join('<option%s>%s</option>' % (" selected" if o == estado else "", o)
+                       for o in ("Activo", "Limitado", "Inactivo"))
+    return ('<select class="sel-estado" data-filtro="off" data-cod="%s" data-nombre="%s" '
+            'aria-label="Estado de la cuenta de %s">%s</select>'
+            % (cod, nombre, nombre, opciones))
 
 
 def _barra(pct):
@@ -97,8 +154,7 @@ def registrar(reg):
     paginas_adm = [
         ("dashboard.html", "33 Administrador - Inicio (dashboard)", dashboard),
         ("usuarios.html", "34 Administrador - Gestión de perfiles", usuarios),
-        ("usuario-docente.html", "35 Administrador - Editar docente", usuario_docente),
-        ("usuario-estudiante.html", "36 Administrador - Editar estudiante", usuario_estudiante),
+        ("solicitudes.html", "35 Administrador - Solicitudes pendientes", solicitudes),
         ("emprendimientos.html", "37 Administrador - Emprendimientos", emprendimientos),
         ("emprendimiento-plan.html", "38 Administrador - Plan de trabajo del emprendimiento",
          emprendimiento_plan),
@@ -133,9 +189,9 @@ def dashboard():
         ("trend", "Avances del mes", "61", "", 88, "+14"),
         ("medalla", "Tasa de cierre", "78", "%", 78, "+3"),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Avance de fase por mes", barras(
         "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"], [12, 19, 27, 41, 61],
         unidad=" avances"))
@@ -153,7 +209,7 @@ def dashboard():
          ["11 nov 2024", "Moderaste 3 comentarios reportados",
           _acc(_b("eye", "Ver detalle"))]]))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Pendientes de decisión", lista_def([
         ("Emprendimientos sin docente", "3"),
         ("Eventos por aprobar", "2"),
@@ -175,41 +231,48 @@ def usuarios():
     for cod, nom, correo, area, carga, emp, estado in DOCENTES:
         filas_doc.append([
             "<b>%s</b>" % cod, "<b>%s</b>" % nom, correo, area,
-            "%s h" % carga, emp, badge(estado, "b-azul" if estado == "Activo" else "b-neutra"),
-            _acc(_b("edit", "Editar docente")),
+            "%s h" % carga, emp,             _sel_estado(cod, nom, estado),
+            _acc('<button data-accion="editar-docente" title="Editar docente" '
+                 'aria-label="Editar docente">%s</button>' % ico("edit", 16)),
         ])
     cuerpo = callout("Los perfiles de estudiante se editan desde su cuenta. El "
-                     "administrador solo puede activar o desactivar el acceso.", "bombilla")
-    cuerpo += '<div style="height:20px"></div>'
+                     "administrador solo puede cambiar el estado de acceso (Activo, "
+                     "Limitado o Inactivo).", "bombilla")
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += metricas([
         ("users", "Docentes", "18", "", 45, "+1"),
         ("users", "Estudiantes", "110", "", 92, "+11"),
         ("alerta", "Cuentas inactivas", "4", "", 12, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += toolbar(filtros=_sel("Filtrar área", ["Todas las áreas", "Alimentos",
                                                      "Moda", "Ambiental", "Tecnología"]))
     cuerpo += card("Docentes", tabla(
         ["Código", "Nombre", "Correo institucional", "Área", "Carga semanal",
-         "Emprendimientos", "Estado", "@ACC"], filas_doc), sin_pad=True)
+         "Emprendimientos", "Estado", "@ACC"], filas_doc), accion=_nuevo("nuevo-docente", "Nuevo docente"), sin_pad=True)
     cuerpo += card("Estudiantes", tabla(
         ["Código", "Nombre", "Sector", "Emprendimiento", "Etapa", "Avance", "Estado", "@ACC"],
         [[c, "<b>%s</b>" % n, sec, emp, badge(et, "b-linea"), _barra(av),
-          badge(est, "b-azul" if est == "Activo" else "b-neutra"),
-          _acc(_b("edit", "Editar estudiante"))] for c, n, sec, emp, et, av, est in ESTUDIANTES],
-    ), sin_pad=True)
+          _sel_estado(c, n, est),
+          _acc('<button data-accion="editar-estudiante" title="Editar estudiante" '
+               'aria-label="Editar estudiante">%s</button>' % ico("edit", 16))] for c, n, sec, emp, et, av, est in ESTUDIANTES],
+    ), accion=_nuevo("nuevo-estudiante", "Nuevo estudiante"), sin_pad=True)
     cuerpo += paginas(1, 5, 18)
+    cuerpo += '<div id="form-docente" hidden>' + _cuerpo_docente() + "</div>"
+    cuerpo += '<div id="form-estudiante" hidden>' + _cuerpo_estudiante() + "</div>"
+    cuerpo += '<div id="form-nuevo-docente" hidden>' + _cuerpo_nuevo_docente() + "</div>"
+    cuerpo += '<div id="form-nuevo-estudiante" hidden>' + _cuerpo_nuevo_estudiante() + "</div>"
     return shell(R, "usuarios", "Gestión de perfiles", cuerpo,
                  migas=["Inicio", "Gestión de perfiles"],
                  sub="Altas, edición y estado de acceso de docentes y estudiantes.")
 
 
-# --- 35. Editar docente ------------------------------------------------------
-def usuario_docente():
-    cuerpo = steps(["Datos", "Área y carga", "Permisos", "Confirmar"], 1)
-    cuerpo += '<div style="height:22px"></div>'
-    cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+# --- 35. Editar docente (formulario embebido en Gestion de perfiles) --------
+def _cuerpo_docente():
+    """Formulario de edicion de docente. Se abre en un modal desde usuarios();
+    ya no es una pagina aparte."""
+    cuerpo = '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Datos del docente",
                    campo("Código", valor="DOC-014", bloqueo="Código asignado por el sistema")
                    + campo("Nombres", valor="Carlos Alejandro", req=True)
@@ -226,40 +289,30 @@ def usuario_docente():
                    + campo("Emprendimientos asignados", tipo="number", valor="8",
                            bloqueo="Se actualiza desde Asignaciones"))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Estado del acceso", lista_def([
         ("Estado", "Activo"),
         ("Último acceso", "Hoy, 07:42"),
         ("Asesorías realizadas", "31"),
         ("Promedio de calificación", "89 de 100"),
     ]))
-    cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
-                   + '<button class="btn btn-primario">%s Guardar cambios</button>'
-                     % ico("check", 16)
-                   + '<button class="btn btn-secundario">%s Desactivar acceso</button>'
-                     % ico("lock", 16)
-                   + '<a class="btn btn-secundario" href="usuarios.html">%s Volver</a>'
-                     % ico("izq", 16)
-                   + "</div>")
     cuerpo += "</div></div>"
-    return shell(R, "usuarios", "Editar docente", cuerpo,
-                 migas=["Inicio", "Gestión de perfiles", "Editar docente"],
-                 sub="Actualiza los datos institutionales del docente.",
-                 acciones=_btn("check", "Guardar"))
+    return cuerpo
 
 
-# --- 36. Editar estudiante ---------------------------------------------------
-def usuario_estudiante():
+# --- 36. Editar estudiante (formulario embebido en Gestion de perfiles) -----
+def _cuerpo_estudiante():
+    """Formulario de edicion de estudiante. Se abre en un modal desde
+    usuarios(); ya no es una pagina aparte."""
     cuerpo = callout("El estudiante edita su cuenta. El administrador solo puede "
-                     "<b>activar o desactivar</b> el acceso.", "bombilla")
-    cuerpo += '<div style="height:20px"></div>'
+                     "<b>cambiar el estado de acceso</b> (Activo, Limitado o Inactivo).", "bombilla")
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Datos del estudiante",
                    campo("Código", valor="EST-087", bloqueo="Código asignado por el sistema")
                    + campo("Nombres", valor="Mariana", bloqueo="Los edita el estudiante")
-                   + campo("Apellidos", valor="Lopez", bloqueo="Los edita el estudiante")
+                   + campo("Apellidos", valor="López", bloqueo="Los edita el estudiante")
                    + campo("Correo institucional", tipo="email",
                            valor="mariana.lopez@sgemd.edu.co",
                            bloqueo="Los edita el estudiante"))
@@ -270,27 +323,141 @@ def usuario_estudiante():
         ("Docente asignado", "Carlos Mendoza"),
     ]))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Estado del acceso", lista_def([
         ("Estado", "Activo"),
         ("Fecha de registro", "12 mar 2024"),
         ("Último acceso", "Hoy, 08:02"),
         ("Asesorías recibidas", "3"),
     ]))
-    cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
-                   + '<button class="btn btn-primario">%s Guardar estado</button>'
-                     % ico("check", 16)
-                   + '<button class="btn btn-secundario">%s Desactivar acceso</button>'
-                     % ico("lock", 16)
-                   + '<a class="btn btn-secundario" href="usuarios.html">%s Volver</a>'
-                     % ico("izq", 16)
-                   + "</div>")
     cuerpo += "</div></div>"
-    return shell(R, "usuarios", "Editar estudiante", cuerpo,
-                 migas=["Inicio", "Gestión de perfiles", "Editar estudiante"],
-                 sub="Gestiona el acceso del estudiante a la plataforma.",
-                 acciones=_btn("check", "Guardar"))
+    return cuerpo
+
+
+# --- 36b. Alta de docente (formulario embebido en Gestion de perfiles) ------
+def _cuerpo_nuevo_docente():
+    """Alta de docente. Se abre en un modal desde usuarios(); el codigo y la
+    cuenta los asigna el sistema, por eso no son campos editables."""
+    cuerpo = callout("El docente recibirá un correo de activación en su cuenta "
+                     "institucional para definir su contraseña.", "mail")
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos del docente",
+                   campo("Nombres", req=True)
+                   + campo("Apellidos", req=True)
+                   + campo("Correo institucional", tipo="email", req=True,
+                           ayuda="Debe ser una cuenta @sgemd.edu.co")
+                   + campo("Teléfono", tipo="tel"))
+    cuerpo += card("Área y carga",
+                   select("Área de conocimiento", ["Alimentos", "Moda", "Ambiental",
+                                                   "Tecnología", "Muebles"],
+                          req=True, valor="Alimentos")
+                   + campo("Horas de asesoría por semana", tipo="number",
+                           ph="De 1 a 20"))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Estado del acceso",
+                   select("Estado de la cuenta", ["Activo", "Limitado"],
+                          req=True, valor="Activo")
+                   + '<div class="ayuda">%s Limitado deja la cuenta creada pero '
+                     'sin acceso hasta que la habilites.</div>' % ico("alerta", 13))
+    cuerpo += "</div></div>"
+    return cuerpo
+
+
+# --- 36c. Alta de estudiante (formulario embebido en Gestion de perfiles) ----
+def _cuerpo_nuevo_estudiante():
+    """Alta de estudiante. Se abre en un modal desde usuarios()."""
+    cuerpo = callout("El estudiante recibirá un correo de activación en su cuenta "
+                     "institucional para definir su contraseña.", "mail")
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos del estudiante",
+                   campo("Nombres", req=True)
+                   + campo("Apellidos", req=True)
+                   + campo("Correo institucional", tipo="email", req=True,
+                           ayuda="Debe ser una cuenta @sgemd.edu.co")
+                   + campo("Teléfono", tipo="tel"))
+    cuerpo += card("Emprendimiento y sector",
+                   select("Sector", ["Alimentos", "Moda", "Ambiental",
+                                     "Tecnología", "Muebles"],
+                          req=True, valor="Alimentos")
+                   + campo("Nombre del emprendimiento", ph="Ej.: Sabor y Sabe")
+                   + select("Etapa", ETAPAS, req=True, valor="FASE 1 - Ideación"))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Estado del acceso",
+                   select("Estado de la cuenta", ["Activo", "Limitado"],
+                          req=True, valor="Activo")
+                   + '<div class="ayuda">%s Limitado deja la cuenta creada pero '
+                     'sin acceso hasta que la habilites.</div>' % ico("alerta", 13))
+    cuerpo += "</div></div>"
+    return cuerpo
+
+
+# --- 35. Solicitudes pendientes (bandeja del Admin) --------------------------
+def _cuerpo_desb():
+    filas = [
+        ["<b>%s</b>" % c, "<b>%s</b>" % n, badge(r, "b-linea"), m, f,
+         _acc(_solic("solicitud-aprobar", "check", "Aprobar"),
+              _solic("solicitud-rechazar", "x", "Rechazar"))]
+        for c, n, r, m, f in SOLIC_DESBLOQUEOS
+    ]
+    return tabla(["Código", "Nombre", "Rol", "Motivo de la solicitud", "Fecha", "@ACC"],
+                 filas)
+
+
+def _cuerpo_par():
+    filas = [
+        ["<b>%s</b>" % c, "<b>%s</b>" % n, a, "<b>%s</b>" % nu, s, f,
+         _acc(_solic("solicitud-aprobar", "check", "Aprobar"),
+              _solic("solicitud-rechazar", "x", "Rechazar"))]
+        for c, n, a, nu, s, f in SOLIC_PARALELOS
+    ]
+    return tabla(["Código", "Estudiante", "Emprendimiento actual", "Nuevo emprendimiento",
+                  "Sector", "Fecha", "@ACC"], filas)
+
+
+def _cuerpo_cit():
+    filas = [
+        ["<b>%s</b>" % n, e, d, f, m,
+         _acc(_solic("solicitud-aprobar", "check", "Aprobar"),
+              _solic("solicitud-rechazar", "x", "Rechazar"))]
+        for n, e, d, f, m in SOLIC_CITAS
+    ]
+    return tabla(["Estudiante", "Emprendimiento", "Docente sugerido", "Fecha propuesta",
+                  "Motivo", "@ACC"], filas)
+
+
+def solicitudes():
+    """Bandeja unica del Admin: desbloqueos de cuenta, paralelos y citas (D1/D2/D4)."""
+    paneles = [
+        ("Desbloqueos (%d)" % len(SOLIC_DESBLOQUEOS), "tab-desb", _cuerpo_desb()),
+        ("Paralelos (%d)" % len(SOLIC_PARALELOS), "tab-par", _cuerpo_par()),
+        ("Citas (%d)" % len(SOLIC_CITAS), "tab-cit", _cuerpo_cit()),
+    ]
+    cuerpo = callout(
+        "Aprueba o rechaza las solicitudes pendientes. Al aprobar, el sistema aplica "
+        "el cambio y notifica al solicitante; al rechazar, se solicita un motivo.",
+        "checklist")
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += metricas([
+        ("lock", "Desbloqueos", str(len(SOLIC_DESBLOQUEOS)), "", 35, None),
+        ("maleta", "Paralelos", str(len(SOLIC_PARALELOS)), "", 25, None),
+        ("calendar", "Citas de asesoría", str(len(SOLIC_CITAS)), "", 20, None),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += tabs_paneles([(n, pid) for n, pid, _ in paneles])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += "".join(
+        '<div data-panel-nombre="%s"%s>%s</div>' % (pid, "" if i == 0 else " hidden", b)
+        for i, (_, pid, b) in enumerate(paneles)
+    )
+    return shell(R, "solicitudes", "Solicitudes pendientes", cuerpo,
+                 migas=["Inicio", "Solicitudes pendientes"],
+                 sub="Bandeja de desbloqueos de cuenta, solicitudes de paralelo y citas de asesoría.")
 
 
 # --- 37. Emprendimientos -----------------------------------------------------
@@ -298,13 +465,13 @@ def emprendimientos():
     """Registro maestro: es la tabla canonica del admin, con chips de sector."""
     cuerpo = callout("Como administrador tu ves <b>todos</b> los emprendimientos, "
                      "tengan o no docente asignado.", "bombilla")
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += metricas([
         ("maleta", "Total", "46", "", 72, "+5"),
         ("trend", "En fase 3 o 4", "18", "", 62, None),
         ("alerta", "Sin docente", "3", "", 18, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += toolbar(filtros=_sel("Filtrar sector", ["Todos los sectores", "Alimentos",
                                                       "Moda", "Ambiental", "Muebles"])
                       + _sel("Filtrar etapa", ["Todas las etapas"] + ETAPAS)
@@ -317,7 +484,8 @@ def emprendimientos():
                   ("b-linea" if sector == "Ambiental" else "b-neutra")),
             tipo, badge(etapa, "b-linea"), _barra(avance),
             docente if docente != "Sin asignar" else badge("Sin asignar", "b-amarillo"),
-            _acc(_b("eye", "Abrir plan"), _b("edit", "Editar")),
+            _acc(_revisar(cod, emp, estu, sector, tipo, etapa, docente),
+                 _b("eye", "Abrir plan"), _b("edit", "Editar")),
         ])
     cuerpo += tabla(["Emprendimiento", "Código", "Estudiante", "Sector", "Tipo",
                      "Etapa", "Avance", "Docente asignado", "@ACC"], filas)
@@ -338,9 +506,9 @@ def emprendimiento_plan():
         ("reloj", "Días sin avance", "6", "", 40, "Último: 05 nov 2024"),
         ("calendar", "Asesorías programadas", "3", "", 60, "1 por confirmar"),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Plan de trabajo por fase", tabla(
         ["Fase", "Tareas", "Completadas", "Avance", "Estado", "@ACC"],
         [[badge(ETAPAS[0], "b-linea"), "3", "3", "100%",
@@ -353,24 +521,24 @@ def emprendimiento_plan():
           badge("No iniciada", "b-neutra"), _acc(_b("eye", "Ver detalle"))]]))
     cuerpo += card("Hitos de la fase actual", linea_tiempo([
         ("12", "nov", "Cierre de prototipo y control de calidad",
-         "Responsable: Mariana Lopez · 5 tareas abiertas",
-         '<div style="margin-top:10px">' + badge("En curso", "b-amarillo", "reloj")
+         "Responsable: Mariana López · 5 tareas abiertas",
+         '<div class="mt-10">' + badge("En curso", "b-amarillo", "reloj")
          + '</div>'),
         ("20", "nov", "Revisión tecnica con el docente",
          "Responsable: Carlos Mendoza · Confirmado",
-         '<div style="margin-top:10px">' + badge("Confirmado", "b-azul", "check")
+         '<div class="mt-10">' + badge("Confirmado", "b-azul", "check")
          + '</div>'),
         ("28", "nov", "Prueba de ventas en punto real",
          "Responsable: equipo del emprendimiento · Sin asignar",
-         '<div style="margin-top:10px">' + badge("Sin asignar", "b-amarillo")
+         '<div class="mt-10">' + badge("Sin asignar", "b-amarillo")
          + '</div>'),
         ("05", "dic", "Evaluación y cierre de FASE 2",
          "Comite académico · Pendiente",
-         '<div style="margin-top:10px">' + badge("Pendiente", "b-neutra")
+         '<div class="mt-10">' + badge("Pendiente", "b-neutra")
          + '</div>'),
     ]))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Datos del emprendimiento", lista_def([
         ("Código", "EMP-041"),
         ("Nombre", "Sabor y Sabe"),
@@ -380,7 +548,7 @@ def emprendimiento_plan():
         ("Docente", "Carlos Mendoza"),
     ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + '<a class="btn btn-primario" href="seguimiento-dashboard.html">'
                      "%s Ver seguimiento</a>" % ico("trend", 16)
                    + '<a class="btn btn-secundario" href="asignar-emprendimiento.html">'
@@ -399,15 +567,15 @@ def seguimiento():
     """Salud global primero; la tabla es solo la cola de alertas."""
     cuerpo = callout("Vista institucional del seguimiento. El docente registra los "
                      "avances de los emprendimientos asignados.", "bombilla")
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += metricas([
         ("trend", "Al día", "31", "", 68, None),
         ("alerta", "En riesgo", "9", "", 20, None),
         ("alerta", "Sin avances en 15 días", "6", "", 13, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Salud del seguimiento", '<div class="card-body">'
                    + distribucion([
                        ("Al día", "31", 68),
@@ -430,7 +598,7 @@ def seguimiento():
                    + lista_avisos([("Sin avance reciente", alertas)])
                    + '</div>')
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Docentes con mayor carga", '<div class="card-body">'
                    + distribucion([
                        ("Paula Rios", "6", 50),
@@ -439,7 +607,7 @@ def seguimiento():
                        ("Ninafq Beltran", "3", 25),
                    ]) + '</div>')
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + _btn("grid", "Ver tablero", "seguimiento-dashboard.html",
                           "btn btn-secundario")
                    + _btn("download", "Exportar", "reportes.html",
@@ -459,9 +627,9 @@ def seguimiento_dashboard():
         ("alerta", "Emprendimientos en riesgo", "9", "", 20, None),
         ("medalla", "Promedio institucional", "87", "", 87, "+2"),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Avance acumulado por mes", lineas(
         "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"],
         [("Avances", [12, 19, 27, 41, 61], AZUL),
@@ -473,7 +641,7 @@ def seguimiento_dashboard():
         "", "", ["C. Mendoza", "P. Rios", "H. Vargas", "N. Beltran", "R. Nieto"],
         [92, 86, 84, 78, 74], maximo=100, unidad=" de 100"))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Salud de los seguimiento", donut(
         "", "", [("Al día", 31, AZUL), ("En riesgo", 9, AMAR),
                  ("Inactivos", 6, "#bbbbbb")], "emprendimientos"))
@@ -493,9 +661,9 @@ def seguimiento_dashboard():
 def asignar_emprendimiento():
     cuerpo = steps(["Seleccionar emprendimiento", "Elegir docente",
                     "Confirmar asignación"], 1)
-    cuerpo += '<div style="height:22px"></div>'
+    cuerpo += '<div class="sep sep-22"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Emprendimiento sin docente", tabla(
         ["Código", "Emprendimiento", "Estudiante", "Sector", "Etapa", "@ACC"],
         [["EMP-038", "<b>Aromas del Sur</b>", "Sofia Ramirez", "Alimentos",
@@ -513,7 +681,7 @@ def asignar_emprendimiento():
          ["Rafael Nieto", "Tecnología", "5 h de 6 h", "1 h",
           _acc(_b("check", "Seleccionar"))]]))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Asignación seleccionada", lista_def([
         ("Emprendimiento", "Aromas del Sur"),
         ("Estudiante", "Sofia Ramirez"),
@@ -521,7 +689,7 @@ def asignar_emprendimiento():
         ("Horas asignadas", "2 h por semana"),
     ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + '<button class="btn btn-primario">%s Confirmar asignación</button>'
                      % ico("check", 16)
                    + '<button class="btn btn-secundario">%s Cancelar</button>'
@@ -542,15 +710,15 @@ def comentarios():
     """Dos colas lado a lado: lo reportado y lo visible. Sin tabla."""
     cuerpo = callout("Solo los comentarios <b>reportados</b> requieren moderación. "
                      "Borrar un comentario es permanente.", "bombilla")
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += metricas([
         ("alerta", "Reportados", "3", "", 25, None),
         ("chat", "Visibles", "27", "", 90, "+4"),
         ("trash", "Borrados este mes", "2", "", 12, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Cola de moderación (3)", lista_avisos([
         ("Requieren decisión", [
             ("chat", "Comentario reportado en Sabor y Sabe",
@@ -568,19 +736,19 @@ def comentarios():
                    + '<div class="grid" style="gap:10px">'
                    + '<div class="fila-simple"><div><b>Consulta sobre el evento de costos</b>'
                      '<div class="nota-foot">Docente · EMP-041 · 10 nov 2024</div></div>'
-                     '<div style="display:flex;gap:6px">' + _b("eye", "Ver")
+                     '<div class="fila-6">' + _b("eye", "Ver")
                      + _b("x", "Ocultar") + '</div></div>'
                    + '<div class="fila-simple"><div><b>Sugerencia para el plan de trabajo</b>'
                      '<div class="nota-foot">Docente · EMP-037 · 09 nov 2024</div></div>'
-                     '<div style="display:flex;gap:6px">' + _b("eye", "Ver")
+                     '<div class="fila-6">' + _b("eye", "Ver")
                      + _b("x", "Ocultar") + '</div></div>'
                    + '<div class="fila-simple"><div><b>Duda sobre el costo de insumos</b>'
                      '<div class="nota-foot">Estudiante · EMP-035 · 08 nov 2024</div></div>'
-                     '<div style="display:flex;gap:6px">' + _b("eye", "Ver")
+                     '<div class="fila-6">' + _b("eye", "Ver")
                      + _b("x", "Ocultar") + '</div></div>'
                    + '</div></div>')
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Reglas de moderación", lista_def([
         ("Reportado", "3 en cola"),
         ("Visible", "27 publicados"),
@@ -588,7 +756,7 @@ def comentarios():
         ("Borrado", "2 este mes"),
     ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + '<a class="btn btn-primario" href="comentarios.html">%s '
                      'Moderar cola</a>' % ico("check", 16)
                    + '<a class="btn btn-secundario" href="reportes.html">%s '
@@ -608,9 +776,9 @@ def asesorias():
         ("checklist", "Asesorías finalizadas", "31", "", 82, None),
         ("alerta", "Sin confirmar", "5", "", 22, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Asesorías por mes", barras(
         "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"], [18, 24, 29, 33, 38],
         unidad=" asesorías"))
@@ -618,7 +786,7 @@ def asesorias():
         "", "", ["Alimentos", "Moda", "Ambiental", "Muebles", "Tecnología"],
         [16, 10, 7, 3, 2], color=AMAR))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Estado de las asesorías", donut(
         "", "", [("Finalizadas", 31, AZUL), ("Confirmadas", 7, AMAR),
                  ("Sin confirmar", 5, "#bbbbbb"), ("Canceladas", 3, "#bbbbbb")],
@@ -644,7 +812,7 @@ def eventos():
         ("doc", "Borradores", "1", "", 20, None),
         ("users", "Confirmaciones", "141", "", 88, "+37"),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += kanban([
         ("Por aprobar", [
             ("<b>Jornada de mentoria</b>",
@@ -691,9 +859,9 @@ def eventos():
 # --- 45. Crear evento --------------------------------------------------------
 def evento_form():
     cuerpo = steps(["Datos del evento", "Fecha y lugar", "Publicar"], 1)
-    cuerpo += '<div style="height:22px"></div>'
+    cuerpo += '<div class="sep sep-22"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Datos del evento",
                    campo("Título del evento", valor="Taller de costos y precios", req=True)
                    + select("Dirigido a", ["Todos los estudiantes",
@@ -714,14 +882,14 @@ def evento_form():
                    + campo("Link de inscripción",
                            valor="sgemd.edu.co/eventos/taller-costos"))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Visibilidad", lista_def([
         ("Visibilidad", "Visible para-Alimentos"),
         ("Confirmaciones", "32 de 40"),
         ("Recordatorio", "Un día antes"),
     ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + '<button class="btn btn-primario">%s Publicar evento</button>'
                      % ico("enviar", 16)
                    + '<button class="btn btn-secundario">%s Guardar borrador</button>'
@@ -741,15 +909,15 @@ def asignaciones():
     """Carga de docentes arriba, cola de asignaciones pendientes abajo."""
     cuerpo = callout("Un docente puede tener hasta <b>12 emprendimientos</b>. "
                      "La carga semanal se descuenta del cupo disponible.", "bombilla")
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += metricas([
         ("sliders", "Asignaciones vigentes", "43", "", 93, None),
         ("alerta", "Sin docente", "3", "", 18, None),
         ("reloj", "Carga promedio", "3.1", " h", 62, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Cupo ocupado por docente", '<div class="card-body">'
                    + distribucion([
                        ("P. A. Rios", "6 h", 50),
@@ -765,10 +933,10 @@ def asignaciones():
           badge("3 h", "b-neutra"), _acc(_b("edit", "Asignar"))],
          ["<b>EMP-034 Eco Hogar</b>", "Valeria Cruz", "Hogar",
           badge("2 h", "b-neutra"), _acc(_b("edit", "Asignar"))],
-         ["<b>EMP-033 Pan de Abuela</b>", "Valentina Gomez", "Alimentos",
+         ["<b>EMP-033 Pan de Abuela</b>", "Valentina Gómez", "Alimentos",
           badge("3 h", "b-neutra"), _acc(_b("edit", "Asignar"))]]))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Resumen", lista_def([
         ("Vigentes", "43 de 46"),
         ("Pendientes", "3"),
@@ -776,7 +944,7 @@ def asignaciones():
         ("Carga promedio", "3.1 h semanales"),
     ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + _btn("plus", "Asignar emprendimiento", "asignar-emprendimiento.html")
                    + _btn("download", "Exportar", "reportes.html",
                           "btn btn-secundario")
@@ -795,9 +963,9 @@ def diagnosticos():
         ("reloj", "Sin revisión", "5", "", 22, None),
         ("medalla", "Promedio", "74", "", 74, "+2"),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Puntaje por emprendimiento", '<div class="card-body">'
                    + barras_h("", "Último diagnóstico registrado", [
                        "EcoPack", "Sabor y Sabe", "Aromas del Sur",
@@ -814,7 +982,7 @@ def diagnosticos():
                    + '<p class="nota-foot">La mayoria de los estudiantes se ubica '
                      'entre 70 y 89 puntos.</p></div>')
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Pendientes de revisión", '<div class="card-body">'
                    + lista_avisos([
                        ("Sin revisión del docente", [
@@ -833,7 +1001,7 @@ def diagnosticos():
                        ]),
                    ]) + '</div>')
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + _btn("download", "Exportar resultados", "reportes.html",
                           "btn btn-secundario")
                    + _btn("doc", "Ver instrumento", "reportes.html",
@@ -858,7 +1026,7 @@ def reportes():
          [badge("Diagnosticos", "b-linea"), "Puntajes del diagnóstico por estudiante",
           "CSV y PDF", "08 nov 2024", _acc(_b("download", "Descargar"), _b("eye", "Vista previa"))]]),
         sin_pad=True)
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += card("Filtros del reporte", select("Formato", ["CSV", "PDF", "XLSX"], req=True,
                                                  valor="CSV")
@@ -878,7 +1046,7 @@ def reportes():
                        ("Último archivo generado", "12 nov 2024, 09:20"),
                    ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + '<button class="btn btn-primario">%s Generar reporte</button>'
                      % ico("download", 16)
                    + '<button class="btn btn-secundario">%s Descargar plantilla</button>'
@@ -898,9 +1066,9 @@ def perfil():
         ("medalla", "Reportes generados", "24", "", 62, "+4"),
         ("alerta", "Decisiones pendientes", "6", "", 20, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Datos personales", campo("Nombres", valor="Ana", req=True)
                    + campo("Apellidos", valor="Restrepo", req=True)
                    + campo("Correo institucional", tipo="email",
@@ -911,14 +1079,14 @@ def perfil():
                    + campo("Cargo", valor="Administradora del programa",
                            bloqueo="El cargo lo asigna la institución"))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid" style="gap:20px">'
+    cuerpo += '<div class="grid">'
     cuerpo += card("Seguridad", lista_def([
         ("Contraseña", "Actualizada hace 2 meses"),
         ("Verificación en dos pasos", "Activada"),
         ("Último acceso", "Hoy, 07:15"),
     ]))
     cuerpo += card("Acciones",
-                   '<div style="display:flex;flex-direction:column;gap:10px">'
+                   '<div class="fila-col">'
                    + '<button class="btn btn-primario">%s Guardar cambios</button>'
                      % ico("check", 16)
                    + '<button class="btn btn-secundario">%s Cambiar contraseña</button>'
@@ -974,7 +1142,7 @@ def notificaciones():
         ("check", "Aprobaciones del mes", "24", "", 62, None),
         ("users", "Docentes activos", "8", "", 88, None),
     ])
-    cuerpo += '<div style="height:20px"></div>'
+    cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += agenda(dias)
     cuerpo += '<p class="nota-foot">El registro conserva 90 días y se puede '\
               'exportar desde Reportes.</p>'

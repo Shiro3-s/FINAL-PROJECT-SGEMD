@@ -111,6 +111,7 @@ SHELL_CSS = """
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -200,6 +201,32 @@ COMPONENTES_CSS = """
 @media (max-width:1023px){.g-3,.g-2-1,.g-1-2{grid-template-columns:1fr}}
 @media (max-width:767px){.g-4,.g-3,.g-2{grid-template-columns:1fr}}
 
+/* Utilidades de espaciado y de fila: sustituyen los estilos en linea que se
+   repetian en las vistas (separadores de altura fija, filas de botones, textos
+   secundarios). Mantienen la paleta via tokens. */
+.sep-8{height:8px}
+.sep-12{height:12px}
+.sep-16{height:16px}
+.sep-20{height:20px}
+.sep-22{height:22px}
+.sep-24{height:24px}
+.sep-28{height:28px}
+.g-col{gap:0 16px}
+.suave{font-size:13px;color:var(--tinta-2)}
+.fuerte{font-size:13px;color:var(--tinta)}
+.fila-acciones{display:flex;gap:10px}
+.fila-6{display:flex;gap:6px}
+.fila-fin{display:flex;justify-content:flex-end;gap:10px}
+.fila-col{display:flex;flex-direction:column;gap:10px}
+.kpi-caja{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px}
+.kpi-caja .k-lbl{font-size:13px;color:var(--tinta-2)}
+.kpi-caja .k-val{font-size:20px;font-weight:700;color:var(--tinta)}
+.fila-paso{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--gris)}
+.mt-8{margin-top:8px}
+.mt-10{margin-top:10px}
+.mt-14{margin-top:14px}
+.pt-8{padding-top:8px}
+
 .metrica{padding:20px}
 .metrica-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
 .metrica-ico{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-sm);background:var(--azul-08);color:var(--azul-real);display:flex;align-items:center;justify-content:center}
@@ -268,6 +295,7 @@ table.tabla tbody tr:last-child td{border-bottom:none}
 .buscador input::placeholder{color:var(--gris)}
 .buscador svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--azul-real)}
 select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}
+select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 8px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tinta);background:var(--blanco);cursor:pointer}
 .paginacion{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2);flex-wrap:wrap}
 .paginacion .pag{margin-left:auto;display:flex;gap:6px}
 
@@ -525,8 +553,8 @@ INTERACCION_CSS = (
     "[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}"
     "button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}"
     "tr.seleccionada{background:var(--azul-06)}"
-    ".kanban-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}"
-    ".k-card.arrastrando{opacity:.45}"
+    ".kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}"
+    ".kan-card.arrastrando{opacity:.45}"
     "@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}"
     "@media (max-width:767px){"
     ".toast-pila{left:12px;right:12px;bottom:12px;max-width:none}"
