@@ -2034,5 +2034,277 @@ guardar(estado);
   document.documentElement.classList.add("js-listo");
 })();
 </script>
+<script>
+(function () {
+  "use strict";
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  var ACCIONES = {
+    "calificar": 1, "asignar-tarea": 1, "confirmar-asesoria": 1,
+    "reprogramar-asesoria": 1, "rechazar-asesoria": 1, "publicar-comentario": 1,
+    "devolver-tarea": 1, "registrar-avance": 1, "revisar-diagnostico": 1,
+    "guardar-recomendaciones": 1,
+    "confirmar-avance": 1, "cambiar-contrasena": 1, "marcar-todo-leido": 1,
+    "filtrar-notificacion": 1
+  };
+
+  var pila = null;
+  function toast(msg, tipo) {
+    if (!pila) {
+      pila = document.createElement("div");
+      pila.className = "toast-pila";
+      pila.setAttribute("role", "status");
+      pila.setAttribute("aria-live", "polite");
+      document.body.appendChild(pila);
+    }
+    var t = document.createElement("div");
+    t.className = "toast t-" + (tipo || "info");
+    t.appendChild(document.createTextNode(msg));
+    pila.appendChild(t);
+    setTimeout(function () { t.classList.add("va-fuera"); }, 3200);
+    setTimeout(function () { t.remove(); }, 3700);
+  }
+
+  function cerrarModal() {
+    var v = $(".modal-velo");
+    if (v) v.remove();
+    document.body.classList.remove("sin-scroll");
+  }
+
+  function abrirModal(titulo, cuerpoHTML, botones) {
+    cerrarModal();
+    var velo = document.createElement("div");
+    velo.className = "modal-velo";
+    var caja = document.createElement("div");
+    caja.className = "modal";
+    caja.setAttribute("role", "dialog");
+    caja.setAttribute("aria-modal", "true");
+    caja.setAttribute("aria-label", titulo);
+    var head = document.createElement("div");
+    head.className = "modal-head";
+    var h2 = document.createElement("h2");
+    h2.textContent = titulo;
+    var equis = document.createElement("button");
+    equis.className = "icon-btn modal-x";
+    equis.setAttribute("aria-label", "Cerrar");
+    equis.appendChild(document.createTextNode("X"));
+    head.appendChild(h2);
+    head.appendChild(equis);
+    var cuerpo = document.createElement("div");
+    cuerpo.className = "modal-cuerpo";
+    cuerpo.innerHTML = cuerpoHTML;
+    var pie = document.createElement("div");
+    pie.className = "modal-foot";
+    (botones || []).forEach(function (b) {
+      var el = document.createElement("button");
+      el.className = b.clase || "btn btn-secundario";
+      el.appendChild(document.createTextNode(b.txt));
+      el.addEventListener("click", function () {
+        if (b.al) b.al(caja);
+        if (b.cerrar !== false) cerrarModal();
+      });
+      pie.appendChild(el);
+    });
+    caja.appendChild(head);
+    caja.appendChild(cuerpo);
+    caja.appendChild(pie);
+    velo.appendChild(caja);
+    document.body.appendChild(velo);
+    document.body.classList.add("sin-scroll");
+    equis.addEventListener("click", cerrarModal);
+    velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
+    var foco = $("input, select, textarea, .modal-foot button", caja);
+    if (foco) foco.focus();
+    return caja;
+  }
+
+  function confirmar(titulo, texto, al) {
+    abrirModal(titulo, '<p class="confirm-texto"></p>', [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Confirmar", clase: "btn btn-peligro", al: al }
+    ]);
+    $(".confirm-texto").textContent = texto;
+  }
+
+  function campo(id, etq, tipo) {
+    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
+      '<input id="' + id + '" type="' + (tipo || "text") + '"></div>';
+  }
+  function area(id, etq, ph) {
+    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
+      '<textarea id="' + id + '" placeholder="' + ph + '"></textarea></div>';
+  }
+  function selCampo(id, etq, opciones) {
+    var ops = opciones.map(function (o) { return "<option>" + o + "</option>"; }).join("");
+    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
+      '<select id="' + id + '">' + ops + '</select></div>';
+  }
+
+  var BODY_CALIFICAR = campo("cal-puntaje", "Puntaje (0 a 100)", "number") +
+    selCampo("cal-resultado", "Resultado", ["Aprobada", "En revision", "Devuelta"]) +
+    area("cal-retro", "Retroalimentacion", "Observaciones para el estudiante");
+
+  var BODY_ASIGNAR = campo("asig-titulo", "Titulo de la tarea") +
+    campo("asig-emp", "Emprendimiento") +
+    selCampo("asig-prio", "Prioridad", ["Alta", "Media", "Baja"]) +
+    campo("asig-fecha", "Fecha limite", "date") +
+    area("asig-instr", "Instrucciones", "Que debe entregar el estudiante");
+
+  var BODY_ASESORIA = campo("as-fecha", "Fecha", "date") +
+    campo("as-hora", "Hora", "time") +
+    selCampo("as-mod", "Modalidad", ["Presencial", "Virtual", "Modalidad mixta"]) +
+    campo("as-lugar", "Lugar o enlace");
+
+  var BODY_DIAG = area("diag-rec", "Recomendaciones", "Que debe reforzar el estudiante");
+
+  var BODY_CLAVE = campo("clave-act", "Contrasena actual", "password") +
+    campo("clave-nueva", "Contrasena nueva", "password") +
+    campo("clave-rep", "Repetir contrasena nueva", "password");
+
+  function aplicarFiltroDesdeURL() {
+    var m = location.search.match(/[?&]f=([^&]+)/);
+    if (!m) return;
+    var val = decodeURIComponent(m[1].split("+").join(" "));
+    var sels = document.querySelectorAll("select[data-filtro]");
+    for (var i = 0; i < sels.length; i++) {
+      var s = sels[i], ok = false;
+      for (var j = 0; j < s.options.length; j++) {
+        if (s.options[j].value === val) { ok = true; break; }
+      }
+      if (ok) { s.value = val; s.dispatchEvent(new Event("change")); return; }
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", aplicarFiltroDesdeURL);
+  } else {
+    aplicarFiltroDesdeURL();
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button, a.btn");
+    if (!b) return;
+    var acc = b.getAttribute("data-accion");
+    if (!acc || !ACCIONES[acc]) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (acc === "registrar-avance") { location.href = "seguimiento-notas.html"; return; }
+
+    if (acc === "calificar") {
+      abrirModal("Calificar entrega", BODY_CALIFICAR, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Guardar calificacion", clase: "btn btn-primario", al: function () { toast("Calificacion guardada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "asignar-tarea") {
+      abrirModal("Asignar tarea", BODY_ASIGNAR, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Asignar tarea", clase: "btn btn-primario", al: function () { toast("Tarea asignada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "confirmar-asesoria") {
+      abrirModal("Confirmar asesoria", BODY_ASESORIA, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Confirmar y notificar", clase: "btn btn-primario", al: function () { toast("Asesoria confirmada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "reprogramar-asesoria") {
+      abrirModal("Proponer otra fecha", BODY_ASESORIA, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Enviar propuesta", clase: "btn btn-primario", al: function () { toast("Nueva fecha propuesta", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "rechazar-asesoria") {
+      confirmar("Rechazar solicitud", "Se notificara al estudiante que la solicitud fue rechazada.", function () { toast("Solicitud rechazada", "info"); });
+      return;
+    }
+    if (acc === "revisar-diagnostico") {
+      abrirModal("Recomendaciones del diagnostico", BODY_DIAG, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Guardar recomendaciones", clase: "btn btn-primario", al: function () { toast("Recomendaciones guardadas", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "guardar-recomendaciones") {
+      confirmar("Guardar recomendaciones", "Se enviaran al estudiante y se marcaran como revisadas.", function () { toast("Recomendaciones guardadas", "ok"); });
+      return;
+    }
+    if (acc === "cambiar-contrasena") {
+      abrirModal("Cambiar contrasena", BODY_CLAVE, [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Actualizar contrasena", clase: "btn btn-primario", al: function () { toast("Contrasena actualizada", "ok"); } }
+      ]);
+      return;
+    }
+    if (acc === "devolver-tarea") {
+      confirmar("Devolver tarea", "La tarea volvera al estudiante para que ajuste la evidencia.", function () { toast("Tarea devuelta", "info"); });
+      return;
+    }
+    if (acc === "confirmar-avance") {
+      confirmar("Registrar avance", "Se guardara el avance y se notificara al estudiante.", function () { toast("Avance registrado", "ok"); });
+      return;
+    }
+    if (acc === "marcar-todo-leido") {
+      confirmar("Marcar todo como leido", "Se archivaran todas las notificaciones pendientes.", function () {
+        var c = $(".count");
+        if (c) c.textContent = "0";
+        toast("Notificaciones marcadas como leidas", "ok");
+      });
+      return;
+    }
+    if (acc === "publicar-comentario") {
+      var cont = b.closest(".comentario-form") || document;
+      var ta = $("textarea", cont);
+      var txt = ta && ta.value.trim();
+      if (!txt) { toast("Escribe un comentario", "error"); return; }
+      var lista = $(".comentarios");
+      if (lista) {
+        var art = document.createElement("article");
+        art.className = "comentario";
+        var cab = document.createElement("div");
+        cab.className = "comentario-cab";
+        var aut = document.createElement("span");
+        aut.className = "comentario-autor";
+        aut.appendChild(document.createTextNode("Carlos Mendoza"));
+        var fec = document.createElement("span");
+        fec.className = "comentario-fecha";
+        fec.appendChild(document.createTextNode("Ahora"));
+        cab.appendChild(aut);
+        cab.appendChild(fec);
+        var tx = document.createElement("div");
+        tx.className = "comentario-texto";
+        tx.appendChild(document.createTextNode(txt));
+        art.appendChild(cab);
+        art.appendChild(tx);
+        lista.appendChild(art);
+      }
+      if (ta) ta.value = "";
+      toast("Comentario publicado", "ok");
+      return;
+    }
+    if (acc === "filtrar-notificacion") {
+      var tipo = b.getAttribute("data-tipo");
+      $$(".chips .chip").forEach(function (c) {
+        c.classList.toggle("activo", c === b);
+        c.setAttribute("aria-pressed", c === b ? "true" : "false");
+      });
+      $$(".aviso").forEach(function (av) {
+        var ver = !tipo || tipo === "todos" || av.classList.contains("u-" + tipo);
+        av.hidden = !ver;
+      });
+      return;
+    }
+  }, true);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") cerrarModal();
+  });
+})();
+</script>
 </body>
 </html>

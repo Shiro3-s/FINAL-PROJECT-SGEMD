@@ -169,6 +169,13 @@ Elementos de interfaz comunes a todo el prototipo:
 | 31 | Mi perfil | Datos y carga académica |
 | 32 | Notificaciones | Avisos del sistema |
 
+> **Refactor UX/UI del Rol Docente:** las 12 pantallas fueron rediseñadas
+> (filtros funcionales, modales de calificación/asignación/asesoría, pestañas,
+> bitácora de comentarios, accesibilidad). El CSS/JS del rol va **embebido en cada
+> HTML** y se genera desde `paginas_docente.py` (helper `_inyectar`), así que correr
+> `python generar.py` **reproduce** los cambios sin pérdida. Detalle en
+> [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md).
+
 ### 3.4 Administrador (18)
 
 | # | Vista | Qué resuelve |
