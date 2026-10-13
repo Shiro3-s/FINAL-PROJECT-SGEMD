@@ -306,3 +306,84 @@ Tareas (asignar y calificar con evidencia) → Perfil/Notificaciones.
   delta es `docente/emprendimientos.html` (40 → 45 celdas ocultas a 375 px), porque su
   tabla se oculta entera a ese ancho y se le sumó la columna *Evidencia*. Sin desbordes
   nuevos en docente.
+
+---
+
+## 13. Tercer refactor (2026) — acciones docente como vistas completas
+
+> Ajuste posterior pedido por el equipo tras revisar el prototipo. Cambia el alcance de
+> **9 a 17** pantallas. Todo se aplicó en `prototype/paginas_docente.py` (+ `NAV`/`MIGAS`
+> en `lib_ui.py`) y se regeneró con `python generar.py`.
+
+**Idea de fondo:** el docente ya no resuelve casi nada en ventanas modales. Cada acción
+—ver un avance, calificar o devolver una tarea, registrar o confirmar una asesoría,
+revisar un diagnóstico, cambiar la contraseña— lleva a una **vista completa** con su
+propio contexto. Solo sobrevive un diálogo (sin formulario) para la confirmación
+destructiva *Marcar todo como leído*.
+
+1. **Menú.** En `NAV["docente"]`, **Tareas** se mueve al grupo **Mis emprendimientos**
+   (queda: *Emprendimientos asignados · Diagnóstico · Tareas*); **Acompañamiento y
+   actividades** deja solo *Asesorías*. `MIGAS["docente"]` suma las migas de las vistas
+   nuevas (detalle/generar asesoría, detalle/registrar avance, revisión, detalle/
+   devolver/asignar tarea, cambiar contraseña).
+2. **Inicio (dashboard).** Acciones rápidas y actividad reciente ahora **enlazan** a las
+   vistas completas (avance, tarea, asesoría, diagnóstico); se quitaron los botones que
+   abrían modal.
+3. **Avances.** Nueva **vista completa de avance** (`avance-detalle.html`): descripción,
+   evidencia adjunta, datos, historial y acciones de edición; y **registrar/editar avance**
+   (`avance-form.html`) como formulario-página (antes era el modal *Registrar avance*).
+   El expediente enlaza a ambas.
+4. **Tareas.** **Vista completa por tarea** (`tarea-detalle.html`) para visualizar y
+   **calificar**; **devolver** tiene su **propia vista** (`tarea-devolver.html`) con
+   **motivo** (select) y **observaciones**; **asignar tarea** pasa a página
+   (`tarea-form.html`). La lista enlaza a las tres.
+5. **Asesorías.** La tabla es **una sola** con **filtro por estado agrupado**
+   (*Por agendar · Agendada · Completada · Cancelada*, derivado del estado detallado
+   *Pendiente de confirmar · Confirmada · Finalizada · Cancelada por el estudiante*).
+   Cada fila abre **detalle de asesoría** (`asesoria-detalle.html`, vista completa con
+   confirmar/reprogramar/rechazar). Desde el **expediente**, el tab *Asesorías* lleva a
+   esa lista. **Registrar/generar asesoría** (`asesoria-form.html`) se rediseñó: el
+   emprendimiento se elige por **grupo** (agenda a todos sus estudiantes), con **hora
+   disponible**, **descripción de necesidades** y **tema por defecto** (p. ej.
+   *FASE 2 - Prototipo: empaque* o *Tarea: …*). Refleja el flujo de referencia del
+   estudiante (`solicitar-asesoria`, **no modificado**).
+6. **Emprendimientos asignados.** Nuevo **selector por estudiante**: al elegir uno, la
+   lista se sustituye por **los emprendimientos de ese estudiante como pestañas**; el
+   primer emprendimiento queda activo por defecto. Los emprendimientos del docente
+   siguen siendo N:N (p. ej. *Mariana Lopez* tiene *Sabor y Sabe* y *Krea Textil*;
+   *Diego Torres* tiene *Sabor y Sabe* y *EcoPack*).
+7. **Diagnóstico.** Deja de ser solo *Revisión del diagnóstico*: **vista propia** con
+   **selector de emprendimiento** y **filtros por estudiante/proyecto**, **avance por
+   fases** y tabla de diagnósticos cuyo **origen** es la **completación de las 4 fases**
+   o una **serie de tareas clave**. La revisión y recomendaciones viven en
+   `diagnostico-revision.html` (vista completa).
+8. **Cambiar contraseña.** El modal se reemplaza por la vista `contrasena.html`
+   (enlazada desde *Mi perfil*).
+
+### Contrato `data-accion` (estado final)
+
+Se mantienen `guardar-avance`, `guardar-calificacion`, `devolver-tarea`, `asignar-tarea`,
+`generar-asesoria`, `confirmar-asesoria`, `reprogramar-asesoria`, `rechazar-asesoria`,
+`guardar-recomendaciones`, `actualizar-contrasena` (todos disparan un **toast** de
+confirmación, ya sin modal), `publicar-comentario`, `descargar-pdf`, `filtrar-notificacion`
+y `marcar-todo-leido` (única confirmación con diálogo). Desaparecen los `data-accion="ver"`
+del rol: ver algo ahora es un **enlace**.
+
+### Verificación de este tercer refactor
+
+- `python _auditar.py` → **0** (sin clones: las firmas de las vistas nuevas son únicas).
+- `python _check_tipografia.py` → **0**.
+- `python _estructura.py` → **1** aviso: presupuesto de estilos en línea (1107 / 699),
+  deuda preexistente y transversal (no hay avisos por archivo, etiquetas ni `for`).
+- `python _interaccion.py` (Chromium) → **0 problemas** en las 65 pantallas.
+- **Responsive (`_responsive.py`):** 88 avisos, **idéntico** al estado previo (1 desborde
+  ajeno en `estudiante/configuracion.html` @1280 y 87 celdas ocultas a 375 px en paneles
+  de pestañas). Las tablas nuevas (`diagnostico`, `diagnostico-revision`) son visibles y
+  no añaden celdas ocultas.
+- **DOM real (jsdom):** las 17 vistas cargan con `js-listo` y 0 errores JS; el selector
+  por estudiante muestra sus emprendimientos como pestañas (primer tab activo), las
+  pestañas de la lista y del expediente conmutan, los filtros (estado agrupado de
+  asesorías, evidencia, estudiante) filtran y actualizan el contador, y `?f=Sin+evidencia`
+  sigue aplicando el filtro.
+- `admin/`, `estudiante/` y `compartido/` **no cambian** (`git status` solo lista
+  `paginas_docente.py`, `lib_ui.py` y los `docente/*.html`).

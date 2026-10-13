@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rol DOCENTE - 9 pantallas.
+"""Rol DOCENTE - 17 pantallas.
 
 Reglas del rol:
   - Solo ve los emprendimientos que tiene asignados.
@@ -7,17 +7,23 @@ Reglas del rol:
   - Confirma fecha y hora de la asesoria que el estudiante solicito (BR-002).
   - Revisa el diagnostico y deja recomendaciones; el estudiante lo responde.
 
-Refactor UX/UI (ver cambios-a-docente.md): cada pagina inyecta un bundle CSS/JS
-propio del rol via _inyectar(). El script captura en fase de captura y atiende
-solo sus data-accion nuevos; el resto lo sigue manejando lib_js.
+Refactor UX/UI (ver cambios-a-docente.md): las acciones del docente ya no abren
+ventanas modales: cada una lleva a una vista completa. Solo las confirmaciones
+destructivas sin formulario (marcar todo leido) siguen siendo un dialogo. Cada
+pagina inyecta un bundle CSS/JS propio del rol via _inyectar(). El script captura
+en fase de captura y atiende sus data-accion; el resto lo sigue manejando lib_js.
 """
+
+import re
 
 from lib_ui import (
     shell, metricas, tabla, toolbar, paginas, badge, campo, select, callout,
     card, estado_vacio, lista_def, steps, ico, boton_accion, lista_avisos,
-    tarjeta_emp, kanban, agenda,
+    tarjeta_emp, kanban, agenda, linea_tiempo,
 )
-from lib_charts import barras, barras_h, donut, stacked_tareas, AZUL, AMAR
+from lib_charts import (
+    barras, barras_h, donut, stacked_tareas, progreso_fases, circular, AZUL, AMAR,
+)
 
 R = "docente"
 
@@ -45,24 +51,28 @@ DOCENTE_CSS = (
     ".campo input[type=number]{width:100%;height:40px;border:1px solid var(--gris);"
     "border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;"
     "color:var(--tinta);background:var(--blanco)}"
+    ".texto-ayuda{font-size:14px;line-height:1.6;color:var(--tinta-2)}"
+    ".medida{min-width:110px}"
     "@media (max-width:479px){.acciones-rapidas{grid-template-columns:minmax(0,1fr)}}"
 )
 
 DOCENTE_JS = """
 (function () {
   "use strict";
-  __OPS__
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 
-  var ACCIONES = {
-    "calificar": 1, "asignar-tarea": 1, "confirmar-asesoria": 1,
-    "reprogramar-asesoria": 1, "rechazar-asesoria": 1, "publicar-comentario": 1,
-    "generar-asesoria": 1,
-    "devolver-tarea": 1, "registrar-avance": 1, "revisar-diagnostico": 1,
-    "guardar-recomendaciones": 1,
-    "cambiar-contrasena": 1, "marcar-todo-leido": 1,
-    "filtrar-notificacion": 1
+  var GUARDAR = {
+    "guardar-avance": "Avance registrado",
+    "guardar-calificacion": "Calificacion guardada",
+    "devolver-tarea": "Tarea devuelta al estudiante",
+    "asignar-tarea": "Tarea asignada",
+    "generar-asesoria": "Asesoria generada",
+    "confirmar-asesoria": "Asesoria confirmada",
+    "reprogramar-asesoria": "Nueva fecha propuesta",
+    "rechazar-asesoria": "Solicitud rechazada",
+    "guardar-recomendaciones": "Recomendaciones guardadas",
+    "actualizar-contrasena": "Contrasena actualizada"
   };
 
   var pila = null;
@@ -88,7 +98,7 @@ DOCENTE_JS = """
     document.body.classList.remove("sin-scroll");
   }
 
-  function abrirModal(titulo, cuerpoHTML, botones) {
+  function confirmar(titulo, texto, al) {
     cerrarModal();
     var velo = document.createElement("div");
     velo.className = "modal-velo";
@@ -101,102 +111,70 @@ DOCENTE_JS = """
     head.className = "modal-head";
     var h2 = document.createElement("h2");
     h2.textContent = titulo;
-    var equis = document.createElement("button");
-    equis.className = "icon-btn modal-x";
-    equis.setAttribute("aria-label", "Cerrar");
-    equis.appendChild(document.createTextNode("X"));
     head.appendChild(h2);
-    head.appendChild(equis);
     var cuerpo = document.createElement("div");
     cuerpo.className = "modal-cuerpo";
-    cuerpo.innerHTML = cuerpoHTML;
+    var p = document.createElement("p");
+    p.className = "confirm-texto";
+    p.textContent = texto;
+    cuerpo.appendChild(p);
     var pie = document.createElement("div");
     pie.className = "modal-foot";
-    (botones || []).forEach(function (b) {
-      var el = document.createElement("button");
-      el.className = b.clase || "btn btn-secundario";
-      el.appendChild(document.createTextNode(b.txt));
-      el.addEventListener("click", function () {
-        if (b.al) b.al(caja);
-        if (b.cerrar !== false) cerrarModal();
-      });
-      pie.appendChild(el);
+    var no = document.createElement("button");
+    no.className = "btn btn-secundario";
+    no.textContent = "Cancelar";
+    no.addEventListener("click", cerrarModal);
+    var si = document.createElement("button");
+    si.className = "btn btn-peligro";
+    si.textContent = "Confirmar";
+    si.addEventListener("click", function () {
+      cerrarModal();
+      if (al) al();
     });
+    pie.appendChild(no);
+    pie.appendChild(si);
     caja.appendChild(head);
     caja.appendChild(cuerpo);
     caja.appendChild(pie);
     velo.appendChild(caja);
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    equis.addEventListener("click", cerrarModal);
-    velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
-    var foco = $("input, select, textarea, .modal-foot button", caja);
-    if (foco) foco.focus();
-    return caja;
+    si.focus();
   }
 
-  function confirmar(titulo, texto, al) {
-    abrirModal(titulo, '<p class="confirm-texto"></p>', [
-      { txt: "Cancelar", clase: "btn btn-secundario" },
-      { txt: "Confirmar", clase: "btn btn-peligro", al: al }
-    ]);
-    $(".confirm-texto").textContent = texto;
+  function slug(txt) {
+    return (txt || "").toLowerCase().normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   }
 
-  function campo(id, etq, tipo) {
-    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
-      '<input id="' + id + '" type="' + (tipo || "text") + '"></div>';
+  /* Emprendimientos asignados: al elegir un estudiante se sustituye la lista
+     por las pestanas de sus emprendimientos (uno por emprendimiento). */
+  var selEst = $("#sel-estudiante");
+  if (selEst) {
+    var lista = $("#lista-emprendimientos");
+    var det = $("#detalle-estudiante");
+    var pintar = function () {
+      var v = slug(selEst.value);
+      if (lista) lista.hidden = !!v;
+      if (det) det.hidden = !v;
+      $$("[data-est-perfil]").forEach(function (s) {
+        s.hidden = s.getAttribute("data-est-perfil") !== v;
+      });
+      if (v) {
+        var sec = $("[data-est-perfil]:not([hidden])");
+        if (sec) {
+          var t = $(".tabs button", sec);
+          if (t) t.click();
+        }
+      } else if (lista) {
+        var t0 = $(".tabs button", lista);
+        if (t0) t0.click();
+      }
+    };
+    selEst.addEventListener("change", pintar);
+    if (selEst.value) pintar();
   }
-  function area(id, etq, ph) {
-    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
-      '<textarea id="' + id + '" placeholder="' + ph + '"></textarea></div>';
-  }
-  function selCampo(id, etq, opciones) {
-    var ops = opciones.map(function (o) { return "<option>" + o + "</option>"; }).join("");
-    return '<div class="campo"><label for="' + id + '">' + etq + '</label>' +
-      '<select id="' + id + '">' + ops + '</select></div>';
-  }
-
-  var BODY_CALIFICAR = campo("cal-puntaje", "Puntaje (0 a 100)", "number") +
-    selCampo("cal-resultado", "Resultado", ["Aprobada", "En revision", "Devuelta"]) +
-    area("cal-retro", "Retroalimentacion", "Observaciones para el estudiante");
-
-  var BODY_ASIGNAR = campo("asig-titulo", "Titulo de la tarea") +
-    campo("asig-emp", "Emprendimiento") +
-    selCampo("asig-prio", "Prioridad", ["Alta", "Media", "Baja"]) +
-    campo("asig-fecha", "Fecha limite", "date") +
-    area("asig-instr", "Instrucciones", "Que debe entregar el estudiante");
-
-  var BODY_ASESORIA = campo("as-fecha", "Fecha", "date") +
-    campo("as-hora", "Hora", "time") +
-    selCampo("as-mod", "Modalidad", ["Presencial", "Virtual", "Modalidad mixta"]) +
-    campo("as-lugar", "Lugar o enlace");
-
-  var BODY_DIAG = area("diag-rec", "Recomendaciones", "Que debe reforzar el estudiante");
-
-  var BODY_AVANCE = selCampo("av-emp", "Emprendimiento", OPS_EMP) +
-    selCampo("av-fase", "Fase alcanzada", OPS_FASE) +
-    campo("av-fecha", "Fecha del avance", "date") +
-    area("av-desc", "Descripcion del avance", "Que se avanzo en esta fase") +
-    campo("av-puntaje", "Puntaje (0 a 100)", "number") +
-    selCampo("av-estado", "Estado de revision",
-             ["Pendiente", "En revision", "Calificada", "Devuelta"]) +
-    selCampo("av-evid", "Evidencia", ["Con evidencia", "Sin evidencia"]) +
-    area("av-obs", "Comentario para el estudiante", "Retroalimentacion");
-
-  var BODY_GENERAR = selCampo("gen-modo", "Generar asesoria para",
-      ["Un estudiante especifico", "Un proyecto completo (todo el grupo)"]) +
-    selCampo("gen-est", "Estudiante", OPS_EST) +
-    selCampo("gen-emp", "Emprendimiento", OPS_EMP) +
-    campo("gen-fecha", "Fecha", "date") +
-    campo("gen-hora", "Hora", "time") +
-    selCampo("gen-mod", "Modalidad", ["Presencial", "Virtual", "Modalidad mixta"]) +
-    campo("gen-lugar", "Lugar o enlace") +
-    '<p class="nota-foot" id="gen-nota">Se anexara a todos los estudiantes del grupo.</p>';
-
-  var BODY_CLAVE = campo("clave-act", "Contrasena actual", "password") +
-    campo("clave-nueva", "Contrasena nueva", "password") +
-    campo("clave-rep", "Repetir contrasena nueva", "password");
 
   function aplicarFiltroDesdeURL() {
     var m = location.search.match(/[?&]f=([^&]+)/);
@@ -221,96 +199,28 @@ DOCENTE_JS = """
     var b = e.target.closest("button, a.btn");
     if (!b) return;
     var acc = b.getAttribute("data-accion");
-    if (!acc || !ACCIONES[acc]) return;
-    e.preventDefault();
-    e.stopPropagation();
+    if (!acc) return;
 
-    if (acc === "registrar-avance") {
-      abrirModal("Registrar avance", BODY_AVANCE, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Registrar avance", clase: "btn btn-primario", al: function () { toast("Avance registrado", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "generar-asesoria") {
-      var cajaGen = abrirModal("Generar asesoria", BODY_GENERAR, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Generar asesoria", clase: "btn btn-primario", al: function () { toast("Asesoria generada", "ok"); } }
-      ]);
-      var modoGen = $("#gen-modo", cajaGen);
-      var estGen = $("#gen-est", cajaGen);
-      var notaGen = $("#gen-nota", cajaGen);
-      function pintarGen() {
-        var porProyecto = modoGen && modoGen.value.indexOf("proyecto") !== -1;
-        var caja = estGen ? estGen.closest(".campo") : null;
-        if (caja) caja.hidden = porProyecto;
-        if (notaGen) notaGen.textContent = porProyecto
-          ? "La asesoria se anexara a todos los estudiantes del grupo del emprendimiento."
-          : "La asesoria se registra para el estudiante y el emprendimiento elegidos.";
-      }
-      if (modoGen) { modoGen.addEventListener("change", pintarGen); pintarGen(); }
-      return;
-    }
-
-    if (acc === "calificar") {
-      abrirModal("Calificar entrega", BODY_CALIFICAR, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Guardar calificacion", clase: "btn btn-primario", al: function () { toast("Calificacion guardada", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "asignar-tarea") {
-      abrirModal("Asignar tarea", BODY_ASIGNAR, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Asignar tarea", clase: "btn btn-primario", al: function () { toast("Tarea asignada", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "confirmar-asesoria") {
-      abrirModal("Confirmar asesoria", BODY_ASESORIA, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Confirmar y notificar", clase: "btn btn-primario", al: function () { toast("Asesoria confirmada", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "reprogramar-asesoria") {
-      abrirModal("Proponer otra fecha", BODY_ASESORIA, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Enviar propuesta", clase: "btn btn-primario", al: function () { toast("Nueva fecha propuesta", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "rechazar-asesoria") {
-      confirmar("Rechazar solicitud", "Se notificara al estudiante que la solicitud fue rechazada.", function () { toast("Solicitud rechazada", "info"); });
-      return;
-    }
-    if (acc === "revisar-diagnostico") {
-      abrirModal("Recomendaciones del diagnostico", BODY_DIAG, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Guardar recomendaciones", clase: "btn btn-primario", al: function () { toast("Recomendaciones guardadas", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "guardar-recomendaciones") {
-      confirmar("Guardar recomendaciones", "Se enviaran al estudiante y se marcaran como revisadas.", function () { toast("Recomendaciones guardadas", "ok"); });
-      return;
-    }
-    if (acc === "cambiar-contrasena") {
-      abrirModal("Cambiar contrasena", BODY_CLAVE, [
-        { txt: "Cancelar", clase: "btn btn-secundario" },
-        { txt: "Actualizar contrasena", clase: "btn btn-primario", al: function () { toast("Contrasena actualizada", "ok"); } }
-      ]);
-      return;
-    }
-    if (acc === "devolver-tarea") {
-      confirmar("Devolver tarea", "La tarea volvera al estudiante para que ajuste la evidencia.", function () { toast("Tarea devuelta", "info"); });
-      return;
-    }
     if (acc === "marcar-todo-leido") {
-      confirmar("Marcar todo como leido", "Se archivaran todas las notificaciones pendientes.", function () {
-        var c = $(".count");
-        if (c) c.textContent = "0";
-        toast("Notificaciones marcadas como leidas", "ok");
+      e.preventDefault();
+      confirmar("Marcar todo como leido",
+        "Se archivaran todas las notificaciones pendientes.",
+        function () {
+          var c = $(".count");
+          if (c) c.textContent = "0";
+          toast("Notificaciones marcadas como leidas", "ok");
+        });
+      return;
+    }
+    if (acc === "filtrar-notificacion") {
+      var tipo = b.getAttribute("data-tipo");
+      $$(".chips .chip").forEach(function (c) {
+        c.classList.toggle("activo", c === b);
+        c.setAttribute("aria-pressed", c === b ? "true" : "false");
+      });
+      $$(".aviso").forEach(function (av) {
+        var ver = !tipo || tipo === "todos" || av.classList.contains("u-" + tipo);
+        av.hidden = !ver;
       });
       return;
     }
@@ -319,8 +229,8 @@ DOCENTE_JS = """
       var ta = $("textarea", cont);
       var txt = ta && ta.value.trim();
       if (!txt) { toast("Escribe un comentario", "error"); return; }
-      var lista = $(".comentarios");
-      if (lista) {
+      var listaC = $(".comentarios");
+      if (listaC) {
         var art = document.createElement("article");
         art.className = "comentario";
         var cab = document.createElement("div");
@@ -338,22 +248,18 @@ DOCENTE_JS = """
         tx.appendChild(document.createTextNode(txt));
         art.appendChild(cab);
         art.appendChild(tx);
-        lista.appendChild(art);
+        listaC.appendChild(art);
       }
       if (ta) ta.value = "";
       toast("Comentario publicado", "ok");
       return;
     }
-    if (acc === "filtrar-notificacion") {
-      var tipo = b.getAttribute("data-tipo");
-      $$(".chips .chip").forEach(function (c) {
-        c.classList.toggle("activo", c === b);
-        c.setAttribute("aria-pressed", c === b ? "true" : "false");
-      });
-      $$(".aviso").forEach(function (av) {
-        var ver = !tipo || tipo === "todos" || av.classList.contains("u-" + tipo);
-        av.hidden = !ver;
-      });
+    if (acc === "descargar-pdf") {
+      toast("PDF del diagnostico generado", "info");
+      return;
+    }
+    if (GUARDAR[acc]) {
+      toast(GUARDAR[acc], "ok");
       return;
     }
   }, true);
@@ -365,17 +271,8 @@ DOCENTE_JS = """
 """
 
 
-def _js_arr(items):
-    return "[" + ",".join('"%s"' % str(i).replace('"', '\\"') for i in items) + "]"
-
-
 def _js_docente():
-    """Inyecta en el bundle del rol los catalogos reales de estudiantes,
-    emprendimientos y fases, para que los selectores no queden desincronizados."""
-    return DOCENTE_JS.replace(
-        "__OPS__",
-        "var OPS_EMP = %s, OPS_EST = %s, OPS_FASE = %s;"
-        % (_js_arr(EMPRESAS), _js_arr(TODOS_ESTUDIANTES), _js_arr(FASES)))
+    return DOCENTE_JS
 
 
 def _inyectar(html):
@@ -402,19 +299,86 @@ ESTADOS_AS = {
     "Cancelada por el estudiante": "b-neutra",
 }
 
+# Agrupacion pedida para el filtro de la tabla de asesorias: agendadas,
+# completadas y por agendar. El estado detallado se conserva en ESTADOS_AS.
+GRUPO_AS = {
+    "Confirmada": "Agendada",
+    "Pendiente de confirmar": "Por agendar",
+    "Finalizada": "Completada",
+    "Cancelada por el estudiante": "Cancelada",
+}
+COLOR_GRUPO_AS = {
+    "Agendada": "b-azul",
+    "Por agendar": "b-amarillo",
+    "Completada": "b-linea",
+    "Cancelada": "b-neutra",
+}
+
+# Campos: (codigo, emprendimiento, estudiante, sector, estado, fecha, modalidad, tema)
 ASESORIAS = [
     ("ASES-014", "Sabor y Sabe", "Mariana Lopez", "Alimentos",
-     "Confirmada", "12 nov 2024, 10:00", "Modalidad mixta"),
+     "Confirmada", "12 nov 2024, 10:00", "Modalidad mixta",
+     "FASE 2 - Prototipo: empaque"),
     ("ASES-013", "Krea Textil", "Jhon Ospina", "Moda",
-     "Confirmada", "14 nov 2024, 15:30", "Virtual"),
+     "Confirmada", "14 nov 2024, 15:30", "Virtual",
+     "Tarea: Perfil en redes sociales"),
     ("ASES-012", "EcoPack", "Lucia Fernandez", "Ambiental",
-     "Pendiente de confirmar", "20 nov 2024, 09:00", "Presencial"),
+     "Pendiente de confirmar", "20 nov 2024, 09:00", "Presencial",
+     "FASE 3 - Validación: prueba con usuarios"),
     ("ASES-011", "Sabor y Sabe", "Mariana Lopez", "Alimentos",
-     "Finalizada", "05 nov 2024, 10:00", "Presencial"),
+     "Finalizada", "05 nov 2024, 10:00", "Presencial",
+     "FASE 2 - Prototipo: precios"),
     ("ASES-010", "Krea Textil", "Jhon Ospina", "Moda",
-     "Finalizada", "31 oct 2024, 14:00", "Virtual"),
+     "Finalizada", "31 oct 2024, 14:00", "Virtual",
+     "Tarea: Análisis de competencia"),
     ("ASES-009", "EcoPack", "Lucia Fernandez", "Ambiental",
-     "Cancelada por el estudiante", "28 oct 2024, 11:00", "Presencial"),
+     "Cancelada por el estudiante", "28 oct 2024, 11:00", "Presencial",
+     "FASE 1 - Ideación: problema"),
+]
+
+# Avances del emprendimiento: (fecha, fase, descripcion, calificacion, evidencia)
+AVANCES = [
+    ("12 nov 2024", "FASE 2", "Prototipo de empaque listo para 20 unidades",
+     92, "Con evidencia"),
+    ("05 nov 2024", "FASE 2", "Definicion de precios y punto de equilibrio",
+     88, "Con evidencia"),
+    ("28 oct 2024", "FASE 1", "Diagnostico inicial y problema claro",
+     81, "Sin evidencia"),
+]
+
+# Tareas del docente: (titulo, emprendimiento, estudiante, prioridad, vence, estado)
+TAREAS_DOC = [
+    ("Evidencia fotografica del punto de venta", "Sabor y Sabe", "Mariana Lopez",
+     "Alta", "12 nov 2024", "En revision"),
+    ("Presupuesto de insumos", "Sabor y Sabe", "Mariana Lopez",
+     "Media", "15 nov 2024", "Completada"),
+    ("Perfil en redes sociales", "Krea Textil", "Jhon Ospina",
+     "Baja", "16 nov 2024", "Pendiente"),
+    ("Prototipo de empaque", "EcoPack", "Lucia Fernandez",
+     "Alta", "14 nov 2024", "En revision"),
+    ("Analisis de competencia", "Aromas del Sur", "Sofia Ramirez",
+     "Media", "18 nov 2024", "Pendiente"),
+]
+
+PRIO_AS = {"Alta": "b-amarillo", "Media": "b-azul", "Baja": "b-linea"}
+ESTADO_TAREA = {"En revision": "b-amarillo", "Completada": "b-azul",
+                "Pendiente": "b-neutra", "Devuelta": "b-neutra"}
+
+# Diagnostico generado: (origen, emprendimiento, estudiante, tema, estado, fecha)
+DIAGNOSTICOS = [
+    ("FASE 1 completada", "Sabor y Sabe", "Mariana Lopez",
+     "Problema y perfil", "Completado", "28 oct 2024"),
+    ("FASE 2 en curso", "Sabor y Sabe", "Mariana Lopez",
+     "Prototipo y precios", "En curso", "12 nov 2024"),
+    ("Tareas clave", "Krea Textil", "Jhon Ospina",
+     "Validación con usuarios", "Pendiente", "Pendiente"),
+]
+
+DIAG_FASES = [
+    ("FASE 1 - Ideación", 100, AZUL),
+    ("FASE 2 - Prototipo", 62, AZUL),
+    ("FASE 3 - Validación", 24, AMAR),
+    ("FASE 4 - Formalización", 0, "#bbbbbb"),
 ]
 
 # Grupo de cada emprendimiento: un emprendimiento puede tener varios estudiantes
@@ -423,8 +387,10 @@ ASESORIAS = [
 ESTUDIANTES_EMP = {
     "Sabor y Sabe": [("Mariana Lopez", "EST-087", "Sede Norte"),
                      ("Diego Torres", "EST-090", "Sede Norte")],
-    "Krea Textil": [("Jhon Ospina", "EST-086", "Sede Centro")],
-    "EcoPack": [("Lucia Fernandez", "EST-085", "Sede Norte")],
+    "Krea Textil": [("Jhon Ospina", "EST-086", "Sede Centro"),
+                    ("Mariana Lopez", "EST-087", "Sede Norte")],
+    "EcoPack": [("Lucia Fernandez", "EST-085", "Sede Norte"),
+                ("Diego Torres", "EST-090", "Sede Norte")],
     "Aromas del Sur": [("Sofia Ramirez", "EST-084", "Sede Sur"),
                        ("Camilo Rojas", "EST-091", "Sede Sur")],
     "Muebles Origen": [("Andres Felipe", "EST-083", "Sede Centro")],
@@ -460,6 +426,9 @@ REVISION = {
     "Muebles Origen": ("Devuelta", "b-neutra"),
 }
 
+INFO_EMP = {a[0]: a for a in ASIGNADOS}
+
+
 def estudiantes_de(emp):
     """Nombres del grupo anexado a un emprendimiento."""
     return [e[0] for e in ESTUDIANTES_EMP.get(emp, [])]
@@ -470,11 +439,34 @@ def roster_de(emp):
     return ESTUDIANTES_EMP.get(emp, [])
 
 
-TODOS_ESTUDIANTES = [e[0] for grupo in ESTUDIANTES_EMP.values() for e in grupo]
+def emprendimientos_de(estudiante):
+    """Emprendimientos asignados a un estudiante (relación N:N)."""
+    return [emp for emp in EMPRESAS if estudiante in estudiantes_de(emp)]
+
+
+def _estudiantes_unicos():
+    vistos = []
+    for grupo in ESTUDIANTES_EMP.values():
+        for e in grupo:
+            if e[0] not in vistos:
+                vistos.append(e[0])
+    return vistos
+
+
+TODOS_ESTUDIANTES = _estudiantes_unicos()
 EMPRESAS = [a[0] for a in ASIGNADOS]
 
 
 # --- Helpers de marcado ------------------------------------------------------
+_ACENTOS_SLUG = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
+
+
+def _slug(texto):
+    """Slug igual al de lib_js, para casar el selector con las secciones."""
+    s = texto.lower().translate(_ACENTOS_SLUG)
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
 def _b(icono, etiqueta):
     """Boton generico de tabla (data-accion por intencion del icono)."""
     return boton_accion(icono, etiqueta)
@@ -490,6 +482,18 @@ def _bt(accion, icono, texto, clase="btn btn-primario"):
     """Boton con texto y data-accion explicito."""
     return ('<button data-accion="%s" class="%s">%s %s</button>'
             % (accion, clase, ico(icono, 16), texto))
+
+
+def _lnk(href, icono, texto, clase="btn btn-primario"):
+    """Enlace con aspecto de boton (navega a una vista completa)."""
+    return ('<a class="%s" href="%s">%s %s</a>'
+            % (clase, href, ico(icono, 16), texto))
+
+
+def _a(icono, etiqueta, href):
+    """Accion de tabla como enlace real (para navegar, no modal)."""
+    return ('<a class="table-act" href="%s" title="%s" aria-label="%s">%s</a>'
+            % (href, etiqueta, etiqueta, ico(icono, 16)))
 
 
 def _acc(*items):
@@ -575,14 +579,23 @@ def registrar(reg):
     paginas_doc = [
         ("dashboard.html", "21 Docente - Inicio (dashboard)", dashboard),
         ("asesorias.html", "22 Docente - Mis asesorías", asesorias),
-        ("asesoria-form.html", "23 Docente - Registrar asesoría", asesoria_form),
-        ("emprendimientos.html", "24 Docente - Emprendimientos asignados", emprendimientos),
-        ("emprendimiento-expediente.html", "25 Docente - Expediente del emprendimiento",
+        ("asesoria-detalle.html", "23 Docente - Detalle de asesoría", asesoria_detalle),
+        ("asesoria-form.html", "24 Docente - Registrar asesoría", asesoria_form),
+        ("emprendimientos.html", "25 Docente - Emprendimientos asignados", emprendimientos),
+        ("emprendimiento-expediente.html", "26 Docente - Expediente del emprendimiento",
          emprendimiento_expediente),
-        ("diagnostico.html", "26 Docente - Revisión del diagnóstico", diagnostico),
-        ("tareas.html", "27 Docente - Tareas asignadas", tareas),
-        ("perfil.html", "28 Docente - Mi perfil", perfil),
-        ("notificaciones.html", "29 Docente - Notificaciones", notificaciones),
+        ("avance-detalle.html", "27 Docente - Detalle del avance", avance_detalle),
+        ("avance-form.html", "28 Docente - Registrar avance", avance_form),
+        ("diagnostico.html", "29 Docente - Diagnóstico", diagnostico),
+        ("diagnostico-revision.html", "30 Docente - Revisión del diagnóstico",
+         diagnostico_revision),
+        ("tareas.html", "31 Docente - Tareas asignadas", tareas),
+        ("tarea-detalle.html", "32 Docente - Detalle de tarea", tarea_detalle),
+        ("tarea-devolver.html", "33 Docente - Devolver tarea", tarea_devolver),
+        ("tarea-form.html", "34 Docente - Asignar tarea", tarea_form),
+        ("perfil.html", "35 Docente - Mi perfil", perfil),
+        ("contrasena.html", "36 Docente - Cambiar contraseña", contrasena),
+        ("notificaciones.html", "37 Docente - Notificaciones", notificaciones),
     ]
     for i, (arch, tit, fn) in enumerate(paginas_doc):
         reg("docente", arch, tit, _envolver(fn), i)
@@ -606,22 +619,22 @@ def dashboard():
         "Actividad reciente del docente",
         ["Fecha", "Emprendimiento", "Accion registrada", "@ACC"],
         [["12 nov 2024", "Sabor y Sabe", "Registraste un avance de fase",
-          _acc(_b("eye", "Ver detalle"))],
+          _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
          ["11 nov 2024", "Krea Textil", "Calificaste una tarea con 92 de 100",
-          _acc(_b("eye", "Ver detalle"))],
+          _acc(_a("eye", "Ver tarea", "tarea-detalle.html"))],
          ["11 nov 2024", "EcoPack", "Confirmaste la asesoría del 20 de noviembre",
-          _acc(_b("eye", "Ver detalle"))],
+          _acc(_a("eye", "Ver asesoría", "asesoria-detalle.html"))],
          ["08 nov 2024", "Sabor y Sabe", "Asignaste la tarea de evidencia fotografica",
-          _acc(_b("eye", "Ver detalle"))]]))
+          _acc(_a("eye", "Ver tarea", "tarea-detalle.html"))]]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
     cuerpo += card("Acciones rapidas", '<div class="acciones-rapidas">'
-                   + _bt("registrar-avance", "edit", "Registrar avance")
-                   + _bt("calificar", "check", "Calificar", "btn btn-secundario")
-                   + _bt("revisar-diagnostico", "clipboard", "Revisar diagnostico",
-                         "btn btn-secundario")
-                   + _bt("generar-asesoria", "chat", "Generar asesoria",
-                         "btn btn-secundario")
+                   + _lnk("avance-form.html", "edit", "Registrar avance")
+                   + _lnk("tareas.html", "check", "Calificar", "btn btn-secundario")
+                   + _lnk("diagnostico-revision.html", "clipboard", "Revisar diagnostico",
+                          "btn btn-secundario")
+                   + _lnk("asesoria-form.html", "chat", "Generar asesoria",
+                          "btn btn-secundario")
                    + "</div>")
     cuerpo += card("Proximas asesorias", agenda([
         ("Hoy", [("10:00", "Sabor y Sabe", "Mariana Lopez · Modalidad mixta",
@@ -643,83 +656,78 @@ def dashboard():
     return shell(R, "dashboard", "Inicio", cuerpo,
                  migas=["Inicio"],
                  sub="Panorama de tus emprendimientos asignados y tu carga de trabajo.",
-                 acciones=_bt("generar-asesoria", "plus", "Generar asesoria"))
+                 acciones=_lnk("asesoria-form.html", "plus", "Generar asesoria"))
 
 
 # --- 22. Mis asesorias -------------------------------------------------------
 def asesorias():
     filas = []
-    for cod, emp, estu, sector, estado, fecha, mod in ASESORIAS:
-        acciones = []
-        if estado == "Pendiente de confirmar":
-            acciones.append(_ba("confirmar-asesoria", "check", "Confirmar"))
-        acciones.append(_ba("reprogramar-asesoria", "edit", "Reprogramar"))
-        acciones.append(_ba("ver", "eye", "Ver detalle"))
+    for cod, emp, estu, sector, estado, fecha, mod, tema in ASESORIAS:
         filas.append([
-            "<b>%s</b>" % cod, "<b>%s</b>" % emp, estu, sector,
-            badge(estado, ESTADOS_AS[estado]), fecha, mod,
-            _acc(*acciones),
+            "<b>%s</b>" % cod, "<b>%s</b>" % emp, estu, tema,
+            badge(GRUPO_AS[estado], COLOR_GRUPO_AS[GRUPO_AS[estado]]),
+            fecha, mod,
+            _acc(_a("eye", "Ver detalle", "asesoria-detalle.html")),
         ])
     filtros = (_filtro("Filtrar por estado",
-                       ["Todos los estados", "Confirmada", "Pendiente de confirmar",
-                        "Finalizada"], 4)
+                       ["Todos los estados", "Por agendar", "Agendada",
+                        "Completada", "Cancelada"], 4)
                + _filtro("Filtrar por estudiante",
                          ["Todos los estudiantes"] + TODOS_ESTUDIANTES, 2)
                + _filtro("Filtrar por emprendimiento",
                          ["Todos los emprendimientos"] + EMPRESAS, 1)
-               + _contador())
+               + _contador(len(filas)))
     cuerpo = callout(
         "Como docente tú confirmas la <b>fecha y la hora</b> que el estudiante solicitó. "
         "El estudiante no puede agendar por su cuenta.", "bombilla")
     cuerpo += _sep()
     cuerpo += _zona(toolbar(filtros=filtros)
-                    + _tabla_con_titulo("Solicitudes y asesorías del docente",
-                                        ["Código", "Emprendimiento", "Estudiante", "Sector", "Estado",
-                                         "Fecha y hora", "Modalidad", "@ACC"], filas)
+                    + _tabla_con_titulo(
+                        "Asesorías agendadas, completadas y por agendar",
+                        ["Código", "Emprendimiento", "Estudiante", "Tema",
+                         "Estado", "Fecha y hora", "Modalidad", "@ACC"], filas)
                     + paginas(1, 6, 24))
     return shell(R, "asesorias", "Mis asesorías", cuerpo,
                  migas=["Inicio", "Mis asesorías"],
-                 sub="Asesorías asignadas y las que aún debes confirmar.",
-                 acciones=_bt("generar-asesoria", "plus", "Generar asesoría")
-                          + '<a class="btn btn-secundario" href="asesoria-form.html">%s '
-                            "Registrar asesoría</a>" % ico("chat", 16))
+                 sub="Todas tus asesorías: por agendar, agendadas y completadas.",
+                 acciones=_lnk("asesoria-form.html", "plus", "Registrar asesoría"))
 
 
-# --- 23. Registrar asesoria --------------------------------------------------
-def asesoria_form():
+# --- 23. Detalle de asesoria -------------------------------------------------
+def asesoria_detalle():
     cuerpo = steps(["Solicitud recibida", "Confirmar fecha", "Registrar sesion",
                     "Cerrar asesoria"], 1)
     cuerpo += _sep_lg()
+    cuerpo += metricas([
+        ("chat", "Modalidad", "Mixta", "", 60, "Sala 3 / enlace"),
+        ("reloj", "Duracion", "60", "min", 60, "10:00 a 11:00"),
+        ("users", "Agendada a", "2", "estudiantes", 100, "Todo el grupo"),
+    ])
+    cuerpo += _sep()
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
     cuerpo += card("Solicitud del estudiante", lista_def([
-        ("Estudiante", "Mariana Lopez"),
+        ("Estudiante que solicita", "Mariana Lopez"),
         ("Emprendimiento", "Sabor y Sabe"),
-        ("Fecha preferida", "20 de noviembre de 2024"),
-        ("Horario preferido", "Mañana, 09:00 a 11:00"),
-        ("Temas sugeridos", "Presupuesto y punto de equilibrio"),
+        ("Tema por defecto", "FASE 2 - Prototipo: empaque"),
+        ("Necesidades descritas", "Revisar el costo unitario del empaque y el "
+         "punto de equilibrio."),
+        ("Fecha pedida", "20 de noviembre de 2024"),
     ]))
-    cuerpo += card("Datos de la asesoría",
-                   select("Estudiante", TODOS_ESTUDIANTES, req=True,
-                          valor="Mariana Lopez")
-                   + select("Emprendimiento", EMPRESAS, req=True, valor="Sabor y Sabe")
-                   + '<div class="nota-foot">Elige al estudiante y el emprendimiento '
-                     "al que registras la asesoría. Si el estudiante tiene varios "
-                     "emprendimientos, escoge uno por asesoría.</div>")
-    cuerpo += card("Confirmación de agenda",
-                   campo("Fecha", tipo="date", valor="2024-11-20", req=True,
-                         ayuda="La fecha propuesta por el estudiante fue el 20 de noviembre.")
-                   + campo("Hora", tipo="time", valor="10:00", req=True)
+    cuerpo += card("Agenda de la asesoría",
+                   campo("Fecha", tipo="date", valor="2024-11-20", req=True)
+                   + select("Hora disponible",
+                            ["08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
+                             "14:00 - 15:00", "15:00 - 16:00"], req=True,
+                            valor="10:00 - 11:00")
                    + select("Modalidad", ["Presencial", "Virtual", "Modalidad mixta"],
                             req=True, valor="Modalidad mixta")
                    + campo("Lugar o enlace",
-                           valor="Sala 3 del bloque B / meet.sgemd.edu.co/ases-014"))
+                           valor="Sala 3 del bloque B / meet.sgemd.edu.co/ases-014")
+                   + '<div class="nota-foot">Los 2 estudiantes del grupo quedan '
+                     "agendados en la misma asesoría.</div>")
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Temas a trabajar", campo(
-        "Contenido de la sesión", alto=True,
-        valor="Presupuesto de insumos, punto de equilibrio y canal de venta en el campus.",
-        ph="Que temas se van a trabajar"))
     cuerpo += card("Acciones",
                    '<div class="acciones-col">'
                    + _bt("confirmar-asesoria", "check", "Confirmar y notificar")
@@ -727,29 +735,142 @@ def asesoria_form():
                          "btn btn-secundario")
                    + _bt("rechazar-asesoria", "x", "Rechazar solicitud",
                          "btn btn-secundario")
+                   + _lnk("asesorias.html", "izq", "Volver a asesorías",
+                          "btn btn-secundario")
+                   + "</div>")
+    cuerpo += card("Estudiantes agendados", lista_def(
+        [(n, "%s · %s" % (cod, sede))
+         for n, cod, sede in roster_de("Sabor y Sabe")]))
+    cuerpo += "</div></div>"
+    return shell(R, "asesorias", "Detalle de asesoría", cuerpo,
+                 migas=["Inicio", "Mis asesorías", "Detalle de asesoría"],
+                 sub="Confirma, reprograma o rechaza la solicitud del estudiante.",
+                 acciones=_lnk("asesorias.html", "izq", "Volver", "btn btn-secundario"))
+
+
+# --- 24. Registrar asesoria --------------------------------------------------
+def asesoria_form():
+    cuerpo = callout(
+        "Elige el emprendimiento: si es un grupo, la asesoría se agenda para "
+        "<b>todos sus estudiantes</b>. El tema por defecto puede ser una fase con "
+        "su tarea o una tarea asignada.", "bombilla")
+    cuerpo += _sep()
+    cuerpo += steps(["Datos", "Fecha y hora", "Necesidades", "Confirmar"], 0)
+    cuerpo += _sep_lg()
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la asesoría",
+                   select("Emprendimiento", EMPRESAS, req=True, valor="Sabor y Sabe")
+                   + '<div class="nota-foot">Se agendará a los 2 estudiantes del '
+                     "grupo de Sabor y Sabe.</div>"
+                   + select("Tema por defecto",
+                            ["FASE 2 - Prototipo: empaque",
+                             "FASE 2 - Prototipo: precios",
+                             "FASE 3 - Validación: usuarios",
+                             "Tarea: Evidencia fotografica",
+                             "Tarea: Perfil en redes sociales",
+                             "Otra (la define el docente)"], req=True,
+                            valor="FASE 2 - Prototipo: empaque")
+                   + select("Modalidad", ["Presencial", "Virtual", "Modalidad mixta"],
+                            req=True, valor="Modalidad mixta")
+                   + campo("Lugar o enlace",
+                           valor="Sala 3 del bloque B / meet.sgemd.edu.co/ases-014"))
+    cuerpo += card("Necesidades de la asesoría", campo(
+        "Descripción de las necesidades", alto=True,
+        valor="Revisar el costo unitario del empaque, el punto de equilibrio y el "
+              "canal de venta en el campus.",
+        ph="Qué necesita resolver el estudiante en la asesoría"))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Fecha y hora disponible",
+                   campo("Fecha", tipo="date", valor="2024-11-20", req=True)
+                   + select("Hora disponible",
+                            ["08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
+                             "14:00 - 15:00", "15:00 - 16:00"], req=True,
+                            valor="10:00 - 11:00"))
+    cuerpo += card("Estudiantes que se agendan", lista_def(
+        [(n, "%s · %s" % (cod, sede))
+         for n, cod, sede in roster_de("Sabor y Sabe")]))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col">'
+                   + _bt("generar-asesoria", "check", "Generar asesoría")
+                   + _lnk("asesorias.html", "izq", "Cancelar", "btn btn-secundario")
                    + "</div>"
-                   + '<div class="nota-foot">Al confirmar, el estudiante recibe la '
-                     "notificacion con la fecha, la hora y el lugar.</div>")
+                   + '<div class="nota-foot">Al generar, los estudiantes reciben '
+                     "la notificación con la fecha, la hora y el lugar.</div>")
     cuerpo += "</div></div>"
     return shell(R, "asesorias", "Registrar asesoría", cuerpo,
                  migas=["Inicio", "Mis asesorías", "Registrar asesoría"],
-                 sub="Confirma la fecha solicitada y deja el acta de la sesión.",
-                 acciones='<a class="btn btn-secundario" href="asesorias.html">%s Volver</a>'
-                          % ico("izq", 16))
+                 sub="Agenda una asesoría para un emprendimiento y su grupo.",
+                 acciones=_lnk("asesorias.html", "izq", "Volver", "btn btn-secundario"))
 
 
-# --- 24. Emprendimientos asignados -------------------------------------------
+# --- 25. Emprendimientos asignados -------------------------------------------
+def _emp_resumen(emp):
+    """Panel de un emprendimiento dentro de las pestanas por estudiante."""
+    a = INFO_EMP[emp]
+    sector, etapa, avance, act, evid = a[1], a[2], a[3], a[5], a[6]
+    rev, col = REVISION[emp]
+    izq = card("Datos del emprendimiento", lista_def([
+        ("Sector", sector),
+        ("Etapa", badge(etapa, "b-azul")),
+        ("Avance", _barra(avance)),
+        ("Estado de revision", badge(rev, col)),
+        ("Evidencia", badge("Con evidencia" if evid else "Sin evidencia",
+                            "b-azul" if evid else "b-amarillo")),
+        ("Ultima actividad", act),
+    ])) + card("Estudiantes del grupo", lista_def(
+        [(n, "%s · %s" % (cod, sede)) for n, cod, sede in roster_de(emp)]))
+    der = card("Acciones", '<div class="acciones-col">'
+               + _lnk("emprendimiento-expediente.html", "eye", "Abrir expediente")
+               + _lnk("asesorias.html", "chat", "Ver asesorías", "btn btn-secundario")
+               + _lnk("diagnostico.html", "clipboard", "Diagnóstico",
+                      "btn btn-secundario")
+               + _lnk("tareas.html", "checklist", "Tareas", "btn btn-secundario")
+               + "</div>")
+    return ('<div class="grid g-2-1"><div class="grid">%s</div>'
+            '<div class="grid">%s</div></div>' % (izq, der))
+
+
+def _secciones_estudiantes():
+    """Una sección por estudiante con sus emprendimientos como pestañas."""
+    out = []
+    for est in TODOS_ESTUDIANTES:
+        emps = emprendimientos_de(est)
+        if not emps:
+            continue
+        tabs = _tabs([(_slug(e), e) for e in emps])
+        paneles = "".join(
+            _panel(_slug(e), _emp_resumen(e), activo=(i == 0))
+            for i, e in enumerate(emps))
+        out.append('<section data-est-perfil="%s" hidden>%s%s</section>'
+                   % (_slug(est), tabs, paneles))
+    return "".join(out)
+
+
 def emprendimientos():
     """Tarjetas con avance + tabla de proyectos; el docente elige sobre cuales trabaja."""
     cuerpo = callout(
-        "Solo aparecen los <b>8 emprendimientos</b> que tienes asignados. No puedes "
-        "agregar ni reasignar estudiantes.", "bombilla")
+        "Solo aparecen los emprendimientos que tienes asignados. Al elegir un "
+        "<b>estudiante</b>, sus emprendimientos se muestran como pestañas.", "bombilla")
     cuerpo += _sep()
     cuerpo += metricas([
-        ("maleta", "Asignados", "8", "", 62, None),
+        ("maleta", "Asignados", "%d" % len(ASIGNADOS), "", 62, None),
         ("upload", "Con evidencia", "3", "", 60, None),
         ("alerta", "Requieren atención", "2", "", 25, None),
     ])
+    cuerpo += _sep()
+
+    opts = '<option value="">Todos los estudiantes</option>'
+    for est in TODOS_ESTUDIANTES:
+        if emprendimientos_de(est):
+            opts += '<option value="%s">%s</option>' % (est, est)
+    cuerpo += ('<div class="campo"><label for="sel-estudiante">Ver emprendimientos '
+               'por estudiante</label>'
+               '<select class="filtro" id="sel-estudiante" '
+               'aria-label="Ver emprendimientos por estudiante">%s</select>'
+               '<div class="ayuda">Al elegir un estudiante se muestran sus '
+               "emprendimientos como pestañas.</div></div>" % opts)
     cuerpo += _sep()
 
     tarjetas = '<div class="emp-grid">'
@@ -779,28 +900,32 @@ def emprendimientos():
             'href="emprendimiento-expediente.html">Abrir</a>',
         ])
     filtros = (_filtro("Filtrar por etapa",
-                       ["Todas las etapas", "FASE 1 - Ideacion", "FASE 2 - Prototipo",
-                        "FASE 3 - Validacion"], 3)
+                       ["Todas las etapas", "FASE 1 - Ideación", "FASE 2 - Prototipo",
+                        "FASE 3 - Validación"], 3)
                + _filtro("Filtrar por sector",
                          ["Todos los sectores", "Alimentos", "Moda", "Ambiental",
                           "Muebles"], 2)
                + _filtro("Filtrar por evidencia",
                          ["Toda la evidencia", "Con evidencia", "Sin evidencia"], 6)
-               + _contador())
+               + _contador(len(filas)))
     tabla_proy = _zona(toolbar(filtros=filtros) + _tabla_con_titulo(
         "Proyectos asignados al docente",
         ["Emprendimiento", "Estudiante", "Sector", "Etapa", "Avance",
          "Estado de revision", "Evidencia", "Ultima actividad", "@ACC"], filas))
 
-    cuerpo += _tabs([("tarjetas", "Tarjetas"), ("tabla", "Tabla")])
-    cuerpo += _panel("tarjetas", tarjetas, activo=True)
-    cuerpo += _panel("tabla", tabla_proy)
+    cuerpo += ('<div id="lista-emprendimientos">'
+               + _tabs([("tarjetas", "Tarjetas"), ("tabla", "Tabla")])
+               + _panel("tarjetas", tarjetas, activo=True)
+               + _panel("tabla", tabla_proy)
+               + "</div>")
+    cuerpo += ('<div id="detalle-estudiante" hidden>'
+               + _secciones_estudiantes() + "</div>")
     return shell(R, "emprendimientos", "Emprendimientos asignados", cuerpo,
                  migas=["Inicio", "Emprendimientos asignados"],
-                 sub="Los 8 emprendimientos que tienes asignados.")
+                 sub="Tus emprendimientos asignados y los de cada estudiante.")
 
 
-# --- 25. Expediente ----------------------------------------------------------
+# --- 26. Expediente ----------------------------------------------------------
 def emprendimiento_expediente():
     """Expediente académico del docente: lo que califica y su evidencia."""
     cuerpo = metricas([
@@ -816,45 +941,48 @@ def emprendimiento_expediente():
         "Avances y calificaciones del emprendimiento",
         ["Fecha", "Fase", "Descripcion del avance", "Calificacion", "@ACC"],
         [["12 nov 2024", "FASE 2", "Prototipo de empaque listo para 20 unidades",
-          badge("92 de 100", "b-azul"), _acc(_ba("ver", "eye", "Ver detalle"))],
+          badge("92 de 100", "b-azul"), _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
          ["05 nov 2024", "FASE 2", "Definicion de precios y punto de equilibrio",
-          badge("88 de 100", "b-azul"), _acc(_ba("ver", "eye", "Ver detalle"))],
+          badge("88 de 100", "b-azul"), _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
          ["28 oct 2024", "FASE 1", "Diagnostico inicial y problema claro",
-          badge("81 de 100", "b-azul"), _acc(_ba("ver", "eye", "Ver detalle"))]])
+          badge("81 de 100", "b-azul"), _acc(_a("eye", "Ver avance", "avance-detalle.html"))]])
 
     tareas = kanban([
         ("Por calificar", [
             ("Evidencia fotografica del punto de venta",
              "Sabor y Sabe · Vence 12 nov 2024",
              badge("Alta", "b-amarillo"),
-             _bt("calificar", "check", "Calificar", "btn btn-sm btn-primario")),
+             _lnk("tarea-detalle.html", "check", "Calificar", "btn btn-sm btn-primario")),
         ]),
         ("Devueltas al estudiante", [
             ("Presupuesto de insumos", "Sabor y Sabe · Faltan soportes",
              badge("Media", "b-linea"),
-             '<a class="btn btn-sm btn-secundario" href="tareas.html">Ver</a>'),
+             _lnk("tarea-detalle.html", "eye", "Ver", "btn btn-sm btn-secundario")),
         ]),
         ("Calificadas", [
             ("Perfil en redes sociales", "Calificada el 09 nov 2024",
              badge("Completada", "b-azul"),
-             '<a class="btn btn-sm btn-secundario" href="tareas.html">Ver</a>'),
+             _lnk("tarea-detalle.html", "eye", "Ver", "btn btn-sm btn-secundario")),
         ]),
     ])
 
     filas_as = []
-    for cod, emp, estu, sector, estado, fecha, mod in ASESORIAS:
+    for cod, emp, estu, sector, estado, fecha, mod, tema in ASESORIAS:
         if emp == "Sabor y Sabe":
             filas_as.append([cod, fecha, mod, badge(estado, ESTADOS_AS[estado]),
-                             _acc(_ba("ver", "eye", "Ver detalle"))])
+                             _acc(_a("eye", "Ver asesoría", "asesorias.html"))])
     asesorias_panel = tabla(["Codigo", "Fecha y hora", "Modalidad", "Estado", "@ACC"],
                             filas_as)
+    asesorias_panel += ('<div class="form-acciones">'
+                        + _lnk("asesorias.html", "chat", "Ver todas las asesorías",
+                               "btn btn-secundario") + "</div>")
 
     diag_panel = lista_def([
         ("Ultima revision", "28 oct 2024, 09:14"),
         ("Puntaje heuristics", "7.8 de 10"),
         ("Recomendaciones enviadas", "Canal de venta y presupuesto de publicidad"),
-    ]) + '<div class="form-acciones">' + _bt(
-        "revisar-diagnostico", "clipboard", "Revisar y recomendar") + "</div>"
+    ]) + '<div class="form-acciones">' + _lnk(
+        "diagnostico-revision.html", "clipboard", "Revisar y recomendar") + "</div>"
 
     com_panel = ('<div class="comentarios">'
                  + _comentario("Carlos Mendoza", "12 nov 2024",
@@ -894,101 +1022,400 @@ def emprendimiento_expediente():
           "calificaciones y los avances aplican a todos sus integrantes.</div>")
     cuerpo += card("Acciones",
                    '<div class="acciones-col">'
-                   + _bt("registrar-avance", "edit", "Registrar avance")
-                   + _bt("generar-asesoria", "chat", "Generar asesoría",
-                         "btn btn-secundario")
-                   + '<a class="btn btn-secundario" href="tareas.html">%s Revisar tareas</a>'
-                     % ico("checklist", 16)
+                   + _lnk("avance-form.html", "edit", "Registrar avance")
+                   + _lnk("asesoria-form.html", "chat", "Generar asesoría",
+                          "btn btn-secundario")
+                   + _lnk("tareas.html", "checklist", "Revisar tareas",
+                          "btn btn-secundario")
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "emprendimientos", "Sabor y Sabe", cuerpo,
                  migas=["Inicio", "Emprendimientos asignados", "Sabor y Sabe"],
                  sub="Expediente académico del emprendimiento y su grupo de estudiantes.",
-                 acciones='<a class="btn btn-secundario" href="emprendimientos.html">%s Volver</a>'
-                          % ico("izq", 16))
+                 acciones=_lnk("emprendimientos.html", "izq", "Volver",
+                               "btn btn-secundario"))
 
 
-# --- 26. Revision del diagnostico --------------------------------------------
+# --- 27. Detalle del avance --------------------------------------------------
+def avance_detalle():
+    cuerpo = metricas([
+        ("trend", "Fase", "FASE 2", "", 62, "Prototipo"),
+        ("medalla", "Calificación", "92", "/ 100", 92, None),
+        ("clip", "Evidencia", "3", "archivos", 100, None),
+        ("check", "Estado", "En rev.", "", 50, "Por calificar"),
+    ])
+    cuerpo += _sep()
+    cuerpo += callout(
+        "El avance aplica a <b>todo el grupo</b> del emprendimiento. Editar el "
+        "puntaje recalifica a todos sus estudiantes.", "bombilla")
+    cuerpo += _sep()
+    izq = card("Descripción del avance", '<p class="texto-ayuda">Se completó el '
+               "prototipo de empaque para 20 unidades, con ficha técnica y costos "
+               "unitarios. Falta validar el punto de equilibrio.</p>")
+    izq += card("Evidencia adjunta", lista_def([
+        ("prototipo-empaque.pdf", "Subido el 12 nov 2024"),
+        ("costos-unitarios.xlsx", "Subido el 12 nov 2024"),
+        ("ficha-tecnica.docx", "Subido el 12 nov 2024"),
+    ]))
+    der = card("Datos del avance", lista_def([
+        ("Emprendimiento", "Sabor y Sabe"),
+        ("Estudiante", "Mariana Lopez"),
+        ("Fase", "FASE 2 - Prototipo"),
+        ("Fecha", "12 nov 2024"),
+        ("Estado de revision", badge("En revision", "b-amarillo")),
+    ]))
+    der += card("Acciones", '<div class="acciones-col">'
+                + _lnk("avance-form.html", "edit", "Editar avance")
+                + _lnk("tarea-detalle.html", "check", "Ver tarea asociada",
+                       "btn btn-secundario")
+                + _lnk("emprendimiento-expediente.html", "izq", "Volver al expediente",
+                       "btn btn-secundario")
+                + "</div>")
+    cuerpo += '<div class="grid g-2-1"><div class="grid">%s</div><div class="grid">%s</div></div>' % (
+        izq, der)
+    cuerpo += _sep()
+    cuerpo += card("Historial del avance", linea_tiempo([
+        ("12", "nov", "Avance registrado", "Puntaje 92 de 100", ""),
+        ("13", "nov", "Evidencia revisada", "3 archivos validados", ""),
+        ("14", "nov", "Comentario del docente", "Falta el punto de equilibrio", ""),
+    ]))
+    return shell(R, "emprendimientos", "Detalle del avance", cuerpo,
+                 migas=["Inicio", "Emprendimientos asignados", "Sabor y Sabe",
+                        "Detalle del avance"],
+                 sub="Visualiza el avance registrado y edítalo si hace falta.",
+                 acciones=_lnk("emprendimiento-expediente.html", "izq", "Volver",
+                               "btn btn-secundario"))
+
+
+# --- 28. Registrar / editar avance -------------------------------------------
+def avance_form():
+    cuerpo = callout(
+        "Registra el avance de una fase. El puntaje y la evidencia quedan "
+        "visibles para todo el grupo del emprendimiento.", "bombilla")
+    cuerpo += _sep()
+    cuerpo += steps(["Fase alcanzada", "Descripción", "Evidencia", "Calificación"], 0)
+    cuerpo += _sep_lg()
+    izq = card("Datos del avance",
+               select("Emprendimiento", EMPRESAS, req=True, valor="Sabor y Sabe")
+               + select("Fase alcanzada", FASES, req=True, valor="FASE 2 - Prototipo")
+               + campo("Fecha del avance", tipo="date", valor="2024-11-12", req=True)
+               + campo("Puntaje (0 a 100)", tipo="number", valor="92")
+               + select("Estado de revision",
+                        ["Pendiente", "En revision", "Calificada", "Devuelta"],
+                        valor="En revision")
+               + select("Evidencia", ["Con evidencia", "Sin evidencia"],
+                        valor="Con evidencia"))
+    izq += card("Descripción del avance", campo(
+        "Descripción", alto=True,
+        valor="Prototipo de empaque listo para 20 unidades, con ficha tecnica y "
+              "costos unitarios.",
+        ph="Qué se avanzó en esta fase"))
+    der = card("Aplicar a los estudiantes del grupo", lista_def(
+        [(n, "%s · %s" % (cod, sede))
+         for n, cod, sede in roster_de("Sabor y Sabe")])
+        + '<div class="nota-foot">El avance y su calificación aplican a todos los '
+          "integrantes del grupo.</div>")
+    der += card("Acciones", '<div class="acciones-col">'
+                + _bt("guardar-avance", "check", "Guardar avance")
+                + _lnk("emprendimiento-expediente.html", "izq", "Cancelar",
+                       "btn btn-secundario")
+                + "</div>")
+    cuerpo += '<div class="grid g-2-1"><div class="grid">%s</div><div class="grid">%s</div></div>' % (
+        izq, der)
+    return shell(R, "emprendimientos", "Registrar avance", cuerpo,
+                 migas=["Inicio", "Emprendimientos asignados", "Sabor y Sabe",
+                        "Registrar avance"],
+                 sub="Registra o edita el avance de una fase del emprendimiento.",
+                 acciones=_lnk("emprendimiento-expediente.html", "izq", "Volver",
+                               "btn btn-secundario"))
+
+
+# --- 29. Diagnostico ---------------------------------------------------------
 def diagnostico():
     cuerpo = callout(
-        "Como docente <b>revisas</b> el diagnóstico y dejas recomendaciones. "
-        "El cuestionario lo responde el estudiante.", "bombilla")
+        "Elige el emprendimiento y filtra por estudiante o proyecto. El "
+        "diagnóstico se calcula por la <b>completación de las 4 fases</b> o por "
+        "una serie de <b>tareas clave</b> completadas.", "bombilla")
     cuerpo += _sep()
-    cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Comportamiento entrepreneurial del estudiante", barras_h(
+    cuerpo += metricas([
+        ("maleta", "Emprendimientos", "%d" % len(ASIGNADOS), "", 60, None),
+        ("trend", "Fases completadas", "1 de 4", "", 25, None),
+        ("clipboard", "Diagnósticos", "3", "", 45, None),
+        ("checklist", "Tareas clave", "2 de 5", "", 40, None),
+    ])
+    cuerpo += _sep()
+    cuerpo += ('<div class="grid g-2-1">'
+               '<div class="grid">'
+               + select("Emprendimiento", EMPRESAS, valor="Sabor y Sabe")
+               + select("Estudiante", ["Todos los estudiantes"] + TODOS_ESTUDIANTES,
+                        valor="Mariana Lopez")
+               + select("Proyecto / grupo", ["Todos los proyectos"] + EMPRESAS,
+                        valor="Sabor y Sabe")
+               + select("Origen del diagnóstico",
+                        ["Fases y tareas clave", "Solo por fases (4)",
+                         "Solo por tareas clave"], valor="Fases y tareas clave")
+               + "</div>"
+               '<div class="grid">'
+               + card("Datos del emprendimiento", lista_def([
+                   ("Emprendimiento", "Sabor y Sabe"),
+                   ("Sector", "Alimentos"),
+                   ("Etapa", "FASE 2 - Prototipo"),
+                   ("Grupo", "Mariana Lopez · Diego Torres"),
+               ]))
+               + "</div></div>")
+    cuerpo += _sep()
+    cuerpo += card("Avance por fases", progreso_fases(DIAG_FASES))
+    cuerpo += card("Comportamiento entrepreneurial", barras_h(
         "", "", ["Visión", "Creatividad", "Resiliencia", "Liderazgo",
                  "Trabajo en equipo", "Toma de decisiones"],
         [85, 78, 70, 82, 88, 66], maximo=100, unidad="%"))
+    filtros = (_filtro("Filtrar por estado",
+                       ["Todos los estados", "Completado", "En curso",
+                        "Pendiente"], 4)
+               + _filtro("Filtrar por emprendimiento",
+                         ["Todos los emprendimientos"] + EMPRESAS, 1)
+               + _filtro("Filtrar por estudiante",
+                         ["Todos los estudiantes"] + TODOS_ESTUDIANTES, 2)
+               + _contador(len(DIAGNOSTICOS)))
+    filas = [[origen, emp, estu, tema, badge(estado, "b-azul" if estado == "Completado"
+              else "b-amarillo" if estado == "En curso" else "b-linea"), fecha,
+              _acc(_a("eye", "Revisar", "diagnostico-revision.html"))]
+             for origen, emp, estu, tema, estado, fecha in DIAGNOSTICOS]
+    cuerpo += _zona(toolbar(buscar=False, filtros=filtros)
+                    + _tabla_con_titulo(
+                        "Diagnósticos por fase o tareas clave",
+                        ["Origen", "Emprendimiento", "Estudiante", "Tema", "Estado",
+                         "Fecha", "@ACC"], filas)
+                    + paginas(1, 3, 3, tam=10))
+    cuerpo += _sep()
+    cuerpo += card("Historial de diagnósticos", linea_tiempo([
+        ("28", "oct", "Diagnóstico FASE 1", "Puntaje 7.8 de 10", ""),
+        ("12", "nov", "Diagnóstico FASE 2 en curso", "62% de la fase", ""),
+    ]))
+    return shell(R, "diagnostico", "Diagnóstico", cuerpo,
+                 migas=["Inicio", "Diagnóstico"],
+                 sub="Diagnóstico por fases o por tareas clave de cada emprendimiento.",
+                 acciones=_lnk("diagnostico-revision.html", "clipboard",
+                               "Revisar y recomendar"))
+
+
+# --- 30. Revision del diagnostico --------------------------------------------
+def diagnostico_revision():
+    cuerpo = callout(
+        "Revisa el resultado y deja tus <b>recomendaciones</b>. El cuestionario lo "
+        "responde el estudiante y la revisión se guarda en el expediente.", "bombilla")
+    cuerpo += _sep()
+    cuerpo += metricas([
+        ("trend", "Puntaje heuristics", "7.8", "/ 10", 78, "28 oct 2024"),
+        ("clipboard", "Fases completadas", "1", "de 4", 25, "FASE 1"),
+        ("checklist", "Tareas clave", "2", "de 5", 40, "3 pendientes"),
+    ])
+    cuerpo += _sep()
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la revisión", lista_def([
+        ("Estudiante", "Mariana Lopez"),
+        ("Emprendimiento", "Sabor y Sabe"),
+        ("Respondido", "28 oct 2024, 09:14"),
+        ("Origen", "Fases y tareas clave"),
+    ]))
     cuerpo += card("Tus recomendaciones", campo(
         "Recomendaciones", alto=True,
         valor="Definir con más precisión el canal de venta digital y separar el "
               "presupuesto de insumos del de publicidad.",
-        ph="Que debe reforzar el estudiante"))
+        ph="Qué debe reforzar el estudiante"))
     cuerpo += '<div class="form-acciones">'
-    cuerpo += '<button class="btn btn-secundario">%s Descargar PDF</button>' % ico("download", 16)
+    cuerpo += ('<button class="btn btn-secundario" data-accion="descargar-pdf">%s '
+               "Descargar PDF</button>" % ico("download", 16))
     cuerpo += _bt("guardar-recomendaciones", "check", "Guardar recomendaciones")
     cuerpo += "</div></div>"
     cuerpo += '<div class="grid">'
     cuerpo += card("Resumen", lista_def([
-        ("Estudiante", "Mariana Lopez"),
-        ("Emprendimiento", "Sabor y Sabe"),
-        ("Respondido", "28 oct 2024, 09:14"),
-        ("Puntaje heuristics", "7.8 de 10"),
+        ("Comportamiento", "Fuerte en trabajo en equipo"),
+        ("A reforzar", "Toma de decisiones"),
+        ("Pendientes", "FASES 2 a 4 y 3 tareas clave"),
     ]))
     cuerpo += card("Pendientes de revision", _tabla_con_titulo(
         "Pendientes de revision del diagnostico",
         ["Estudiante", "Emprendimiento", "Fecha", "@ACC"],
         [["Jhon Ospina", "Krea Textil", "30 oct 2024",
-          _acc(_ba("revisar-diagnostico", "eye", "Revisar"))],
+          _acc(_a("eye", "Revisar", "diagnostico-revision.html"))],
          ["Sofia Ramirez", "Aromas del Sur", "02 nov 2024",
-          _acc(_ba("revisar-diagnostico", "eye", "Revisar"))]]))
+          _acc(_a("eye", "Revisar", "diagnostico-revision.html"))]]))
     cuerpo += "</div></div>"
     return shell(R, "diagnostico", "Revisión del diagnóstico", cuerpo,
-                 migas=["Inicio", "Diagnóstico"],
-                 sub="Revisa los resultados y deja recomendaciones al estudiante.")
+                 migas=["Inicio", "Diagnóstico", "Revisión"],
+                 sub="Revisa los resultados y deja recomendaciones al estudiante.",
+                 acciones=_lnk("diagnostico.html", "izq", "Volver",
+                               "btn btn-secundario"))
 
 
-# --- 27. Tareas asignadas ----------------------------------------------------
+# --- 31. Tareas asignadas ----------------------------------------------------
 def tareas():
-    filas = [
-        ["<b>Evidencia fotografica del punto de venta</b>", "Sabor y Sabe", "Mariana Lopez",
-         badge("Alta", "b-amarillo"), "12 nov 2024", badge("En revision", "b-amarillo"),
-         _acc(_ba("calificar", "check", "Calificar"), _ba("ver", "eye", "Ver evidencia"))],
-        ["<b>Presupuesto de insumos</b>", "Sabor y Sabe", "Mariana Lopez",
-         badge("Media", "b-amarillo"), "15 nov 2024", badge("Completada", "b-azul"),
-         _acc(_ba("calificar", "check", "Calificar"))],
-        ["<b>Perfil en redes sociales</b>", "Krea Textil", "Jhon Ospina",
-         badge("Baja", "b-linea"), "16 nov 2024", badge("Pendiente", "b-neutra"),
-         _acc(_ba("calificar", "check", "Calificar"))],
-        ["<b>Prototipo de empaque</b>", "EcoPack", "Lucia Fernandez",
-         badge("Alta", "b-amarillo"), "14 nov 2024", badge("En revision", "b-amarillo"),
-         _acc(_ba("calificar", "check", "Calificar"), _ba("ver", "eye", "Ver evidencia"),
-              _ba("devolver-tarea", "x", "Devolver"))],
-        ["<b>Analisis de competencia</b>", "Aromas del Sur", "Sofia Ramirez",
-         badge("Media", "b-amarillo"), "18 nov 2024", badge("Pendiente", "b-neutra"),
-         _acc(_ba("calificar", "check", "Calificar"))],
-    ]
+    filas = []
+    for titulo, emp, estu, prio, vence, estado in TAREAS_DOC:
+        acciones = [_a("check", "Ver y calificar", "tarea-detalle.html")]
+        if estado != "Completada":
+            acciones.append(_a("x", "Devolver tarea", "tarea-devolver.html"))
+        filas.append([
+            "<b>%s</b>" % titulo, emp, estu,
+            badge(prio, PRIO_AS[prio]), vence,
+            badge(estado, ESTADO_TAREA[estado]),
+            _acc(*acciones),
+        ])
     filtros = (_filtro("Filtrar por estado",
-                       ["Todos los estados", "Pendiente", "En revision", "Completada"], 5)
+                       ["Todos los estados", "Pendiente", "En revision",
+                        "Completada"], 5)
                + _filtro("Filtrar por prioridad",
                          ["Toda la prioridad", "Alta", "Media", "Baja"], 3)
-               + _contador())
+               + _contador(len(filas)))
     cuerpo = callout("La tarea se considera <b>completada</b> cuando el estudiante "
                      "adjunta al menos una evidencia.", "bombilla")
     cuerpo += _sep()
     cuerpo += _zona(toolbar(filtros=filtros)
                     + _tabla_con_titulo("Tareas asignadas por revisar",
-                                        ["Tarea", "Emprendimiento", "Estudiante", "Prioridad", "Vence",
-                                         "Estado", "@ACC"], filas)
+                                        ["Tarea", "Emprendimiento", "Estudiante",
+                                         "Prioridad", "Vence", "Estado", "@ACC"], filas)
                     + paginas(1, 5, 23))
     return shell(R, "tareas", "Tareas asignadas", cuerpo,
                  migas=["Inicio", "Tareas"],
                  sub="Revisa y califica las entregas con evidencia de tus estudiantes.",
-                 acciones=_bt("asignar-tarea", "plus", "Asignar tarea"))
+                 acciones=_lnk("tarea-form.html", "plus", "Asignar tarea"))
 
 
-# --- 28. Mi perfil -----------------------------------------------------------
+# --- 32. Detalle de tarea ----------------------------------------------------
+def tarea_detalle():
+    cuerpo = metricas([
+        ("checklist", "Prioridad", "Alta", "", 80, "Vence 12 nov 2024"),
+        ("clip", "Evidencia", "2", "archivos", 100, "Entregada 16:40"),
+        ("medalla", "Calificación", "92", "/ 100", 92, None),
+        ("check", "Estado", "En rev.", "", 50, "Por calificar"),
+    ])
+    cuerpo += _sep()
+    cuerpo += callout(
+        "Califica la entrega o <b>devuélvela</b> con observaciones y el motivo. "
+        "La devolución la recibe el estudiante en su bandeja.", "bombilla")
+    cuerpo += _sep()
+    izq = card("Descripción de la tarea", '<p class="texto-ayuda">Adjunta una foto '
+               "del punto de venta y la lista de precios con el costo unitario de "
+               "cada producto.</p>")
+    izq += card("Evidencia entregada", lista_def([
+        ("punto-de-venta.jpg", "Subida el 12 nov 2024, 16:40"),
+        ("lista-precios.xlsx", "Subida el 12 nov 2024, 16:41"),
+    ]))
+    izq += card("Retroalimentación", campo(
+        "Retroalimentación para el estudiante", alto=True,
+        valor="Buena evidencia del punto de venta. Ajusta el costo unitario del "
+              "empaque.",
+        ph="Observaciones para el estudiante"))
+    der = card("Datos de la entrega", lista_def([
+        ("Tarea", "Evidencia fotografica del punto de venta"),
+        ("Emprendimiento", "Sabor y Sabe"),
+        ("Estudiante", "Mariana Lopez"),
+        ("Entregada", "12 nov 2024, 16:40"),
+        ("Vence", "12 nov 2024"),
+    ]))
+    der += card("Calificación", circular(92, "Calificación", "Sobre 100")
+                + campo("Puntaje (0 a 100)", tipo="number", valor="92")
+                + select("Resultado",
+                         ["Aprobada", "En revision", "Devuelta"], valor="Aprobada"))
+    der += card("Acciones", '<div class="acciones-col">'
+                + _bt("guardar-calificacion", "check", "Guardar calificación")
+                + _lnk("tarea-devolver.html", "x", "Devolver tarea",
+                       "btn btn-secundario")
+                + _lnk("tareas.html", "izq", "Volver a tareas", "btn btn-secundario")
+                + "</div>")
+    cuerpo += '<div class="grid g-2-1"><div class="grid">%s</div><div class="grid">%s</div></div>' % (
+        izq, der)
+    return shell(R, "tareas", "Detalle de tarea", cuerpo,
+                 migas=["Inicio", "Tareas", "Detalle de tarea"],
+                 sub="Visualiza la entrega, califícala o devuélvela.",
+                 acciones=_lnk("tareas.html", "izq", "Volver", "btn btn-secundario"))
+
+
+# --- 33. Devolver tarea ------------------------------------------------------
+def tarea_devolver():
+    cuerpo = callout(
+        "Devuelve la tarea con el <b>motivo</b> y las observaciones. El estudiante "
+        "podrá ajustar la evidencia y volver a entregarla.", "alerta")
+    cuerpo += _sep()
+    izq = card("Datos de la entrega", lista_def([
+        ("Tarea", "Prototipo de empaque"),
+        ("Emprendimiento", "EcoPack"),
+        ("Estudiante", "Lucia Fernandez"),
+        ("Entregada", "14 nov 2024, 11:20"),
+        ("Vence", "14 nov 2024"),
+    ]))
+    izq += card("Evidencia entregada", lista_def([
+        ("prototipo-v1.pdf", "Subida el 14 nov 2024, 11:20"),
+    ]))
+    der = card("Motivo de la devolución", select(
+        "Motivo",
+        ["Evidencia incompleta",
+         "No cumple con lo solicitado",
+         "Archivos ilegibles",
+         "Entrega fuera de fecha",
+         "Otro motivo"], req=True, valor="No cumple con lo solicitado"))
+    der += card("Observaciones para el estudiante", campo(
+        "Observaciones", alto=True,
+        valor="El prototipo no incluye la ficha técnica ni el costo unitario. "
+              "Adjúntalos y vuelve a entregar.",
+        ph="Describe qué debe corregir el estudiante"))
+    der += card("Acciones", '<div class="acciones-col">'
+                + _bt("devolver-tarea", "x", "Devolver al estudiante")
+                + _lnk("tarea-detalle.html", "izq", "Cancelar", "btn btn-secundario")
+                + "</div>")
+    cuerpo += '<div class="grid g-2-1"><div class="grid">%s</div><div class="grid">%s</div></div>' % (
+        izq, der)
+    return shell(R, "tareas", "Devolver tarea", cuerpo,
+                 migas=["Inicio", "Tareas", "Devolver tarea"],
+                 sub="Explica el motivo y las observaciones de la devolución.",
+                 acciones=_lnk("tareas.html", "izq", "Volver", "btn btn-secundario"))
+
+
+# --- 34. Asignar tarea -------------------------------------------------------
+def tarea_form():
+    cuerpo = callout(
+        "Asigna una tarea al emprendimiento; si es un grupo, la reciben todos sus "
+        "estudiantes y cada uno entrega su evidencia.", "bombilla")
+    cuerpo += _sep()
+    cuerpo += steps(["Datos", "Fechas", "Evidencia", "Confirmar"], 0)
+    cuerpo += _sep_lg()
+    izq = card("Datos de la tarea",
+               campo("Título", valor="Evidencia fotografica del punto de venta",
+                     req=True, ph="Qué debe entregar el estudiante")
+               + select("Emprendimiento", EMPRESAS, req=True, valor="Sabor y Sabe")
+               + select("Prioridad", ["Alta", "Media", "Baja"], req=True,
+                        valor="Alta")
+               + campo("Fecha límite", tipo="date", valor="2024-11-12", req=True))
+    izq += card("Instrucciones", campo(
+        "Instrucciones", alto=True,
+        valor="Adjunta una foto del punto de venta y la lista de precios con el "
+              "costo unitario de cada producto.",
+        ph="Qué debe entregar el estudiante"))
+    der = card("Evidencia requerida", select(
+        "Tipo de evidencia",
+        ["Archivo o foto", "Enlace", "Texto", "Sin evidencia"], valor="Archivo o foto")
+        + _chk("Obligatoria para completar la tarea", True)
+        + _chk("Permitir entrega fuera de fecha", False))
+    der += card("Estudiantes que la reciben", lista_def(
+        [(n, "%s · %s" % (cod, sede))
+         for n, cod, sede in roster_de("Sabor y Sabe")])
+        + '<div class="nota-foot">La tarea se asigna a todo el grupo del '
+          "emprendimiento.</div>")
+    der += card("Acciones", '<div class="acciones-col">'
+                + _bt("asignar-tarea", "check", "Asignar tarea")
+                + _lnk("tareas.html", "izq", "Cancelar", "btn btn-secundario")
+                + "</div>")
+    cuerpo += '<div class="grid g-2-1"><div class="grid">%s</div><div class="grid">%s</div></div>' % (
+        izq, der)
+    return shell(R, "tareas", "Asignar tarea", cuerpo,
+                 migas=["Inicio", "Tareas", "Asignar tarea"],
+                 sub="Crea una tarea con evidencia para un emprendimiento.",
+                 acciones=_lnk("tareas.html", "izq", "Volver", "btn btn-secundario"))
+
+
+# --- 35. Mi perfil -----------------------------------------------------------
 def perfil():
     cuerpo = '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
@@ -1023,8 +1450,8 @@ def perfil():
                    '<div class="acciones-col">'
                    + '<button class="btn btn-primario">%s Guardar cambios</button>'
                      % ico("check", 16)
-                   + _bt("cambiar-contrasena", "lock", "Cambiar contrasena",
-                         "btn btn-secundario")
+                   + _lnk("contrasena.html", "lock", "Cambiar contraseña",
+                          "btn btn-secundario")
                    + "</div>")
     cuerpo += "</div></div>"
     return shell(R, "perfil", "Mi perfil", cuerpo,
@@ -1032,7 +1459,34 @@ def perfil():
                  sub="Actualiza tus datos de contacto y revisa tu actividad.")
 
 
-# --- 29. Notificaciones ------------------------------------------------------
+# --- 36. Cambiar contrasena --------------------------------------------------
+def contrasena():
+    cuerpo = callout(
+        "Por seguridad, la contraseña nueva debe tener al menos <b>8 caracteres</b>, "
+        "una mayúscula y un número.", "lock")
+    cuerpo += _sep()
+    izq = card("Cambiar contraseña",
+               campo("Contraseña actual", tipo="password", req=True)
+               + campo("Contraseña nueva", tipo="password", req=True,
+                       ayuda="Mínimo 8 caracteres, una mayúscula y un número.")
+               + campo("Repetir contraseña nueva", tipo="password", req=True)
+               + '<div class="form-acciones">'
+               + _bt("actualizar-contrasena", "lock", "Actualizar contraseña")
+               + "</div>")
+    der = card("Recomendaciones", '<div class="texto-ayuda">No reutilices la '
+               "contraseña de otros servicios. Si detectas un acceso que no "
+               "reconoces, actualízala y avisa a soporte.</div>")
+    der += card("Acciones", _lnk("perfil.html", "izq", "Volver a mi perfil",
+                                 "btn btn-secundario"))
+    cuerpo += '<div class="grid g-2-1"><div class="grid">%s</div><div class="grid">%s</div></div>' % (
+        izq, der)
+    return shell(R, "perfil", "Cambiar contraseña", cuerpo,
+                 migas=["Inicio", "Mi perfil", "Cambiar contraseña"],
+                 sub="Actualiza la contraseña de tu cuenta institucional.",
+                 acciones=_lnk("perfil.html", "izq", "Volver", "btn btn-secundario"))
+
+
+# --- 37. Notificaciones ------------------------------------------------------
 def notificaciones():
     """Bandeja del docente: lista agrupada por urgencia, no tabla.
 
@@ -1055,13 +1509,13 @@ def notificaciones():
         ("Hoy", [
             ("bell", "Solicitud de asesoría de Mariana Lopez",
              "Asesorías · Modalidad mixta · 10:00",
-             "asesorias.html", "media",
-             '<a class="btn btn-sm btn-primario" href="asesorias.html">Confirmar</a>'
+             "asesoria-detalle.html", "media",
+             '<a class="btn btn-sm btn-primario" href="asesoria-detalle.html">Confirmar</a>'
              + _b("check", "Marcar como leída")),
             ("upload", "Evidencia enviada: Sabor y Sabe",
              "Emprendimientos · Prototipo · Entregada 16:40",
-             "emprendimiento-expediente.html", "media",
-             '<a class="btn btn-sm btn-primario" href="emprendimiento-expediente.html">Calificar</a>'
+             "tarea-detalle.html", "media",
+             '<a class="btn btn-sm btn-primario" href="tarea-detalle.html">Calificar</a>'
              + _b("check", "Marcar como leída")),
         ]),
         ("Recientes", [

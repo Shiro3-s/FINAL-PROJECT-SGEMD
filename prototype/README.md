@@ -1,7 +1,7 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-60 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
+65 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
@@ -26,7 +26,7 @@ pantallas globales de acceso.
   - [3. Las vistas por rol](#3-las-vistas-por-rol)
     - [3.1 Acceso global (4)](#31-acceso-global-4)
     - [3.2 Estudiante (19 vistas, 26 archivos)](#32-estudiante-19-vistas-26-archivos)
-    - [3.3 Docente (9)](#33-docente-9)
+    - [3.3 Docente (17)](#33-docente-17)
     - [3.4 Administrador (18)](#34-administrador-18)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
   - [5. Sistema de diseño](#5-sistema-de-diseño)
@@ -53,7 +53,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 60 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 65 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -89,11 +89,11 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 |---|---|---|
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
 | `estudiante/` | 26 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
-| `docente/` | 9 | Inicio, asesorías, expedientes, diagnóstico, tareas, perfil, notificaciones |
+| `docente/` | 17 | Inicio, emprendimientos asignados (por estudiante), expediente, avances, diagnóstico, tareas, asesorías, perfil, notificaciones |
 | `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
-| **Total** | **60** | más `index.html` como índice local |
+| **Total** | **65** | más `index.html` como índice local |
 
-Son **53 vistas lógicas** repartidas en **60 archivos**: dos vistas se reproducen en
+Son **58 vistas lógicas** repartidas en **65 archivos**: dos vistas se reproducen en
 varios archivos. El *detalle de tarea* del estudiante (#15) se reproduce en cinco
 estados (`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
 `completada-usuarios` y `completada-clientes`) y el *detalle del evento* (#18b) en
@@ -152,27 +152,38 @@ Elementos de interfaz comunes a todo el prototipo:
 | 19b | Configuración | Edita datos personales, académicos, contraseña y foto |
 | 20 | Notificaciones | Cada aviso enlaza a su vista; incluye filtros y campana |
 
-### 3.3 Docente (9)
+### 3.3 Docente (17)
+
+Las acciones del docente son **vistas completas**, no ventanas emergentes (solo *Marcar todo como leído* conserva un diálogo de confirmación).
 
 | # | Vista | Qué resuelve |
 |---|---|---|
-| 21 | Inicio | Emprendimientos asignados y tareas pendientes |
-| 22 | Mis asesorías | Agenda y estado de las sesiones; genera asesorías por estudiante o por proyecto |
-| 23 | Registrar asesoría | **Confirma fecha y hora**; deja observaciones; elige estudiante y emprendimiento |
-| 24 | Emprendimientos asignados | Solo los que tiene asignados; grupos (un emprendimiento puede tener varios estudiantes) y columna de evidencia |
-| 25 | Expediente del emprendimiento | Historial completo: avances, tareas, asesorías, diagnóstico, estudiantes del grupo |
-| 26 | Revisión del diagnóstico | Lectura del resultado y recomendaciones al estudiante |
-| 27 | Tareas asignadas | Crea, asigna y califica tareas |
-| 28 | Mi perfil | Datos personales, título/especialidad y ubicación |
-| 29 | Notificaciones | Avisos del sistema |
+| 21 | Inicio | Emprendimientos asignados y tareas pendientes; accesos rápidos que enlazan a las vistas |
+| 22 | Mis asesorías | **Una tabla** con filtro de estado agrupado (*Por agendar · Agendada · Completada · Cancelada*) |
+| 23 | Detalle de asesoría | Vista completa: confirmar, reprogramar o rechazar la solicitud |
+| 24 | Registrar asesoría | Agenda por **grupo** (todo el emprendimiento): tema por defecto, hora disponible y necesidades |
+| 25 | Emprendimientos asignados | Los asignados (N:N) en Tarjetas/Tabla; **selector de estudiante** que muestra sus emprendimientos como **pestañas** |
+| 26 | Expediente del emprendimiento | Historial: avances, tareas, asesorías, diagnóstico, estudiantes del grupo, comentarios |
+| 27 | Detalle del avance | Un avance: descripción, evidencia adjunta, historial y edición |
+| 28 | Registrar avance | Formulario-página del avance (fase, puntaje 0–100, estado de revisión, evidencia) |
+| 29 | Diagnóstico | Selector de emprendimiento y filtros; se calcula por **4 fases** o por **tareas clave** |
+| 30 | Revisión del diagnóstico | Lectura del resultado y recomendaciones al estudiante |
+| 31 | Tareas asignadas | Crea, asigna y califica tareas |
+| 32 | Detalle de tarea | Vista completa de la entrega: evidencia, calificación y devolución |
+| 33 | Devolver tarea | Vista propia con **motivo** y **observaciones** |
+| 34 | Asignar tarea | Formulario-página de la tarea y su evidencia |
+| 35 | Mi perfil | Datos personales, título/especialidad y ubicación |
+| 36 | Cambiar contraseña | Vista propia para la contraseña institucional |
+| 37 | Notificaciones | Avisos del sistema |
 
-> **Refactor UX/UI del Rol Docente:** las 9 pantallas fueron rediseñadas
-> (filtros funcionales, modales de calificación/asignación/asesoría y de avance,
-> pestañas, bitácora de comentarios, accesibilidad). El menú lateral usa los
-> **mismos grupos/acordeón que el rol Estudiante**. El CSS/JS del rol va
-> **embebido en cada HTML** y se genera desde `paginas_docente.py` (helper
-> `_inyectar`), así que correr `python generar.py` **reproduce** los cambios sin
-> pérdida. Detalle en [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md).
+> **Refactor UX/UI del Rol Docente:** las pantallas fueron rediseñadas en tres iteraciones
+> (filtros funcionales, pestañas, bitácora de comentarios, accesibilidad y, en la última,
+> **acciones como vistas completas** en lugar de modales). El menú lateral usa los
+> **mismos grupos/acordeón que el rol Estudiante**, con *Tareas* dentro de **Mis
+> emprendimientos**. El CSS/JS del rol va **embebido en cada HTML** y se genera desde
+> `paginas_docente.py` (helper `_inyectar`), así que correr `python generar.py`
+> **reproduce** los cambios sin pérdida. Detalle en
+> [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md).
 
 ### 3.4 Administrador (18)
 
@@ -301,10 +312,10 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 60 pantallas + index.html
+├── generar.py              Orquestador: emite las 65 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
 ├── paginas_estudiante.py   26 pantallas del estudiante
-├── paginas_docente.py      9 pantallas del docente
+├── paginas_docente.py      17 pantallas del docente
 ├── paginas_admin.py        18 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
 ├── lib_css.py              Tokens, paleta, responsive, componentes
@@ -339,7 +350,7 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 60 pantallas + index.html)
+# Generar (emite las 65 pantallas + index.html)
 python generar.py
 
 # Regenerar las variantes de logo desde el PNG fuente (hoy fuera del repo)
@@ -358,7 +369,7 @@ python _reconciliar.py
 
 ## 9. Validación automática
 
-El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 60
+El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 65
 pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
 hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una
 salvedad: `_estructura.py` marca el presupuesto de **estilos inline** por encima
@@ -395,7 +406,7 @@ instalado, así que no se ejecutaron.
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Total:** 51 documentos — 50 pantallas de interfaz más una de marca
-  (`_marca/logo-color-1200.png`). El prototipo local ya genera **60 archivos HTML**;
+  (`_marca/logo-color-1200.png`). El prototipo local ya genera **65 archivos HTML**;
   Stitch conserva los 50 originales: no se subieron los cuatro estados extra de
   *detalle de tarea* ni las vistas nuevas (*detalle del seguimiento*, *configuración*
   y el detalle de cada evento).
@@ -435,7 +446,7 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
   porque se generaron así; un usuario real no debe depender de eso.
 - **Responsive validado en navegador de escritorio.** Chromium con viewport
   emulado; no se probó en Safari ni en un móvil físico.
-- **La tipografía depende de internet.** Si Google Fonts no responde, las 60
+- **La tipografía depende de internet.** Si Google Fonts no responde, las 65
   pantallas se ven con la fuente del sistema. El diseño aguanta el cambio, pero las
   medidas no son idénticas a las capturadas.
 
