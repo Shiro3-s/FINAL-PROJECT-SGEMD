@@ -553,5 +553,137 @@ CALENDARIO_CSS = (
     "border-radius:999px;background:#004a93}"
 )
 
+# --- Ampliaciones del rol Estudiante -----------------------------------------
+# Migas navegables, previsualizaciones al pasar el mouse, desplegable de tareas,
+# comentarios del docente, cabecera de perfil estilo GitHub y enlaces de la
+# bandeja de notificaciones. Todo se construye con la paleta absoluta.
+EXTRA_CSS = """
+/* El atributo [hidden] lo sobreescribia cualquier regla con display (por
+   ejemplo .notif{display:flex}), asi que los filtros de la bandeja ocultaban
+   filas que seguian visibles. Con !important [hidden] vuelve a mandar. */
+[hidden]{display:none!important}
+
+/* --- Migas de pan navegables --------------------------------------------- */
+.crumbs a{color:var(--tinta-2)}
+.crumbs a:hover{color:var(--azul-real)}
+.crumbs .miga-item{color:var(--tinta-2)}
+
+/* --- Previsualizacion de las metricas al pasar el mouse ------------------- */
+.metrica-enlace{position:relative;display:block;color:inherit;text-decoration:none;
+  transition:border-color .15s ease,box-shadow .15s ease}
+.metrica-enlace:hover,.metrica-enlace:focus-visible{border-color:var(--azul-real);
+  box-shadow:var(--shadow-2);text-decoration:none}
+.mini-prev{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:40;
+  background:var(--azul-noche);color:var(--blanco);border-radius:var(--r-sm);
+  padding:12px 14px;box-shadow:var(--shadow-3);opacity:0;visibility:hidden;
+  transform:translateY(-4px);pointer-events:none;
+  transition:opacity .15s ease,transform .15s ease,visibility .15s}
+.mini-prev b{display:block;font-size:13px;margin-bottom:4px;color:var(--blanco)}
+.mini-prev span{display:block;font-size:13px;color:var(--blanco);opacity:.85;line-height:1.5}
+.mini-prev em{display:block;margin-top:8px;font-style:normal;font-weight:700;
+  font-size:13px;color:var(--amarillo)}
+.metrica-enlace:hover .mini-prev,.metrica-enlace:focus-visible .mini-prev{
+  opacity:1;visibility:visible;transform:none}
+@media (prefers-reduced-motion:reduce){.mini-prev{transition:none}}
+
+/* --- Aviso superior de Inicio (tareas pendientes) ------------------------- */
+.mini-aviso{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border:1px solid var(--azul-real);border-left:4px solid var(--amarillo);
+  border-radius:var(--r-sm);background:var(--azul-06);color:var(--tinta-2);
+  text-decoration:none}
+.mini-aviso:hover{background:var(--azul-12);text-decoration:none}
+.mini-aviso b{color:var(--tinta)}
+.mini-aviso .mini-aviso-ico{flex:0 0 18px;color:var(--azul-real);margin-top:1px}
+.mini-aviso .mini-aviso-cta{margin-left:auto;font-weight:700;color:var(--azul-real);white-space:nowrap}
+
+/* --- Desplegable de opciones de tareas ------------------------------------ */
+.desplegable{border:1px solid var(--gris);border-radius:var(--r-sm);background:var(--blanco)}
+.desplegable>summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:13px;
+  color:var(--azul-real);list-style:none;display:flex;align-items:center;gap:8px}
+.desplegable>summary::-webkit-details-marker{display:none}
+.desplegable[open]>summary{border-bottom:1px solid var(--gris)}
+.desp-lista{display:flex;flex-direction:column}
+.desp-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-bottom:1px solid var(--gris);font-size:13px;color:var(--tinta);text-decoration:none}
+.desp-item:last-child{border-bottom:none}
+.desp-item:hover{background:var(--azul-06);text-decoration:none}
+.desp-item svg{flex:0 0 16px;color:var(--azul-real)}
+.desp-item span{margin-left:auto;color:var(--tinta-2);white-space:nowrap}
+
+/* --- Comentarios del docente ---------------------------------------------- */
+.coment{display:flex;gap:12px;align-items:flex-start;padding:12px 0}
+.coment+.coment{border-top:1px solid var(--gris)}
+.coment .avatar{width:34px;height:34px;flex:0 0 34px;font-size:13px}
+.coment-cab{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.coment-cab b{font-size:13px;color:var(--tinta)}
+.coment-cab .who-role{padding:0 7px}
+.coment-cab time{font-size:13px;color:var(--tinta-2)}
+.coment-txt{margin-top:7px;font-size:13px;color:var(--tinta);
+  background:var(--noche-03);border-left:3px solid var(--azul-real);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;line-height:1.55}
+
+/* --- Cabecera de perfil (patron tipo GitHub) ------------------------------ */
+.perfil-cab{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.perfil-foto{width:132px;height:132px;flex:0 0 132px;border-radius:var(--r-full);
+  background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;
+  justify-content:center;font-size:32px;font-weight:700;border:1px solid var(--gris);overflow:hidden}
+.perfil-foto img{width:100%;height:100%;object-fit:cover}
+.perfil-datos{flex:1;min-width:240px}
+.perfil-nombre{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.perfil-usuario{font-size:16px;color:var(--tinta-2);margin-top:2px}
+.perfil-bio{font-size:14px;color:var(--tinta-2);margin-top:12px;max-width:640px}
+.perfil-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;
+  font-size:13px;color:var(--tinta-2)}
+.perfil-meta span{display:inline-flex;align-items:center;gap:6px}
+.perfil-meta svg{color:var(--azul-real);flex:0 0 15px}
+.perfil-acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.perfil-repo{display:block;color:inherit;text-decoration:none}
+.perfil-repo:hover{text-decoration:none}
+
+/* --- Diagnostico: selector por tarjetas ----------------------------------- */
+.radio-grupo{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.radio-card strong{display:block;font-size:13px;color:var(--tinta)}
+.radio-card small{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.radio-card.sel{background:var(--azul-06)}
+.radio-card input:checked+div strong{color:var(--azul-real)}
+
+/* --- Kanban de 4 columnas (tareas: comple., en curso, revision, pendiente) -- */
+.kanban[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1279px){.kanban[data-cols="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:767px){.kanban[data-cols="4"]{grid-template-columns:1fr}}
+
+/* --- Bandeja de notificaciones: cada aviso navega ------------------------- */
+a.notif{color:inherit;text-decoration:none;cursor:pointer;align-items:center}
+a.notif:hover{background:var(--azul-06);text-decoration:none}
+.notif-flecha{margin-left:auto;flex:0 0 16px;color:var(--gris)}
+.notif-ico{flex:0 0 34px;width:34px;height:34px;border-radius:8px;
+  background:var(--azul-06);color:var(--azul-real);display:flex;align-items:center;
+  justify-content:center}
+.notif-cuerpo{flex:1;min-width:0}
+.chip{cursor:pointer}
+.chip:hover{border-color:var(--azul-real);color:var(--azul-real)}
+
+/* --- Drawer de la campana: avisos enlazados ------------------------------ */
+.sg-drawer-lista a{display:flex;gap:10px;align-items:flex-start;padding:12px;
+  border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;
+  color:var(--tinta);text-decoration:none}
+.sg-drawer-lista a:hover{background:var(--azul-06);text-decoration:none}
+.sg-drawer-lista a svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}
+.sg-drawer-lista a b{display:block;font-size:13px;color:var(--tinta)}
+.sg-drawer-lista a span{display:block;color:var(--tinta-2);margin-top:2px}
+.sg-drawer-lista a time{display:block;color:var(--gris);margin-top:3px;font-size:13px}
+
+/* --- Filas de tarea del plan (navegan al detalle) ------------------------- */
+.fila-tarea{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--gris);color:inherit;text-decoration:none}
+.fila-tarea:last-child{border-bottom:none}
+.fila-tarea:hover{background:var(--azul-06);text-decoration:none}
+.fila-ico{flex:0 0 16px;color:var(--azul-real);display:flex}
+.fila-txt{flex:1;font-size:13px;color:var(--tinta)}
+.fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.fase-link{color:inherit;text-decoration:none}
+.fase-link:hover{color:var(--azul-real);text-decoration:underline}
+"""
+
 CSS = (TOKENS_CSS + TOKENS_LOGO_CSS + SHELL_CSS + COMPONENTES_CSS + LISTADOS_CSS
-       + CALENDARIO_CSS + INTERACCION_CSS + LOGO_MARCA_CSS)
+       + CALENDARIO_CSS + INTERACCION_CSS + LOGO_MARCA_CSS + EXTRA_CSS)

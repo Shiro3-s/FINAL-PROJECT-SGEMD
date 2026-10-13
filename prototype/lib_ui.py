@@ -78,10 +78,10 @@ NAV = {
             ("Diagnóstico", "clipboard", "diagnostico"),
         ]),
         ("Planificación y seguimiento", [
+            ("Estado de seguimiento", "trend", "estado-seguimiento"),
             ("Plan de trabajo", "layers", "plan-trabajo"),
             ("Tareas", "checklist", "tareas"),
             ("Seguimiento", "doc", "seguimiento"),
-            ("Estado de seguimiento", "trend", "estado-seguimiento"),
         ]),
         ("Acompanamiento y actividades", [
             ("Asesorías", "chat", "asesorias"),
@@ -118,6 +118,87 @@ ROLES = {
     "docente": ("DOCENTE", "Carlos Mendoza", "CM"),
     "administrador": ("ADMINISTRADOR", "Ana Restrepo", "AR"),
 }
+
+# --- Migas navegables --------------------------------------------------------
+# El breadcrumb era texto muerto: solo "Inicio" navegaba. Aqui vive el mapa
+# rotulo -> archivo, por rol, para que cada nivel intermedio sea un enlace real
+# a la vista que representa. El ultimo nivel nunca se enlaza: es la pagina
+# actual. El valor es el nombre de archivo dentro de la carpeta del rol.
+MIGAS = {
+    "estudiante": {
+        "inicio": "dashboard.html",
+        "mi emprendimiento": "emprendimientos.html",
+        "sabor y sabe": "emprendimiento-detalle.html",
+        "mochilas origen": "emprendimiento-detalle.html",
+        "diagnóstico": "diagnostico.html",
+        "resultado": "diagnostico-resultados.html",
+        "plan de trabajo": "plan-trabajo.html",
+        "tareas": "tareas.html",
+        "detalle de tarea": "tareas.html",
+        "seguimiento": "seguimiento.html",
+        "estado de seguimiento": "estado-seguimiento.html",
+        "asesorías": "asesorias.html",
+        "solicitar": "solicitar-asesoria.html",
+        "eventos": "eventos.html",
+        "perfil": "perfil.html",
+        "mi perfil": "perfil.html",
+        "configuración": "configuracion.html",
+        "notificaciones": "notificaciones.html",
+        "editar": "emprendimiento-editar.html",
+    },
+    "docente": {
+        "inicio": "dashboard.html",
+        "mis asesorías": "asesorias.html",
+        "registrar asesoría": "asesoria-form.html",
+        "emprendimientos asignados": "emprendimientos.html",
+        "sabor y sabe": "emprendimiento-expediente.html",
+        "seguimiento": "seguimiento.html",
+        "tablero": "seguimiento-dashboard.html",
+        "registrar avance": "seguimiento-notas.html",
+        "diagnóstico": "diagnostico.html",
+        "tareas": "tareas.html",
+        "mi perfil": "perfil.html",
+        "notificaciones": "notificaciones.html",
+    },
+    "administrador": {
+        "inicio": "dashboard.html",
+        "gestión de perfiles": "usuarios.html",
+        "editar docente": "usuario-docente.html",
+        "editar estudiante": "usuario-estudiante.html",
+        "emprendimientos": "emprendimientos.html",
+        "plan de trabajo": "emprendimiento-plan.html",
+        "seguimiento": "seguimiento.html",
+        "tablero": "seguimiento-dashboard.html",
+        "asignaciones": "asignaciones.html",
+        "asignar emprendimiento": "asignar-emprendimiento.html",
+        "moderación de comentarios": "comentarios.html",
+        "asesorías": "asesorias.html",
+        "eventos": "eventos.html",
+        "crear evento": "evento-form.html",
+        "diagnosticos": "diagnosticos.html",
+        "reportes": "reportes.html",
+        "mi perfil": "perfil.html",
+        "notificaciones": "notificaciones.html",
+    },
+}
+
+# Fuente unica de notificaciones del estudiante: la campana de la esquina y la
+# vista de Notificaciones leen de aqui, para que muestren exactamente lo mismo.
+# Campos: (leida, titulo, texto, fecha, icono, tipo, href).
+NOTIFS_EST = [
+    (True, "Asesoría confirmada",
+     "Tu asesoría con Carlos Mendoza quedó confirmada para el martes 19 de noviembre a las 9:00.",
+     "hace 12 minutos", "chat", "asesoria", "asesorias.html"),
+    (True, "Nueva tarea asignada",
+     "Debes subir la evidencia fotografica del punto de venta antes del 12 de noviembre.",
+     "hace 2 horas", "checklist", "tarea", "tareas.html"),
+    (True, "Seguimiento registrado",
+     "Carlos Mendoza registró un avance de fase en tu emprendimiento Sabor y Sabe.",
+     "ayer, 16:40", "trend", "seguimiento", "seguimiento.html"),
+    (False, "Evento nuevo",
+     "Se publicó el evento Startup Minuto de Dios. Postulación hasta el 25 de noviembre.",
+     "10 nov 2024", "calendar", "sistema", "eventos.html"),
+]
 
 # El logo aparece UNA sola vez por pantalla. En escritorio vive en la sidebar
 # (siempre visible); el del topbar solo se muestra por CSS cuando la sidebar
@@ -199,23 +280,45 @@ def _nav_html(rol, activo):
     return "".join(out)
 
 
-def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None, extra_head=""):
-    """Envoltorio completo: sidebar + header + contenido."""
+def _notif_fuente(items):
+    """Fuente oculta de la campana: los mismos 4 avisos de la bandeja, enlazados.
+
+    lib_js los clona en el drawer para que la campana muestre exactamente las
+    mismas notificaciones que la vista de notificaciones, y cada una navegue a
+    la vista que referencia."""
+    lis = ""
+    for ic, tit, txt, hora, href in items:
+        lis += ('<li><a href="%s">%s<b>%s</b><span>%s</span><time>%s</time></a></li>'
+                % (href, ico(ic, 15), tit, txt, hora))
+    return ('<ul class="sg-notif-fuente" hidden data-notif-fuente>%s</ul>' % lis)
+
+
+def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None,
+          extra_head="", notif_lista=None):
+    """Envoltorio completo: sidebar + header + contenido.
+
+    notif_lista: [(icono, titulo, texto, hora, href)] que alimenta el drawer de
+    la campana. Si no se pasa, la campana conserva su contenido generico."""
     etiqueta, nombre, iniciales = ROLES[rol]
     items = _nav_html(rol, activo)
+    mapa = MIGAS.get(rol, {})
     m = ""
     if migas:
-        # BT1: el breadcrumb no tiene enlaces muertos. "Inicio" navega al
-        # dashboard real; los niveles intermedios son texto (contexto), y el
-        # ultimo es la pagina actual (texto). Asi no hay <a href="#"> falsos.
+        # BT1: el breadcrumb no tiene enlaces muertos. Cada nivel intermedio que
+        # corresponde a una vista real es un <a>; los que son solo contexto
+        # quedan como texto. El ultimo nivel es la pagina actual.
         def _miga(i, x):
-            if i == 0 and x.lower() == "inicio":
-                return '<a href="dashboard.html">' + x + "</a>"
+            if i == len(migas) - 1:
+                return "<b>%s</b>" % x
+            href = mapa.get(x.strip().lower())
+            if href:
+                return '<a href="%s">%s</a>' % (href, x)
             return '<span class="miga-item">%s</span>' % x
         m = '<div class="crumbs">' + " &rsaquo; ".join(
-            _miga(i, x) if i < len(migas) - 1 else "<b>%s</b>" % x
-            for i, x in enumerate(migas)
-        ) + "</div>"
+            _miga(i, x) for i, x in enumerate(migas)) + "</div>"
+    if notif_lista is None and rol == "estudiante":
+        notif_lista = [(n[4], n[1], n[2], n[3], n[6]) for n in NOTIFS_EST]
+    fuente = _notif_fuente(notif_lista) if notif_lista else ""
     encabezado = "<h1>%s</h1>" % titulo
     if sub:
         encabezado += '<p class="sub">%s</p>' % sub
@@ -262,6 +365,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
   </div>
 </div>
 <div class="overlay" id="ov"></div>
+%(notif_fuente)s
 <script>%(js)s</script>
 </body>
 </html>""" % {
@@ -274,6 +378,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
         "nombre": nombre,
         "ini": iniciales,
         "notif": notif,
+        "notif_fuente": fuente,
         "ico_menu": ico("menu", 20),
         "ico_search": ico("search", 16),
         "ico_bell": ico("bell", 18),
@@ -304,6 +409,50 @@ def metricas(items):
         )
     out.append("</div>")
     return "".join(out)
+
+
+def metrica_enlace(ic, lbl, val, uni, barra, delta, href, prev_titulo, prev_texto):
+    """Metrica que ademas es un enlace.
+
+    Al pasar el mouse por encima muestra una mini vista previa con lo que hay
+    dentro de esa vista; al hacer clic navega a ella, y si el mouse se retira el
+    resumen desaparece."""
+    d = '<span class="metrica-delta">%s %s</span>' % (ico("trend", 13), delta) if delta else ""
+    return (
+        '<a class="card metrica metrica-enlace" href="%s">'
+        '<div class="metrica-top"><span class="metrica-ico">%s</span>'
+        '<div><div class="metrica-lbl">%s</div>'
+        '<div class="metrica-val">%s<span class="u">%s</span></div></div>%s</div>'
+        '<div class="barra"><span style="width:%d%%"></span></div>'
+        '<span class="mini-prev"><b>%s</b><span>%s</span><em>%s Ver esta vista</em></span></a>'
+        % (href, ico(ic, 18), lbl, val, uni, d, barra, prev_titulo, prev_texto, ico("der", 12))
+    )
+
+
+def metricas_enlace(items):
+    """items: lista de (icono, etiqueta, valor, unidad, barra, delta, href,
+    titulo_previa, texto_previa)."""
+    out = ['<div class="grid g-4">']
+    for it in items:
+        out.append(metrica_enlace(*it))
+    out.append("</div>")
+    return "".join(out)
+
+
+def opciones_card(nombre, opciones, seleccion=0):
+    """Selector de tarjetas: opciones = [(titulo, descripcion), ...].
+
+    Se usa para el sector productivo y el tipo de emprendimiento del
+    diagnostico: se elige la tarjeta y debajo queda visible su descripcion."""
+    h = '<div class="radio-grupo">'
+    for i, (tit, desc) in enumerate(opciones):
+        i2 = _fid("r")
+        h += ('<label class="radio-card%s" for="%s">'
+              '<input type="radio" name="%s" id="%s"%s>'
+              '<div><strong>%s</strong><small>%s</small></div></label>'
+              % (" sel" if i == seleccion else "", i2, nombre, i2,
+                 " checked" if i == seleccion else "", tit, desc))
+    return h + "</div>"
 
 
 def th(c):
@@ -546,7 +695,8 @@ def lista_avisos(grupos):
 
 def kanban(columnas):
     """columnas: lista de (título, [(título, meta, badge_html, pie_html)])."""
-    h = '<div class="kanban">'
+    extra = ' data-cols="%d"' % len(columnas) if len(columnas) != 3 else ""
+    h = '<div class="kanban"%s>' % extra
     for titulo, tarjetas in columnas:
         h += ('<section class="kan-col"><div class="kan-head">'
               '<span class="kan-titulo">%s</span>'

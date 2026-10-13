@@ -1,4 +1,4 @@
-"""Comportamiento de las 50 pantallas, en un unico bloque inline.
+"""Comportamiento de las 60 pantallas, en un unico bloque inline.
 
 Restricciones que condicionan el diseno:
 
@@ -138,6 +138,22 @@ JS = r"""
       '<ul class="sg-drawer-lista">' + items.map(function (t) {
         return "<li>" + icono(ICO.info, 15) + "<span>" + esc(t) + "</span></li>";
       }).join("") + "</ul>" +
+      (pie || "");
+    document.body.appendChild(d);
+    var o = $("#ov");
+    if (o) o.classList.add("visible");
+    $(".drawer-x", d).addEventListener("click", cerrarDrawer);
+  }
+  /* Variante con HTML ya construido: la usa la campana para clonar las mismas
+     4 notificaciones de la bandeja, con su enlace a la vista que referencian. */
+  function abrirDrawerHTML(titulo, itemsHTML, pie) {
+    cerrarDrawer();
+    var d = document.createElement("aside");
+    d.className = "sg-drawer";
+    d.setAttribute("aria-label", titulo);
+    d.innerHTML = '<div class="sg-drawer-head"><h2>' + esc(titulo) + "</h2>" +
+      '<button class="icon-btn drawer-x" aria-label="Cerrar">' + icono(ICO.x, 18) + "</button></div>" +
+      '<ul class="sg-drawer-lista">' + itemsHTML + "</ul>" +
       (pie || "");
     document.body.appendChild(d);
     var o = $("#ov");
@@ -490,7 +506,26 @@ JS = r"""
     "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
     ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
     ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
-    ".kan-col,.ln-item,.aviso{margin-bottom:8px}";
+    ".kan-col,.ln-item,.aviso{margin-bottom:8px}" +
+    /* Kanban, tarjetas y avisos se imprimen como bloques apilados y legibles
+       (tareas.html no tiene tabla principal: su PDF se arma con el contenido). */
+    ".kanban,.kanban[data-cols]{display:block;grid-template-columns:none}" +
+    ".kan-col{border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px;margin-bottom:10px}" +
+    ".kan-head{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin-bottom:6px}" +
+    ".kan-card{border:1px solid #bbbbbb;border-radius:6px;padding:6px 8px;margin-bottom:6px}" +
+    ".kan-card-titulo{font-weight:600;font-size:13px}.kan-meta,.kan-foot{font-size:13px;color:#162644}" +
+    ".grid,.emp-grid{display:block}" +
+    ".metrica{border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px;margin:8px 0}" +
+    ".metrica-val{font-size:18px;font-weight:700}.metrica-lbl{font-size:13px;color:#162644}" +
+    ".barra{height:6px;background:#bbbbbb;border-radius:999px;margin-top:6px}" +
+    ".barra span{display:block;height:6px;background:#004a93;border-radius:999px}" +
+    ".mini-aviso,.metrica-enlace{display:block;border:0;padding:0;background:none}.mini-prev,.chip{display:none}" +
+    "details>*{display:block!important}details>summary{display:none}" +
+    ".desp-item{display:block;border-bottom:1px solid #bbbbbb;padding:5px 0;font-size:13px}" +
+    ".emp-card,.aviso-grp,.notif{border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px;margin-bottom:8px}" +
+    ".tabs,.crumbs,.page-head,.acciones,.toolbar,.paginacion{display:none}" +
+    ".linea{display:block}.ln-dia,.ln-mes{font-weight:700}" +
+    ".coment{margin:8px 0}.coment-txt{border-left:3px solid #004a93;padding:6px 10px;background:#ffffff}";
   function imprimirDocumento(titulo, cuerpoHTML) {
     var w = window.open("", "_blank");
     if (!w) { toast("Activa las ventanas emergentes para generar el PDF", "info"); return false; }
@@ -646,6 +681,36 @@ JS = r"""
         } else {
           toast("Esta pantalla no tiene tabla para exportar", "info");
         }
+        break;
+      }
+
+      case "exportar-expediente": {
+        /* El boton "Exportar" de Mi emprendimiento genera el expediente: el
+           reporte completo de la pantalla, listo para guardar como PDF. */
+        e.preventDefault();
+        imprimirDocumento("Expediente - " + tituloPagina(),
+          '<p class="doc-meta">' + esc(tituloPagina()) +
+          " &middot; reporte completo</p>" + vistaDocumento());
+        toast("Abriendo el expediente para guardar como PDF…", "info");
+        break;
+      }
+
+      case "cambiar-foto": {
+        /* Subida de la imagen del estudiante (PNG/JPG) con vista previa real. */
+        e.preventDefault();
+        var inpFoto = document.createElement("input");
+        inpFoto.type = "file";
+        inpFoto.accept = "image/png,image/jpeg";
+        inpFoto.addEventListener("change", function () {
+          var f = inpFoto.files && inpFoto.files[0];
+          if (!f) return;
+          var caja = $(".perfil-foto");
+          if (caja) {
+            caja.innerHTML = '<img src="' + URL.createObjectURL(f) + '" alt="Foto del estudiante">';
+          }
+          toast("Imagen actualizada: " + f.name, "ok");
+        });
+        inpFoto.click();
         break;
       }
 
@@ -835,6 +900,14 @@ JS = r"""
 
       case "notificaciones":
         e.preventDefault();
+        var fuenteN = $("[data-notif-fuente]");
+        if (fuenteN) {
+          abrirDrawerHTML("Notificaciones", fuenteN.innerHTML,
+            '<div class="sg-drawer-pie">' +
+            '<button class="btn btn-acento" data-accion="ver-todas-notificaciones">' +
+            icono(ICO.doc, 16) + " Ver todas las notificaciones</button></div>");
+          break;
+        }
         abrirDrawer("Notificaciones", [
           "Nueva revisión de tu Startup Week II",
           "Tu docente registró un avance",
@@ -896,6 +969,10 @@ JS = r"""
     }
     var dentro = b.classList.toggle("hecho");
     b.setAttribute("aria-pressed", dentro ? "true" : "false");
+    /* En el detalle de un evento virtual, inscribirse revela el enlace de
+       acceso a la sala; al cancelar la inscripcion vuelve a ocultarse. */
+    var acceso = $("#acceso-virtual");
+    if (acceso) acceso.hidden = !dentro;
     toast(dentro ? "Inscripción registrada" : "Inscripción cancelada", dentro ? "ok" : "info");
   }
 
@@ -1270,8 +1347,13 @@ guardar(estado);
       if (!m) {
         m = document.createElement("div");
         m.className = "who-menu";
+        /* El estudiante tiene una vista de configuración propia; en docente y
+           administrador el menú conserva "Preferencias" (sin vista). */
+        var esEstudiante = location.pathname.split("/").slice(-2, -1)[0] === "estudiante";
         m.innerHTML = '<button data-accion="perfil">Mi perfil</button>' +
-          '<button data-accion="preferencias">Preferencias</button>' +
+          (esEstudiante
+            ? '<button data-accion="configuracion">Configuración</button>'
+            : '<button data-accion="preferencias">Preferencias</button>') +
           '<button data-accion="cerrar-sesion">Cerrar sesión</button>';
         w.parentNode.appendChild(m);
         $$("button", m).forEach(function (b) {
@@ -1283,6 +1365,10 @@ guardar(estado);
               /* El perfil se abre desde el mini menu de la esquina superior
                  derecha; navega a la misma vista que tenia el menu lateral. */
               location.href = "perfil.html";
+              return;
+            }
+            if (b.dataset.accion === "configuracion") {
+              location.href = "configuracion.html";
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {

@@ -1,4 +1,4 @@
-"""Fase 4 en ejecucion: el bloque de lib_js.js dentro de las 50 pantallas.
+"""Fase 4 en ejecucion: el bloque de lib_js.js dentro de las 60 pantallas.
 
 Chromium carga cada HTML como se vera en Stitch (file://, sin servidor) y se
 comprueba que:

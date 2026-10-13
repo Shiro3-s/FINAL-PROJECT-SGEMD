@@ -1,4 +1,4 @@
-"""Barrido responsive de las 50 pantallas.
+"""Barrido responsive de las 60 pantallas.
 
 Verifica a 1440, 1280, 768 y 375 px:
   - que la pagina no desborde en horizontal;

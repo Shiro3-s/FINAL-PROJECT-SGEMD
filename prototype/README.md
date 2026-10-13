@@ -1,7 +1,7 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-54 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
+60 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
@@ -25,7 +25,7 @@ pantallas globales de acceso.
   - [2. Qué contiene](#2-qué-contiene)
   - [3. Las vistas por rol](#3-las-vistas-por-rol)
     - [3.1 Acceso global (4)](#31-acceso-global-4)
-    - [3.2 Estudiante (16 vistas, 20 archivos)](#32-estudiante-16-vistas-20-archivos)
+    - [3.2 Estudiante (19 vistas, 26 archivos)](#32-estudiante-19-vistas-26-archivos)
     - [3.3 Docente (12)](#33-docente-12)
     - [3.4 Administrador (18)](#34-administrador-18)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
@@ -53,7 +53,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 54 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 60 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -88,15 +88,17 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 | Carpeta | Archivos | Contenido |
 |---|---|---|
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
-| `estudiante/` | 20 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, notificaciones |
+| `estudiante/` | 26 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
 | `docente/` | 12 | Inicio, asesorías, expedientes, seguimiento, diagnósticos, tareas, perfil, notificaciones |
 | `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
-| **Total** | **54** | más `index.html` como índice local |
+| **Total** | **60** | más `index.html` como índice local |
 
-Son **50 vistas lógicas** repartidas en **54 archivos**: el estudiante aporta cuatro
-archivos extra porque su *detalle de tarea* (#15) se reproduce en cinco estados
-(`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
-`completada-usuarios` y `completada-clientes`).
+Son **53 vistas lógicas** repartidas en **60 archivos**: dos vistas se reproducen en
+varios archivos. El *detalle de tarea* del estudiante (#15) se reproduce en cinco
+estados (`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
+`completada-usuarios` y `completada-clientes`) y el *detalle del evento* (#18b) en
+cuatro, uno por evento (`evento-detalle-startup`, `evento-detalle-capacitacion`,
+`evento-detalle-asesoria-grupal` y `evento-detalle-showroom`).
 
 Elementos de interfaz comunes a todo el prototipo:
 
@@ -123,26 +125,32 @@ Elementos de interfaz comunes a todo el prototipo:
 | 03 | Verificar OTP | Código de 8 dígitos; explica que el perfil queda *Limitado* hasta la activación |
 | 04 | Recuperar contraseña | Correo + documento; respuesta genérica para no revelar qué cuentas existen |
 
-### 3.2 Estudiante (16 vistas, 20 archivos)
+### 3.2 Estudiante (19 vistas, 26 archivos)
 
 | # | Vista | Qué resuelve |
 |---|---|---|
-| 05 | Inicio | Resumen de estado, pendientes y próximas asesorías |
-| 06 | Estado de seguimiento | Fase actual del emprendimiento y requisitos por cumplir |
-| 07 | Mi emprendimiento | Listado de sus emprendimientos |
-| 08 | Detalle del emprendimiento | Ficha completa: tipo, sector, etapa, acta, avance |
+| 05 | Inicio | Resumen de estado, tareas por completar y próximas asesorías; las tarjetas muestran una vista previa al pasar el mouse |
+| 06 | Estado de seguimiento | Avance general por fase y requisitos por cumplir |
+| 07 | Mi emprendimiento | Listado de sus emprendimientos; **Crear emprendimiento** lleva al diagnóstico y **Exportar** descarga el expediente |
+| 08 | Detalle del emprendimiento | Ficha completa: tipo, sector, etapa, acta, avance por fase e historial |
 | 09 | Editar emprendimiento | Solo nombre, descripción y redes; el resto es de solo lectura |
-| 10 | Diagnóstico | Cuestionario por etapas |
+| 10 | Diagnóstico | Cuestionario por etapas, con selector de **sector** y **tipo de emprendimiento** |
 | 11 | Resultados del diagnóstico | Puntajes por dimensión y recomendaciones |
-| 12 | Plan de trabajo | Hitos y responsables |
+| 12 | Plan de trabajo | Fases y tareas por emprendimiento; cada fase y cada tarea navega a su vista |
 | 13 | Seguimiento | Historial de avances (**solo lectura**) |
-| 14 | Mis tareas | Listado con estado y fecha límite |
-| 15 | Detalle de tarea | Instrucciones, evidencia exigida y entregas |
-| 16 | Mis asesorías | Historial y próximas sesiones |
+| 13b | Detalle del seguimiento | Un registro: tipo, título, descripción y avance al momento |
+| 14 | Mis tareas | Tablero por emprendimiento y por estado, con fecha límite |
+| 15 | Detalle de tarea | Instrucciones, evidencia, **fecha de envío** con indicador de puntualidad y comentarios del docente |
+| 16 | Mis asesorías | Historial y próximas sesiones, con el número de emprendimientos |
 | 17 | Solicitar asesoría | Elige **fecha propuesta**; el docente confirma fecha y hora |
 | 18 | Eventos | Convocatorias y eventos del programa |
-| 19 | Mi perfil | Datos personales y preferencias |
-| 20 | Notificaciones | Avisos del sistema |
+| 18a | Detalle del evento — Startup Minuto de Dios | En qué consiste, datos e inscripción (presencial) |
+| 18b | Detalle del evento — Capacitación en modelado | En qué consiste, datos, inscripción y enlace de acceso (virtual) |
+| 18c | Detalle del evento — Asesoría grupal | En qué consiste, datos e inscripción (presencial) |
+| 18d | Detalle del evento — Showroom | En qué consiste, datos e inscripción (presencial) |
+| 19 | Mi perfil | Datos básicos del estudiante y sus emprendimientos; el botón para editar lleva a Configuración |
+| 19b | Configuración | Edita datos personales, académicos, contraseña y foto |
+| 20 | Notificaciones | Cada aviso enlaza a su vista; incluye filtros y campana |
 
 ### 3.3 Docente (12)
 
@@ -287,9 +295,9 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 54 pantallas + index.html
+├── generar.py              Orquestador: emite las 60 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
-├── paginas_estudiante.py   20 pantallas del estudiante
+├── paginas_estudiante.py   26 pantallas del estudiante
 ├── paginas_docente.py      12 pantallas del docente
 ├── paginas_admin.py        18 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
@@ -325,7 +333,7 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 54 pantallas + index.html)
+# Generar (emite las 60 pantallas + index.html)
 python generar.py
 
 # Regenerar las variantes de logo desde el PNG fuente (hoy fuera del repo)
@@ -344,7 +352,7 @@ python _reconciliar.py
 
 ## 9. Validación automática
 
-El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 54
+El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 60
 pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
 hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una
 salvedad: `_estructura.py` marca el presupuesto de **estilos inline** por encima
@@ -381,9 +389,10 @@ instalado, así que no se ejecutaron.
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Total:** 51 documentos — 50 pantallas de interfaz más una de marca
-  (`_marca/logo-color-1200.png`). El prototipo local ya genera **54 archivos HTML**;
-  los cuatro estados extra de *detalle de tarea* no se subieron, así que Stitch
-  conserva esos 50.
+  (`_marca/logo-color-1200.png`). El prototipo local ya genera **60 archivos HTML**;
+  Stitch conserva los 50 originales: no se subieron los cuatro estados extra de
+  *detalle de tarea* ni las vistas nuevas (*detalle del seguimiento*, *configuración*
+  y el detalle de cada evento).
 - **Comentario:** el enlace se actualizó al recrear el proyecto. El anterior
   (`projects/8880818071963426152`) se borró por un error; se creó uno nuevo en
   Stitch y se resubieron las 51 pantallas.
@@ -420,7 +429,7 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
   porque se generaron así; un usuario real no debe depender de eso.
 - **Responsive validado en navegador de escritorio.** Chromium con viewport
   emulado; no se probó en Safari ni en un móvil físico.
-- **La tipografía depende de internet.** Si Google Fonts no responde, las 54
+- **La tipografía depende de internet.** Si Google Fonts no responde, las 60
   pantallas se ven con la fuente del sistema. El diseño aguanta el cambio, pero las
   medidas no son idénticas a las capturadas.
 

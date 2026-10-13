@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Rol ESTUDIANTE — 16 pantallas."""
+"""Rol ESTUDIANTE — 26 pantallas."""
 
 from lib_ui import (
-    shell, metricas, tabla, toolbar, paginas, badge, campo, select, callout,
-    card, estado_vacio, lista_def, steps, tabs, tabs_paneles, ico, boton_accion, ico, linea_tiempo, kanban,
+    shell, metricas, metricas_enlace, opciones_card, tabla, toolbar, paginas, badge,
+    campo, select, callout, card, estado_vacio, lista_def, steps, tabs, tabs_paneles,
+    ico, boton_accion, ico, linea_tiempo, kanban, agenda, NOTIFS_EST,
 )
 from lib_charts import (
     barras, barras_h, lineas, donut, circular, progreso_fases, stacked_tareas,
@@ -11,6 +12,67 @@ from lib_charts import (
 )
 
 R = "estudiante"
+
+# --- Tareas por emprendimiento (fuente unica) --------------------------------
+# El Inicio, el plan de trabajo y la vista de Tareas leen de aqui, de modo que
+# las tres pantallas muestran las mismas tareas, los mismos estados y las mismas
+# fechas. Campos: (titulo, prioridad, estado, fase, fecha_limite, fecha_envio,
+# detalle).
+TAREAS_EMP = [
+    ("Sabor y Sabe", "emp-sabor", [
+        ("Definir clientes potenciales", "Alta", "Completada", 1,
+         "05 nov 2024", "28 oct 2024", "tarea-detalle-completada-clientes.html"),
+        ("Validar la solución con 10 usuarios", "Media", "Completada", 1,
+         "10 nov 2024", "01 nov 2024", "tarea-detalle-completada-usuarios.html"),
+        ("Definir el precio de venta final", "Alta", "Completada", 1,
+         "30 oct 2024", "08 nov 2024", "tarea-detalle-completada-precio.html"),
+        ("Levantar el modelo de negocio", "Alta", "En revisión", 2,
+         "04 nov 2024", "04 nov 2024", "tarea-detalle-en-revision.html"),
+        ("Registrar las ventas de la semana", "Media", "En curso", 2,
+         "15 nov 2024", "—", "tarea-detalle.html"),
+        ("Actualizar el inventario de insumos", "Media", "Pendiente", 2,
+         "13 nov 2024", "—", "tarea-detalle.html"),
+        ("Subir evidencia fotografica del punto de venta", "Alta", "Pendiente", 2,
+         "Hoy", "—", "tarea-detalle.html"),
+    ]),
+    ("Mochilas Origen", "emp-mochilas", [
+        ("Definir la idea y el problema que ataca", "Alta", "Completada", 1,
+         "20 sep 2024", "19 sep 2024", "tarea-detalle.html"),
+        ("Identificar clientes potenciales", "Media", "En curso", 1,
+         "18 nov 2024", "—", "tarea-detalle.html"),
+        ("Validar la solución con usuarios", "Media", "Pendiente", 1,
+         "25 nov 2024", "—", "tarea-detalle.html"),
+    ]),
+]
+
+# Nombre y color de cada estado de tarea (los mismos en plan, tareas y detalle).
+ESTADO_BADGE = {
+    "Completada": ("b-linea", "check"),
+    "En curso": ("b-azul", "engranaje"),
+    "En revisión": ("b-amarillo", "reloj"),
+    "Pendiente": ("b-neutra", "reloj"),
+}
+# Orden de las columnas del tablero: lo que falta primero, lo hecho al final.
+ESTADOS_KANBAN = ["Pendiente", "En curso", "En revisión", "Completada"]
+
+# Las cuatro fases del programa y el avance declarado por emprendimiento.
+FASES_META = [
+    ("FASE 1", "Ideación y priorización de ideas"),
+    ("FASE 2", "Estructuración y ejecución"),
+    ("FASE 3", "Consolidación del proceso"),
+    ("FASE 4", "Escalamiento"),
+]
+AVANCE_FASES = {"Sabor y Sabe": [100, 62, 0, 0], "Mochilas Origen": [24, 0, 0, 0]}
+# Avance general y fase en curso (los declara el docente; son la firma del plan).
+AVANCE_GENERAL = {"Sabor y Sabe": (62, "FASE 2 · Ejecución"),
+                  "Mochilas Origen": (24, "FASE 1 · Ideación")}
+
+# Tareas por completar (pendientes y en curso) que resume el Inicio: misma
+# fuente que el desplegable de opciones y que la vista de Tareas.
+TAREAS_PEND = [
+    (t[4], t[0], t[1], t[6])
+    for t in TAREAS_EMP[0][2] if t[2] in ("Pendiente", "En curso")
+]
 
 
 def _acc(*items):
@@ -53,7 +115,17 @@ def registrar(reg):
         ("asesorias.html", "16 Estudiante - Mis asesorías", asesorias),
         ("solicitar-asesoria.html", "17 Estudiante - Solicitar asesoría", solicitar_asesoria),
         ("eventos.html", "18 Estudiante - Eventos", eventos),
+        ("evento-detalle-startup.html", "18a Estudiante - Detalle evento (Startup Minuto de Dios)",
+         evento_detalle_startup),
+        ("evento-detalle-capacitacion.html", "18b Estudiante - Detalle evento (Capacitación virtual)",
+         evento_detalle_capacitacion),
+        ("evento-detalle-asesoria-grupal.html", "18c Estudiante - Detalle evento (Asesoría grupal)",
+         evento_detalle_asesoria_grupal),
+        ("evento-detalle-showroom.html", "18d Estudiante - Detalle evento (Showroom)",
+         evento_detalle_showroom),
         ("perfil.html", "19 Estudiante - Mi perfil", perfil),
+        ("configuracion.html", "19b Estudiante - Configuración (editar perfil)", configuracion),
+        ("seguimiento-detalle.html", "13b Estudiante - Detalle del seguimiento", seguimiento_detalle),
         ("notificaciones.html", "20 Estudiante - Notificaciones", notificaciones),
     ]
     for i, (arch, tit, fn) in enumerate(p):
@@ -63,17 +135,36 @@ def registrar(reg):
 # --- 1. Dashboard ------------------------------------------------------------
 def dashboard():
     cuerpo = (
-        callout(
+        # Mini pestaña superior, estilo notificación: resume las tareas
+        # pendientes y lleva a la vista de Tareas al hacer clic.
+        '<a class="mini-aviso" href="tareas.html">'
+        '<span class="mini-aviso-ico">%s</span>'
+        '<div><b>Tienes 3 tareas por completar.</b> La más próxima vence hoy: '
+        "la evidencia fotografica del punto de venta.</div>"
+        '<span class="mini-aviso-cta">Ver tareas %s</span></a>'
+        % (ico("checklist", 18), ico("der", 14))
+        + '<div style="height:20px"></div>'
+        + callout(
             "Tu cuenta esta <b>Limitada</b>. Ya puedes entrar al sistema, pero el modulo de "
             "<b>Diagnóstico</b> permanece bloqueado hasta que un administrador active tu cuenta.",
             "escudo",
         )
         + '<div style="height:20px"></div>'
-        + metricas([
-            ("maleta", "Mi emprendimiento", "1", "activo", 100, "1 registrado"),
-            ("target", "Diagnóstico", "Pendiente", "", 0, ""),
-            ("checklist", "Tareas completadas", "3", "de 7", 43, ""),
-            ("chat", "Asesorías realizadas", "3", "", 100, ""),
+        # Cada metrica es un enlace: al pasar el mouse muestra una mini vista
+        # previa con lo que hay dentro de esa vista; al hacer clic navega a ella.
+        + metricas_enlace([
+            ("maleta", "Mi emprendimiento", "1", "activo", 100, "1 registrado",
+             "emprendimientos.html", "Mi emprendimiento",
+             "Sabor y Sabe: diagnóstico, avance por fase y expediente del negocio."),
+            ("target", "Diagnóstico", "Pendiente", "", 0, "",
+             "diagnostico.html", "Diagnóstico",
+             "Cuestionario de 22 preguntas sobre perfil, problema, propuesta, mercado y capacidad."),
+            ("checklist", "Tareas completadas", "3", "de 7", 43, "",
+             "tareas.html", "Tareas",
+             "Tus 7 tareas del plan, separadas por emprendimiento y por estado."),
+            ("chat", "Asesorías realizadas", "3", "", 100, "",
+             "asesorias.html", "Asesorías",
+             "Historial de asesorías, horarios y estado de confirmación."),
         ])
         + '<div style="height:20px"></div>'
         + '<div class="grid g-2-1">'
@@ -104,19 +195,26 @@ def dashboard():
         + '<div style="height:20px"></div>'
         + '<div class="grid g-2">'
         + card(
-            "Tareas pendientes",
+            "Tareas por completar",
             '<div class="lista-def" style="padding:4px 0">'
             + "".join(
-                '<div class="def-row"><dt style="flex:0 0 auto">%s</dt><dd style="flex:1">%s</dd>'
+                '<div class="def-row"><dt style="flex:0 0 auto">%s</dt>'
+                '<dd style="flex:1"><a href="%s">%s</a></dd>'
                 '<dd style="flex:0 0 auto">%s</dd></div>'
-                % (t, d, badge(p, "b-amarillo" if p == "Alta" else "b-linea", "alerta" if p == "Alta" else "reloj"))
-                for t, d, p in [
-                    ("Hoy", "Subir evidencia fotografica del punto de venta", "Alta"),
-                    ("13 nov", "Actualizar el inventario de insumos", "Media"),
-                    ("15 nov", "Registrar las ventas de la semana en el formato", "Media"),
-                ]
+                % (f, href, d, badge(p, "b-amarillo" if p == "Alta" else "b-linea",
+                                     "alerta" if p == "Alta" else "reloj"))
+                for f, d, p, href in TAREAS_PEND
             )
-            + "</div>",
+            + "</div>"
+            + '<div style="height:12px"></div>'
+            # Desplegable con las opciones de tareas: cada opción es un enlace a
+            # su vista, igual que la campana de notificaciones.
+            + '<details class="desplegable"><summary>%s Opciones de tareas</summary>'
+            '<div class="desp-lista">%s</div></details>'
+            % (ico("checklist", 16), "".join(
+                '<a class="desp-item" href="%s">%s<b>%s</b><span>%s</span></a>'
+                % (href, ico("alerta" if p == "Alta" else "reloj", 16), d, f)
+                for f, d, p, href in TAREAS_PEND)),
             accion='<a class="btn btn-secundario btn-sm" href="tareas.html">Ver todas</a>',
         )
         + card(
@@ -266,6 +364,20 @@ def estado_seguimiento():
 
 
 # --- 3. Emprendimientos (lista) ---------------------------------------------
+def _avance_fases_emp(nombre):
+    """Avance por fase de un emprendimiento (se imprime en el expediente)."""
+    filas = ""
+    for (cod, desc), p in zip(FASES_META, AVANCE_FASES[nombre]):
+        filas += ('<div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px">'
+                  '<i style="width:10px;height:10px;border-radius:2px;background:%s;flex:0 0 10px"></i>'
+                  '<span style="flex:1;color:#162644">%s · %s</span>'
+                  '<b style="color:#051533">%d%%</b></div>'
+                  % (AZUL if p > 0 else GRIS, cod, desc, p))
+    return ('<div style="margin-bottom:16px">'
+            '<div style="font-size:13px;font-weight:700;color:#051533;margin-bottom:4px">%s</div>'
+            "%s</div>" % (nombre, filas))
+
+
 def emprendimientos():
     filas = [[
         '<b>Sabor y Sabe</b>', "Alimentos y bebidas", "Alimentos",
@@ -298,17 +410,30 @@ def emprendimientos():
         )
         + paginas(1, 2, 2)
         + '<div style="height:20px"></div>'
-        + callout(
-            "Solo puedes ver los emprendimientos que te pertenecen. Para consultar el de otro "
-            "estudiante debes entrar como <b>DOCENTE</b> o <b>ADMINISTRADOR</b>.",
-            "escudo",
-        )
+        # El expediente que se exporta: avance por fase y el historial del
+        # negocio, para que el PDF no sea solo el listado.
+        + '<div class="grid g-2">'
+        + card("Avance por fase del expediente",
+               "".join(_avance_fases_emp(n) for n, _, _ in TAREAS_EMP))
+        + card("Historial del expediente", linea_tiempo([
+            ("12", "oct", "Emprendimiento registrado",
+             "Sabor y Sabe · diagnóstico inicial habilitado.", ""),
+            ("03", "sep", "Emprendimiento registrado",
+             "Mochilas Origen · a la espera de docente asignado.", ""),
+            ("20", "oct", "Plan de trabajo cargado",
+             "El docente Carlos Mendoza cargó las cuatro fases de Sabor y Sabe.", ""),
+            ("04", "nov", "Asesoría realizada",
+             "Se revisó el modelo de negocio y los apuntes de la fase 2.", ""),
+            ("08", "nov", "Avance de fase registrado",
+             "Se definió el precio de venta final con margen del 35 %.", ""),
+        ]))
+        + "</div>"
     )
     return shell(R, "emprendimientos", "Mi emprendimiento", cuerpo,
                  migas=["Inicio", "Mi emprendimiento"],
                  sub="Listado de tus emprendimientos y su estado actual.",
-                 acciones='<button class="btn btn-secundario" data-accion="exportar">%s Exportar</button>' % ico("download", 16)
-                          + '<a class="btn btn-acento" href="emprendimiento-editar.html">%s Crear emprendimiento</a>' % ico("plus", 16))
+                 acciones='<button class="btn btn-secundario" data-accion="exportar-expediente">%s Exportar expediente</button>' % ico("download", 16)
+                          + '<a class="btn btn-acento" href="diagnostico.html">%s Crear emprendimiento</a>' % ico("plus", 16))
 
 
 # --- 4. Detalle del emprendimiento ------------------------------------------
@@ -576,12 +701,29 @@ def diagnostico():
         ("Perfil del emprendimiento", [
             campo("Cuál es el nombre de tu emprendimiento?", valor="Sabor y Sabe",
                   ph="Ej. Sabor y Sabe", req=True),
-            select("Qué tipo de emprendimiento es?",
-                   ["Alimentos y bebidas", "Moda y accesorios", "Servicios", "Tecnología"],
-                   valor="Alimentos y bebidas", req=True),
-            select("A qué sector productivo pertenece?",
-                   ["Alimentos", "Textil", "Servicios", "Tecnología"],
-                   valor="Alimentos", req=True),
+            # Selector por tarjetas: se elige una opción y su descripción queda
+            # visible bajo el título (nada de escribirla a mano).
+            '<div class="campo"><label>Qué tipo de emprendimiento es?'
+            '<span class="req">*</span></label>'
+            + opciones_card("tipo_emprendimiento", [
+                ("Pequeño", "Opera con recursos propios y un alcance local."),
+                ("Escalable", "Puede crecer rápido y replicarse en otros mercados."),
+                ("Social", "Su objetivo principal es generar impacto social."),
+                ("Ambiental", "Reduce el impacto ambiental en toda su operación."),
+                ("Cultural", "Valoriza la identidad y el patrimonio local."),
+                ("Intraemprendimiento", "Innovación dentro de una organización que ya existe."),
+            ])
+            + "</div>",
+            '<div class="campo"><label>A qué sector productivo pertenece?'
+            '<span class="req">*</span></label>'
+            + opciones_card("sector_productivo", [
+                ("Sector primario", "Extracción y materias primas."),
+                ("Sector secundario", "Industria y transformación."),
+                ("Sector terciario", "Servicios y comercio."),
+                ("Sector cuaternario", "Tecnología, información y conocimiento."),
+                ("Sector quinario", "Servicios sociales, bienestar e impacto."),
+            ], seleccion=1)
+            + "</div>",
             campo("Qué producto o servicio ofreces?", alto=True,
                   valor="Snacks artesanales de frutos secos y granola", req=True),
             select("En qué etapa del programa está tu emprendimiento?",
@@ -732,114 +874,82 @@ def diagnostico_resultados():
 
 
 # --- 8. Plan de trabajo ------------------------------------------------------
-FASES = [
-    ("FASE 1", "Ideación y priorización de ideas", 100, [
-        ("Definir la idea y el problema que ataca", "Completada"),
-        ("Identificar clientes potenciales", "Completada"),
-        ("Validar la solución con usuarios", "Completada"),
-    ]),
-    ("FASE 2", "Estructuración y ejecución", 62, [
-        ("Levantar el modelo de negocio", "En curso"),
-        ("Definir la mezcla de marketing", "En curso"),
-        ("Calcular el punto de equilibrio", "Pendiente"),
-        ("Constituir el Startup Minuto de Dios", "Pendiente"),
-    ]),
-    ("FASE 3", "Consolidación del proceso", 0, [
-        ("Formalizar la operación diaria", "Bloqueada"),
-        ("Registrar indicadores de venta", "Bloqueada"),
-    ]),
-    ("FASE 4", "Escalamiento", 0, [
-        ("Escalar el modelo de negocio", "Bloqueada"),
-        ("Buscar alianzas estratégicas", "Bloqueada"),
-    ]),
-]
+def _conteos_estado(tareas):
+    """Cuántas tareas hay en cada estado (alimenta la gráfica del plan)."""
+    return [sum(1 for t in tareas if t[2] == e) for e in ESTADOS_KANBAN]
 
 
-def _bloques_plan(fases, resumen, avance):
-    """Plan de trabajo por emprendimiento: fases + columna de resumen."""
+def _fila_tarea(t):
+    """Fila de una tarea dentro de una fase del plan; navega a su detalle."""
+    tit, pri, est, fase, lim, env, href = t
+    col = ESTADO_BADGE[est]
+    return (
+        '<a class="fila-tarea" href="%s" title="Abrir el detalle de la tarea">'
+        '<span class="fila-ico">%s</span>'
+        '<span class="fila-txt">%s'
+        '<span class="fila-sub">Fecha límite %s &middot; Envío %s</span></span>%s</a>'
+        % (href, ico("checklist", 16), tit, lim, env, badge(est, col[0], col[1]))
+    )
+
+
+def _bloques_plan(nombre):
+    """Plan de trabajo de un emprendimiento: las cuatro fases y su resumen.
+
+    Las tareas salen de TAREAS_EMP —la misma fuente que la vista de Tareas— y
+    cada una navega a su detalle, así que el plan y el tablero nunca se
+    contradicen. Cada fase se abre desde su título.
+    """
+    tareas = [e[2] for e in TAREAS_EMP if e[0] == nombre][0]
     bloques = ""
-    for codigo, nombre, pct, tareas in fases:
-        filas = ""
-        for t, est in tareas:
-            col = {"Completada": ("b-linea", "check"), "En curso": ("b-azul", "reloj"),
-                   "Pendiente": ("b-amarillo", "bombilla"), "Bloqueada": ("b-neutra", "lock")}[est]
-            filas += (
-                '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;'
-                'border-bottom:1px solid #bbbbbb">'
-                '<span style="color:#004a93;flex:0 0 18px">%s</span>'
-                '<span style="flex:1;font-size:13px;color:#051533">%s</span>%s</div>'
-                % (ico("checklist", 16), t, badge(est, col[0], col[1]))
-            )
+    for i, (cod, desc) in enumerate(FASES_META, start=1):
+        pct = AVANCE_FASES[nombre][i - 1]
+        propias = [t for t in tareas if t[3] == i]
+        filas = "".join(_fila_tarea(t) for t in propias) if propias else (
+            '<div class="nota-foot" style="padding:10px 0">'
+            "Aún no hay tareas asignadas en esta fase.</div>")
         cab = AMAR if 0 < pct < 100 else (AZUL if pct == 100 else GRIS)
         bloques += (
             '<div class="card"><div class="card-head">'
             '<span style="background:%s;color:%s;border-radius:6px;padding:3px 9px;'
             'font-size:13px;font-weight:700;letter-spacing:.04em">%s</span>'
-            '<h3>%s</h3>'
+            '<h3><a class="fase-link" href="tareas.html" '
+            'title="Ver las tareas de la fase">%s</a></h3>'
             '<span style="font-weight:700;font-size:13px;color:#051533">%d%%</span></div>'
             '<div class="card-body sin-pad"><div style="padding:6px 20px 14px">%s</div>'
             '<div style="padding:0 20px 16px"><div class="barra"><span style="width:%d%%;'
             'background:%s"></span></div></div></div></div>'
-            % (cab, "#051533" if cab == AMAR else "#ffffff", codigo, nombre, pct, filas, pct, cab)
+            % (cab, "#051533" if cab == AMAR else "#ffffff", cod, desc, pct, filas, pct, cab)
         )
+    hechas = sum(1 for t in tareas if t[2] == "Completada")
+    pct, fase = AVANCE_GENERAL[nombre]
+    conteos = _conteos_estado(tareas)
     return (
         '<div class="grid g-2-1">'
         + '<div class="grid" style="gap:20px">' + bloques + "</div>"
         + '<div class="grid" style="gap:20px">'
         + card("Avance general", '<div style="text-align:center">'
-             + circular(avance[0], "avance", avance[1]) + "</div>")
-        + card("Resumen por estado", stacked_tareas(resumen, "tareas"))
+             + circular(pct, "avance", fase)
+             + '<p style="font-size:13px;color:#162644;margin-top:8px">'
+               "%d de %d tareas completadas.</p></div>" % (hechas, len(tareas)))
+        + card("Tareas por estado", barras_h(
+             "", "Distribución de las tareas del plan", ESTADOS_KANBAN, conteos,
+             maximo=max(conteos + [1]), unidad=" tareas"))
         + "</div></div>"
     )
 
 
 def plan_trabajo():
-    paneles = [
-        (
-            "Sabor y Sabe",
-            "emp-sabor",
-            FASES,
-            [("Alta", 2, AZUL), ("Media", 3, PROF), ("Baja", 1, GRIS)],
-            (62, "FASE 2 · Ejecución"),
-        ),
-        (
-            "Mochilas Origen",
-            "emp-mochilas",
-            [
-                ("FASE 1", "Ideación y priorización de ideas", 24, [
-                    ("Definir la idea y el problema que ataca", "Completada"),
-                    ("Identificar clientes potenciales", "En curso"),
-                    ("Validar la solución con usuarios", "Pendiente"),
-                ]),
-                ("FASE 2", "Estructuración y ejecución", 0, [
-                    ("Levantar el modelo de negocio", "Bloqueada"),
-                    ("Definir la mezcla de marketing", "Bloqueada"),
-                    ("Calcular el punto de equilibrio", "Bloqueada"),
-                    ("Constituir el Startup Minuto de Dios", "Bloqueada"),
-                ]),
-                ("FASE 3", "Consolidación del proceso", 0, [
-                    ("Formalizar la operación diaria", "Bloqueada"),
-                    ("Registrar indicadores de venta", "Bloqueada"),
-                ]),
-                ("FASE 4", "Escalamiento", 0, [
-                    ("Escalar el modelo de negocio", "Bloqueada"),
-                    ("Buscar alianzas estratégicas", "Bloqueada"),
-                ]),
-            ],
-            [("Alta", 1, AZUL), ("Media", 1, PROF), ("Baja", 1, GRIS)],
-            (24, "FASE 1 · Ideación"),
-        ),
-    ]
+    paneles = [(n, pid) for n, pid, _ in TAREAS_EMP]
     cuerpo = (
         callout("El plan de trabajo lo construye el docente que tienes asignado y tu solo "
                 "puedes consultar su avance y completar las tareas.", "escudo")
         + '<div style="height:20px"></div>'
-        + tabs_paneles([(n, pid) for n, pid, _, _, _ in paneles])
+        + tabs_paneles(paneles)
         + '<div style="height:20px"></div>'
         + "".join(
-            '<div data-panel-nombre="%s"%s>%s</div>' % (pid, "" if i == 0 else " hidden",
-                                                         _bloques_plan(fases, resumen, avance))
-            for i, (_, pid, fases, resumen, avance) in enumerate(paneles)
+            '<div data-panel-nombre="%s"%s>%s</div>'
+            % (pid, "" if i == 0 else " hidden", _bloques_plan(n))
+            for i, (n, pid) in enumerate(paneles)
         )
     )
     return shell(R, "plan-trabajo", "Plan de trabajo", cuerpo,
@@ -863,12 +973,12 @@ def seguimiento():
     ]:
         filas.append([f, badge(est, "b-azul" if "Avance" in est else "b-neutra",
                                "trend" if "Avance" in est else "chat"), desc, doc,
-                      _acc(_b("eye", "Ver detalle"))])
+                      _acc(_a("eye", "Ver detalle", "seguimiento-detalle.html"))])
     cuerpo = (
         callout("El seguimiento es de <b>solo lectura</b>. Los registros los crea el docente o el "
                 "administrador segun las reglas de gestión.", "escudo")
         + '<div style="height:20px"></div>'
-        + tabla(["Fecha", "Tipo de registro", "Descripción", "Registrado por", "@ACC"], filas)
+        + tabla(["Fecha", "Tipo de registro", "Título", "Registrado por", "@ACC"], filas)
         + paginas(1, 4, 4)
         + '<div style="height:20px"></div>'
         + card("Frecuencia con que te acompaña el docente",
@@ -880,66 +990,126 @@ def seguimiento():
                  sub="Historial de los acompañamientos registrados por tu docente.")
 
 
-# --- 10. Tareas (lista) ------------------------------------------------------
-def tareas():
-    """Tablero por estado: el estudiante ve que esta haciendo y que falta."""
+def seguimiento_detalle():
+    """Detalle de un registro del historial de seguimiento (solo lectura).
+
+    Se abre desde la columna de acciones del historial; conserva el mismo tono
+    de solo lectura y muestra el avance del emprendimiento en ese momento.
+    """
     cuerpo = (
-        metricas([
-            ("checklist", "Tareas asignadas", "7", "en total", 100, ""),
-            ("check", "Completadas", "3", "", 43, ""),
-            ("reloj", "Pendientes", "3", "", 43, ""),
-            ("alerta", "En revisión", "1", "", 14, ""),
-        ])
+        callout("Este registro lo creó el docente que tienes asignado. El seguimiento "
+                "es de <b>solo lectura</b> para el estudiante.", "escudo")
         + '<div style="height:20px"></div>'
-        + kanban([
-            ("Pendientes", [
-                ("Subir evidencia fotografica del punto de venta",
-                 "Vence hoy · Carlos Mendoza",
-                 badge("Alta", "b-azul", "alerta"),
-                 '<a class="btn btn-sm btn-primario" href="tarea-detalle.html">'
-                 'Abrir</a>'),
-                ("Actualizar el inventario de insumos",
-                 "Vence 13 nov 2024 · Carlos Mendoza",
-                 badge("Media", "b-neutra", "reloj"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle.html">'
-                 'Abrir</a>'),
-                ("Registrar las ventas de la semana",
-                 "Vence 15 nov 2024 · Carlos Mendoza",
-                 badge("Media", "b-neutra", "reloj"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle.html">'
-                 'Abrir</a>'),
-            ]),
-            ("En revisión", [
-                ("Levantar el modelo de negocio",
-                 "Enviada el 04 nov 2024 · esperando calificación",
-                 badge("Alta", "b-azul", "alerta"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-en-revision.html">'
-                 'Ver</a>'),
-            ]),
-            ("Completadas", [
-                ("Definir el precio de venta final",
-                 "Completada el 08 nov 2024",
-                 badge("Calificada 90", "b-linea"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-completada-precio.html">'
-                 'Ver</a>'),
-                ("Validar la solución con 10 usuarios",
-                 "Completada el 01 nov 2024",
-                 badge("Calificada 85", "b-linea"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-completada-usuarios.html">'
-                 'Ver</a>'),
-                ("Definir clientes potenciales",
-                 "Completada el 28 oct 2024",
-                 badge("Calificada 92", "b-linea"),
-                 '<a class="btn btn-sm btn-secundario" href="tarea-detalle-completada-clientes.html">'
-                 'Ver</a>'),
-            ]),
-        ])
-        + '<p class="nota-foot">Arrastra no aplica: cada tarea se mueve cuando '
-          'el docente la califica.</p>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card("Datos del registro", lista_def([
+            ("Título", "Se define el precio de venta final"),
+            ("Tipo de registro", badge("Avance de fase", "b-azul", "trend")),
+            ("Fecha", "12 de noviembre de 2024"),
+            ("Fase", "FASE 2 · Estructuración y ejecución"),
+            ("Emprendimiento", "Sabor y Sabe"),
+            ("Registrado por", "Carlos Mendoza"),
+        ]))
+        + card("Descripción",
+               '<p style="font-size:13px;color:#162644">Se define el precio de venta final '
+               "de cada producto con base en el análisis de costos y el margen acordado. El "
+               "precio queda sustentado en la cartelera del punto de venta.</p>")
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Avance al momento del registro",
+               '<div style="text-align:center">'
+               + circular(62, "avance", "FASE 2 · Ejecución") + "</div>")
+        + card("Cómo leer el seguimiento",
+               '<div style="font-size:13px;color:#162644">Cada registro documenta un avance '
+               "concreto del emprendimiento. La frecuencia de acompañamiento se calcula sobre "
+               "estos registros y alimenta el estado de seguimiento.</div>")
+        + "</div></div>"
+    )
+    return shell(R, "seguimiento", "Detalle del seguimiento", cuerpo,
+                 migas=["Inicio", "Seguimiento", "Detalle del registro"],
+                 sub="Registro del acompañamiento del docente (solo lectura).",
+                 acciones='<a class="btn btn-secundario" href="seguimiento.html">%s Volver</a>' % ico("izq", 16))
+
+
+# --- 10. Tareas (lista) ------------------------------------------------------
+# Rótulo de las columnas del tablero y notas de las tareas ya calificadas.
+KANBAN_TITULO = {"Pendiente": "Pendientes", "En curso": "En curso",
+                 "En revisión": "En revisión", "Completada": "Completadas"}
+NOTAS = {"Definir clientes potenciales": 92,
+         "Validar la solución con 10 usuarios": 85,
+         "Definir el precio de venta final": 90}
+
+
+def _kanban_emp(nombre):
+    """Tablero de tareas de un emprendimiento: una columna por estado.
+
+    Los estados son los mismos del plan de trabajo (pendiente, en curso, en
+    revisión y completada), así que el plan y el tablero siempre coinciden.
+    """
+    tareas = [e[2] for e in TAREAS_EMP if e[0] == nombre][0]
+    columnas = []
+    for est in ESTADOS_KANBAN:
+        tarjetas = []
+        for tit, pri, _, fase, lim, env, href in [t for t in tareas if t[2] == est]:
+            if est == "Completada":
+                meta = "Enviada el %s" % env
+                pie = badge("Calificada %d" % NOTAS.get(tit, 0), "b-linea", "check")
+            elif est == "En revisión":
+                meta = "Enviada el %s · esperando calificación" % env
+                pie = badge("En revisión", "b-amarillo", "reloj")
+            elif est == "En curso":
+                meta = "Vence %s" % lim
+                pie = badge("En curso", "b-azul", "engranaje")
+            else:
+                meta = "Vence %s" % lim
+                pie = badge("Alta" if pri == "Alta" else "Media",
+                            "b-azul" if pri == "Alta" else "b-neutra",
+                            "alerta" if pri == "Alta" else "reloj")
+            tarjetas.append((tit, "Fase %d · %s" % (fase, meta), pie,
+                             '<a class="btn btn-sm btn-secundario" href="%s">Abrir</a>' % href))
+        columnas.append((KANBAN_TITULO[est], tarjetas))
+    return kanban(columnas)
+
+
+def tareas():
+    """Tablero por emprendimiento y por estado: qué está haciendo y qué falta.
+
+    Cada emprendimiento tiene su propia pestaña, igual que Estado de seguimiento
+    y Plan de trabajo, para no mezclar las tareas de dos negocios.
+    """
+    paneles = [(n, pid) for n, pid, _ in TAREAS_EMP]
+    partes = []
+    for i, (n, pid) in enumerate(paneles):
+        tareas_emp = [e[2] for e in TAREAS_EMP if e[0] == n][0]
+        total = len(tareas_emp) or 1
+        conteos = _conteos_estado(tareas_emp)
+        por = conteos[0] + conteos[1]
+
+        def pct(k):
+            return int(round(k * 100.0 / total))
+
+        partes.append(
+            '<div data-panel-nombre="%s"%s>%s</div>'
+            % (pid, "" if i == 0 else " hidden",
+               metricas([
+                   ("checklist", "Tareas asignadas", str(total), "en total", 100, ""),
+                   ("reloj", "Por completar", str(por), "", pct(por), ""),
+                   ("alerta", "En revisión", str(conteos[2]), "", pct(conteos[2]), ""),
+                   ("check", "Completadas", str(conteos[3]), "", pct(conteos[3]), ""),
+               ])
+               + '<div style="height:20px"></div>'
+               + _kanban_emp(n))
+        )
+    cuerpo = (
+        tabs_paneles(paneles)
+        + '<div style="height:20px"></div>'
+        + "".join(partes)
+        + '<p class="nota-foot">Arrastra no aplica: cada tarea se mueve cuando el docente '
+          "la califica.</p>"
     )
     return shell(R, "tareas", "Mis tareas", cuerpo,
                  migas=["Inicio", "Tareas"],
-                 sub="Tareas que debes completar y su evidencia.",
+                 sub="Tus tareas por emprendimiento y por estado.",
                  acciones='<button class="btn btn-secundario" data-accion="descargar">%s Descargar reporte</button>' % ico("download", 16))
 
 
@@ -952,6 +1122,7 @@ def tarea_detalle():
                lista_def([
                    ("Prioridad", badge("Alta", "b-azul", "alerta")),
                    ("Fecha límite", "12 de noviembre de 2024"),
+                   ("Fecha de envío", badge("Pendiente de envío", "b-neutra", "reloj")),
                    ("Asignada por", "Carlos Mendoza"),
                    ("Estado", badge("Pendiente", "b-amarillo", "reloj")),
                    ("Emprendimiento", "Sabor y Sabe"),
@@ -989,17 +1160,37 @@ def tarea_detalle():
              '<div class="nota-foot">El botón se habilita cuando exista evidencia adjunta.</div>'
              % ico("check", 16))
         + card("Comentarios del docente",
-               '<div class="lista-def" style="padding:4px 0">'
-               '<div class="def-row" style="display:block"><dd style="color:#051533">'
-               "Recuerda que las fotos deben incluir la fecha de toma para validar la evidencia."
-               '</dd><dt style="flex:0 0 auto;margin-top:6px;font-size:13px">'
-               "Carlos Mendoza &middot; 09 nov 2024</dt></div></div>")
+               _comentario("Recuerda que las fotos deben incluir la fecha de toma para "
+                           "validar la evidencia.", "09 nov 2024"))
         + "</div></div>"
     )
     return shell(R, "tareas", "Subir evidencia fotografica del punto de venta", cuerpo,
                  migas=["Inicio", "Tareas", "Detalle de tarea"],
                  sub="Detalle de la tarea asignada.",
-                 acciones='<a class="btn btn-secundario" href="tareas.html">%s Volver</a>' % ico("izq", 16))
+                 acciones='<button class="btn btn-secundario" data-accion="descargar">%s '
+                          'Descargar ficha</button>'
+                          ' <a class="btn btn-secundario" href="tareas.html">%s Volver</a>'
+                          % (ico("download", 16), ico("izq", 16)))
+
+
+def _comentario(txt, fecha, autor="Carlos Mendoza", rol="Docente", ini="CM"):
+    """Comentario del docente: avatar, nombre, rol, fecha y el texto."""
+    return (
+        '<div class="coment"><span class="avatar">%s</span>'
+        '<div style="flex:1;min-width:0">'
+        '<div class="coment-cab"><b>%s</b><span class="who-role">%s</span>'
+        "<time>%s</time></div>"
+        '<div class="coment-txt">%s</div></div></div>'
+        % (ini, autor, rol, fecha, txt)
+    )
+
+
+def _puntualidad(retraso):
+    """Badge de puntualidad; retraso = días de retraso (0 = a tiempo)."""
+    if retraso > 0:
+        return badge("Entregada %d día%s tarde" % (retraso, "" if retraso == 1 else "s"),
+                     "b-amarillo", "reloj")
+    return badge("Entregada a tiempo", "b-linea", "check")
 
 
 def _archivos_cargados(archivos):
@@ -1023,6 +1214,7 @@ def tarea_detalle_en_revision():
                lista_def([
                    ("Prioridad", badge("Alta", "b-azul", "alerta")),
                    ("Fecha límite", "04 de noviembre de 2024"),
+                   ("Fecha de envío", "04 de noviembre de 2024 " + _puntualidad(0)),
                    ("Asignada por", "Carlos Mendoza"),
                    ("Estado", badge("En revisión", "b-azul", "reloj")),
                    ("Emprendimiento", "Sabor y Sabe"),
@@ -1046,20 +1238,21 @@ def tarea_detalle_en_revision():
                "revisara y te asignara una calificación.</p>"
                '<div class="nota-foot">La tarea quedara en Completadas cuando el docente la califique.</div>')
         + card("Comentarios del docente",
-               '<div class="lista-def" style="padding:4px 0">'
-               '<div class="def-row" style="display:block"><dd style="color:#051533">'
-               "Tu evidencia está en validación. Recuerda que debe incluir la fecha de toma."
-               '</dd><dt style="flex:0 0 auto;margin-top:6px;font-size:13px">'
-               "Carlos Mendoza &middot; 04 nov 2024</dt></div></div>")
+               _comentario("Tu evidencia está en validación. Recuerda que debe incluir "
+                           "la fecha de toma.", "04 nov 2024"))
         + "</div></div>"
     )
     return shell(R, "tareas", "Levantar el modelo de negocio", cuerpo,
                  migas=["Inicio", "Tareas", "Detalle de tarea"],
                  sub="Tarea enviada a revisión. La evidencia ya esta cargada.",
-                 acciones='<a class="btn btn-secundario" href="tareas.html">%s Volver</a>' % ico("izq", 16))
+                 acciones='<button class="btn btn-secundario" data-accion="descargar">%s '
+                          'Descargar ficha</button>'
+                          ' <a class="btn btn-secundario" href="tareas.html">%s Volver</a>'
+                          % (ico("download", 16), ico("izq", 16)))
 
 
-def _tarea_completada(titulo, nota, fecha_limite, fecha_done, descripcion, archivos, comentario):
+def _tarea_completada(titulo, nota, fecha_limite, fecha_envio, retraso, fecha_coment,
+                      descripcion, archivos, comentario):
     """Detalle de una tarea COMPLETADA: calificación, evidencia cargada y solo lectura."""
     cuerpo = (
         '<div class="grid g-2-1">'
@@ -1068,6 +1261,7 @@ def _tarea_completada(titulo, nota, fecha_limite, fecha_done, descripcion, archi
                lista_def([
                    ("Prioridad", badge("Alta", "b-azul", "alerta")),
                    ("Fecha límite", fecha_limite),
+                   ("Fecha de envío", fecha_envio + " " + _puntualidad(retraso)),
                    ("Asignada por", "Carlos Mendoza"),
                    ("Estado", badge("Completada · Calificada %d" % nota, "b-linea", "check")),
                    ("Emprendimiento", "Sabor y Sabe"),
@@ -1081,28 +1275,26 @@ def _tarea_completada(titulo, nota, fecha_limite, fecha_done, descripcion, archi
         + "</div>"
         + '<div class="grid" style="gap:20px">'
         + card("Calificación",
-               circular(nota, "Calificación", "Completada el %s" % fecha_done)
+               circular(nota, "Calificación", "Completada el %s" % fecha_coment)
                + '<p style="font-size:13px;color:#162644;margin-top:8px">'
                  "<b>Felicitaciones.</b> Esta tarea fue calificada y entregada y ya no puede "
                  "modificarse.</p>")
-        + card("Comentarios del docente",
-               '<div class="lista-def" style="padding:4px 0">'
-               '<div class="def-row" style="display:block"><dd style="color:#051533">'
-               + comentario
-               + '</dd><dt style="flex:0 0 auto;margin-top:6px;font-size:13px">'
-                 "Carlos Mendoza &middot; %s</dt></div></div>" % fecha_done)
+        + card("Comentarios del docente", _comentario(comentario, fecha_coment))
         + "</div></div>"
     )
     return shell(R, "tareas", titulo, cuerpo,
                  migas=["Inicio", "Tareas", "Detalle de tarea"],
                  sub="Tarea completada y calificada por el docente.",
-                 acciones='<a class="btn btn-secundario" href="tareas.html">%s Volver</a>' % ico("izq", 16))
+                 acciones='<button class="btn btn-secundario" data-accion="descargar">%s '
+                          'Descargar ficha</button>'
+                          ' <a class="btn btn-secundario" href="tareas.html">%s Volver</a>'
+                          % (ico("download", 16), ico("izq", 16)))
 
 
 def tarea_detalle_completada_precio():
     return _tarea_completada(
         "Definir el precio de venta final", 90,
-        "30 de octubre de 2024", "08 nov 2024",
+        "30 de octubre de 2024", "08 de noviembre de 2024", 9, "08 nov 2024",
         "Define el precio de venta final de cada producto con base en el análisis de costos "
         "y el margen acordado con tu docente.",
         [("analisis-costos.pdf", "1.2 MB", "07 nov 2024"),
@@ -1114,7 +1306,7 @@ def tarea_detalle_completada_precio():
 def tarea_detalle_completada_usuarios():
     return _tarea_completada(
         "Validar la solución con 10 usuarios", 85,
-        "27 de octubre de 2024", "01 nov 2024",
+        "10 de noviembre de 2024", "01 de noviembre de 2024", 0, "01 nov 2024",
         "Realiza la validación de la solución con al menos 10 usuarios y adjunta el registro "
         "de sus respuestas y comentarios.",
         [("registro-validaciones.pdf", "1.8 MB", "31 oct 2024"),
@@ -1125,7 +1317,7 @@ def tarea_detalle_completada_usuarios():
 def tarea_detalle_completada_clientes():
     return _tarea_completada(
         "Definir clientes potenciales", 92,
-        "22 de octubre de 2024", "28 oct 2024",
+        "05 de noviembre de 2024", "28 de octubre de 2024", 0, "28 oct 2024",
         "Segmenta los clientes potenciales del emprendimiento y adjunta el estudio de mercado "
         "que respalda la segmentación.",
         [("estudio-mercado.pdf", "2.3 MB", "28 oct 2024"),
@@ -1142,6 +1334,7 @@ def asesorias():
                 "rol DOCENTE o ADMINISTRADOR.", "escudo")
         + '<div style="height:20px"></div>'
         + metricas([
+            ("maleta", "Emprendimientos", "2", "activos", 100, "Sabor y Sabe · Mochilas Origen"),
             ("chat", "Asesorías realizadas", "3", "", 100, ""),
             ("reloj", "Programadas", "3", "", 100, ""),
             ("check", "Confirmadas", "2", "", 67, ""),
@@ -1149,17 +1342,17 @@ def asesorias():
         + '<div style="height:20px"></div>'
         + card("Próximas asesorías", linea_tiempo([
             ("14", "nov", "Asesoría con Laura Sanchez",
-             "14:30 - 15:30 · Presencial · Pendiente de confirmar",
+             "14:30 - 15:30 · Presencial · Pendiente de confirmar · Mochilas Origen",
              '<div style="margin-top:10px">'
              + badge("Pendiente de confirmar", "b-amarillo", "reloj")
              + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver detalle</button></div>"),
             ("19", "nov", "Asesoría con Carlos Mendoza",
-             "09:00 - 10:00 · Virtual · Confirmada",
+             "09:00 - 10:00 · Virtual · Confirmada · Sabor y Sabe",
              '<div style="margin-top:10px">'
              + badge("Confirmada", "b-azul", "check")
              + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver detalle</button></div>"),
             ("12", "nov", "Asesoría con Carlos Mendoza",
-             "10:00 - 11:00 · Virtual · Confirmada",
+             "10:00 - 11:00 · Virtual · Confirmada · Sabor y Sabe",
              '<div style="margin-top:10px">'
              + badge("Confirmada", "b-azul", "check")
              + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver detalle</button></div>"),
@@ -1167,7 +1360,7 @@ def asesorias():
         + '<div style="height:20px"></div>'
         + card("Asesorías realizadas", linea_tiempo([
             ("04", "nov", "Asesoría con Carlos Mendoza",
-             "09:00 - 10:00 · Virtual · Realizada",
+             "09:00 - 10:00 · Virtual · Realizada · Sabor y Sabe",
              '<div style="margin-top:10px">'
              + badge("Realizada", "b-linea", "check")
              + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-acta\">Ver acta</button></div>"),
@@ -1175,7 +1368,7 @@ def asesorias():
     )
     return shell(R, "asesorias", "Mis asesorías", cuerpo,
                  migas=["Inicio", "Asesorías"],
-                 sub="Historial y próximas asesorías de tu emprendimiento.",
+                 sub="Historial y próximas asesorías de tus emprendimientos.",
                  acciones='<a class="btn btn-acento" href="solicitar-asesoria.html">%s Solicitar asesoría</a>'
                           % ico("plus", 16))
 
@@ -1245,16 +1438,20 @@ def eventos():
             ["Evento", "Tipo", "Fecha y hora", "Modalidad", "Organizador", "@ACC"],
             [['<b>Startup Minuto de Dios</b>', "Conferencia",
               "21 nov 2024, 08:00", "Presencial", "Dirección Académica",
-              _acc(_b("eye", "Ver detalle"), _b("calendar", "Inscribirme"))],
+              _acc(_a("eye", "Ver detalle", "evento-detalle-startup.html"),
+                   _b("calendar", "Inscribirme"))],
              ['<b>Capacitación en modelado de negocios</b>', "Taller",
               "21 nov 2024, 14:00", "Virtual", "Coordinación Académica",
-              _acc(_b("eye", "Ver detalle"), _b("calendar", "Inscribirme"))],
+              _acc(_a("eye", "Ver detalle", "evento-detalle-capacitacion.html"),
+                   _b("calendar", "Inscribirme"))],
              ['<b>Asesoría grupal de empleabilidad</b>', "Asesoría",
               "26 nov 2024, 10:00", "Presencial", "Bienestar Estudiantil",
-              _acc(_b("eye", "Ver detalle"), _b("calendar", "Inscribirme"))],
+              _acc(_a("eye", "Ver detalle", "evento-detalle-asesoria-grupal.html"),
+                   _b("calendar", "Inscribirme"))],
              ['<b>Showroom de emprendimientos</b>', "Muestra",
               "02 dic 2024, 09:00", "Presencial", "Dirección Académica",
-              _acc(_b("eye", "Ver detalle"), _b("calendar", "Inscribirme"))]],
+              _acc(_a("eye", "Ver detalle", "evento-detalle-showroom.html"),
+                   _b("calendar", "Inscribirme"))]],
             id="tabla-proximos"))
         + '<div data-listado-inscritos>'
         + card("Eventos en los que ya estas inscrito", tabla(
@@ -1269,14 +1466,108 @@ def eventos():
                + _calendario("noviembre", 2024)
                + "</div>")
         + card("Cómo inscribirte",
-               '<div style="font-size:13px;color:#162644">Al inscribirte, el evento aparece en '
-               "tu panel y recibes recordatorio el día anterior. Puedes cancelar tu inscripción "
-               "desde el detalle del evento.</div>")
+               '<div style="font-size:13px;color:#162644">Abre el detalle de un evento para ver '
+               "en qué consiste; al inscribirte, aparece en tu panel y recibes recordatorio el día "
+               "anterior. Si el evento es <b>virtual</b>, el enlace de acceso se habilita después "
+               "de inscribirte.</div>")
         + "</div></div>"
     )
     return shell(R, "eventos", "Eventos", cuerpo,
                  migas=["Inicio", "Eventos"],
                  sub="Eventos, talleres y asesorías de la institución.")
+
+
+def _evento_detalle(evento, fecha, modalidad, organizador, lugar, cupos, consiste,
+                    extra_html="", virtual=False):
+    """Detalle de un evento: en qué consiste, los datos y la inscripción.
+
+    Si el evento es virtual, el enlace de acceso empieza oculto y se muestra al
+    inscribirse (misma logica que el resto de accesos virtuales del sistema).
+    """
+    datos = lista_def([
+        ("Fecha y hora", fecha),
+        ("Modalidad", badge(modalidad, "b-azul" if modalidad == "Virtual" else "b-neutra",
+                            "play" if modalidad == "Virtual" else "")),
+        ("Lugar", lugar),
+        ("Organiza", organizador),
+        ("Cupos disponibles", cupos),
+    ])
+    acceso = ""
+    if virtual:
+        acceso = (
+            '<div id="acceso-virtual" hidden>'
+            + card("Acceso al evento virtual",
+                   lista_def([
+                       ("Enlace", '<a href="https://meet.minutodedios.edu.co/capacitacion-modelado">'
+                                  "meet.minutodedios.edu.co/capacitacion-modelado</a>"),
+                       ("ID de la reunión", "482 913 776"),
+                       ("Requisitos", "Conexión estable y audífonos."),
+                   ]),
+                   hint="<span>Visible después de inscribirte</span>")
+            + "</div>"
+        )
+    cuerpo = (
+        callout("En qué consiste: " + consiste, "libro")
+        + '<div style="height:20px"></div>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card(evento, datos + '<div class="divisor"></div>' + extra_html,
+               accion='<button class="btn btn-acento btn-sm" data-accion="inscribirse">%s '
+                      "Inscribirme</button>" % ico("calendar", 15))
+        + acceso
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Después de inscribirte",
+               '<div style="font-size:13px;color:#162644">El evento aparecerá en tu panel y '
+               "recibirás un recordatorio el día anterior. Puedes cancelar tu inscripción desde "
+               "este mismo detalle mientras el evento no haya comenzado.</div>")
+        + "</div></div>"
+    )
+    return shell(R, "eventos", evento, cuerpo,
+                 migas=["Inicio", "Eventos", evento],
+                 sub="Detalle del evento y su inscripción.",
+                 acciones='<a class="btn btn-secundario" href="eventos.html">%s Volver</a>'
+                          % ico("izq", 16))
+
+
+def evento_detalle_startup():
+    return _evento_detalle(
+        "Startup Minuto de Dios", "21 nov 2024, 08:00 - 12:00", "Presencial",
+        "Dirección Académica", "Auditorio principal, sede Norte", "40 cupos",
+        "una conferencia para presentar la ruta del programa Startup Minuto de Dios, los "
+        "criterios de evaluación y los testimonios de emprendimientos que ya pasaron por el "
+        "proceso. Al final hay un espacio de preguntas con la dirección académica.")
+
+
+def evento_detalle_capacitacion():
+    return _evento_detalle(
+        "Capacitación en modelado de negocios", "21 nov 2024, 14:00 - 16:30", "Virtual",
+        "Coordinación Académica", "Sala virtual institucional", "120 cupos",
+        "un taller virtual para construir el modelo de negocio (clientes, propuesta de valor, "
+        "canales e ingresos) con ejercicios guiados sobre tu propio emprendimiento.",
+        virtual=True)
+
+
+def evento_detalle_asesoria_grupal():
+    return _evento_detalle(
+        "Asesoría grupal de empleabilidad", "26 nov 2024, 10:00 - 11:30", "Presencial",
+        "Bienestar Estudiantil", "Sala de reuniones 204", "25 cupos",
+        "una asesoría en grupo sobre empleabilidad y emprendimiento: cómo presentar tu proyecto, "
+        "armar tu hoja de vida y preparar una entrevista.", 
+        extra_html=steps(["Inscríbete en el evento.",
+                          "Lleva tu proyecto y tu hoja de vida.",
+                          "Participa y recibe la retroalimentación del grupo.",
+                          "Recibe el acta de participación."]))
+
+
+def evento_detalle_showroom():
+    return _evento_detalle(
+        "Showroom de emprendimientos", "02 dic 2024, 09:00 - 15:00", "Presencial",
+        "Dirección Académica", "Plaza central, sede Norte", "60 cupos",
+        "una muestra abierta donde cada estudiante presenta su emprendimiento a visitantes y "
+        "jurados. Habrá un espacio asignado por emprendimiento y una rúbrica de evaluación.",
+        extra_html='<div class="nota-foot">El montaje del stand está a cargo de cada '
+                   "emprendimiento; la institución entrega la mesa y la señalización.</div>")
 
 
 def _calendario(mes, anio):
@@ -1305,10 +1596,92 @@ def _calendario(mes, anio):
 
 
 # --- 15. Perfil --------------------------------------------------------------
+def _tarjeta_emp(nombre, tareas):
+    """Tarjeta de un emprendimiento dentro del perfil (enlaza a su detalle)."""
+    pct, fase = AVANCE_GENERAL[nombre]
+    hechas = sum(1 for t in tareas if t[2] == "Completada")
+    return (
+        '<a class="card metrica perfil-repo" href="emprendimiento-detalle.html">'
+        '<div class="metrica-top"><span class="metrica-ico">%s</span>'
+        '<div><div class="metrica-lbl">%s</div>'
+        '<div class="metrica-val" style="font-size:16px">%s</div></div></div>'
+        '<p style="font-size:13px;color:#162644;margin-top:8px">%s</p></a>'
+        % (ico("maleta", 18), nombre, "%d%% · %s" % (pct, fase),
+           "%d de %d tareas completadas en el plan." % (hechas, len(tareas)))
+    )
+
+
 def perfil():
+    """Perfil del estudiante: sus datos basicos y sus emprendimientos.
+
+    Cabecera con foto y datos arriba, los emprendimientos abajo y un boton para
+    editar que lleva a Configuracion (alli se cambian los datos y la contraseña).
+    """
     cuerpo = (
-        callout("Aquí puedes mantener tus datos personales y tu contraseña. Los campos "
-                "institucionales los mantiene el administrador de la institución.", "escudo")
+        '<div class="card"><div class="card-body">'
+        '<div class="perfil-cab">'
+        '<div class="perfil-foto"><span>ML</span></div>'
+        '<div class="perfil-datos">'
+        '<h2 class="perfil-nombre">Mariana Lopez Herrera</h2>'
+        '<div class="perfil-usuario">mariana.lopez@minutodedios.edu.co &middot; '
+        "Número de estudiante 2024105678</div>"
+        '<p class="perfil-bio">Estudiante de Ingeniería Industrial (quinto semestre), modalidad '
+        "presencial, sede Norte. Emprendedora a cargo de Sabor y Sabe y Mochilas Origen dentro "
+        "del programa Startup Minuto de Dios.</p>"
+        '<div class="perfil-meta">'
+        '<span>%s ESTUDIANTE</span>'
+        '<span>%s Cúcuta, Norte de Santander</span>'
+        '<span>%s 2 emprendimientos activos</span>'
+        "</div></div>"
+        '<div class="perfil-acciones">'
+        '<a class="btn btn-secundario" href="configuracion.html">%s Editar perfil</a>'
+        "</div></div></div></div>"
+        % (ico("user", 15), ico("home", 15), ico("maleta", 15), ico("edit", 15))
+        + '<div style="height:20px"></div>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid" style="gap:20px">'
+        + card("Mis emprendimientos",
+               '<div class="grid g-2">'
+               + "".join(_tarjeta_emp(n, t) for n, _, t in TAREAS_EMP)
+               + "</div>")
+        + "</div>"
+        + '<div class="grid" style="gap:20px">'
+        + card("Estado de la cuenta", lista_def([
+            ("Estado", badge("Limitado", "b-amarillo", "lock")),
+            ("Emprendimientos", "2"),
+            ("Tareas por completar", str(len(TAREAS_PEND))),
+            ("Fecha de registro", "12 oct 2024"),
+        ]),
+            accion='<button class="btn btn-secundario btn-sm" data-accion="cerrar-sesion">%s '
+                   "Cerrar sesión</button>" % ico("salir", 15))
+        + card("Notificaciones", '<div style="font-size:13px;color:#162644">Tienes '
+               "%d avisos sin leer: una asesoría confirmada, una tarea nueva y un avance de "
+               "seguimiento."
+               "</div>" % sum(1 for n in NOTIFS_EST if n[0]),
+               accion='<a class="btn btn-secundario btn-sm" href="notificaciones.html">%s '
+                      "Ver notificaciones</a>" % ico("bell", 15))
+        + "</div></div>"
+        + '<div style="height:20px"></div>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+        + '<a class="btn btn-acento" href="configuracion.html">%s Editar perfil y configuración</a>'
+        % ico("edit", 16)
+        + "</div>"
+    )
+    return shell(R, "perfil", "Mi perfil", cuerpo,
+                 migas=["Inicio", "Mi perfil"],
+                 sub="Tus datos básicos y los emprendimientos que tienes a cargo.")
+
+
+# --- 15b. Configuracion (edicion del perfil) ---------------------------------
+def configuracion():
+    """Configuración del estudiante: datos personales, académicos y contraseña.
+
+    Es la pantalla de edición que se abre desde el perfil. Los campos
+    institucionales los mantiene el ADMINISTRADOR.
+    """
+    cuerpo = (
+        callout("Aquí actualizas tus datos y tu contraseña. Los campos con el candado los "
+                "mantiene el <b>ADMINISTRADOR</b> de la institución.", "escudo")
         + '<div style="height:20px"></div>'
         + '<div class="grid g-2-1">'
         + '<div class="grid" style="gap:20px">'
@@ -1317,9 +1690,15 @@ def perfil():
                + campo("Nombres", valor="Mariana") + campo("Apellidos", valor="Lopez Herrera")
                + "</div>"
                + '<div class="grid g-2" style="gap:0 16px">'
-               + campo("Tipo de documento", valor="CC")
+               + select("Tipo de documento", ["CC", "TI", "Cédula de extranjería"],
+                        valor="CC", req=True)
                + campo("Número de documento", valor="1020304050",
                        bloqueo="Solo ADMINISTRADOR puede modificarlo.")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Número de estudiante", valor="2024105678",
+                       bloqueo="Solo ADMINISTRADOR puede modificarlo.")
+               + campo("Fecha de nacimiento", tipo="date", valor="1999-04-18")
                + "</div>"
                + '<div class="grid g-2" style="gap:0 16px">'
                + campo("Correo personal", valor="mariana.lopez@correo.com", tipo="email")
@@ -1327,12 +1706,33 @@ def perfil():
                        tipo="email", bloqueo="Solo ADMINISTRADOR puede modificarlo.")
                + "</div>"
                + '<div class="grid g-2" style="gap:0 16px">'
-               + campo("Teléfono fijo", valor="604 123 4567", tipo="tel")
-               + campo("Celular", valor="300 555 4412", tipo="tel")
+               + campo("Celular", valor="300 555 4412", tipo="tel", req=True)
+               + campo("Celular 2 (opcional)", tipo="tel", ph="Opcional",
+                       ayuda="Déjalo vacío si no tienes un segundo número.")
+               + "</div>"
+               + '<div class="grid g-3" style="gap:0 16px">'
+               + campo("Departamento", valor="Norte de Santander")
+               + campo("Ciudad", valor="Cúcuta")
+               + campo("Sede", valor="Sede Norte")
                + "</div>"
                + '<div style="display:flex;justify-content:flex-end;gap:10px">'
                + '<button class="btn btn-secundario" data-accion="cancelar-perfil">Cancelar</button>'
-               + '<button class="btn btn-primario" data-accion="guardar-perfil">%s Guardar cambios</button></div>' % ico("check", 16))
+               + '<button class="btn btn-primario" data-accion="guardar-perfil">%s '
+                 "Guardar cambios</button>" % ico("check", 16) + "</div>")
+        + card("Datos académicos",
+               '<div class="grid g-2" style="gap:0 16px">'
+               + select("Nivel académico", ["Pregrado", "Posgrado"], valor="Pregrado", req=True)
+               + campo("Programa académico", valor="Ingeniería Industrial",
+                       bloqueo="Solo ADMINISTRADOR puede modificarlo.")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + select("Semestre", ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto",
+                                     "Sexto", "Séptimo", "Octavo", "Noveno", "Décimo"],
+                        valor="Quinto", req=True)
+               + select("Modalidad", ["Presencial", "Virtual"], valor="Presencial", req=True)
+               + "</div>"
+               + '<div class="nota-foot">Estos datos determinan los eventos y las '
+                 "convocatorias que te llegan.</div>")
         + card("Cambiar contraseña",
                '<div class="grid g-3" style="gap:0 16px">'
                + campo("Contraseña actual", tipo="password", ph="••••••••")
@@ -1340,56 +1740,55 @@ def perfil():
                + campo("Repetir nueva contraseña", tipo="password", ph="••••••••")
                + "</div>"
                '<div style="display:flex;justify-content:flex-end">'
-               '<button class="btn btn-secundario" data-accion="actualizar-contrasena">Actualizar contraseña</button></div>')
+               '<button class="btn btn-secundario" data-accion="actualizar-contrasena">'
+               "Actualizar contraseña</button></div>")
         + "</div>"
         + '<div class="grid" style="gap:20px">'
-        + card("Mi rol en el sistema",
-               '<div style="text-align:center;padding:8px 0">'
-               '<span class="avatar" style="width:72px;height:72px;margin:0 auto;font-size:20px">ML</span>'
-               '<h3 style="margin-top:12px">Mariana Lopez Herrera</h3>'
-               '<div style="margin-top:6px">%s</div></div>' % badge("ESTUDIANTE", "b-amarillo", "user"))
-        + card("Estado de la cuenta", '<div class="lista-def" style="padding:4px 0">'
-             '<div class="def-row"><dt>Estado</dt><dd>%s</dd></div>' % badge("Limitado", "b-amarillo", "lock")
-             + '<div class="def-row"><dt>Emprendimientos</dt><dd>2</dd></div>'
-             + '<div class="def-row"><dt>Tareas pendientes</dt><dd>4</dd></div>'
-             + '<div class="def-row"><dt>Fecha de registro</dt><dd>12 oct 2024</dd></div>'
-             "</div>",
-             accion='<button class="btn btn-secundario btn-sm" data-accion="cerrar-sesion">%s Cerrar sesión</button>' % ico("salir", 15))
+        + card("Foto del estudiante",
+               '<div style="display:flex;align-items:center;gap:16px">'
+               '<div class="perfil-foto" style="width:96px;height:96px;flex:0 0 96px">'
+               "<span>ML</span></div>"
+               '<div><div style="font-size:13px;color:#162644">Sube una imagen en formato '
+               "<b>PNG</b> o JPG, de máximo 2 MB.</div>"
+               '<div style="margin-top:10px">'
+               '<button class="btn btn-secundario btn-sm" data-accion="cambiar-foto">%s '
+               "Subir imagen</button></div></div></div>" % ico("upload", 15))
+        + card("Accesos y seguridad", lista_def([
+            ("Último ingreso", "12 nov 2024, 08:14 · Cúcuta"),
+            ("Estado de la cuenta", badge("Limitado", "b-amarillo", "lock")),
+            ("Rol", badge("ESTUDIANTE", "b-amarillo", "user")),
+        ]))
         + "</div></div>"
     )
-    return shell(R, "perfil", "Mi perfil", cuerpo,
-                 migas=["Inicio", "Perfil"],
-                 sub="Información de tu cuenta y preferencias.")
+    return shell(R, "configuracion", "Configuración", cuerpo,
+                 migas=["Inicio", "Mi perfil", "Configuración"],
+                 sub="Edita tus datos personales, académicos y tu contraseña.",
+                 acciones='<a class="btn btn-secundario" href="perfil.html">%s Volver al perfil</a>'
+                          % ico("izq", 16))
 
 
 # --- 16. Notificaciones ------------------------------------------------------
 def notificaciones():
-    items = [
-        (True, "Asesoría confirmada", "Tu asesoría con Carlos Mendoza quedo confirmada para el "
-         "martes 12 de noviembre a las 10:00.", "hace 12 minutos", "chat", "asesoria"),
-        (True, "Nueva tarea asignada", "Debes subir la evidencia fotografica del punto de venta "
-         "antes del 12 de noviembre.", "hace 2 horas", "checklist", "tarea"),
-        (True, "Seguimiento registrado", "Carlos Mendoza registro un avance de fase en tu "
-         "emprendimiento Sabor y Sabe.", "ayer, 16:40", "trend", "seguimiento"),
-        (False, "Correo verificado", "Tu correo institucional quedo verificado correctamente.",
-         "28 oct 2024", "escudo", "sistema"),
-        (False, "Bienvenida a SGEMD", "Bienvenida al sistema de gestión de emprendimiento "
-         "Minuto de Dios.", "12 oct 2024", "rayo", "sistema"),
-    ]
+    """Bandeja de avisos; la campana del encabezado lee la misma fuente.
+
+    Cada aviso es un enlace a la vista donde se resuelve, y los filtros de la
+    columna derecha muestran y ocultan sin tocar el contenido.
+    """
+    no_leidas = sum(1 for n in NOTIFS_EST if n[0])
     cuerpo = (
         '<div class="grid g-2-1">'
         + '<div class="grid" style="gap:20px">'
         + '<div class="card"><div class="card-head"><h3>Bandeja de notificaciones</h3>'
-          '<span class="hint" id="contador-no-leidas">3 sin leer</span></div><div class="card-body sin-pad">'
+          '<span class="hint" id="contador-no-leidas">%d sin leer</span></div>'
+          '<div class="card-body sin-pad">' % no_leidas
         + "".join(
-            '<div class="notif%s" data-tipo="%s" data-i="%d">'
-            '<div style="flex:0 0 34px;width:34px;height:34px;'
-            'border-radius:8px;background:rgba(0,74,147,.08);color:#004a93;'
-            'display:flex;align-items:center;justify-content:center">%s</div>'
-            '<div style="flex:1;min-width:0"><h3>%s</h3><p>%s</p><time>%s</time></div>%s</div>'
-            % (" no-leida" if leer else "", tipo, i, ico(ic, 17), t, txt, f,
-               '<span class="notif-dot"></span>' if leer else "")
-            for i, (leer, t, txt, f, ic, tipo) in enumerate(items)
+            '<a class="notif%s" href="%s" data-tipo="%s" data-i="%d">'
+            '<span class="notif-ico">%s</span>'
+            '<div class="notif-cuerpo"><h3>%s</h3><p>%s</p><time>%s</time></div>'
+            '<span class="notif-flecha">%s</span>%s</a>'
+            % (" no-leida" if leer else "", href, tipo, i, ico(ic, 17), t, txt, f,
+               ico("der", 16), '<span class="notif-dot"></span>' if leer else "")
+            for i, (leer, t, txt, f, ic, tipo, href) in enumerate(NOTIFS_EST)
         )
         + "</div></div>"
         + "</div>"
@@ -1406,13 +1805,15 @@ def notificaciones():
              + "".join(
                  '<div class="def-row"><dt style="flex:1">%s</dt><dd style="flex:0 0 auto">'
                  '<span class="chip on">Activado</span></dd></div>' % t
-                 for t in ["Correo electronico", "Notificaciones en el sistema", "Recordatorio de tareas"])
+                 for t in ["Correo electronico", "Notificaciones en el sistema",
+                           "Recordatorio de tareas"])
              + '<div class="nota-foot">Un administrador puede ajustar estas preferencias.</div>'
          + "</div>")
         + "</div></div>"
     )
-    return shell(R, "perfil", "Notificaciones", cuerpo,
+    return shell(R, "notificaciones", "Notificaciones", cuerpo,
                  migas=["Inicio", "Notificaciones"],
                  sub="Alertas de tareas, asesorías y seguimiento.",
-                 acciones='<button class="btn btn-secundario">%s Marcar todas como leídas</button>'
-                          % ico("check", 16))
+                 acciones='<button class="btn btn-secundario" '
+                          'data-accion="marcar-todas-como-leidas">%s Marcar todas como leídas'
+                          "</button>" % ico("check", 16))

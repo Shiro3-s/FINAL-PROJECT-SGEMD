@@ -5,7 +5,7 @@
 > **Base de la spec:** `README.md` §3 (funcionalidades), §5 (modelo de datos), §6 (reglas), §7 (API), §8 (frontend), §11–§13 (MVP y criterios) y §16 (alcance ampliado).
 >
 > **Estado real verificado:**
-> - `prototype/` → **54 pantallas HTML estáticas** (4 acceso + 20 estudiante + 12 docente + 18 admin), generadas desde Python. **No hay backend**: login simulado, sesión en `localStorage`, "guardar/descargar" son simulaciones.
+> - `prototype/` → **60 pantallas HTML estáticas** (4 acceso + 26 estudiante + 12 docente + 18 admin), generadas desde Python. **No hay backend**: login simulado, sesión en `localStorage`, "guardar/descargar" son simulaciones.
 > - `core/`, `agents/`, `skills/`, `interfaces/`, `config/`, `tools/`, `evaluations/` → **framework de agentes** (scaffolding de IA), **no** es la aplicación SGEMD.
 > - **No existe** backend (Node/Express), frontend React, ni base de datos PostgreSQL.
 > - Documentación: completa (`docs/`, `CORRECCIONES-VISTAS-ESTUDIANTE.md`).
@@ -23,7 +23,7 @@ La spec y el prototipo (UI) están **avanzados**; **toda la capa real** (backend
 | Capa | Estado | Detalle |
 | ---- | ------ | ------- |
 | **Spec / documentación** | ✅ | `README.md` completo y actualizado (§16). |
-| **Prototipo (UI estática)** | 🟡 | 54 pantallas navegables, sin lógica real ni datos. |
+| **Prototipo (UI estática)** | 🟡 | 60 pantallas navegables, sin lógica real ni datos. |
 | **Frontend real (React)** | ❌ | No existe. |
 | **Backend (Node + Express)** | ❌ | No existe. |
 | **API REST** | ❌ | Definida en §7; sin implementar. |
