@@ -1,0 +1,215 @@
+<mxfile host="app.diagrams.net" agent="opencode" version="24.0.0">
+  <diagram id="sgemd-componentes" name="Componentes SGEMD">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ============ FRONTEND (React) ============ -->
+        <mxCell id="front_cont" value="Frontend — React (SPA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6C8EBF;fontStyle=1;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="440" height="360" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_auth" value="Auth · Login / Registro&#xa;(OTP 8 dígitos)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="400" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_admin" value="Panel Admin&#xa;usuarios · emprendimientos · asignaciones" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="60" y="146" width="400" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_doc" value="Panel Docente / Mentor&#xa;seguimientos · tareas · asesorías" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="60" y="202" width="400" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_est" value="Panel Estudiante&#xa;progreso · tareas · avance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="60" y="258" width="400" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_api" value="Cliente API central&#xa;Bearer token · redirige en 401/403" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontStyle=4;" vertex="1" parent="1">
+          <mxGeometry x="60" y="314" width="400" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ============ BACKEND (Node + Express) ============ -->
+        <mxCell id="back_cont" value="Backend — Node.js + Express (API REST /api)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#D79B00;fontStyle=1;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="520" y="40" width="1020" height="420" as="geometry"/>
+        </mxCell>
+        <mxCell id="mw_label" value="Middleware" style="text;html=1;align=left;verticalAlign=top;fontStyle=2;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="540" y="80" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_auth" value="authenticateToken (JWT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="540" y="100" width="450" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_rol" value="isAdmin · isTeacher · isStudent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="100" width="450" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc_label" value="Servicios por módulo (routes → controllers → services → BD)" style="text;html=1;align=left;verticalAlign=top;fontStyle=2;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="540" y="160" width="400" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_auth" value="AuthService&#xa;register · verify · login · logout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="540" y="190" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_user" value="UserService&#xa;CRUD · avatar · roles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="780" y="190" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_emp" value="EmprendimientoService&#xa;CRUD · etapas · paralelos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="190" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_asig" value="AsignaciónService&#xa;mentor ↔ estudiante ↔ empr." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="190" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_seg" value="SeguimientoService&#xa;notas de acompañamiento" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="540" y="262" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_tarea" value="TareaService&#xa;CRUD · completar · % avance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="780" y="262" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_ases" value="AsesoríaService&#xa;solicitud · confirmación · agenda" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="262" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_event" value="EventoService&#xa;eventos · registro de asistencia" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="262" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_diag" value="DiagnósticoService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="540" y="334" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="s_dash" value="DashboardService&#xa;métricas reales de BD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="780" y="334" width="220" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="val" value="Validación de entrada +&#xa;consultas SQL parametrizadas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontStyle=4;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="334" width="220" height="52" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="sock" value="Socket.io&#xa;Notificaciones en tiempo real" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="540" y="396" width="220" height="52" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="fil" value="File storage&#xa;Uploads locales (&#8804; 500 MB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="780" y="396" width="220" height="52" as="geometry"/>
+        </mxCell>
+
+        <!-- ============ SEGURIDAD ============ -->
+        <mxCell id="seg_cont" value="Seguridad" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9673A6;fontStyle=1;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="520" y="520" width="460" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="jwt" value="JWT · expiración 8 h" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="570" width="380" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="bcrypt" value="bcrypt · hash de contraseñas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="626" width="380" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="otp" value="Código OTP · validez 5 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="682" width="380" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ============ SMTP EXTERNO ============ -->
+        <mxCell id="smtp" value="Externo — SMTP&#xa;envío de correo de verificación" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="520" width="420" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ============ POSTGRESQL ============ -->
+        <mxCell id="db_cont" value="Persistencia — PostgreSQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A9C4EB;strokeColor=#1F4E79;fontStyle=1;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1580" y="40" width="360" height="700" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_usu" value="usuarios&#xa;(1=Admin · 2=Estudiante · 3=Docente)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="100" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_emp" value="emprendimiento&#xa;(etapa · propietario)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="160" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_asig" value="asignaciones&#xa;(mentor ↔ estudiante)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="220" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_seg" value="seguimientos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="280" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_tarea" value="tareas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="340" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_ases" value="asesorías" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="400" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_event" value="eventos + usuarios_has_Eventos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="460" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_cod" value="códigos de verificación (OTP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="520" width="320" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_cat" value="catálogos&#xa;(roles · documento · programa · municipio ·…)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="580" width="320" height="48" as="geometry"/>
+        </mxCell>
+
+        <!-- ============ INFRAESTRUCTURA ============ -->
+        <mxCell id="infra_cont" value="Infraestructura" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;fontStyle=1;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="440" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="docker" value="docker-compose&#xa;backend | frontend | postgres" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="680" width="400" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="env" value=".env · secretos y credenciales" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="736" width="400" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- ============ CONEXIONES ============ -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="f_auth" target="f_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="f_admin" target="f_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="f_doc" target="f_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="f_est" target="f_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;edgeLabel=fb" edge="1" source="f_api" target="m_auth" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="970" y="305" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="m_auth" target="m_rol" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="m_rol" target="s_asig" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="s_auth" target="jwt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="s_auth" target="bcrypt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="s_auth" target="otp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="s_auth" target="smtp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="otp" target="t_cod" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="s_dash" target="val" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;edgeLabel=db" edge="1" source="val" target="t_emp" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1560" y="360" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;edgeLabel=host" edge="1" source="t_usu" target="docker" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1780" y="720" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;dashed=1;" edge="1" source="env" target="docker" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+              <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="s_diag" target="sock" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="s_dash" target="fil" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;dashed=1;" edge="1" source="sock" target="f_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+    </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
