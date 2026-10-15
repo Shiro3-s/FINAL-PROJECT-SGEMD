@@ -90,13 +90,15 @@ NAV = {
     ],
     "docente": [
         ("Inicio", "pie", "dashboard"),
-        ("Mis asesorías", "chat", "asesorias"),
-        ("Emprendimientos asignados", "maleta", "emprendimientos"),
-        ("Seguimiento", "trend", "seguimiento"),
-        ("Diagnóstico", "clipboard", "diagnostico"),
-        ("Tareas", "checklist", "tareas"),
-        ("Notificaciones", "bell", "notificaciones"),
-        ("Perfil", "user", "perfil"),
+        ("Mis emprendimientos", [
+            ("Emprendimientos asignados", "maleta", "emprendimientos"),
+            ("Diagnóstico", "clipboard", "diagnostico"),
+            ("Tareas", "checklist", "tareas"),
+        ]),
+        ("Acompañamiento y actividades", [
+            ("Asesorías", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+        ]),
     ],
     "administrador": [
         ("Inicio", "grid", "dashboard"),
@@ -149,15 +151,29 @@ MIGAS = {
     "docente": {
         "inicio": "dashboard.html",
         "mis asesorías": "asesorias.html",
+        "asesorías": "asesorias.html",
+        "detalle de asesoría": "asesoria-detalle.html",
         "registrar asesoría": "asesoria-form.html",
+        "generar asesoría": "asesoria-form.html",
         "emprendimientos asignados": "emprendimientos.html",
         "sabor y sabe": "emprendimiento-expediente.html",
-        "seguimiento": "seguimiento.html",
-        "tablero": "seguimiento-dashboard.html",
-        "registrar avance": "seguimiento-notas.html",
+        "detalle del avance": "avance-detalle.html",
+        "registrar avance": "avance-form.html",
+        "editar avance": "avance-form.html",
         "diagnóstico": "diagnostico.html",
+        "revisión": "diagnostico-revision.html",
         "tareas": "tareas.html",
+        "detalle de tarea": "tarea-detalle.html",
+        "devolver tarea": "tarea-devolver.html",
+        "asignar tarea": "tarea-form.html",
+        "eventos": "eventos.html",
+        "startup minuto de dios": "evento-detalle-startup.html",
+        "capacitación en modelado de negocios": "evento-detalle-capacitacion.html",
+        "asesoría grupal de empleabilidad": "evento-detalle-asesoria-grupal.html",
+        "showroom de emprendimientos": "evento-detalle-showroom.html",
         "mi perfil": "perfil.html",
+        "configuración": "configuracion.html",
+        "cambiar contraseña": "contrasena.html",
         "notificaciones": "notificaciones.html",
     },
     "administrador": {
@@ -642,6 +658,72 @@ def steps(items, actual=0):
         if i < len(items) - 1:
             h += '<div class="step-line"></div>'
     return h + "</div>"
+
+
+def calendario(mes, anio, hoy=12, marcados=(21, 26, 2)):
+    """Calendario mensual del kit (rejilla Lu..Do) con marcas en dias de evento.
+
+    Misma salida que el calendario del rol Estudiante (celdas `.cal` y un punto
+    en los dias con evento). `mes` es el nombre en espanol."""
+    import calendar
+    MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5,
+             "junio": 6, "julio": 7, "agosto": 8, "septiembre": 9,
+             "setiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
+    m = MESES.get(str(mes).lower(), 11)
+    dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"]
+    primer_dia, n_dias = calendar.monthrange(anio, m)
+    h = ('<div class="cal cal-cab">'
+         + "".join("<div>%s</div>" % d for d in dias) + "</div>")
+    h += '<div class="cal">'
+    for _ in range(primer_dia):
+        h += '<div class="cal-vacio"></div>'
+    for d in range(1, n_dias + 1):
+        h += '<div class="cal-celda%s">%d' % (" hoy" if d == hoy else "", d)
+        if d in marcados:
+            h += '<span class="cal-punto"></span>'
+        h += "</div>"
+    return h + "</div>"
+
+
+def calendario_interactivo(mes, anio, dias, hoy=12, vacio=""):
+    """Calendario navegable: al elegir un dia cambia el panel de compromisos.
+
+    `dias` es {numero_de_dia: html}. Cada dia se pinta como un <button
+    data-dia="N"> con su etiqueta legible; los paneles llevan `data-dia-panel` y
+    solo el dia `hoy` arranca visible. El contenedor expone `data-cal-doc` y
+    `data-hoy` para que el JS del rol Docente lo controle. Un panel
+    `data-dia-panel="sin"` cubre los dias sin compromisos."""
+    import calendar
+    MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5,
+             "junio": 6, "julio": 7, "agosto": 8, "septiembre": 9,
+             "setiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
+    m = MESES.get(str(mes).lower(), 11)
+    abrev = str(mes)[:3]
+    cab_dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"]
+    primer_dia, n_dias = calendar.monthrange(anio, m)
+    h = ('<div class="cal-envoltura" data-cal-doc data-hoy="%d">' % hoy)
+    h += ('<div class="cal cal-cab">'
+          + "".join("<div>%s</div>" % d for d in cab_dias) + "</div>")
+    h += '<div class="cal">'
+    for _ in range(primer_dia):
+        h += '<div class="cal-vacio"></div>'
+    for d in range(1, n_dias + 1):
+        et = "%d %s %d" % (d, abrev, anio)
+        cls = "cal-celda cal-btn" + (" hoy activo" if d == hoy else "")
+        punto = '<span class="cal-punto"></span>' if d in dias else ""
+        h += ('<button type="button" class="%s" data-dia="%d" data-etiqueta="%s" '
+              'aria-pressed="%s" aria-label="Ver compromisos del %s">%d%s</button>'
+              % (cls, d, et, "true" if d == hoy else "false", et, d, punto))
+    h += "</div>"
+    h += ('<p class="cal-resumen">Compromisos del <b data-dia-titulo>%d %s %d</b></p>'
+          % (hoy, abrev, anio))
+    h += '<div data-dia-paneles>'
+    for d in sorted(dias):
+        h += ('<div data-dia-panel="%d"%s>%s</div>'
+              % (d, "" if d == hoy else " hidden", dias[d]))
+    h += '<div data-dia-panel="sin"%s>%s</div>' % (
+        " hidden" if hoy in dias else "", vacio)
+    return h + "</div></div>"
 
 
 def tabs(items, activo=0):

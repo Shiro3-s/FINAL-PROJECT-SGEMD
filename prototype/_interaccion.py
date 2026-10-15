@@ -10,9 +10,11 @@ comprueba que:
   - los estilos de los componentes que crea el JS existan en la pagina;
   - el estado quede en localStorage bajo la clave de la propia pantalla.
 
-Un boton con texto visible siempre cae en el `default` del manejador global, que
-confirma la accion con un toast, asi que basta con que tenga texto o un
-data-accion para no ser inerte.
+Un boton con texto visible cae en el `default` del manejador global, que confirma
+la accion con un toast, asi que basta con que tenga texto o un data-accion para no
+ser inerte. Como las pantallas ya no dejan botones "pelados" (todos tienen
+data-accion o un comportamiento propio: acordeon, pestanas, chip, paginacion), el
+toast del `default` se prueba con un boton temporal creado al vuelo.
 """
 import asyncio
 import glob
@@ -83,14 +85,19 @@ JS_PRUEBA_ACCION = r"""async () => {
 
   const conAccion = sel => document.querySelector(sel);
 
-  // Toast: cualquier boton con texto visible cae en el default del manejador.
-  const btn = [...document.querySelectorAll('button')]
-      .find(b => (b.textContent || '').trim() && !b.dataset.accion && !b.matches('.burger'));
-  if (btn) {
-    btn.click();
-    await esperar(120);
-    salida.toast = document.querySelectorAll('.toast-pila .toast').length;
-  }
+  // Toast: un boton "pelado" (texto visible, sin data-accion ni comportamiento
+  // propio) cae en el default del manejador global, que confirma con un toast.
+  // Las pantallas ya no dejan botones inertes, asi que tomar el primero del DOM
+  // mediria el acordeon del menu o la paginacion, no el toast; se inyecta uno
+  // temporal para probar el default de forma determinista.
+  const sonda = document.createElement('button');
+  sonda.type = 'button';
+  sonda.textContent = 'Probar aviso';
+  document.body.appendChild(sonda);
+  sonda.click();
+  await esperar(120);
+  salida.toast = document.querySelectorAll('.toast-pila .toast').length;
+  sonda.remove();
 
   // Drawer de notificaciones.
   const bell = document.querySelector('[data-accion="notificaciones"]');

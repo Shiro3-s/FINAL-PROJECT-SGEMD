@@ -1347,11 +1347,12 @@ guardar(estado);
       if (!m) {
         m = document.createElement("div");
         m.className = "who-menu";
-        /* El estudiante tiene una vista de configuración propia; en docente y
+        /* Estudiante y docente tienen una vista de configuración propia; en
            administrador el menú conserva "Preferencias" (sin vista). */
-        var esEstudiante = location.pathname.split("/").slice(-2, -1)[0] === "estudiante";
+        var carpeta = location.pathname.split("/").slice(-2, -1)[0];
+        var conConfiguracion = carpeta === "estudiante" || carpeta === "docente";
         m.innerHTML = '<button data-accion="perfil">Mi perfil</button>' +
-          (esEstudiante
+          (conConfiguracion
             ? '<button data-accion="configuracion">Configuración</button>'
             : '<button data-accion="preferencias">Preferencias</button>') +
           '<button data-accion="cerrar-sesion">Cerrar sesión</button>';

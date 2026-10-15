@@ -57,18 +57,28 @@ def barras(titulo, sub, etiquetas, valores, maximo=None, unidad="", alto=180, co
     return _wrap("".join(s), titulo, sub)
 
 
-def barras_h(titulo, sub, etiquetas, valores, maximo=None, unidad="", color=AZUL):
-    """Barras horizontales: ideal para rankings y estados por estudiante."""
+def barras_h(titulo, sub, etiquetas, valores, maximo=None, unidad="", color=AZUL,
+             ancho=520, pad_l=150, pad_r=54, alto_fila=34, responsive=False):
+    """Barras horizontales: ideal para rankings y estados por estudiante.
+
+    Los parametros `ancho`, `pad_l`, `pad_r`, `alto_fila` y `responsive` tienen
+    por defecto los valores historicos, de modo que la salida no cambia para
+    quien no los pasa. Con `responsive=True` el SVG llena el ancho de su tarjeta
+    (`height:auto`) en lugar de quedarse fijado a su altura natural."""
     mx = maximo or (max(valores) * 1.2 or 1)
     filas = len(valores)
-    alto = filas * 34 + 8
-    W = 520
-    s = ['<svg viewBox="0 0 %d %d" width="100%%" height="%d" role="img" aria-label="%s" '
-         'style="display:block">' % (W, alto, alto, _esc(titulo or "Gráfico"))]
-    pad_l, pad_r = 150, 54
+    alto = filas * alto_fila + 8
+    W = ancho
+    if responsive:
+        s = ['<svg viewBox="0 0 %d %d" role="img" aria-label="%s" '
+             'style="display:block;width:100%%;height:auto">'
+             % (W, alto, _esc(titulo or "Gráfico"))]
+    else:
+        s = ['<svg viewBox="0 0 %d %d" width="100%%" height="%d" role="img" aria-label="%s" '
+             'style="display:block">' % (W, alto, alto, _esc(titulo or "Gráfico"))]
     pw = W - pad_l - pad_r
     for i, (et, v) in enumerate(zip(etiquetas, valores)):
-        y = i * 34 + 6
+        y = i * alto_fila + 6
         s.append('<text x="%d" y="%d" font-size="11.5" fill="%s" text-anchor="end" '
                  'font-family="Inter,sans-serif">%s</text>' % (pad_l - 10, y + 16, PROF, _esc(et)))
         s.append('<rect x="%d" y="%d" width="%.1f" height="18" rx="3" fill="rgba(0,74,147,.15)"/>'
