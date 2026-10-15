@@ -98,7 +98,8 @@ JS = r"""
       var el = document.createElement("button");
       el.className = b.clase || "btn btn-secundario";
       el.textContent = b.txt;
-      el.addEventListener("click", function () {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
         if (b.alClic) b.alClic(velo);
         if (b.cerrar !== false) cerrarModal();
       });
@@ -106,7 +107,10 @@ JS = r"""
     });
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    $(".modal-x", velo).addEventListener("click", cerrarModal);
+    $(".modal-x", velo).addEventListener("click", function (e) {
+      e.stopPropagation();
+      cerrarModal();
+    });
     velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
     var foco = $(".modal input, .modal select, .modal textarea, .modal-foot button", velo);
     if (foco) foco.focus();
@@ -167,6 +171,49 @@ JS = r"""
       { txt: "Cancelar", clase: "btn btn-secundario" },
       { txt: "Confirmar", clase: "btn btn-peligro", alClic: alConfirmar }
     ]);
+  }
+
+  /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
+     de solicitudes y por la revision de emprendimientos. */
+  function rechazarConMotivo(titulo, aviso, msgOk, alRechazar) {
+    abrirModal(titulo,
+      '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
+      '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
+      '<p class="modal-aviso">' + esc(aviso) + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () {
+            toast(msgOk, "ok");
+            if (alRechazar) alRechazar();
+          } }
+      ]);
+  }
+
+  /* Revision de emprendimiento: lee los datos de la fila (dataset) y ofrece
+     aprobar o rechazar. Los botones abren un segundo modal, por eso llevan
+     cerrar:false (abrirModal ya reemplaza el modal abierto). */
+  function revisarEmprendimiento(boton) {
+    var d = boton.dataset;
+    abrirModal("Revisar emprendimiento",
+      '<p class="confirm-texto"><b>Emprendimiento:</b> ' + esc(d.emp || "") + "<br>" +
+      "<b>Código:</b> " + esc(d.cod || "") + "<br>" +
+      "<b>Estudiante:</b> " + esc(d.estu || "") + "<br>" +
+      "<b>Sector:</b> " + esc(d.sector || "") + "<br>" +
+      "<b>Tipo:</b> " + esc(d.tipo || "") + "<br>" +
+      "<b>Etapa:</b> " + esc(d.etapa || "") + "<br>" +
+      "<b>Docente:</b> " + esc(d.docente || "") + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", cerrar: false, alClic: function () {
+            rechazarConMotivo("Rechazar emprendimiento",
+              "Se notificará al estudiante con este motivo.", "Emprendimiento rechazado");
+          } },
+        { txt: "Aprobar", clase: "btn btn-primario", cerrar: false, alClic: function () {
+            confirmar("Aprobar emprendimiento",
+              "El emprendimiento " + (d.emp || "") + " pasará a estado Aprobado y quedará listo para asignar docente.",
+              function () { toast("Emprendimiento aprobado", "ok"); });
+          } }
+      ]);
   }
 
   /* --- barra lateral ---------------------------------------------------- */
@@ -263,7 +310,9 @@ JS = r"""
   function aplicarFiltros() {
     var zona = $("[data-tabla-zona]") || document;
     var tabla = $("table.tabla", zona);
-    var selects = $$("select", zona).filter(function (s) { return s.dataset.filtro !== "off"; });
+    var selects = $$("select.filtro, select[data-filtro]", zona).filter(function (s) {
+      return s.dataset.filtro !== "off";
+    });
     var chips = $$(".chip.activo", zona).map(function (c) { return c.dataset.chip; });
     var input = $(".buscador input", zona);
     var q = ((input && input.value) || "").trim().toLowerCase();
@@ -294,13 +343,39 @@ JS = r"""
     if (r) r.textContent = n + (n === 1 ? " resultado" : " resultados");
     guardar({ filtros: n });
   }
-  $$("[data-filtro], .chip").forEach(function (c) {
+  $$("[data-filtro]:not([data-filtro='off']), .chip").forEach(function (c) {
     c.addEventListener("click", function () {
       c.classList.toggle("activo");
       aplicarFiltros();
     });
   });
-  $$("select[data-filtro]").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+  $$("select[data-filtro]:not([data-filtro='off'])").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+
+  /* --- estado de cuenta (Activo/Limitado/Inactivo) ----------------------- */
+  $$("select.sel-estado").forEach(function (s) {
+    var actual = s.value;
+    s.addEventListener("change", function () {
+      var nuevo = s.value, nombre = s.dataset.nombre || "la cuenta";
+      s.value = actual;
+      var aviso = nuevo === "Inactivo"
+        ? "La cuenta perderá el acceso hasta que la reactives."
+        : (nuevo === "Limitado"
+            ? "La cuenta conserva su registro pero con acceso restringido."
+            : "La cuenta recuperará el acceso completo.");
+      abrirModal("Cambiar estado de la cuenta",
+        '<p class="confirm-texto">¿Cambiar el acceso de <b>' + esc(nombre) +
+        '</b> a <b>' + esc(nuevo) + '</b>?</p>' +
+        '<p class="modal-aviso">' + aviso + '</p>',
+        [
+          { txt: "Cancelar", clase: "btn btn-secundario" },
+          { txt: "Confirmar", clase: "btn btn-primario", alClic: function () {
+              actual = nuevo;
+              s.value = nuevo;
+              toast("Estado actualizado a " + nuevo, "ok");
+          } }
+        ]);
+    });
+  });
 
   /* --- seleccion de filas ------------------------------------------------ */
   $$("table.tabla").forEach(function (t) {
@@ -380,6 +455,61 @@ JS = r"""
       ]);
   }
 
+  /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
+     para fusionar en la pantalla de gestion los formularios de edicion de
+     docente/estudiante, que antes eran paginas aparte. */
+  function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
+    var plantilla = document.getElementById(idForm);
+    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, plantilla.innerHTML, [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
+        toast(mensaje || "Cambios guardados", "ok");
+      } }
+    ]);
+  }
+
+  /* Nueva/editar asesoria: reusa el formulario #form-asesoria y, al editar,
+     prefilla los campos con los data-* de la fila. */
+  function abrirFormAsesoria(boton) {
+    var d = boton ? boton.dataset : null;
+    var editar = !!(d && d.cod);
+    abrirFormulario(editar ? "Editar asesoría" : "Nueva asesoría",
+      "form-asesoria", boton,
+      editar ? "Guardar cambios" : "Crear asesoría",
+      editar ? "Cambios guardados en la asesoría" : "Asesoría creada");
+    if (editar && d) {
+      var m = $(".modal");
+      if (!m) return;
+      [["estudiante", d.estu], ["docente", d.doc], ["fecha", d.fecha],
+       ["hora", d.hora], ["tema", d.tema], ["modalidad", d.mod],
+       ["estado", d.estado]].forEach(function (p) {
+        var el = m.querySelector("[name='" + p[0] + "']");
+        if (el && p[1]) el.value = p[1];
+      });
+    }
+  }
+
+  /* A07: edicion de emprendimiento desde el registro maestro. Reusa el
+     formulario #form-emprendimiento y prefilla con los data-* de la fila. */
+  function abrirFormEmprendimiento(boton) {
+    var d = boton ? boton.dataset : null;
+    if (!d || !d.emp) return;
+    abrirFormulario("Editar emprendimiento", "form-emprendimiento", boton,
+      "Guardar cambios", "Cambios guardados en el emprendimiento");
+    var m = $(".modal");
+    if (!m) return;
+    /* El campo "Código" se pinta con bloqueo (sin name): se setea directo. */
+    var cod = m.querySelector("input[disabled]");
+    if (cod && d.cod) cod.value = d.cod;
+    [["nombre", d.emp], ["estudiante", d.estu],
+     ["sector", d.sector], ["tipo", d.tipo], ["etapa", d.etapa],
+     ["avance", d.avance], ["docente", d.doc]].forEach(function (p) {
+      var el = m.querySelector("[name='" + p[0] + "']");
+      if (el && p[1]) el.value = p[1];
+    });
+  }
+
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
   /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
      ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
@@ -442,6 +572,70 @@ JS = r"""
     return h;
   }
 
+  /* --- kanban (A03) -------------------------------------------------------- */
+  /* Mueve una tarjeta entre columnas del kanban de eventos, ajusta su pie
+     (badge + acciones) y actualiza los contadores y las notas de columna vacia. */
+  function kanbanColumnas(titulo) {
+    var col = null;
+    $$(".kan-col").forEach(function (c) {
+      var t = c.querySelector(".kan-titulo");
+      if (t && t.textContent === titulo) col = c;
+    });
+    return col;
+  }
+  function kanbanContar() {
+    $$(".kan-col").forEach(function (c) {
+      var n = c.querySelector(".kan-n");
+      if (n) n.textContent = String(c.querySelectorAll(".kan-card").length);
+    });
+  }
+  function kanbanMover(card, tituloDestino, badgeHTML, pieHTML) {
+    var pie = card.querySelector(".kan-foot");
+    if (pie) pie.innerHTML = (badgeHTML || "") + (pieHTML || "");
+    var origen = card.closest(".kan-col");
+    var destino = kanbanColumnas(tituloDestino);
+    if (destino) {
+      var v = destino.querySelector(".kan-empty");
+      if (v) destino.insertBefore(card, v);
+      else destino.appendChild(card);
+    }
+    if (origen && !origen.querySelector(".kan-card") &&
+        !origen.querySelector(".kan-empty")) {
+      var e = document.createElement("div");
+      e.className = "kan-empty";
+      e.textContent = "Sin pendientes";
+      origen.appendChild(e);
+    }
+    kanbanContar();
+  }
+  function editarEventoLink() {
+    return '<a class="btn btn-sm btn-secundario" href="evento-form.html">Editar</a>';
+  }
+  function botonAprobarEvento(b) {
+    var d = b.dataset;
+    var f = {
+      titulo: "Detalle del evento",
+      filas: [
+        ["Evento", esc(d.titulo || "")],
+        ["Fecha y hora", esc(d.fecha || "")],
+        ["Lugar", esc(d.lugar || "")],
+        ["Confirmados", esc((d.confirmados || "") + " confirmaciones")],
+        ["Dirigido a", esc(d.sector || "")],
+      ],
+    };
+    var nota = "Se publicará y notificará a los estudiantes del sector correspondiente.";
+    abrirModal("Aprobar evento", htmlFicha(f, nota), [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Publicar y notificar", clase: "btn btn-primario", alClic: function () {
+          var card = b.closest(".kan-card");
+          kanbanMover(card, "Publicado",
+            '<span class="badge b-azul">' + icono(ICO.check, 12) + " Publicado</span>",
+            editarEventoLink());
+          toast("Evento publicado y notificado a los estudiantes", "ok");
+        } }
+    ]);
+  }
+
   /* --- descargas reales (item 3) ---------------------------------------- */
   function descargarArchivo(nombre, contenido, mime) {
     try {
@@ -470,6 +664,29 @@ JS = r"""
       if (celdas.length) filas.push(celdas.join(";"));
     });
     return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* A27: pantallas sin tabla (metricas, tableros) exportan un resumen de los
+     indicadores mostrados en lugar de no exportar nada. */
+  function csvDeMetricas() {
+    var tiles = $$(".metricas .metrica, .grid.g-4 > .metrica, .metrica");
+    var filas = [];
+    tiles.forEach(function (t) {
+      var lbl = $(".metrica-lbl", t), val = $(".metrica-val", t);
+      if (lbl && val) {
+        filas.push('"' + lbl.textContent.trim().replace(/"/g, '""') + '";' +
+          '"' + val.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"');
+      }
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* F1 (vista #10): plantilla de exportacion de reportes. Se descarga con la
+     misma cabecera que el reporte maestro para cargar la informacion luego. */
+  function csvPlantillaReporte() {
+    var filas = [
+      '"Emprendimiento";"Docente";"Estudiante";"Sector";"Etapa";"% de avance";"Horas trabajadas";"Nota promedio"',
+      '"";"";"";"";"";"";"";""',
+    ];
+    return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
     var t = $("main table.tabla") || $("table.tabla");
@@ -614,9 +831,104 @@ JS = r"""
         break;
       }
 
-      case "editar":
       case "editar-docente":
+        e.preventDefault();
+        abrirFormulario("Editar docente", "form-docente", b);
+        break;
+
       case "editar-estudiante":
+        e.preventDefault();
+        abrirFormulario("Editar estudiante", "form-estudiante", b);
+        break;
+
+      case "nuevo-docente":
+        e.preventDefault();
+        abrirFormulario("Nuevo docente", "form-nuevo-docente", b,
+          "Crear docente", "Docente creado. Se enviará el correo de activación.");
+        break;
+
+      case "nuevo-estudiante":
+        e.preventDefault();
+        abrirFormulario("Nuevo estudiante", "form-nuevo-estudiante", b,
+          "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
+        break;
+
+      case "solicitud-aprobar":
+        e.preventDefault();
+        confirmar("Aprobar solicitud",
+          "Se aplicará el cambio y se notificará al solicitante. ¿Confirmas la aprobación?",
+          function () { toast("Solicitud aprobada", "ok"); });
+        break;
+
+      case "solicitud-rechazar":
+        e.preventDefault();
+        rechazarConMotivo("Rechazar solicitud",
+          "El solicitante recibirá este motivo en su notificación.", "Solicitud rechazada");
+        break;
+
+      case "revisar-emprendimiento":
+        e.preventDefault();
+        revisarEmprendimiento(b);
+        break;
+
+      case "nueva-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-emprendimiento":
+        /* A07: abre el formulario real de edicion del emprendimiento. */
+        e.preventDefault();
+        abrirFormEmprendimiento(b);
+        break;
+
+      case "ver-instrumento": {
+        /* A16: desplega el instrumento del diagnostico (solo lectura). */
+        e.preventDefault();
+        var instr = document.getElementById("contenido-instrumento");
+        if (!instr) { toast("Instrumento no disponible", "error"); break; }
+        abrirModal("Instrumento del diagnóstico", instr.innerHTML,
+          [{ txt: "Cerrar", clase: "btn btn-primario" }]);
+        break;
+      }
+
+      case "cancelar-asesoria": {
+        e.preventDefault();
+        var dd = b.dataset;
+        confirmar("Cancelar asesoría",
+          "Se cancelará la asesoría de " + (dd.estu || "se") +
+          " del " + (dd.fecha || "esa fecha") +
+          (dd.hora ? " a las " + dd.hora : "") + ". ¿Confirmas?",
+          function () { toast("Asesoría cancelada", "ok"); });
+        break;
+      }
+
+      case "aprobar-evento": {
+        e.preventDefault();
+        botonAprobarEvento(b);
+        break;
+      }
+
+      case "rechazar-evento": {
+        e.preventDefault();
+        var cardEv = b.closest(".kan-card");
+        rechazarConMotivo("Rechazar evento",
+          "El evento volverá a borrador y su autor será notificado.",
+          "Evento rechazado",
+          function () {
+            kanbanMover(cardEv, "Borrador",
+              '<span class="badge b-neutra">' + icono(ICO.alerta, 12) + " Rechazado</span>",
+              editarEventoLink());
+          });
+        break;
+      }
+
+      case "editar":
       case "registrar-avance":
       case "asignar":
       case "editar-sensores":
@@ -673,7 +985,9 @@ JS = r"""
 
       case "exportar":
       case "exportar-reporte": {
-        var csv = csvDeTabla();
+        /* A27: exporta CSV de la tabla de la pantalla y, si no hay tabla
+           (paginas de metricas/tablero), un resumen de las metricas. */
+        var csv = csvDeTabla() || csvDeMetricas();
         e.preventDefault();
         if (csv) {
           descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
@@ -739,12 +1053,14 @@ JS = r"""
         break;
 
       case "enviar-diagnostico":
-        /* DG4: persiste el envio del cuestionario completo. */
+        /* DG4: persiste el envio del cuestionario completo. Al terminar se
+           vuelve a la pagina de resultados (E001: re-responder y regresar). */
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
         b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
+        setTimeout(function () { location.href = "diagnostico-resultados.html"; }, 750);
         break;
 
       case "guardar-borrador":
@@ -795,7 +1111,8 @@ JS = r"""
       case "guardar-perfil":
         /* PE1: persiste los datos personales del perfil (localStorage). */
         e.preventDefault();
-        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        var activo = document.querySelector(".campos-perfil") || b.closest(".card") || document;
+        guardar({ perfil: serializarCampos(activo) });
         toast("Datos personales guardados", "ok");
         break;
 
@@ -928,7 +1245,7 @@ JS = r"""
 
       case "cerrar-sesion":
         e.preventDefault();
-        cerrarSesion();
+        confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
         break;
 
       case "marcar-todas-como-leidas":
@@ -942,9 +1259,57 @@ JS = r"""
             porLeer++;
           }
         });
+        $$(".aviso").forEach(function (aviso) {
+          var leer = $('[data-accion="aprobar"]', aviso);
+          if (leer && !leer.classList.contains("hecho")) {
+            leer.classList.add("hecho");
+            leer.setAttribute("aria-pressed", "true");
+            porLeer++;
+          }
+        });
         if (typeof notifRefrescar === "function") notifRefrescar();
         if (typeof notifPersistir === "function") notifPersistir();
         toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
+        break;
+
+        /* F1 (vista #10): los botones de las pantallas de flujo sin accion
+         asignada ahora ejecutan su transicion correspondiente. */
+      case "confirmar-asignacion":
+        e.preventDefault();
+        confirmar("Confirmar asignación",
+          "Se confirmará la asignación de Carlos Mendoza como docente de Aromas del Sur (2 h por semana).",
+          function () {
+            toast("Asignación confirmada", "ok");
+            setTimeout(function () { window.location.href = "asignaciones.html"; }, 750);
+          });
+        break;
+
+      case "publicar-evento":
+        e.preventDefault();
+        confirmar("Publicar evento",
+          "El evento quedará visible para docentes y estudiantes. ¿Publicar?",
+          function () {
+            toast("Evento publicado", "ok");
+            setTimeout(function () { window.location.href = "eventos.html"; }, 750);
+          });
+        break;
+
+      case "generar-reporte":
+        e.preventDefault();
+        confirmar("Generar reporte",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          function () { toast("Reporte en cola de generación", "info"); });
+        break;
+
+      case "descargar-plantilla":
+        e.preventDefault();
+        descargarArchivo("plantilla-reporte.csv", csvPlantillaReporte(), "text/csv;charset=utf-8");
+        toast("Plantilla descargada", "ok");
+        break;
+
+      case "asignar-tarea":
+        e.preventDefault();
+        abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
         break;
 
       default:
@@ -1242,9 +1607,12 @@ JS = r"""
   });
 
   /* --- arrastrar y soltar (kanban) --------------------------------------- */
+  /* Solo en Admin y Estudiante: la vista de Docente conserva su tablero
+     inerte a propósito (no se toca ese rol). */
+  if (location.pathname.indexOf("/docente/") === -1) {
   $$(".kanban, [data-kanban]").forEach(function (tablero) {
     var arrastre = null;
-    $$(".k-col, .kanban-col", tablero).forEach(function (col) {
+    $$(".kan-col", tablero).forEach(function (col) {
       col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("sobre"); });
       col.addEventListener("dragleave", function () { col.classList.remove("sobre"); });
       col.addEventListener("drop", function (e) {
@@ -1253,21 +1621,22 @@ JS = r"""
         if (!arrastre) return;
         col.appendChild(arrastre);
         var estado = { tablero: tablero.dataset.kanban || "kanban", tareas: [] };
-        $$(".kanban-col", tablero).forEach(function (c) {
-          $$(".k-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
+        $$(".kan-col", tablero).forEach(function (c) {
+          $$(".kan-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
         });
 guardar(estado);
         toast("Tarea movida a " + nombreCol(col), "ok");
       });
     });
-    $$(".k-card", tablero).forEach(function (k) {
+    $$(".kan-card", tablero).forEach(function (k) {
       k.setAttribute("draggable", "true");
       k.addEventListener("dragstart", function () { arrastre = k; k.classList.add("arrastrando"); });
       k.addEventListener("dragend", function () { k.classList.remove("arrastrando"); arrastre = null; });
     });
   });
+  }
   function nombreCol(col) {
-    var h = $(".k-col-t, .kanban-col-t, h3, .hint", col);
+    var h = $(".kan-titulo, h3, .hint", col);
     return (h && h.textContent.replace(/\s+/g, " ").trim()) || "la columna";
   }
 
@@ -1373,7 +1742,7 @@ guardar(estado);
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {
-              cerrarSesion();
+              confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");

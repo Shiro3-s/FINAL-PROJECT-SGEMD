@@ -1402,6 +1402,7 @@ def tareas():
                + _contador(len(filas)))
     cuerpo = callout("La tarea se considera <b>completada</b> cuando el estudiante "
                      "adjunta al menos una evidencia.", "bombilla")
+    cuerpo += '<div id="form-tarea" hidden>' + _cuerpo_tarea() + "</div>"
     cuerpo += _sep()
     cuerpo += _zona(toolbar(filtros=filtros)
                     + _tabla_con_titulo("Tareas asignadas por revisar",
