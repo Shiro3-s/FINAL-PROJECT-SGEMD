@@ -142,7 +142,7 @@ MIGAS = {
         "inicio": "dashboard.html",
         "mi emprendimiento": "emprendimientos.html",
         "sabor y sabe": "emprendimiento-detalle.html",
-        "mochilas origen": "emprendimiento-detalle.html",
+        "mochilas origen": "emprendimiento-detalle-mochilas.html",
         "diagnóstico": "diagnostico.html",
         "resultado": "diagnostico-resultados.html",
         "plan de trabajo": "plan-trabajo.html",
@@ -632,9 +632,10 @@ def _fid(prefijo="f"):
 _CONTADOR = 0
 
 
-def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False, name=""):
+def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False,
+          name="", attrs=""):
     i = _fid("f")
-    h = '<div class="campo"><label for="%s">%s%s</label>' % (
+    h = '<div class="campo"' + ((" " + attrs) if attrs else "") + '><label for="%s">%s%s</label>' % (
         i, label, '<span class="req">*</span>' if req else "")
     if bloqueo:
         h += ('<input id="%s" type="text" value="%s" disabled>'
@@ -655,12 +656,13 @@ def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", 
     return h
 
 
-def select(label, opciones, req=False, bloqueo="", valor=None, name=""):
+def select(label, opciones, req=False, bloqueo="", valor=None, name="", attrs=""):
     i = _fid("s")
-    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s%s>' % (
+    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s%s%s>' % (
         i, label, '<span class="req">*</span>' if req else "", i,
         " disabled" if bloqueo else "",
-        (' name="%s"' % name) if name else "")
+        (' name="%s"' % name) if name else "",
+        (" " + attrs) if attrs else "")
     for o in opciones:
         sel = " selected" if valor and o == valor else ""
         h += '<option%s>%s</option>' % (sel, o)
@@ -675,11 +677,13 @@ def callout(txt, icono="alerta"):
     return '<div class="callout">%s<div>%s</div></div>' % (ico(icono, 18), txt)
 
 
-def card(titulo, cuerpo, hint="", accion="", sin_pad=False):
+def card(titulo, cuerpo, hint="", accion="", sin_pad=False, id=""):
     return (
-        '<div class="card"><div class="card-head"><h3>%s</h3>%s<span class="hint">%s</span></div>'
+        '<div class="card"%s><div class="card-head"><h3>%s</h3>%s'
+        '<span class="hint">%s</span></div>'
         '<div class="card-body%s">%s</div></div>'
-        % (titulo, accion, hint, " sin-pad" if sin_pad else "", cuerpo)
+        % ((' id="%s"' % id) if id else "", titulo, accion, hint,
+           " sin-pad" if sin_pad else "", cuerpo)
     )
 
 

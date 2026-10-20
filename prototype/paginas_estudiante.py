@@ -97,6 +97,9 @@ def registrar(reg):
         ("emprendimientos.html", "07 Estudiante - Mi emprendimiento (lista)", emprendimientos),
         ("emprendimiento-detalle.html", "08 Estudiante - Detalle del emprendimiento",
          emprendimiento_detalle),
+        ("emprendimiento-detalle-mochilas.html",
+         "09 Estudiante - Detalle de Mochilas Origen",
+         emprendimiento_detalle_mochilas),
         ("emprendimiento-editar.html", "09 Estudiante - Editar emprendimiento", emprendimiento_editar),
         ("diagnostico.html", "10 Estudiante - Diagnóstico (cuestionario)", diagnostico),
         ("diagnostico-resultados.html", "11 Estudiante - Resultados del diagnóstico", diagnostico_resultados),
@@ -233,6 +236,22 @@ def dashboard():
 
 
 # --- 2. Estado de seguimiento ------------------------------------------------
+def _fase_avance(nombre, pct, color):
+    """Una fase como barra horizontal con su porcentaje al lado.
+
+    Sustituye la barra apilada del panel "Avance por fases": al compartir una
+    sola pista, la fase 1 al 100% tapaba a la fase 2 al 62% y el estudiante solo
+    veia la primera. Ahora cada fase tiene su pista y su valor.
+    """
+    return (
+        '<div class="fase-avance">'
+        '<div class="fase-avance-top"><span class="fase-avance-nombre">%s</span>'
+        '<b class="fase-avance-pct">%d%%</b></div>'
+        '<div class="barra"><span style="width:%d%%;background:%s"></span></div>'
+        "</div>" % (nombre, pct, pct, color)
+    )
+
+
 def _estado_emp(d):
     """Paneles internos de 'Estado de seguimiento' por emprendimiento."""
     return (
@@ -256,7 +275,7 @@ def _estado_emp(d):
         )
         + card(
             "Avance por fases",
-            progreso_fases(d["fases"]),
+            "".join(_fase_avance(nom, pct, col) for nom, pct, col in d["fases"]),
             hint="Las fases se habilitan en orden según el avance del docente asignado",
         )
         + "</div>"
@@ -390,7 +409,7 @@ def emprendimientos():
         '<b>Mochilas Origen</b>', "Moda y accesorios", "Textil",
         badge("FASE 1 · Ideación", "b-amarillo", "bombilla"),
         "03 sep 2024", "Sin asignar",
-        _acc(_a("eye", "Ver detalle", "emprendimiento-detalle.html"),
+        _acc(_a("eye", "Ver detalle", "emprendimiento-detalle-mochilas.html"),
              _b("download", "Descargar expediente")),
     ]]
     cuerpo = (
@@ -437,6 +456,252 @@ def emprendimientos():
 
 
 # --- 4. Detalle del emprendimiento ------------------------------------------
+# =============================================================================
+# 4b. Detalle de Mochilas Origen
+# =============================================================================
+# La pestana "Plan de trabajo" y la tarjeta "Tareas" se arman con las tareas
+# reales de TAREAS_EMP, de modo que el detalle, el plan y el tablero muestran
+# siempre lo mismo.
+MOCHILAS = dict(
+    nombre="Mochilas Origen",
+    tipo="Moda y accesorios",
+    sector="Textil",
+    etapa=("FASE 1 - Ideacion y priorizacion de ideas", "b-amarillo", "bombilla"),
+    creado="03 de septiembre de 2024",
+    cuenta=("Limitado", "b-amarillo", "lock"),
+    descripcion=(
+        "Mochilas Origen disena y confecciona mochilas y morrales en tela "
+        "reciclada, con acabados artesanales hechos por madres cabeza de familia "
+        "del barrio. Las ventas se hacen por encargo en redes sociales y en ferias "
+        "del campus."
+    ),
+    redes=[
+        ("Instagram", "@mochilasorigen.co"),
+        ("WhatsApp Business", "310 448 2277"),
+        ("Tienda propia", "aun no registrada"),
+    ],
+    docente=None,
+    avance_general=24,
+    avance_fase="FASE 1 - Ideacion",
+    hitos=[
+        "Diagnostico inicial entregado",
+        "Idea de negocio priorizada",
+    ],
+    diag_estado=("En progreso", "b-amarillo", "reloj"),
+    diag_secciones="2 de 5",
+    diag_fecha="18 de septiembre de 2024",
+    seg_filas=[
+        ("20 oct 2024", "Avance de fase"),
+        ("30 sep 2024", "Comentario"),
+    ],
+    seg_frecuencia=(["FASE 1 - Sep 2024", "FASE 1 - Oct 2024"], [1, 1]),
+    asesorias=[
+        ("20 nov 2024, 15:00", "Revision de costos de produccion", "Sin docente",
+         ("Pendiente de confirmar", "b-amarillo", "reloj")),
+    ],
+)
+
+
+def _plan_panel_emp(d):
+    """Pestana 'Plan de trabajo' del detalle: avance por fase y tareas reales."""
+    nombre = d["nombre"]
+    avance = AVANCE_FASES[nombre]
+    filas_fase = []
+    for (cod, desc), p in zip(FASES_META, avance):
+        est = ("Completada", "b-azul", "check") if p == 100 else (
+            ("En curso", "b-amarillo", "engranaje") if p > 0 else
+            ("Pendiente", "b-neutra", "reloj"))
+        filas_fase.append(("%s - %s" % (cod, desc), badge(est[0], est[1], est[2])))
+
+    tareas = [t for e in TAREAS_EMP if e[0] == nombre for t in e[2]]
+    filas_tar = [[t[0], badge(t[1], "b-azul" if t[1] == "Alta" else "b-neutra",
+                              "alerta" if t[1] == "Alta" else "reloj"),
+                  t[4], badge(t[2], ESTADO_BADGE[t[2]][0], ESTADO_BADGE[t[2]][1]),
+                  _a("eye", "Ver detalle", t[6])] for t in tareas]
+    activas = sum(1 for t in tareas if t[2] in ("Pendiente", "En curso"))
+
+    return (
+        callout("El plan de trabajo lo construye el docente que tienes asignado y tu solo "
+                "puedes consultar su avance y completar las tareas.", "escudo")
+        + '<div class="sep sep-16"></div>'
+        + card("Avance por fase", lista_def(filas_fase)
+               + '<div class="fila-acciones mt-14">'
+               + '<a class="btn btn-acento" href="plan-trabajo.html">'
+               + ico("layers", 16) + " Abrir plan de trabajo</a>"
+               + "</div>")
+        + card("Tareas del plan",
+               '<p class="suave">Tienes <b>%d tareas activas</b> de %d en total. Mira la '
+               "pestana <b>Tareas</b> para el detalle o el <b>plan de trabajo</b> para el "
+               "avance por fase.</p>" % (activas, len(tareas))
+               + tabla(["Tarea", "Prioridad", "Fecha limite", "Estado", "@ACC"], filas_tar))
+    )
+
+
+def _seguimiento_panel_emp(d):
+    """Pestana 'Seguimiento' del detalle (solo lectura)."""
+    filas = [[f, badge(est, "b-azul" if est == "Avance de fase" else "b-neutra",
+                       "trend" if est == "Avance de fase" else "chat"),
+              "Carlos Mendoza" if d["docente"] else "Sin docente asignado"]
+             for f, est in d["seg_filas"]]
+    etiquetas, valores = d["seg_frecuencia"]
+    return (
+        callout("El seguimiento es de <b>solo lectura</b>. Los registros los crea el docente "
+                "o el administrador.", "escudo")
+        + '<div class="sep sep-16"></div>'
+        + tabla(["Fecha", "Tipo de registro", "Registrado por"], filas)
+        + '<div class="sep sep-12"></div>'
+        + barras_h("Frecuencia de acompanamiento", "Registros por mes",
+                   etiquetas, valores, maximo=max(valores + [1]), unidad=" registros")
+        + '<div class="sep sep-12"></div>'
+        + '<a class="btn btn-secundario" href="seguimiento.html">'
+        + ico("eye", 16) + " Ver historial completo</a>"
+    )
+
+
+def _asesorias_panel_emp(d):
+    """Pestana 'Asesorias' del detalle."""
+    filas = [[f, m, doc, badge(e[0], e[1], e[2])] for f, m, doc, e in d["asesorias"]]
+    return (
+        callout("Puedes <b>solicitar</b> una asesoria y consultar las que ya tienes. La "
+                "asignacion del docente y la confirmacion del horario las hace el rol DOCENTE "
+                "o ADMINISTRADOR.", "escudo")
+        + '<div class="sep sep-16"></div>'
+        + tabla(["Fecha", "Motivo", "Docente", "Estado"], filas)
+        + '<div class="sep sep-12"></div>'
+        + '<div class="fila-acciones">'
+        + '<a class="btn btn-acento" href="solicitar-asesoria.html">'
+        + ico("chat", 16) + " Solicitar asesoria</a>"
+        + '<a class="btn btn-secundario" href="asesorias.html">'
+        + ico("eye", 16) + " Ver historial</a>"
+        + "</div>"
+    )
+
+
+def _detalle_emp(d):
+    """Detalle de un emprendimiento (misma plantilla para los dos del rol).
+
+    Antes solo existia la vista de "Sabor y Sabe" y el boton "Ver detalle" de
+    Mochilas Origen llevaba a ella: el estudiante veia otro emprendimiento.
+    Ahora cada uno pasa su propia ficha.
+    """
+    nombre, tipo, sector = d["nombre"], d["tipo"], d["sector"]
+    color_est, ico_est = d["etapa"][1], d["etapa"][2]
+    color_cta, ico_cta = d["cuenta"][1], d["cuenta"][2]
+
+    panel_resumen = (
+        '<div class="grid g-2-1">'
+        + '<div class="grid">'
+        + card("Datos basicos", lista_def([
+            ("Nombre", "<b>%s</b>" % nombre),
+            ("Tipo de emprendimiento", tipo),
+            ("Sector productivo", sector),
+            ("Etapa actual", badge(d["etapa"][0], color_est, ico_est)),
+            ("Fecha de creacion", d["creado"]),
+            ("Estado de la cuenta", badge(d["cuenta"][0], color_cta, ico_cta)),
+        ]))
+        + card("Descripcion", '<p class="suave">%s</p>' % d["descripcion"])
+        + card("Redes sociales", lista_def(d["redes"]))
+        + "</div>"
+        + '<div class="grid">'
+        + (card("Docente asignado",
+                '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+                '<span class="avatar" style="width:44px;height:44px;flex:0 0 44px;'
+                'font-size:14px">CM</span>'
+                '<div><div style="font-weight:600">Carlos Mendoza</div>'
+                '<div class="suave">Docente &middot; Areas de flipped classroom y '
+                "e-learning</div></div></div>"
+                '<a class="btn btn-secundario btn-sm" href="solicitar-asesoria.html" '
+                'style="width:100%">' + ico("chat", 15) + " Solicitar asesoria</a>")
+           if d["docente"] else
+           card("Docente asignado",
+                '<div class="estado-vacio-mini">'
+                + ico("user", 22)
+                + "<div><b>Aun no tienes docente asignado</b>"
+                '<div class="suave">El programa asigna un docente cuando el '
+                "emprendimiento queda aprobado. Hasta entonces el plan de trabajo no se "
+                "construye.</div></div></div>"
+                + badge("Sin docente asignado", "b-amarillo", "lock")))
+        + card("Acciones disponibles",
+               '<div class="fila-col">'
+               '<a class="btn btn-primario" href="emprendimiento-editar.html" '
+               'style="width:100%">' + ico("edit", 16) + " Editar datos basicos</a>"
+               '<a class="btn btn-secundario" href="plan-trabajo.html" style="width:100%">'
+               + ico("layers", 16) + " Ver plan de trabajo</a>"
+               '<a class="btn btn-secundario" href="tareas.html" style="width:100%">'
+               + ico("checklist", 16) + " Ver mis tareas</a>"
+               '<button class="btn btn-secundario btn-sm" data-accion="descargar" '
+               'data-doc="1" title="Solo aparece en el documento, no en el PDF" '
+               'style="display:none">Descargar expediente</button>'
+               "</div>"
+               '<div class="nota-foot">Solo puedes editar nombre, descripcion y redes '
+               "sociales. El tipo, el sector, la etapa y el acta los administra el rol "
+               "ADMINISTRADOR.</div>")
+        + "</div></div>"
+    )
+
+    panel_diagnostico = (
+        callout("El diagnostico inicial lo respondes una sola vez. Con tus respuestas el "
+                "docente construye tu plan de trabajo.", "doc")
+        + '<div class="sep sep-16"></div>'
+        + '<div class="grid g-2-1">'
+        + '<div class="grid">'
+        + card("Estado del diagnostico", lista_def([
+            ("Estado", badge(d["diag_estado"][0], d["diag_estado"][1], d["diag_estado"][2])),
+            ("Secciones completadas", d["diag_secciones"]),
+            ("Ultima actualizacion", d["diag_fecha"]),
+            ("Responsable", "Tu (estudiante)"),
+        ])
+            + '<div class="fila-acciones mt-14">'
+            '<a class="btn btn-acento" href="diagnostico.html">'
+            + ico("edit", 16) + " Responder diagnostico</a>"
+            '<a class="btn btn-secundario" href="diagnostico-resultados.html">'
+            + ico("doc", 16) + " Ver resultados</a></div>")
+        + card("Las 5 secciones", lista_def([
+            ("1. Perfil del emprendimiento", badge("Completada", "b-azul", "check")),
+            ("2. Problema o necesidad", badge("Completada", "b-azul", "check")),
+            ("3. Propuesta de valor", badge("Pendiente", "b-neutra", "reloj")),
+            ("4. Mercado objetivo", badge("Pendiente", "b-neutra", "reloj")),
+            ("5. Capacidad operativa y financiera", badge("Pendiente", "b-neutra", "reloj")),
+        ]))
+        + "</div>"
+        + '<div class="grid">'
+        + card("Para que sirve", '<p class="suave">Tus respuestas se convierten en la '
+               "caracterizacion y la valoracion del emprendimiento. Con eso el docente arma "
+               "el plan de trabajo y las tareas que veras en las otras pestanas.</p>")
+        + "</div></div>"
+    )
+
+    paneles = [
+        ("Resumen", "resumen", panel_resumen),
+        ("Diagnostico", "diagnostico", panel_diagnostico),
+        ("Plan de trabajo", "plan", _plan_panel_emp(d)),
+        ("Seguimiento", "seguimiento", _seguimiento_panel_emp(d)),
+        ("Tareas", "tareas", panel_tareas_emp(nombre)),
+        ("Asesorias", "asesorias", _asesorias_panel_emp(d)),
+    ]
+    cuerpo = (
+        tabs_paneles([(n, pid) for n, pid, _ in paneles])
+        + '<div class="sep sep-20"></div>'
+        + "".join(
+            '<div data-panel-nombre="%s"%s>%s</div>'
+            % (pid, "" if i == 0 else " hidden", cont)
+            for i, (_, pid, cont) in enumerate(paneles)
+        )
+    )
+    return shell(R, "emprendimientos-detalle", nombre, cuerpo,
+                 migas=["Inicio", "Mi emprendimiento", nombre],
+                 sub="Detalle de tu emprendimiento.",
+                 acciones='<a class="btn btn-secundario" href="emprendimientos.html">%s '
+                          "Volver</a>" % ico("izq", 16)
+                          + '<a class="btn btn-acento" href="emprendimiento-editar.html">'
+                          "%s Editar</a>" % ico("edit", 16))
+
+
+def emprendimiento_detalle_mochilas():
+    """Vista 09: detalle de Mochilas Origen."""
+    return _detalle_emp(MOCHILAS)
+
+
 def emprendimiento_detalle():
     # --- Panel: Resumen -----------------------------------------------------
     panel_resumen = (
@@ -560,26 +825,7 @@ def emprendimiento_detalle():
         + '<a class="btn btn-secundario" href="seguimiento.html">' + ico("eye", 16) + " Ver historial completo</a>"
     )
 
-    # --- Panel: Tareas ------------------------------------------------------
-    filas_tar = [
-        ["Levantar precios de la competencia", badge("Alta", "b-azul", "alerta"),
-         "12 nov 2024", badge("Pendiente", "b-amarillo", "reloj"),
-         _a("eye", "Ver detalle", "tarea-detalle.html")],
-        ["Subir evidencia fotográfica del punto de venta", badge("Media", "b-neutra", "reloj"),
-         "15 nov 2024", badge("En revisión", "b-azul", "reloj"),
-         _a("eye", "Ver detalle", "tarea-detalle-en-revision.html")],
-        ["Definir el margen por producto", badge("Alta", "b-azul", "alerta"),
-         "10 nov 2024", badge("Completada", "b-linea", "check"),
-         _a("eye", "Ver detalle", "tarea-detalle-completada-precio.html")],
-    ]
-    panel_tareas = (
-        callout("Estas son las tareas activas del plan. Completa las pendientes y sube la "
-                "evidencia para que el docente las revise.", "doc")
-        + '<div class="sep sep-16"></div>'
-        + tabla(["Tarea", "Prioridad", "Fecha límite", "Estado", "@ACC"], filas_tar)
-        + '<div class="sep sep-12"></div>'
-        + '<a class="btn btn-secundario" href="tareas.html">' + ico("layers", 16) + " Ver todas mis tareas</a>"
-    )
+    panel_tareas = panel_tareas_emp("Sabor y Sabe")
 
     # --- Panel: Asesorias ---------------------------------------------------
     filas_ase = [
@@ -874,6 +1120,30 @@ def diagnostico_resultados():
 
 
 # --- 8. Plan de trabajo ------------------------------------------------------
+def panel_tareas_emp(nombre):
+    """Pestana 'Tareas' del detalle de un emprendimiento.
+
+    Las tareas salen de TAREAS_EMP, la misma fuente que el plan de trabajo y el
+    tablero, asi que las tres pantallas nunca se contradicen.
+    """
+    tareas = [e[2] for e in TAREAS_EMP if e[0] == nombre][0]
+    filas = [[t[0], badge(t[1], "b-azul" if t[1] == "Alta" else "b-neutra",
+                          "alerta" if t[1] == "Alta" else "reloj"),
+              t[4], badge(t[2], ESTADO_BADGE[t[2]][0], ESTADO_BADGE[t[2]][1]),
+              _a("eye", "Ver detalle", t[6])] for t in tareas]
+    activas = sum(1 for t in tareas if t[2] in ("Pendiente", "En curso"))
+    return (
+        callout("Estas son las tareas activas del plan. Completa las pendientes y sube la "
+                "evidencia para que el docente las revise.", "doc")
+        + '<div class="sep sep-16"></div>'
+        + tabla(["Tarea", "Prioridad", "Fecha limite", "Estado", "@ACC"], filas)
+        + '<div class="sep sep-12"></div>'
+        + '<p class="suave"><b>%d tareas activas</b> de %d en total.</p>' % (activas, len(tareas))
+        + '<a class="btn btn-secundario" href="tareas.html">'
+        + ico("layers", 16) + " Ver todas mis tareas</a>"
+    )
+
+
 def _conteos_estado(tareas):
     """Cuántas tareas hay en cada estado (alimenta la gráfica del plan)."""
     return [sum(1 for t in tareas if t[2] == e) for e in ESTADOS_KANBAN]
@@ -916,9 +1186,8 @@ def _bloques_plan(nombre):
             'title="Ver las tareas de la fase">%s</a></h3>'
             '<span style="font-weight:700;font-size:13px;color:#051533">%d%%</span></div>'
             '<div class="card-body sin-pad"><div style="padding:6px 20px 14px">%s</div>'
-            '<div style="padding:0 20px 16px"><div class="barra"><span style="width:%d%%;'
-            'background:%s"></span></div></div></div></div>'
-            % (cab, "#051533" if cab == AMAR else "#ffffff", cod, desc, pct, filas, pct, cab)
+            "</div></div>"
+            % (cab, "#051533" if cab == AMAR else "#ffffff", cod, desc, pct, filas)
         )
     hechas = sum(1 for t in tareas if t[2] == "Completada")
     pct, fase = AVANCE_GENERAL[nombre]
@@ -955,7 +1224,7 @@ def plan_trabajo():
     return shell(R, "plan-trabajo", "Plan de trabajo", cuerpo,
                  migas=["Inicio", "Plan de trabajo"],
                  sub="Las cuatro fases del Startup Minuto de Dios y tu avance por emprendimiento.",
-                 acciones='<button class="btn btn-secundario" data-accion="descargar">%s Descargar plan</button>' % ico("download", 16))
+                 acciones='<button class="btn btn-secundario" data-accion="descargar-plan">%s Descargar plan</button>' % ico("download", 16))
 
 
 # --- 9. Seguimiento (historial) --------------------------------------------
@@ -1721,16 +1990,38 @@ def configuracion():
                  "Guardar cambios</button>" % ico("check", 16) + "</div>")
         + card("Datos académicos",
                '<div class="grid g-2" style="gap:0 16px">'
-               + select("Nivel académico", ["Pregrado", "Posgrado"], valor="Pregrado", req=True)
+               + select("Nivel académico", ["Pregrado", "Posgrado", "Egresado"],
+                        valor="Pregrado", req=True, attrs='data-acad-nivel="1"')
                + campo("Programa académico", valor="Ingeniería Industrial",
                        bloqueo="Solo ADMINISTRADOR puede modificarlo.")
                + "</div>"
-               + '<div class="grid g-2" style="gap:0 16px">'
+               + '<div class="grid g-2" style="gap:0 16px" data-acad-posgrado-campos hidden>'
+               + select("Tipo de posgrado", ["Especialización", "Maestría", "Doctorado"],
+                        valor="Especialización", attrs='data-acad-tipo="1"')
+               + '<div class="campo"><label>Duración del programa</label>'
+                 + '<div class="ayuda" data-acad-duracion="1">Duración: 2 semestres.</div>'
+                 + '<div class="ayuda">El campo <b>Semestre</b> cambia según el tipo de '
+                   "posgrado: Especialización 2, Maestría 3 a 4 y Doctorado 6 a 8.</div>"
+                 + "</div>"
+               + "</div>"
+               + '<div data-acad-semestre-campo="1">'
                + select("Semestre", ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto",
                                      "Sexto", "Séptimo", "Octavo", "Noveno", "Décimo"],
-                        valor="Quinto", req=True)
-               + select("Modalidad", ["Presencial", "Virtual"], valor="Presencial", req=True)
+                        valor="Quinto", req=True, attrs='data-acad-semestre="1"')
                + "</div>"
+               + '<div data-acad-egresado-campos="1" hidden>'
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Fecha de grado del pregrado", tipo="date", valor="2024-06-14",
+                       req=True, ayuda="Es la fecha del acta o del diploma con la que "
+                                       "obtuviste tu título de pregrado.")
+               + campo("Programa del que se graduó", valor="Ingeniería Industrial")
+               + "</div>"
+               + '<div class="grid g-2" style="gap:0 16px">'
+               + campo("Sede de graduación", valor="Sede Norte")
+               + campo("Número de acta o diploma", ph="Ej. ACTA-2024-01187")
+               + "</div></div>"
+               + select("Modalidad", ["Presencial", "Virtual", "Mixta"], valor="Presencial",
+                        req=True, attrs='data-acad-modalidad="1"')
                + '<div class="nota-foot">Estos datos determinan los eventos y las '
                  "convocatorias que te llegan.</div>")
         + card("Cambiar contraseña",

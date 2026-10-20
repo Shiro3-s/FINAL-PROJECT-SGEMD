@@ -600,6 +600,24 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
 .fase-link{color:inherit;text-decoration:none}
 .fase-link:hover{color:var(--azul-real);text-decoration:underline}
+
+/* --- Avance por fase del estudiante --------------------------------------- */
+/* Cada fase con su propia pista y su porcentaje: la barra apilada ocultaba las
+   fases posteriores cuando la primera estaba al 100%. */
+.fase-avance{margin-top:12px}
+.fase-avance:first-child{margin-top:0}
+.fase-avance-top{display:flex;align-items:baseline;gap:10px}
+.fase-avance-nombre{flex:1;font-size:13px;color:var(--tinta-2)}
+.fase-avance-pct{font-size:13px;color:var(--azul-noche);font-variant-numeric:tabular-nums}
+.fase-avance .barra{margin-top:6px}
+
+/* --- Tarjeta "sin docente asignado" -------------------------------------- */
+.estado-vacio-mini{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.estado-vacio-mini>svg{flex:0 0 22px;color:var(--azul-real);margin-top:2px}
+.estado-vacio-mini b{display:block;color:var(--tinta)}
+
+/* --- Ayuda bajo un select en formularios --------------------------------- */
+.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
 </style>
 </head>
 <body>
@@ -629,7 +647,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Estado de seguimiento</b></div><div class="page-head"><h1>Estado de seguimiento</h1><p class="sub">Aquí ves cuánto has avanzado y qué te falta por completar, por cada emprendimiento.</p><div class="acciones"><a class="btn btn-secundario" href="plan-trabajo.html">Plan de trabajo</a><a class="btn btn-acento" href="tareas.html">Ver mis tareas</a></div></div><div class="tabs"><button class="activo" data-panel="emp-sabor">Sabor y Sabe</button><button class="" data-panel="emp-mochilas">Mochilas Origen</button></div><div class="sep sep-20"></div><div data-panel-nombre="emp-sabor"><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Movimiento en el plan</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap"><div style="text-align:center"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="avance"><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="rgba(0,74,147,.15)" stroke-width="10"/><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="#004a93" stroke-width="10" stroke-linecap="round" stroke-dasharray="222.05" transform="rotate(-90 66.0 66.0)"/><text x="66.0" y="69.0" font-size="22" font-weight="700" fill="#051533" text-anchor="middle" font-family="Inter,sans-serif">62%</text><text x="66.0" y="84.0" font-size="10.5" fill="#162644" text-anchor="middle" font-family="Inter,sans-serif">avance</text></svg><div style="font-size:13px;color:#162644;margin-top:6px;text-align:center">FASE 2 · Ejecución</div></div><div style="flex:1;min-width:300px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Fase actual</div><div style="font-size:20px;font-weight:700;color:#051533">FASE 2</div><div class="suave">Ejecución y validación</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Tareas completadas</div><div style="font-size:20px;font-weight:700;color:#051533">3 / 7</div><div class="suave">43% del total asignado</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Asesorías recibidas</div><div style="font-size:20px;font-weight:700;color:#051533">3</div><div class="suave">última: 04 nov 2024</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Seguimientos registrados</div><div style="font-size:20px;font-weight:700;color:#051533">5</div><div class="suave">último: 08 nov 2024</div></div></div></div></div></div></div><div class="card"><div class="card-head"><h3>Avance por fases</h3><span class="hint">Las fases se habilitan en orden según el avance del docente asignado</span></div><div class="card-body"><div style="display:flex;height:22px;border-radius:999px;overflow:hidden;border:1px solid #bbbbbb"><div style="width:100%;background:#004a93" title="FASE 1 · Ideación y priorización de ideas 100%"></div><div style="width:62%;background:#004a93" title="FASE 2 · Estructuración y ejecución 62%"></div></div><div style="margin-top:12px"><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 1 · Ideación y priorización de ideas</span><b style="color:#051533">100%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 2 · Estructuración y ejecución</span><b style="color:#051533">62%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 3 · Consolidación del proceso</span><b style="color:#051533">0%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 4 · Escalamiento</span><b style="color:#051533">0%</b></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Hitos cumplidos</h3><span class="hint"></span></div><div class="card-body"><div class="lista-def" style="padding:4px 0"><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Diagnóstico inicial entregado</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Plan de trabajo cargado por el docente</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Primeras ventas registradas</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Perfil de cliente definido</dd></div></div></div></div><div class="card"><div class="card-head"><h3>Requisito bloqueante</h3><a class="btn btn-secundario btn-sm" href="perfil.html">Ver mi perfil</a><span class="hint"></span></div><div class="card-body"><div class="suave">Tu cuenta está en estado <b style="color:#051533">Limitado</b>. Mientras no sea activada por un administrador, el diagnóstico inicial no puede enviarse.</div><div style="margin-top:14px"><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Cuenta limitada</span></div></div></div></div></div></div><div data-panel-nombre="emp-mochilas" hidden><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Movimiento en el plan</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap"><div style="text-align:center"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="avance"><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="rgba(0,74,147,.15)" stroke-width="10"/><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="#004a93" stroke-width="10" stroke-linecap="round" stroke-dasharray="85.95" transform="rotate(-90 66.0 66.0)"/><text x="66.0" y="69.0" font-size="22" font-weight="700" fill="#051533" text-anchor="middle" font-family="Inter,sans-serif">24%</text><text x="66.0" y="84.0" font-size="10.5" fill="#162644" text-anchor="middle" font-family="Inter,sans-serif">avance</text></svg><div style="font-size:13px;color:#162644;margin-top:6px;text-align:center">FASE 1 · Ideación</div></div><div style="flex:1;min-width:300px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Fase actual</div><div style="font-size:20px;font-weight:700;color:#051533">FASE 1</div><div class="suave">Ideación y priorización de ideas</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Tareas completadas</div><div style="font-size:20px;font-weight:700;color:#051533">1 / 3</div><div class="suave">33% del plan inicial</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Asesorías recibidas</div><div style="font-size:20px;font-weight:700;color:#051533">0</div><div class="suave">sin docente asignado</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Seguimientos registrados</div><div style="font-size:20px;font-weight:700;color:#051533">2</div><div class="suave">último: 20 oct 2024</div></div></div></div></div></div></div><div class="card"><div class="card-head"><h3>Avance por fases</h3><span class="hint">Las fases se habilitan en orden según el avance del docente asignado</span></div><div class="card-body"><div style="display:flex;height:22px;border-radius:999px;overflow:hidden;border:1px solid #bbbbbb"><div style="width:24%;background:#004a93" title="FASE 1 · Ideación y priorización de ideas 24%"></div></div><div style="margin-top:12px"><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#004a93;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 1 · Ideación y priorización de ideas</span><b style="color:#051533">24%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 2 · Estructuración y ejecución</span><b style="color:#051533">0%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 3 · Consolidación del proceso</span><b style="color:#051533">0%</b></div><div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px"><i style="width:10px;height:10px;border-radius:2px;background:#bbbbbb;flex:0 0 10px"></i><span style="flex:1;color:#162644">FASE 4 · Escalamiento</span><b style="color:#051533">0%</b></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Hitos cumplidos</h3><span class="hint"></span></div><div class="card-body"><div class="lista-def" style="padding:4px 0"><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Diagnóstico inicial entregado</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Idea de negocio priorizada</dd></div></div></div></div><div class="card"><div class="card-head"><h3>Requisito bloqueante</h3><a class="btn btn-secundario btn-sm" href="emprendimientos.html">Ver emprendimientos</a><span class="hint"></span></div><div class="card-body"><div class="suave">Este emprendimiento aún no tiene <b style="color:#051533">docente asignado</b>. El plan de trabajo se construye cuando el programa te asigne un docente.</div><div style="margin-top:14px"><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Sin docente asignado</span></div></div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Estado de seguimiento</b></div><div class="page-head"><h1>Estado de seguimiento</h1><p class="sub">Aquí ves cuánto has avanzado y qué te falta por completar, por cada emprendimiento.</p><div class="acciones"><a class="btn btn-secundario" href="plan-trabajo.html">Plan de trabajo</a><a class="btn btn-acento" href="tareas.html">Ver mis tareas</a></div></div><div class="tabs"><button class="activo" data-panel="emp-sabor">Sabor y Sabe</button><button class="" data-panel="emp-mochilas">Mochilas Origen</button></div><div class="sep sep-20"></div><div data-panel-nombre="emp-sabor"><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Movimiento en el plan</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap"><div style="text-align:center"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="avance"><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="rgba(0,74,147,.15)" stroke-width="10"/><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="#004a93" stroke-width="10" stroke-linecap="round" stroke-dasharray="222.05" transform="rotate(-90 66.0 66.0)"/><text x="66.0" y="69.0" font-size="22" font-weight="700" fill="#051533" text-anchor="middle" font-family="Inter,sans-serif">62%</text><text x="66.0" y="84.0" font-size="10.5" fill="#162644" text-anchor="middle" font-family="Inter,sans-serif">avance</text></svg><div style="font-size:13px;color:#162644;margin-top:6px;text-align:center">FASE 2 · Ejecución</div></div><div style="flex:1;min-width:300px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Fase actual</div><div style="font-size:20px;font-weight:700;color:#051533">FASE 2</div><div class="suave">Ejecución y validación</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Tareas completadas</div><div style="font-size:20px;font-weight:700;color:#051533">3 / 7</div><div class="suave">43% del total asignado</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Asesorías recibidas</div><div style="font-size:20px;font-weight:700;color:#051533">3</div><div class="suave">última: 04 nov 2024</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Seguimientos registrados</div><div style="font-size:20px;font-weight:700;color:#051533">5</div><div class="suave">último: 08 nov 2024</div></div></div></div></div></div></div><div class="card"><div class="card-head"><h3>Avance por fases</h3><span class="hint">Las fases se habilitan en orden según el avance del docente asignado</span></div><div class="card-body"><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 1 · Ideación y priorización de ideas</span><b class="fase-avance-pct">100%</b></div><div class="barra"><span style="width:100%;background:#004a93"></span></div></div><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 2 · Estructuración y ejecución</span><b class="fase-avance-pct">62%</b></div><div class="barra"><span style="width:62%;background:#004a93"></span></div></div><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 3 · Consolidación del proceso</span><b class="fase-avance-pct">0%</b></div><div class="barra"><span style="width:0%;background:#bbbbbb"></span></div></div><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 4 · Escalamiento</span><b class="fase-avance-pct">0%</b></div><div class="barra"><span style="width:0%;background:#bbbbbb"></span></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Hitos cumplidos</h3><span class="hint"></span></div><div class="card-body"><div class="lista-def" style="padding:4px 0"><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Diagnóstico inicial entregado</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Plan de trabajo cargado por el docente</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Primeras ventas registradas</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Perfil de cliente definido</dd></div></div></div></div><div class="card"><div class="card-head"><h3>Requisito bloqueante</h3><a class="btn btn-secundario btn-sm" href="perfil.html">Ver mi perfil</a><span class="hint"></span></div><div class="card-body"><div class="suave">Tu cuenta está en estado <b style="color:#051533">Limitado</b>. Mientras no sea activada por un administrador, el diagnóstico inicial no puede enviarse.</div><div style="margin-top:14px"><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Cuenta limitada</span></div></div></div></div></div></div><div data-panel-nombre="emp-mochilas" hidden><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Movimiento en el plan</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap"><div style="text-align:center"><svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="avance"><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="rgba(0,74,147,.15)" stroke-width="10"/><circle cx="66.0" cy="66.0" r="57.0" fill="none" stroke="#004a93" stroke-width="10" stroke-linecap="round" stroke-dasharray="85.95" transform="rotate(-90 66.0 66.0)"/><text x="66.0" y="69.0" font-size="22" font-weight="700" fill="#051533" text-anchor="middle" font-family="Inter,sans-serif">24%</text><text x="66.0" y="84.0" font-size="10.5" fill="#162644" text-anchor="middle" font-family="Inter,sans-serif">avance</text></svg><div style="font-size:13px;color:#162644;margin-top:6px;text-align:center">FASE 1 · Ideación</div></div><div style="flex:1;min-width:300px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Fase actual</div><div style="font-size:20px;font-weight:700;color:#051533">FASE 1</div><div class="suave">Ideación y priorización de ideas</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Tareas completadas</div><div style="font-size:20px;font-weight:700;color:#051533">1 / 3</div><div class="suave">33% del plan inicial</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Asesorías recibidas</div><div style="font-size:20px;font-weight:700;color:#051533">0</div><div class="suave">sin docente asignado</div></div><div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px"><div class="suave">Seguimientos registrados</div><div style="font-size:20px;font-weight:700;color:#051533">2</div><div class="suave">último: 20 oct 2024</div></div></div></div></div></div></div><div class="card"><div class="card-head"><h3>Avance por fases</h3><span class="hint">Las fases se habilitan en orden según el avance del docente asignado</span></div><div class="card-body"><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 1 · Ideación y priorización de ideas</span><b class="fase-avance-pct">24%</b></div><div class="barra"><span style="width:24%;background:#004a93"></span></div></div><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 2 · Estructuración y ejecución</span><b class="fase-avance-pct">0%</b></div><div class="barra"><span style="width:0%;background:#bbbbbb"></span></div></div><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 3 · Consolidación del proceso</span><b class="fase-avance-pct">0%</b></div><div class="barra"><span style="width:0%;background:#bbbbbb"></span></div></div><div class="fase-avance"><div class="fase-avance-top"><span class="fase-avance-nombre">FASE 4 · Escalamiento</span><b class="fase-avance-pct">0%</b></div><div class="barra"><span style="width:0%;background:#bbbbbb"></span></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Hitos cumplidos</h3><span class="hint"></span></div><div class="card-body"><div class="lista-def" style="padding:4px 0"><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Diagnóstico inicial entregado</dd></div><div class="def-row"><dt style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></dt><dd style="flex:1">Idea de negocio priorizada</dd></div></div></div></div><div class="card"><div class="card-head"><h3>Requisito bloqueante</h3><a class="btn btn-secundario btn-sm" href="emprendimientos.html">Ver emprendimientos</a><span class="hint"></span></div><div class="card-body"><div class="suave">Este emprendimiento aún no tiene <b style="color:#051533">docente asignado</b>. El plan de trabajo se construye cuando el programa te asigne un docente.</div><div style="margin-top:14px"><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Sin docente asignado</span></div></div></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -1344,7 +1362,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
-    var t = $("main table.tabla") || $("table.tabla");
+    var t = tablaDoc();
     if (!t) return "";
     var c = t.cloneNode(true);
     $$("th.acc, td.acc, input, button, a.table-act", c).forEach(function (n) { n.remove(); });
@@ -1353,13 +1371,21 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   /* Item 3: documento imprimible de la pantalla. Si hay tabla principal se
      imprime la tabla; si no (tarjetas, kanban, linea de tiempo) se imprime una
      copia legible del contenido, sin controles ni paneles ocultos. */
+  /* Las tablas dentro de [data-doc] pertenecen al documento aunque no sean
+     la tabla principal de la pantalla; [data-no-doc] excluye lo que solo
+     sirve en vivo (la barra de progreso, por ejemplo). */
+  function tablaDoc() {
+    var t = $("main [data-doc] table.tabla") || $("main [data-doc]") ||
+      $("main table.tabla") || $("table.tabla");
+    return t ? t.cloneNode(true) : null;
+  }
   function vistaDocumento() {
     var t = tablaComoHTML();
     if (t) return t;
     var main = $("main.content") || $("main");
     if (!main) return "";
     var c = main.cloneNode(true);
-    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [hidden]", c)
+    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [data-no-doc], [hidden]", c)
       .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
     return c.innerHTML;
   }
@@ -1374,8 +1400,11 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     "dt{width:190px;color:#162644;font-size:13px}dd{margin:0;flex:1;font-size:13px}" +
     "table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}" +
     "th,td{border:1px solid #bbbbbb;padding:6px 8px;text-align:left}th{background:#ffffff}" +
+    "tbody tr:nth-child(even) td{background:#fafafa}" +
     "footer{margin-top:24px;font-size:13px;color:#162644;border-top:1px solid #bbbbbb;padding-top:8px}" +
     "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
+    ".doc-suave{color:#162644;font-size:12px}" +
+    "h2{margin-top:22px;padding-top:10px;border-top:1px solid #bbbbbb}" +
     ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
     ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
     ".kan-col,.ln-item,.aviso{margin-bottom:8px}" +
@@ -1722,13 +1751,76 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       }
 
       case "exportar-expediente": {
-        /* El boton "Exportar" de Mi emprendimiento genera el expediente: el
-           reporte completo de la pantalla, listo para guardar como PDF. */
+        /* El boton "Exportar" de Mi emprendimiento genera el expediente del
+           emprendimiento: la tabla del listado mas los bloques que el
+           estudiante ve en pantalla (avance por fase e historial). */
         e.preventDefault();
+        var clonExp = tablaDoc();
+        var tablaExp = clonExp ? clonExp.outerHTML : "";
+        var bloquesExp = "";
+        $$("[data-expediente]").forEach(function (z) {
+          var cc = z.cloneNode(true);
+          $$("button, input, select, textarea, script, [data-no-doc], [hidden]", cc)
+            .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+          bloquesExp += cc.innerHTML;
+        });
+        if (tablaExp) bloquesExp = tablaExp + bloquesExp;
+        var resumenExp = csvDeMetricas() ? "" : "";
         imprimirDocumento("Expediente - " + tituloPagina(),
           '<p class="doc-meta">' + esc(tituloPagina()) +
-          " &middot; reporte completo</p>" + vistaDocumento());
+          " &middot; expediente completo</p>" +
+          (bloquesExp || vistaDocumento()));
         toast("Abriendo el expediente para guardar como PDF…", "info");
+        break;
+      }
+
+      case "descargar-plan": {
+        /* Descargar el plan de trabajo: un documento con encabezado, resumen de
+           las cuatro fases y el detalle de tareas por fase. Antes volcaba un
+           CSV plano con las celdas desordenadas; ahora la lectura es la misma
+           de la pantalla. */
+        e.preventDefault();
+        var raizPlan = $("[data-panel-nombre]:not([hidden])") || document;
+        var resumen = "", detalle = "";
+        $$(".card", raizPlan).forEach(function (card) {
+          var t = $(".card-head h3 a, .card-head h3", card);
+          var fase = t ? t.textContent.replace(/\s+/g, " ").trim() : "";
+          if (!fase) return;
+          var pctEl = $(".card-head > span:last-child", card);
+          var pct = pctEl ? pctEl.textContent.replace(/\s+/g, " ").trim() : "";
+          var tareas = $$(".fila-tarea", card);
+          var hechas = 0;
+          var filasHtml = tareas.map(function (f) {
+            var c = f.cloneNode(true);
+            var b = $(".badge", c);
+            var estado = b ? b.textContent.replace(/\s+/g, " ").trim() : "";
+            if (b) b.parentNode.removeChild(b);
+            var sub = $(".fila-sub", c);
+            var meta = sub ? sub.textContent.replace(/\s+/g, " ").trim() : "";
+            if (sub) sub.parentNode.removeChild(sub);
+            var titulo = c.textContent.replace(/\s+/g, " ").trim();
+            if (estado.toLowerCase().indexOf("completada") >= 0) hechas++;
+            return "<tr><td><b>" + esc(titulo) + "</b><br><span class=\"doc-suave\">" +
+              esc(meta) + "</span></td><td>" + esc(estado) + "</td></tr>";
+          }).join("");
+          if (!filasHtml) {
+            filasHtml = '<tr><td colspan="2" class="doc-suave">Sin tareas asignadas en esta fase.</td></tr>';
+          }
+          resumen += "<tr><td><b>" + esc(fase) + "</b></td><td>" + esc(pct) +
+            "</td><td>" + hechas + " de " + tareas.length + "</td></tr>";
+          detalle += "<h2>" + esc(fase) + " &middot; " + esc(pct) + "</h2>" +
+            "<table><thead><tr><th>Tarea</th><th>Estado</th></tr></thead><tbody>" +
+            filasHtml + "</tbody></table>";
+        });
+        var cuerpoPlan =
+          '<p class="doc-meta">' + esc(tituloPagina()) +
+          " &middot; las cuatro fases del programa con el avance y las tareas de cada una</p>" +
+          "<h2>Resumen de avance</h2>" +
+          "<table><thead><tr><th>Fase</th><th>Avance</th><th>Tareas completadas</th></tr></thead>" +
+          "<tbody>" + resumen + "</tbody></table>" +
+          detalle;
+        imprimirDocumento("Plan de trabajo - " + tituloPagina(), cuerpoPlan);
+        toast("Abriendo el plan de trabajo para guardar como PDF...", "info");
         break;
       }
 
@@ -2600,6 +2692,98 @@ guardar(estado);
   document.addEventListener("click", function () {
     $$(".who-menu.visible").forEach(function (m) { m.classList.remove("visible"); });
   });
+
+  /* --- datos academicos del perfil (estudiante) -------------------------- */
+  /* Tres niveles: pregrado, posgrado y egresado. Cada uno muestra un juego
+     distinto de campos; el semestre depende del programa (posgrado) o
+     desaparece (egresado). */
+  function opcionSelect(sel, valor) {
+    if (!sel || !valor) return false;
+    var ok = false;
+    $$("option", sel).forEach(function (o) {
+      if (o.value === valor || o.textContent.trim() === valor) { o.selected = true; ok = true; }
+    });
+    return ok;
+  }
+  function sincronizarAcademico() {
+    var nivel = $("[data-acad-nivel]");
+    if (!nivel) return;
+    var v = (nivel.value || "").toLowerCase();
+    var posgrado = v.indexOf("posgrado") >= 0;
+    var egresado = v.indexOf("egresado") >= 0;
+    var tipo = $("[data-acad-tipo]");
+    var semestre = $("[data-acad-semestre]");
+    var modalidad = $("[data-acad-modalidad]");
+    var posgradoCampos = $("[data-acad-posgrado-campos]");
+    var egresadoCampos = $("[data-acad-egresado-campos]");
+    var semestreCampo = $("[data-acad-semestre-campo]");
+    var duracion = $("[data-acad-duracion]");
+    if (posgradoCampos) posgradoCampos.hidden = !posgrado;
+    if (egresadoCampos) egresadoCampos.hidden = !egresado;
+    if (semestreCampo) semestreCampo.hidden = egresado;
+    if (modalidad && modalidad.closest(".campo")) {
+      modalidad.closest(".campo").hidden = egresado;
+    }
+
+    /* Duracion por tipo de posgrado en UNIMINUTO (El programa confirma 2
+       periodos para especializacion; la maestria va de 3 a 4; el doctorado
+       depende del programa y suele ir de 6 a 8). El minimo y el maximo
+       marcan cuantos semestres ofrece el campo "Semestre". */
+    var DURACION = {
+      "especialización": [2, 2], "especializacion": [2, 2],
+      "maestría": [3, 4], "maestria": [3, 4],
+      "doctorado": [6, 8]
+    };
+    var ORD = ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto",
+      "Séptimo", "Octavo", "Noveno", "Décimo", "Undécimo", "Duodécimo"];
+    var NUM = {};
+    ORD.forEach(function (o, k) { NUM[o] = k + 1; });
+
+    function llenarSemestre(desde, hasta) {
+      if (!semestre) return;
+      var previo = semestre.value;
+      var n = hasta;
+      var opciones = [];
+      for (var k = 1; k <= n; k++) opciones.push(ORD[k - 1]);
+      if ($$("option", semestre).length !== n) {
+        semestre.innerHTML = opciones.map(function (o) {
+          return "<option>" + o + "</option>";
+        }).join("");
+      }
+      var queria = NUM[previo] || desde;
+      if (queria < desde) queria = desde;
+      if (queria > hasta) queria = hasta;
+      semestre.value = ORD[queria - 1];
+    }
+
+    if (posgrado) {
+      var tipoVal = (tipo ? tipo.value : "").toLowerCase();
+      var rango = DURACION[tipoVal] || [3, 4];
+      llenarSemestre(rango[0], rango[1]);
+      if (duracion) {
+        duracion.textContent = rango[0] === rango[1]
+          ? ("Duración: " + rango[0] + " semestres.")
+          : ("Duración: " + rango[0] + " a " + rango[1] + " semestres; elige el semestre en el que vas.");
+      }
+    } else {
+      /* Pregrado conserva los diez semestres de un programa profesional. */
+      llenarSemestre(1, 10);
+      if (duracion) duracion.textContent = "";
+    }
+  }
+  var nivelAcad = $("[data-acad-nivel]");
+  if (nivelAcad) {
+    nivelAcad.addEventListener("change", sincronizarAcademico);
+    var tipoAcad = $("[data-acad-tipo]");
+    if (tipoAcad) tipoAcad.addEventListener("change", sincronizarAcademico);
+    var prevAcad = store(true);
+    var nivelPrevio = prevAcad && prevAcad.perfil && prevAcad.perfil["nivel academico"];
+    if (nivelPrevio && opcionSelect(nivelAcad, nivelPrevio)) {
+      setTimeout(sincronizarAcademico, 0);
+    } else {
+      sincronizarAcademico();
+    }
+  }
 
   /* --- estado inicial ----------------------------------------------------- */
   var previo = store(true);

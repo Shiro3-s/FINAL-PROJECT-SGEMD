@@ -724,7 +724,7 @@ JS = r"""
     return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
-    var t = $("main table.tabla") || $("table.tabla");
+    var t = tablaDoc();
     if (!t) return "";
     var c = t.cloneNode(true);
     $$("th.acc, td.acc, input, button, a.table-act", c).forEach(function (n) { n.remove(); });
@@ -733,13 +733,21 @@ JS = r"""
   /* Item 3: documento imprimible de la pantalla. Si hay tabla principal se
      imprime la tabla; si no (tarjetas, kanban, linea de tiempo) se imprime una
      copia legible del contenido, sin controles ni paneles ocultos. */
+  /* Las tablas dentro de [data-doc] pertenecen al documento aunque no sean
+     la tabla principal de la pantalla; [data-no-doc] excluye lo que solo
+     sirve en vivo (la barra de progreso, por ejemplo). */
+  function tablaDoc() {
+    var t = $("main [data-doc] table.tabla") || $("main [data-doc]") ||
+      $("main table.tabla") || $("table.tabla");
+    return t ? t.cloneNode(true) : null;
+  }
   function vistaDocumento() {
     var t = tablaComoHTML();
     if (t) return t;
     var main = $("main.content") || $("main");
     if (!main) return "";
     var c = main.cloneNode(true);
-    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [hidden]", c)
+    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [data-no-doc], [hidden]", c)
       .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
     return c.innerHTML;
   }
@@ -754,8 +762,11 @@ JS = r"""
     "dt{width:190px;color:#162644;font-size:13px}dd{margin:0;flex:1;font-size:13px}" +
     "table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}" +
     "th,td{border:1px solid #bbbbbb;padding:6px 8px;text-align:left}th{background:#ffffff}" +
+    "tbody tr:nth-child(even) td{background:#fafafa}" +
     "footer{margin-top:24px;font-size:13px;color:#162644;border-top:1px solid #bbbbbb;padding-top:8px}" +
     "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
+    ".doc-suave{color:#162644;font-size:12px}" +
+    "h2{margin-top:22px;padding-top:10px;border-top:1px solid #bbbbbb}" +
     ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
     ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
     ".kan-col,.ln-item,.aviso{margin-bottom:8px}" +
@@ -1102,13 +1113,76 @@ JS = r"""
       }
 
       case "exportar-expediente": {
-        /* El boton "Exportar" de Mi emprendimiento genera el expediente: el
-           reporte completo de la pantalla, listo para guardar como PDF. */
+        /* El boton "Exportar" de Mi emprendimiento genera el expediente del
+           emprendimiento: la tabla del listado mas los bloques que el
+           estudiante ve en pantalla (avance por fase e historial). */
         e.preventDefault();
+        var clonExp = tablaDoc();
+        var tablaExp = clonExp ? clonExp.outerHTML : "";
+        var bloquesExp = "";
+        $$("[data-expediente]").forEach(function (z) {
+          var cc = z.cloneNode(true);
+          $$("button, input, select, textarea, script, [data-no-doc], [hidden]", cc)
+            .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+          bloquesExp += cc.innerHTML;
+        });
+        if (tablaExp) bloquesExp = tablaExp + bloquesExp;
+        var resumenExp = csvDeMetricas() ? "" : "";
         imprimirDocumento("Expediente - " + tituloPagina(),
           '<p class="doc-meta">' + esc(tituloPagina()) +
-          " &middot; reporte completo</p>" + vistaDocumento());
+          " &middot; expediente completo</p>" +
+          (bloquesExp || vistaDocumento()));
         toast("Abriendo el expediente para guardar como PDF…", "info");
+        break;
+      }
+
+      case "descargar-plan": {
+        /* Descargar el plan de trabajo: un documento con encabezado, resumen de
+           las cuatro fases y el detalle de tareas por fase. Antes volcaba un
+           CSV plano con las celdas desordenadas; ahora la lectura es la misma
+           de la pantalla. */
+        e.preventDefault();
+        var raizPlan = $("[data-panel-nombre]:not([hidden])") || document;
+        var resumen = "", detalle = "";
+        $$(".card", raizPlan).forEach(function (card) {
+          var t = $(".card-head h3 a, .card-head h3", card);
+          var fase = t ? t.textContent.replace(/\s+/g, " ").trim() : "";
+          if (!fase) return;
+          var pctEl = $(".card-head > span:last-child", card);
+          var pct = pctEl ? pctEl.textContent.replace(/\s+/g, " ").trim() : "";
+          var tareas = $$(".fila-tarea", card);
+          var hechas = 0;
+          var filasHtml = tareas.map(function (f) {
+            var c = f.cloneNode(true);
+            var b = $(".badge", c);
+            var estado = b ? b.textContent.replace(/\s+/g, " ").trim() : "";
+            if (b) b.parentNode.removeChild(b);
+            var sub = $(".fila-sub", c);
+            var meta = sub ? sub.textContent.replace(/\s+/g, " ").trim() : "";
+            if (sub) sub.parentNode.removeChild(sub);
+            var titulo = c.textContent.replace(/\s+/g, " ").trim();
+            if (estado.toLowerCase().indexOf("completada") >= 0) hechas++;
+            return "<tr><td><b>" + esc(titulo) + "</b><br><span class=\"doc-suave\">" +
+              esc(meta) + "</span></td><td>" + esc(estado) + "</td></tr>";
+          }).join("");
+          if (!filasHtml) {
+            filasHtml = '<tr><td colspan="2" class="doc-suave">Sin tareas asignadas en esta fase.</td></tr>';
+          }
+          resumen += "<tr><td><b>" + esc(fase) + "</b></td><td>" + esc(pct) +
+            "</td><td>" + hechas + " de " + tareas.length + "</td></tr>";
+          detalle += "<h2>" + esc(fase) + " &middot; " + esc(pct) + "</h2>" +
+            "<table><thead><tr><th>Tarea</th><th>Estado</th></tr></thead><tbody>" +
+            filasHtml + "</tbody></table>";
+        });
+        var cuerpoPlan =
+          '<p class="doc-meta">' + esc(tituloPagina()) +
+          " &middot; las cuatro fases del programa con el avance y las tareas de cada una</p>" +
+          "<h2>Resumen de avance</h2>" +
+          "<table><thead><tr><th>Fase</th><th>Avance</th><th>Tareas completadas</th></tr></thead>" +
+          "<tbody>" + resumen + "</tbody></table>" +
+          detalle;
+        imprimirDocumento("Plan de trabajo - " + tituloPagina(), cuerpoPlan);
+        toast("Abriendo el plan de trabajo para guardar como PDF...", "info");
         break;
       }
 
@@ -1980,6 +2054,98 @@ guardar(estado);
   document.addEventListener("click", function () {
     $$(".who-menu.visible").forEach(function (m) { m.classList.remove("visible"); });
   });
+
+  /* --- datos academicos del perfil (estudiante) -------------------------- */
+  /* Tres niveles: pregrado, posgrado y egresado. Cada uno muestra un juego
+     distinto de campos; el semestre depende del programa (posgrado) o
+     desaparece (egresado). */
+  function opcionSelect(sel, valor) {
+    if (!sel || !valor) return false;
+    var ok = false;
+    $$("option", sel).forEach(function (o) {
+      if (o.value === valor || o.textContent.trim() === valor) { o.selected = true; ok = true; }
+    });
+    return ok;
+  }
+  function sincronizarAcademico() {
+    var nivel = $("[data-acad-nivel]");
+    if (!nivel) return;
+    var v = (nivel.value || "").toLowerCase();
+    var posgrado = v.indexOf("posgrado") >= 0;
+    var egresado = v.indexOf("egresado") >= 0;
+    var tipo = $("[data-acad-tipo]");
+    var semestre = $("[data-acad-semestre]");
+    var modalidad = $("[data-acad-modalidad]");
+    var posgradoCampos = $("[data-acad-posgrado-campos]");
+    var egresadoCampos = $("[data-acad-egresado-campos]");
+    var semestreCampo = $("[data-acad-semestre-campo]");
+    var duracion = $("[data-acad-duracion]");
+    if (posgradoCampos) posgradoCampos.hidden = !posgrado;
+    if (egresadoCampos) egresadoCampos.hidden = !egresado;
+    if (semestreCampo) semestreCampo.hidden = egresado;
+    if (modalidad && modalidad.closest(".campo")) {
+      modalidad.closest(".campo").hidden = egresado;
+    }
+
+    /* Duracion por tipo de posgrado en UNIMINUTO (El programa confirma 2
+       periodos para especializacion; la maestria va de 3 a 4; el doctorado
+       depende del programa y suele ir de 6 a 8). El minimo y el maximo
+       marcan cuantos semestres ofrece el campo "Semestre". */
+    var DURACION = {
+      "especialización": [2, 2], "especializacion": [2, 2],
+      "maestría": [3, 4], "maestria": [3, 4],
+      "doctorado": [6, 8]
+    };
+    var ORD = ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto",
+      "Séptimo", "Octavo", "Noveno", "Décimo", "Undécimo", "Duodécimo"];
+    var NUM = {};
+    ORD.forEach(function (o, k) { NUM[o] = k + 1; });
+
+    function llenarSemestre(desde, hasta) {
+      if (!semestre) return;
+      var previo = semestre.value;
+      var n = hasta;
+      var opciones = [];
+      for (var k = 1; k <= n; k++) opciones.push(ORD[k - 1]);
+      if ($$("option", semestre).length !== n) {
+        semestre.innerHTML = opciones.map(function (o) {
+          return "<option>" + o + "</option>";
+        }).join("");
+      }
+      var queria = NUM[previo] || desde;
+      if (queria < desde) queria = desde;
+      if (queria > hasta) queria = hasta;
+      semestre.value = ORD[queria - 1];
+    }
+
+    if (posgrado) {
+      var tipoVal = (tipo ? tipo.value : "").toLowerCase();
+      var rango = DURACION[tipoVal] || [3, 4];
+      llenarSemestre(rango[0], rango[1]);
+      if (duracion) {
+        duracion.textContent = rango[0] === rango[1]
+          ? ("Duración: " + rango[0] + " semestres.")
+          : ("Duración: " + rango[0] + " a " + rango[1] + " semestres; elige el semestre en el que vas.");
+      }
+    } else {
+      /* Pregrado conserva los diez semestres de un programa profesional. */
+      llenarSemestre(1, 10);
+      if (duracion) duracion.textContent = "";
+    }
+  }
+  var nivelAcad = $("[data-acad-nivel]");
+  if (nivelAcad) {
+    nivelAcad.addEventListener("change", sincronizarAcademico);
+    var tipoAcad = $("[data-acad-tipo]");
+    if (tipoAcad) tipoAcad.addEventListener("change", sincronizarAcademico);
+    var prevAcad = store(true);
+    var nivelPrevio = prevAcad && prevAcad.perfil && prevAcad.perfil["nivel academico"];
+    if (nivelPrevio && opcionSelect(nivelAcad, nivelPrevio)) {
+      setTimeout(sincronizarAcademico, 0);
+    } else {
+      sincronizarAcademico();
+    }
+  }
 
   /* --- estado inicial ----------------------------------------------------- */
   var previo = store(true);

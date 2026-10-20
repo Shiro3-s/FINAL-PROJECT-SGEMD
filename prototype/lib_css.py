@@ -741,6 +741,24 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
 .fase-link{color:inherit;text-decoration:none}
 .fase-link:hover{color:var(--azul-real);text-decoration:underline}
+
+/* --- Avance por fase del estudiante --------------------------------------- */
+/* Cada fase con su propia pista y su porcentaje: la barra apilada ocultaba las
+   fases posteriores cuando la primera estaba al 100%. */
+.fase-avance{margin-top:12px}
+.fase-avance:first-child{margin-top:0}
+.fase-avance-top{display:flex;align-items:baseline;gap:10px}
+.fase-avance-nombre{flex:1;font-size:13px;color:var(--tinta-2)}
+.fase-avance-pct{font-size:13px;color:var(--azul-noche);font-variant-numeric:tabular-nums}
+.fase-avance .barra{margin-top:6px}
+
+/* --- Tarjeta "sin docente asignado" -------------------------------------- */
+.estado-vacio-mini{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.estado-vacio-mini>svg{flex:0 0 22px;color:var(--azul-real);margin-top:2px}
+.estado-vacio-mini b{display:block;color:var(--tinta)}
+
+/* --- Ayuda bajo un select en formularios --------------------------------- */
+.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
 """
 
 CSS = (TOKENS_CSS + TOKENS_LOGO_CSS + SHELL_CSS + COMPONENTES_CSS + LISTADOS_CSS

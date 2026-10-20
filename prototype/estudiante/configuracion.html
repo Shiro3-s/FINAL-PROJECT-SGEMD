@@ -90,7 +90,7 @@ small{font-size:13px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
-.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:13px;font-weight:700;line-height:1.4;padding:3px 7px;border-radius:var(--r-full)}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -191,7 +191,6 @@ small{font-size:13px}
 .suave{font-size:13px;color:var(--tinta-2)}
 .fuerte{font-size:13px;color:var(--tinta)}
 .fila-acciones{display:flex;gap:10px}
-.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .fila-6{display:flex;gap:6px}
 .fila-fin{display:flex;justify-content:flex-end;gap:10px}
 .fila-col{display:flex;flex-direction:column;gap:10px}
@@ -600,6 +599,24 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
 .fase-link{color:inherit;text-decoration:none}
 .fase-link:hover{color:var(--azul-real);text-decoration:underline}
+
+/* --- Avance por fase del estudiante --------------------------------------- */
+/* Cada fase con su propia pista y su porcentaje: la barra apilada ocultaba las
+   fases posteriores cuando la primera estaba al 100%. */
+.fase-avance{margin-top:12px}
+.fase-avance:first-child{margin-top:0}
+.fase-avance-top{display:flex;align-items:baseline;gap:10px}
+.fase-avance-nombre{flex:1;font-size:13px;color:var(--tinta-2)}
+.fase-avance-pct{font-size:13px;color:var(--azul-noche);font-variant-numeric:tabular-nums}
+.fase-avance .barra{margin-top:6px}
+
+/* --- Tarjeta "sin docente asignado" -------------------------------------- */
+.estado-vacio-mini{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.estado-vacio-mini>svg{flex:0 0 22px;color:var(--azul-real);margin-top:2px}
+.estado-vacio-mini b{display:block;color:var(--tinta)}
+
+/* --- Ayuda bajo un select en formularios --------------------------------- */
+.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
 </style>
 </head>
 <body>
@@ -629,7 +646,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <a href="perfil.html">Mi perfil</a> &rsaquo; <b>Configuración</b></div><div class="page-head"><h1>Configuración</h1><p class="sub">Edita tus datos personales, académicos y tu contraseña.</p><div class="acciones"><a class="btn btn-secundario" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver al perfil</a></div></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div>Aquí actualizas tus datos y tu contraseña. Los campos con el candado los mantiene el <b>ADMINISTRADOR</b> de la institución.</div></div><div style="height:20px"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos personales</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-2 g-col"><div class="campo"><label for="f46">Nombres</label><input id="f46" type="text" value="Mariana" placeholder=""></div><div class="campo"><label for="f47">Apellidos</label><input id="f47" type="text" value="López Herrera" placeholder=""></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="s48">Tipo de documento<span class="req">*</span></label><select id="s48"><option selected>CC</option><option>TI</option><option>Cédula de extranjería</option></select></div><div class="campo"><label for="f49">Número de documento</label><input id="f49" type="text" value="1020304050" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f50">Número de estudiante</label><input id="f50" type="text" value="2024105678" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div><div class="campo"><label for="f51">Fecha de nacimiento</label><input id="f51" type="date" value="1999-04-18" placeholder=""></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f52">Correo personal</label><input id="f52" type="email" value="mariana.lopez@correo.com" placeholder=""></div><div class="campo"><label for="f53">Correo institucional</label><input id="f53" type="text" value="mariana.lopez@minutodedios.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f54">Celular<span class="req">*</span></label><input id="f54" type="tel" value="300 555 4412" placeholder="" required></div><div class="campo"><label for="f55">Celular 2 (opcional)</label><input id="f55" type="tel" value="" placeholder="Opcional"><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Déjalo vacío si no tienes un segundo número.</div></div></div><div class="grid g-3" style="gap:0 16px"><div class="campo"><label for="f56">Departamento</label><input id="f56" type="text" value="Norte de Santander" placeholder=""></div><div class="campo"><label for="f57">Ciudad</label><input id="f57" type="text" value="Cúcuta" placeholder=""></div><div class="campo"><label for="f58">Sede</label><input id="f58" type="text" value="Sede Norte" placeholder=""></div></div><div class="fila-fin"><button class="btn btn-secundario" data-accion="cancelar-perfil">Cancelar</button><button class="btn btn-primario" data-accion="guardar-perfil"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Guardar cambios</button></div></div></div><div class="card"><div class="card-head"><h3>Datos académicos</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="s59">Nivel académico<span class="req">*</span></label><select id="s59"><option selected>Pregrado</option><option>Posgrado</option></select></div><div class="campo"><label for="f60">Programa académico</label><input id="f60" type="text" value="Ingeniería Industrial" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="s61">Semestre<span class="req">*</span></label><select id="s61"><option>Primero</option><option>Segundo</option><option>Tercero</option><option>Cuarto</option><option selected>Quinto</option><option>Sexto</option><option>Séptimo</option><option>Octavo</option><option>Noveno</option><option>Décimo</option></select></div><div class="campo"><label for="s62">Modalidad<span class="req">*</span></label><select id="s62"><option selected>Presencial</option><option>Virtual</option></select></div></div><div class="nota-foot">Estos datos determinan los eventos y las convocatorias que te llegan.</div></div></div><div class="card"><div class="card-head"><h3>Cambiar contraseña</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-3 g-col"><div class="campo"><label for="f63">Contraseña actual</label><input id="f63" type="password" value="" placeholder="••••••••"></div><div class="campo"><label for="f64">Nueva contraseña</label><input id="f64" type="password" value="" placeholder="Mínimo 8 caracteres"></div><div class="campo"><label for="f65">Repetir nueva contraseña</label><input id="f65" type="password" value="" placeholder="••••••••"></div></div><div style="display:flex;justify-content:flex-end"><button class="btn btn-secundario" data-accion="actualizar-contrasena">Actualizar contraseña</button></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Foto del estudiante</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;align-items:center;gap:16px"><div class="perfil-foto" style="width:96px;height:96px;flex:0 0 96px"><span>ML</span></div><div><div style="font-size:13px;color:#162644">Sube una imagen en formato <b>PNG</b> o JPG, de máximo 2 MB.</div><div style="margin-top:10px"><button class="btn btn-secundario btn-sm" data-accion="cambiar-foto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg> Subir imagen</button></div></div></div></div></div><div class="card"><div class="card-head"><h3>Accesos y seguridad</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Último ingreso</dt><dd>12 nov 2024, 08:14 · Cúcuta</dd></div><div class="def-row"><dt>Estado de la cuenta</dt><dd><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Limitado</span></dd></div><div class="def-row"><dt>Rol</dt><dd><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>ESTUDIANTE</span></dd></div></dl></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <a href="perfil.html">Mi perfil</a> &rsaquo; <b>Configuración</b></div><div class="page-head"><h1>Configuración</h1><p class="sub">Edita tus datos personales, académicos y tu contraseña.</p><div class="acciones"><a class="btn btn-secundario" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver al perfil</a></div></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div>Aquí actualizas tus datos y tu contraseña. Los campos con el candado los mantiene el <b>ADMINISTRADOR</b> de la institución.</div></div><div style="height:20px"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Datos personales</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-2 g-col"><div class="campo"><label for="f46">Nombres</label><input id="f46" type="text" value="Mariana" placeholder=""></div><div class="campo"><label for="f47">Apellidos</label><input id="f47" type="text" value="López Herrera" placeholder=""></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="s48">Tipo de documento<span class="req">*</span></label><select id="s48"><option selected>CC</option><option>TI</option><option>Cédula de extranjería</option></select></div><div class="campo"><label for="f49">Número de documento</label><input id="f49" type="text" value="1020304050" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f50">Número de estudiante</label><input id="f50" type="text" value="2024105678" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div><div class="campo"><label for="f51">Fecha de nacimiento</label><input id="f51" type="date" value="1999-04-18" placeholder=""></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f52">Correo personal</label><input id="f52" type="email" value="mariana.lopez@correo.com" placeholder=""></div><div class="campo"><label for="f53">Correo institucional</label><input id="f53" type="text" value="mariana.lopez@minutodedios.edu.co" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f54">Celular<span class="req">*</span></label><input id="f54" type="tel" value="300 555 4412" placeholder="" required></div><div class="campo"><label for="f55">Celular 2 (opcional)</label><input id="f55" type="tel" value="" placeholder="Opcional"><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Déjalo vacío si no tienes un segundo número.</div></div></div><div class="grid g-3" style="gap:0 16px"><div class="campo"><label for="f56">Departamento</label><input id="f56" type="text" value="Norte de Santander" placeholder=""></div><div class="campo"><label for="f57">Ciudad</label><input id="f57" type="text" value="Cúcuta" placeholder=""></div><div class="campo"><label for="f58">Sede</label><input id="f58" type="text" value="Sede Norte" placeholder=""></div></div><div class="fila-fin"><button class="btn btn-secundario" data-accion="cancelar-perfil">Cancelar</button><button class="btn btn-primario" data-accion="guardar-perfil"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Guardar cambios</button></div></div></div><div class="card"><div class="card-head"><h3>Datos académicos</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="s59">Nivel académico<span class="req">*</span></label><select id="s59" data-acad-nivel="1"><option selected>Pregrado</option><option>Posgrado</option><option>Egresado</option></select></div><div class="campo"><label for="f60">Programa académico</label><input id="f60" type="text" value="Ingeniería Industrial" disabled><div class="bloqueo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo ADMINISTRADOR puede modificarlo.</div></div></div><div class="grid g-2" style="gap:0 16px" data-acad-posgrado-campos hidden><div class="campo"><label for="s61">Tipo de posgrado</label><select id="s61" data-acad-tipo="1"><option selected>Especialización</option><option>Maestría</option><option>Doctorado</option></select></div><div class="campo"><label>Duración del programa</label><div class="ayuda" data-acad-duracion="1">Duración: 2 semestres.</div><div class="ayuda">El campo <b>Semestre</b> cambia según el tipo de posgrado: Especialización 2, Maestría 3 a 4 y Doctorado 6 a 8.</div></div></div><div data-acad-semestre-campo="1"><div class="campo"><label for="s62">Semestre<span class="req">*</span></label><select id="s62" data-acad-semestre="1"><option>Primero</option><option>Segundo</option><option>Tercero</option><option>Cuarto</option><option selected>Quinto</option><option>Sexto</option><option>Séptimo</option><option>Octavo</option><option>Noveno</option><option>Décimo</option></select></div></div><div data-acad-egresado-campos="1" hidden><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f63">Fecha de grado del pregrado<span class="req">*</span></label><input id="f63" type="date" value="2024-06-14" placeholder="" required><div class="ayuda"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>Es la fecha del acta o del diploma con la que obtuviste tu título de pregrado.</div></div><div class="campo"><label for="f64">Programa del que se graduó</label><input id="f64" type="text" value="Ingeniería Industrial" placeholder=""></div></div><div class="grid g-2" style="gap:0 16px"><div class="campo"><label for="f65">Sede de graduación</label><input id="f65" type="text" value="Sede Norte" placeholder=""></div><div class="campo"><label for="f66">Número de acta o diploma</label><input id="f66" type="text" value="" placeholder="Ej. ACTA-2024-01187"></div></div></div><div class="campo"><label for="s67">Modalidad<span class="req">*</span></label><select id="s67" data-acad-modalidad="1"><option selected>Presencial</option><option>Virtual</option><option>Mixta</option></select></div><div class="nota-foot">Estos datos determinan los eventos y las convocatorias que te llegan.</div></div></div><div class="card"><div class="card-head"><h3>Cambiar contraseña</h3><span class="hint"></span></div><div class="card-body"><div class="grid g-3 g-col"><div class="campo"><label for="f68">Contraseña actual</label><input id="f68" type="password" value="" placeholder="••••••••"></div><div class="campo"><label for="f69">Nueva contraseña</label><input id="f69" type="password" value="" placeholder="Mínimo 8 caracteres"></div><div class="campo"><label for="f70">Repetir nueva contraseña</label><input id="f70" type="password" value="" placeholder="••••••••"></div></div><div style="display:flex;justify-content:flex-end"><button class="btn btn-secundario" data-accion="actualizar-contrasena">Actualizar contraseña</button></div></div></div></div><div class="grid" style="gap:20px"><div class="card"><div class="card-head"><h3>Foto del estudiante</h3><span class="hint"></span></div><div class="card-body"><div style="display:flex;align-items:center;gap:16px"><div class="perfil-foto" style="width:96px;height:96px;flex:0 0 96px"><span>ML</span></div><div><div style="font-size:13px;color:#162644">Sube una imagen en formato <b>PNG</b> o JPG, de máximo 2 MB.</div><div style="margin-top:10px"><button class="btn btn-secundario btn-sm" data-accion="cambiar-foto"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg> Subir imagen</button></div></div></div></div></div><div class="card"><div class="card-head"><h3>Accesos y seguridad</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Último ingreso</dt><dd>12 nov 2024, 08:14 · Cúcuta</dd></div><div class="def-row"><dt>Estado de la cuenta</dt><dd><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Limitado</span></dd></div><div class="def-row"><dt>Rol</dt><dd><span class="badge b-amarillo"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>ESTUDIANTE</span></dd></div></dl></div></div></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -1100,23 +1117,10 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
      para fusionar en la pantalla de gestion los formularios de edicion de
      docente/estudiante, que antes eran paginas aparte. */
-  var SEQ_FORM = 0;
-  /* A34: copia del formulario con ids (y labels for) re-sufijados "-mN" para
-     que el modal no duplique los ids del original oculto. Devuelve null si el
-     contenedor no existe. */
-  function plantillaModal(id) {
-    var plantilla = document.getElementById(id);
-    if (!plantilla) return null;
-    SEQ_FORM += 1;
-    var suf = "-m" + SEQ_FORM;
-    return plantilla.innerHTML
-      .replace(/id="([^"]+)"/g, function (m0, x) { return 'id="' + x + suf + '"'; })
-      .replace(/for="([^"]+)"/g, function (m0, x) { return 'for="' + x + suf + '"'; });
-  }
   function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
-    var htmlPlant = plantillaModal(idForm);
-    if (!htmlPlant) { abrirEditor(titulo, celdaDe(boton)); return; }
-    abrirModal(titulo, htmlPlant, [
+    var plantilla = document.getElementById(idForm);
+    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, plantilla.innerHTML, [
       { txt: "Cancelar", clase: "btn btn-secundario" },
       { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
         toast(mensaje || "Cambios guardados", "ok");
@@ -1344,7 +1348,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
-    var t = $("main table.tabla") || $("table.tabla");
+    var t = tablaDoc();
     if (!t) return "";
     var c = t.cloneNode(true);
     $$("th.acc, td.acc, input, button, a.table-act", c).forEach(function (n) { n.remove(); });
@@ -1353,13 +1357,21 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   /* Item 3: documento imprimible de la pantalla. Si hay tabla principal se
      imprime la tabla; si no (tarjetas, kanban, linea de tiempo) se imprime una
      copia legible del contenido, sin controles ni paneles ocultos. */
+  /* Las tablas dentro de [data-doc] pertenecen al documento aunque no sean
+     la tabla principal de la pantalla; [data-no-doc] excluye lo que solo
+     sirve en vivo (la barra de progreso, por ejemplo). */
+  function tablaDoc() {
+    var t = $("main [data-doc] table.tabla") || $("main [data-doc]") ||
+      $("main table.tabla") || $("table.tabla");
+    return t ? t.cloneNode(true) : null;
+  }
   function vistaDocumento() {
     var t = tablaComoHTML();
     if (t) return t;
     var main = $("main.content") || $("main");
     if (!main) return "";
     var c = main.cloneNode(true);
-    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [hidden]", c)
+    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [data-no-doc], [hidden]", c)
       .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
     return c.innerHTML;
   }
@@ -1374,8 +1386,11 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     "dt{width:190px;color:#162644;font-size:13px}dd{margin:0;flex:1;font-size:13px}" +
     "table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}" +
     "th,td{border:1px solid #bbbbbb;padding:6px 8px;text-align:left}th{background:#ffffff}" +
+    "tbody tr:nth-child(even) td{background:#fafafa}" +
     "footer{margin-top:24px;font-size:13px;color:#162644;border-top:1px solid #bbbbbb;padding-top:8px}" +
     "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
+    ".doc-suave{color:#162644;font-size:12px}" +
+    "h2{margin-top:22px;padding-top:10px;border-top:1px solid #bbbbbb}" +
     ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
     ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
     ".kan-col,.ln-item,.aviso{margin-bottom:8px}" +
@@ -1508,27 +1523,6 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
           "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
         break;
 
-      case "dar-de-baja":
-        /* A-4: baja lógica con efecto en cascada. Las asignaciones,
-           solicitudes y comentarios del usuario quedan inactivos. */
-        e.preventDefault();
-        var filaBaja = filaDe(b);
-        var nomBaja = "";
-        if (filaBaja && filaBaja.children[1]) {
-          nomBaja = (filaBaja.children[1].textContent || "")
-            .replace(/\s+/g, " ").trim();
-        }
-        confirmar("Dar de baja",
-          "Se dará de baja a " + (nomBaja || "este usuario") + ". Sus asignaciones, " +
-          "solicitudes y comentarios quedarán inactivos. Puedes revertirlo cambiando " +
-          "el estado de acceso a Activo.",
-          function () {
-            if (filaBaja) filaBaja.remove();
-            toast("Usuario dado de baja. Cascada aplicada.", "ok");
-            if (typeof vacioRefrescar === "function") vacioRefrescar();
-          });
-        break;
-
       case "solicitud-aprobar":
         e.preventDefault();
         confirmar("Aprobar solicitud",
@@ -1605,6 +1599,9 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       }
 
       case "editar":
+      case "registrar-avance":
+      case "asignar":
+      case "editar-sensores":
         e.preventDefault();
         abrirEditor("Editar registro", registro);
         break;
@@ -1722,13 +1719,76 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       }
 
       case "exportar-expediente": {
-        /* El boton "Exportar" de Mi emprendimiento genera el expediente: el
-           reporte completo de la pantalla, listo para guardar como PDF. */
+        /* El boton "Exportar" de Mi emprendimiento genera el expediente del
+           emprendimiento: la tabla del listado mas los bloques que el
+           estudiante ve en pantalla (avance por fase e historial). */
         e.preventDefault();
+        var clonExp = tablaDoc();
+        var tablaExp = clonExp ? clonExp.outerHTML : "";
+        var bloquesExp = "";
+        $$("[data-expediente]").forEach(function (z) {
+          var cc = z.cloneNode(true);
+          $$("button, input, select, textarea, script, [data-no-doc], [hidden]", cc)
+            .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+          bloquesExp += cc.innerHTML;
+        });
+        if (tablaExp) bloquesExp = tablaExp + bloquesExp;
+        var resumenExp = csvDeMetricas() ? "" : "";
         imprimirDocumento("Expediente - " + tituloPagina(),
           '<p class="doc-meta">' + esc(tituloPagina()) +
-          " &middot; reporte completo</p>" + vistaDocumento());
+          " &middot; expediente completo</p>" +
+          (bloquesExp || vistaDocumento()));
         toast("Abriendo el expediente para guardar como PDF…", "info");
+        break;
+      }
+
+      case "descargar-plan": {
+        /* Descargar el plan de trabajo: un documento con encabezado, resumen de
+           las cuatro fases y el detalle de tareas por fase. Antes volcaba un
+           CSV plano con las celdas desordenadas; ahora la lectura es la misma
+           de la pantalla. */
+        e.preventDefault();
+        var raizPlan = $("[data-panel-nombre]:not([hidden])") || document;
+        var resumen = "", detalle = "";
+        $$(".card", raizPlan).forEach(function (card) {
+          var t = $(".card-head h3 a, .card-head h3", card);
+          var fase = t ? t.textContent.replace(/\s+/g, " ").trim() : "";
+          if (!fase) return;
+          var pctEl = $(".card-head > span:last-child", card);
+          var pct = pctEl ? pctEl.textContent.replace(/\s+/g, " ").trim() : "";
+          var tareas = $$(".fila-tarea", card);
+          var hechas = 0;
+          var filasHtml = tareas.map(function (f) {
+            var c = f.cloneNode(true);
+            var b = $(".badge", c);
+            var estado = b ? b.textContent.replace(/\s+/g, " ").trim() : "";
+            if (b) b.parentNode.removeChild(b);
+            var sub = $(".fila-sub", c);
+            var meta = sub ? sub.textContent.replace(/\s+/g, " ").trim() : "";
+            if (sub) sub.parentNode.removeChild(sub);
+            var titulo = c.textContent.replace(/\s+/g, " ").trim();
+            if (estado.toLowerCase().indexOf("completada") >= 0) hechas++;
+            return "<tr><td><b>" + esc(titulo) + "</b><br><span class=\"doc-suave\">" +
+              esc(meta) + "</span></td><td>" + esc(estado) + "</td></tr>";
+          }).join("");
+          if (!filasHtml) {
+            filasHtml = '<tr><td colspan="2" class="doc-suave">Sin tareas asignadas en esta fase.</td></tr>';
+          }
+          resumen += "<tr><td><b>" + esc(fase) + "</b></td><td>" + esc(pct) +
+            "</td><td>" + hechas + " de " + tareas.length + "</td></tr>";
+          detalle += "<h2>" + esc(fase) + " &middot; " + esc(pct) + "</h2>" +
+            "<table><thead><tr><th>Tarea</th><th>Estado</th></tr></thead><tbody>" +
+            filasHtml + "</tbody></table>";
+        });
+        var cuerpoPlan =
+          '<p class="doc-meta">' + esc(tituloPagina()) +
+          " &middot; las cuatro fases del programa con el avance y las tareas de cada una</p>" +
+          "<h2>Resumen de avance</h2>" +
+          "<table><thead><tr><th>Fase</th><th>Avance</th><th>Tareas completadas</th></tr></thead>" +
+          "<tbody>" + resumen + "</tbody></table>" +
+          detalle;
+        imprimirDocumento("Plan de trabajo - " + tituloPagina(), cuerpoPlan);
+        toast("Abriendo el plan de trabajo para guardar como PDF...", "info");
         break;
       }
 
@@ -2017,37 +2077,10 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
           });
         break;
 
-      case "crear-respaldo":
-        e.preventDefault();
-        confirmar("Crear respaldo",
-          "Se generará un respaldo completo de la base de datos (aprox. 84 MB).",
-          function () {
-            var tarjeta = b.closest(".card");
-            var tb = tarjeta ? $("tbody", tarjeta) : null;
-            if (tb) {
-              var f = document.createElement("tr");
-              var d = new Date();
-              var hh = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
-              var fecha = d.getDate() + " " + ["ene", "feb", "mar", "abr", "may", "jun",
-                "jul", "ago", "sep", "oct", "nov", "dic"][d.getMonth()] + " " +
-                d.getFullYear() + ", " + hh;
-              var cod = "BKP-" + d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) +
-                ("0" + d.getDate()).slice(-2) + "-" + hh.replace(":", "");
-              f.innerHTML =
-                "<td><b>" + cod + "</b></td><td>Completo</td><td>" + fecha + "</td>" +
-                "<td>84 MB</td><td>Exitosa</td>" +
-                '<td class="acciones-cell"><button data-accion="descargar" title="Descargar" ' +
-                'aria-label="Descargar">' + icono(ICO.descargar, 16) + "</button></td>";
-              tb.insertBefore(f, tb.firstElementChild);
-            }
-            toast("Respaldo creado", "ok");
-          });
-        break;
-
       case "generar-reporte":
         e.preventDefault();
         confirmar("Generar reporte",
-          "Se generará el reporte maestro para 46 emprendimientos (aprox. 1.284 filas). El archivo quedará disponible en Reportes.",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
           function () { toast("Reporte en cola de generación", "info"); });
         break;
 
@@ -2060,95 +2093,6 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       case "asignar-tarea":
         e.preventDefault();
         abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
-        break;
-
-      case "editar-tarea":
-        e.preventDefault();
-        abrirFormulario("Editar tarea", "form-tarea", b, "Guardar cambios",
-          "Tarea actualizada");
-        break;
-
-      case "eliminar-tarea":
-        e.preventDefault();
-        var filaTarea = filaDe(b);
-        var titTarea = "";
-        if (filaTarea && filaTarea.children[0]) {
-          titTarea = (filaTarea.children[0].textContent || "")
-            .replace(/\s+/g, " ").trim();
-        }
-        confirmar("Eliminar tarea",
-          "Se eliminará: " + (titTarea || "la tarea") + ". Los estudiantes " +
-          "dejarán de verla. Esta acción no se puede deshacer.",
-          function () {
-            if (filaTarea) filaTarea.remove();
-            toast("Tarea eliminada", "ok");
-            if (typeof vacioRefrescar === "function") vacioRefrescar();
-          });
-        break;
-
-      case "nueva-tarea":
-        /* V3: alta real. El modal reutiliza #form-tarea y, al confirmar,
-           lee los campos y agrega la fila a la tabla del admin. */
-        e.preventDefault();
-        var plantNueva = plantillaModal("form-tarea");
-        if (!plantNueva) break;
-        abrirModal("Nueva tarea", plantNueva, [
-          { txt: "Cancelar", clase: "btn btn-secundario" },
-          { txt: "Crear tarea", clase: "btn btn-primario", alClic: function (veloT) {
-              var vals = {};
-              $$(".campo", veloT).forEach(function (c) {
-                var lbl = $("label", c);
-                var el = $("input, select, textarea", c);
-                if (lbl && el) {
-                  vals[lbl.textContent.replace(/\*/g, "").replace(/\s+/g, " ")
-                    .trim().toLowerCase()] = el.value;
-                }
-              });
-              var titT = (vals["título de la tarea"] || "").trim() || "Nueva tarea";
-              var empT = (vals["emprendimiento"] || "").trim();
-              if (!empT || empT.indexOf("- Elegir") === 0) empT = "Sin emprendimiento";
-              var estT = (vals["estudiante"] || "").trim();
-              if (!estT || estT.indexOf("- Elegir") === 0) estT = "Sin estudiante";
-              var prioT = (vals["prioridad"] || "Media").trim() || "Media";
-              var venceT = (vals["vence el"] || "").trim() || "Sin fecha";
-              if (/^\d{4}-\d{2}-\d{2}$/.test(venceT)) {
-                var mesesT = ["ene", "feb", "mar", "abr", "may", "jun", "jul",
-                              "ago", "sep", "oct", "nov", "dic"];
-                var pT = venceT.split("-");
-                venceT = parseInt(pT[2], 10) + " " +
-                  mesesT[parseInt(pT[1], 10) - 1] + " " + pT[0];
-              }
-              var prioCls = prioT === "Alta" ? "b-amarillo"
-                : prioT === "Baja" ? "b-linea" : "b-azul";
-              var tbT = document.querySelector("#zona-tareas tbody");
-              if (tbT) {
-                var filaN = document.createElement("tr");
-                filaN.innerHTML =
-                  '<td data-label="Tarea"><b>' + esc(titT) + "</b></td>" +
-                  '<td data-label="Emprendimiento">' + esc(empT) + "</td>" +
-                  '<td data-label="Estudiante">' + esc(estT) + "</td>" +
-                  '<td data-label="Prioridad"><span class="badge ' + prioCls + '">' +
-                    esc(prioT) + "</span></td>" +
-                  '<td data-label="Vence">' + esc(venceT) + "</td>" +
-                  '<td data-label="Estado"><span class="badge b-neutra">Pendiente</span></td>' +
-                  '<td class="acc" data-label="Acciones"><div class="acciones-cell">' +
-                    '<button data-accion="editar-tarea" title="Editar" aria-label="Editar">' +
-                      icono(ICO.lapiz, 16) + "</button>" +
-                    '<button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar">' +
-                      icono(ICO.x, 16) + "</button>" +
-                  "</div></td>";
-                tbT.insertBefore(filaN, tbT.firstElementChild);
-              }
-              toast("Tarea asignada", "ok");
-            } }
-        ]);
-        break;
-
-      case "ver-tareas":
-        /* Emprendimientos -> baja suave al tablero de tareas de la vista. */
-        e.preventDefault();
-        var zonaT = document.getElementById("zona-tareas");
-        if (zonaT) zonaT.scrollIntoView({ behavior: "smooth", block: "start" });
         break;
 
       default:
@@ -2600,6 +2544,98 @@ guardar(estado);
   document.addEventListener("click", function () {
     $$(".who-menu.visible").forEach(function (m) { m.classList.remove("visible"); });
   });
+
+  /* --- datos academicos del perfil (estudiante) -------------------------- */
+  /* Tres niveles: pregrado, posgrado y egresado. Cada uno muestra un juego
+     distinto de campos; el semestre depende del programa (posgrado) o
+     desaparece (egresado). */
+  function opcionSelect(sel, valor) {
+    if (!sel || !valor) return false;
+    var ok = false;
+    $$("option", sel).forEach(function (o) {
+      if (o.value === valor || o.textContent.trim() === valor) { o.selected = true; ok = true; }
+    });
+    return ok;
+  }
+  function sincronizarAcademico() {
+    var nivel = $("[data-acad-nivel]");
+    if (!nivel) return;
+    var v = (nivel.value || "").toLowerCase();
+    var posgrado = v.indexOf("posgrado") >= 0;
+    var egresado = v.indexOf("egresado") >= 0;
+    var tipo = $("[data-acad-tipo]");
+    var semestre = $("[data-acad-semestre]");
+    var modalidad = $("[data-acad-modalidad]");
+    var posgradoCampos = $("[data-acad-posgrado-campos]");
+    var egresadoCampos = $("[data-acad-egresado-campos]");
+    var semestreCampo = $("[data-acad-semestre-campo]");
+    var duracion = $("[data-acad-duracion]");
+    if (posgradoCampos) posgradoCampos.hidden = !posgrado;
+    if (egresadoCampos) egresadoCampos.hidden = !egresado;
+    if (semestreCampo) semestreCampo.hidden = egresado;
+    if (modalidad && modalidad.closest(".campo")) {
+      modalidad.closest(".campo").hidden = egresado;
+    }
+
+    /* Duracion por tipo de posgrado en UNIMINUTO (El programa confirma 2
+       periodos para especializacion; la maestria va de 3 a 4; el doctorado
+       depende del programa y suele ir de 6 a 8). El minimo y el maximo
+       marcan cuantos semestres ofrece el campo "Semestre". */
+    var DURACION = {
+      "especialización": [2, 2], "especializacion": [2, 2],
+      "maestría": [3, 4], "maestria": [3, 4],
+      "doctorado": [6, 8]
+    };
+    var ORD = ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto",
+      "Séptimo", "Octavo", "Noveno", "Décimo", "Undécimo", "Duodécimo"];
+    var NUM = {};
+    ORD.forEach(function (o, k) { NUM[o] = k + 1; });
+
+    function llenarSemestre(desde, hasta) {
+      if (!semestre) return;
+      var previo = semestre.value;
+      var n = hasta;
+      var opciones = [];
+      for (var k = 1; k <= n; k++) opciones.push(ORD[k - 1]);
+      if ($$("option", semestre).length !== n) {
+        semestre.innerHTML = opciones.map(function (o) {
+          return "<option>" + o + "</option>";
+        }).join("");
+      }
+      var queria = NUM[previo] || desde;
+      if (queria < desde) queria = desde;
+      if (queria > hasta) queria = hasta;
+      semestre.value = ORD[queria - 1];
+    }
+
+    if (posgrado) {
+      var tipoVal = (tipo ? tipo.value : "").toLowerCase();
+      var rango = DURACION[tipoVal] || [3, 4];
+      llenarSemestre(rango[0], rango[1]);
+      if (duracion) {
+        duracion.textContent = rango[0] === rango[1]
+          ? ("Duración: " + rango[0] + " semestres.")
+          : ("Duración: " + rango[0] + " a " + rango[1] + " semestres; elige el semestre en el que vas.");
+      }
+    } else {
+      /* Pregrado conserva los diez semestres de un programa profesional. */
+      llenarSemestre(1, 10);
+      if (duracion) duracion.textContent = "";
+    }
+  }
+  var nivelAcad = $("[data-acad-nivel]");
+  if (nivelAcad) {
+    nivelAcad.addEventListener("change", sincronizarAcademico);
+    var tipoAcad = $("[data-acad-tipo]");
+    if (tipoAcad) tipoAcad.addEventListener("change", sincronizarAcademico);
+    var prevAcad = store(true);
+    var nivelPrevio = prevAcad && prevAcad.perfil && prevAcad.perfil["nivel academico"];
+    if (nivelPrevio && opcionSelect(nivelAcad, nivelPrevio)) {
+      setTimeout(sincronizarAcademico, 0);
+    } else {
+      sincronizarAcademico();
+    }
+  }
 
   /* --- estado inicial ----------------------------------------------------- */
   var previo = store(true);
