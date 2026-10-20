@@ -70,7 +70,7 @@ SHELL_CSS = """
 .shell{display:flex;min-height:100vh;background:var(--blanco)}
 .sidebar{
   width:264px;flex:0 0 264px;background:var(--azul-noche);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 .brand{
   display:flex;flex-direction:column;align-items:center;gap:12px;
@@ -87,7 +87,7 @@ SHELL_CSS = """
 .brand-text{text-align:center}
 .brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
-.nav{padding:10px 10px 8px;overflow-y:auto;flex:1}
+.nav{padding:10px 10px 8px;flex:1 0 auto;overflow:visible}
 .nav-group{margin-bottom:6px}
 .nav-label{
   display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;
@@ -105,7 +105,7 @@ SHELL_CSS = """
    El max-height se ajusta al grupo mas largo (4 hijos) para que la animacion
    no quede con una cola muerta antes de terminar de abrir. */
 .nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
-.nav-group.abierto .nav-hijos{max-height:190px}
+.nav-group.abierto .nav-hijos{max-height:400px}
 @media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
 .nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
@@ -592,6 +592,11 @@ CALENDARIO_CSS = (
     ".cal-celda.hoy{background:#ffd300;font-weight:700}"
     ".cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;"
     "border-radius:999px;background:#004a93}"
+    ".cal-celda.cal-dia-btn{display:block;width:100%;box-sizing:border-box;font:inherit;"
+    "font-size:13px;font-weight:400;padding:8px;text-align:center;cursor:pointer;"
+    "color:#051533;background:#ffffff;border:1px solid #bbbbbb}"
+    ".cal-celda.cal-dia-btn:hover{background:rgba(0,74,147,.06);border-color:#004a93}"
+    ".cal-celda.cal-dia-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}"
     # Calendario navegable del Docente: cada dia es un boton. Se anaden
     # selectores nuevos (.cal-btn, .cal-resumen) para no alterar el calendario
     # estatico del Estudiante, cuyas celdas siguen siendo divs .cal-celda.

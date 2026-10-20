@@ -199,7 +199,6 @@ MIGAS = {
         "tablero": "seguimiento-dashboard.html",
         "asignaciones": "asignaciones.html",
         "asignar emprendimiento": "asignaciones.html",
-        "moderación de comentarios": "comentarios.html",
         "asesorías": "asesorias.html",
         "eventos": "eventos.html",
         "crear evento": "evento-form.html",
@@ -234,8 +233,8 @@ NOTIFS_EST = [
 # que el topbar y la vista no puedan divergir. Campos:
 # (leida, titulo, texto, fecha, icono, tipo, href).
 NOTIFS_ADMIN = [
-    (False, "3 emprendimientos sin docente",
-     "Tres emprendimientos siguen sin docente asignado en la fase actual.",
+    (False, "1 emprendimiento sin docente",
+     "Un emprendimiento sigue sin docente asignado en la fase actual.",
      "hoy, 08:15", "users", "asignacion", "asignaciones.html"),
     (False, "5 diagnosticos sin revisión",
      "Cinco diagnosticos enviados por estudiantes esperan tu revisión.",
@@ -734,11 +733,14 @@ def steps(items, actual=0):
     return h + "</div>"
 
 
-def calendario(mes, anio, hoy=12, marcados=(21, 26, 2)):
+def calendario(mes, anio, hoy=12, marcados=(21, 26, 2), eventos=None):
     """Calendario mensual del kit (rejilla Lu..Do) con marcas en dias de evento.
 
     Misma salida que el calendario del rol Estudiante (celdas `.cal` y un punto
-    en los dias con evento). `mes` es el nombre en espanol."""
+    en los dias con evento). `mes` es el nombre en espanol. `eventos` es un
+    dict {dia: (titulo, detalle)}: esos dias se pintan como botones
+    `.cal-dia-btn` cuyo clic abre un modal en la misma pagina (ver
+    #cal-dia-btn en lib_js) sin redireccionar a otra vista."""
     import calendar
     MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5,
              "junio": 6, "julio": 7, "agosto": 8, "septiembre": 9,
@@ -751,13 +753,25 @@ def calendario(mes, anio, hoy=12, marcados=(21, 26, 2)):
     h += '<div class="cal">'
     for _ in range(primer_dia):
         h += '<div class="cal-vacio"></div>'
+    eventos = eventos or {}
+
+    def attr(s):
+        return str(s).replace("&", "&amp;").replace('"', "&quot;")
+
     for d in range(1, n_dias + 1):
-        h += '<div class="cal-celda%s">%d' % (" hoy" if d == hoy else "", d)
+        ev = eventos.get(d)
+        clase = " hoy" if d == hoy else ""
+        if ev:
+            h += ('<button type="button" class="cal-celda cal-dia-btn%s" '
+                  'data-ev-titulo="%s" data-ev-detalle="%s" '
+                  'aria-label="%d de %s: %s">%d'
+                  % (clase, attr(ev[0]), attr(ev[1]), d, mes, attr(ev[0]), d))
+        else:
+            h += '<div class="cal-celda%s">%d' % (clase, d)
         if d in marcados:
             h += '<span class="cal-punto"></span>'
-        h += "</div>"
+        h += "</button>" if ev else "</div>"
     return h + "</div>"
-
 
 def calendario_interactivo(mes, anio, dias, hoy=12, vacio=""):
     """Calendario navegable: al elegir un dia cambia el panel de compromisos.

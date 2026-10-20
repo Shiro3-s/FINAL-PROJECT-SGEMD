@@ -401,11 +401,14 @@ def dashboard():
                 "aparecerán aquí con su fecha y hora.", "calendar"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Calendario", calendario("noviembre", 2024, hoy=12, marcados=(21,26,2)))
+    cuerpo += card("Calendario", calendario("noviembre", 2024, hoy=12, marcados=(18, 22),
+                                       eventos={18: ("Taller de costos y precios",
+                                                  "Auditorio A · 32 de 40 cupos · Publicado"),
+                                              22: ("Feria de emprendedores",
+                                                  "Plaza central · 86 de 120 cupos · Publicado")}))
     cuerpo += card("Pendientes de decisión", lista_def([
-        ("<a href='asignaciones.html'>Emprendimientos sin docente</a>", "3"),
+        ("<a href='asignaciones.html'>Emprendimientos sin docente</a>", "1"),
         ("<a href='eventos.html'>Eventos por aprobar</a>", "1"),
-        ("<a href='comentarios.html'>Comentarios reportados</a>", "3"),
         ("<a href='diagnosticos.html'>Diagnósticos sin revisar</a>", "5"),
     ]))
     cuerpo += card("Distribución de usuarios", donut(
@@ -766,8 +769,7 @@ def emprendimiento_expediente():
                            "precios.")
                  + "</div>"
                  + '<div class="form-acciones">'
-                 + _btn("puntos", "Moderar comentarios", "comentarios.html",
-                        "btn btn-secundario") + "</div>")
+                 + "</div>")
 
     ev_panel = (
         card("Evidencias y anexos del expediente",
@@ -832,8 +834,7 @@ def emprendimiento_expediente():
                           "emprendimiento-plan.html")
                    + _btn("trend", "Ver tablero de seguimiento",
                           "seguimiento-dashboard.html", "btn btn-secundario")
-                   + _btn("puntos", "Moderar comentarios", "comentarios.html",
-                          "btn btn-secundario")
+
                    + _exportar("Exportar expediente")
                    + "</div>")
     cuerpo += "</div></div>"
@@ -1032,7 +1033,7 @@ def seguimiento_dashboard():
         "", "", [("Al día", 31, AZUL), ("En riesgo", 9, AMAR),
                  ("Inactivos", 6, GRIS)], "emprendimientos"))
     cuerpo += card("Acciones sugeridas", lista_def([
-        ("Asignar docente a 3 emprendimientos", "Sin asignar"),
+        ("Asignar docente a 1 emprendimiento", "Sin asignar"),
         ("Contactar 6 estudiantes inactivos", "15 días sin avance"),
         ("Revisar 5 diagnosticos", "Sin revisión"),
     ]) + _vacio(".def-row", "Sin acciones pendientes",
@@ -1117,73 +1118,6 @@ def asignar_emprendimiento():
 
 
 # --- 42. Moderacion de comentarios -------------------------------------------
-def comentarios():
-    """Dos colas lado a lado: lo reportado y lo visible. Sin tabla."""
-    cuerpo = callout("Solo los comentarios <b>reportados</b> requieren moderación. "
-                     "Borrar un comentario es permanente.", "bombilla")
-    cuerpo += '<div class="sep sep-20"></div>'
-    cuerpo += metricas([
-        ("alerta", "Reportados", "3", "", 25, None),
-        ("chat", "Visibles", "27", "", 90, "+4"),
-        ("trash", "Borrados este mes", "2", "", 12, None),
-    ])
-    cuerpo += '<div class="sep sep-20"></div>'
-    cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid">'
-    cuerpo += '<div id="cola"></div>'
-    cuerpo += card("Cola de moderación (3)", lista_avisos([
-        ("Requieren decisión", [
-            ("chat", "Comentario reportado en Sabor y Sabe",
-             "Estudiante · EMP-041 · 12 nov 2024", "#cola",
-             "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
-            ("chat", "Lenguaje inapropiado en Krea Textil",
-             "Docente · EMP-040 · 12 nov 2024", "#cola",
-             "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
-            ("chat", "Comentario duplicado en EcoPack",
-             "Estudiante · EMP-039 · 11 nov 2024", "#cola",
-             "alta", _b("check", "Aprobar") + " " + _b("trash", "Borrar")),
-        ]),
-    ]) + _vacio(".aviso", "Sin comentarios por moderar",
-                "Los comentarios reportados aparecerán aquí para que decidas "
-                "si aprobarlos o borrarlos.", "chat"))
-    cuerpo += card("Publicados recientemente", '<div class="card-body">'
-                   + '<div class="grid" style="gap:10px">'
-                   + '<div class="fila-simple"><div><b>Consulta sobre el evento de costos</b>'
-                     '<div class="nota-foot">Docente · EMP-041 · 10 nov 2024</div></div>'
-                     '<div class="fila-6">' + _b("eye", "Ver")
-                     + _b("x", "Ocultar") + '</div></div>'
-                   + '<div class="fila-simple"><div><b>Sugerencia para el plan de trabajo</b>'
-                     '<div class="nota-foot">Docente · EMP-037 · 09 nov 2024</div></div>'
-                     '<div class="fila-6">' + _b("eye", "Ver")
-                     + _b("x", "Ocultar") + '</div></div>'
-                   + '<div class="fila-simple"><div><b>Duda sobre el costo de insumos</b>'
-                     '<div class="nota-foot">Estudiante · EMP-035 · 08 nov 2024</div></div>'
-                     '<div class="fila-6">' + _b("eye", "Ver")
-                     + _b("x", "Ocultar") + '</div></div>'
-                   + '</div></div>')
-    cuerpo += "</div>"
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Reglas de moderación", lista_def([
-        ("Reportado", "3 en cola"),
-        ("Visible", "27 publicados"),
-        ("Oculto", "5 ocultos"),
-        ("Borrado", "2 este mes"),
-    ]))
-    cuerpo += card("Acciones",
-                   '<div class="fila-col">'
-                   + '<a class="btn btn-primario" href="#cola">%s '
-                     'Moderar cola</a>' % ico("check", 16)
-                   + '<a class="btn btn-secundario" href="reportes.html">%s '
-                     'Ver reportes</a>' % ico("doc", 16)
-                   + "</div>")
-    cuerpo += "</div></div>"
-    cuerpo = formulario("comentarios", cuerpo)
-    return shell(R, "comentarios", "Moderación de comentarios", cuerpo,
-                 migas=["Inicio", "Moderación de comentarios"],
-                 sub="Aprueba, oculta o borra comentarios de la comunidad.")
-
-
-# --- 43. Metricas y programa de asesorias ------------------------------------
 def _cuerpo_asesoria_form():
     """Formulario de crear/editar asesoría. Se abre en un modal desde asesorías();
     los campos llevan name para prefiltarlos al editar."""
@@ -1422,6 +1356,61 @@ def evento_form():
 
 
 # --- 46. Asignaciones --------------------------------------------------------
+# --- 46. Asignaciones: hoja de pagina y modal de asignacion ----------------
+# El boton de la tabla pasa de icono 32x32 a btn-sm con texto al confirmar
+# (evita el desborde) y la hoja anade el margen/nowrap que lo contiene.
+HOJA_BTN_REASIGNAR = "\ntable.tabla .acc .btn{margin-left:4px;white-space:nowrap;max-width:100%;width:auto;min-width:0;padding:0 12px;justify-content:center;height:32px;flex:0 0 auto}"
+JS_ASIGNAR_DOCENTE = r"""
+/* Asignar/reasignar docente: modal inline que lee y escribe los dataset de la
+   fila. Al confirmar, el boton se vuelve btn-sm con el texto "Reasignar
+   docente" (antes solo tenia el icono y desbordaba la celda). */
+document.querySelector("#vista-asignaciones").addEventListener("click", function (event) {
+  var button = event.target.closest("[data-accion='asignar-docente-inline']");
+  if (!button) return;
+  var fila = button.closest("tr");
+  var actual = fila.dataset.docente || "Sin docente asignado";
+  var docentes = (function () {
+    var vistos = {};
+    var nombres = [];
+    document.querySelectorAll("table.tabla tbody tr").forEach(function (tr) {
+      var n = (tr.dataset.docente || "").trim();
+      if (n && n !== "Sin docente" && !vistos[n]) { vistos[n] = 1; nombres.push(n); }
+    });
+    return nombres;
+  })();
+  var opciones = docentes.map(function (d) {
+    var sel = d === actual ? " selected" : "";
+    return "<option" + sel + ">" + d + "</option>";
+  }).join("");
+  var velo = document.createElement("div");
+  velo.className = "modal-velo";
+  velo.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-label="Asignar docente"><div class="modal-head"><h2>' +
+    (actual === "Sin docente asignado" ? "Asignar docente" : "Reasignar docente") + '</h2><button class="icon-btn modal-x" aria-label="Cerrar">\u00d7</button></div>' +
+    '<div class="modal-cuerpo"><p><b>Proyecto:</b> ' + fila.dataset.proyecto + '<br><b>Estudiante:</b> ' + fila.dataset.estudiante + '</p>' +
+    '<div class="campo"><label for="docente-asignacion">Docente registrado</label><select id="docente-asignacion">' + opciones + '</select></div>' +
+    '<p class="modal-aviso">La confirmaci\u00f3n actualizar\u00e1 el docente visible en esta tabla.</p></div><div class="modal-foot"><button class="btn btn-secundario modal-cancelar">Cancelar</button><button class="btn btn-primario modal-confirmar">Confirmar asignaci\u00f3n</button></div></div>';
+  document.body.appendChild(velo);
+  function cerrar() { velo.remove(); document.body.classList.remove("sin-scroll"); }
+  document.body.classList.add("sin-scroll");
+  velo.querySelector(".modal-x").addEventListener("click", function (e) { e.stopPropagation(); cerrar(); });
+  velo.querySelector(".modal-cancelar").addEventListener("click", function (e) { e.stopPropagation(); cerrar(); });
+  velo.querySelector(".modal-confirmar").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var docente = velo.querySelector("#docente-asignacion").value;
+    fila.dataset.docente = docente.split(" \u2014 ")[0];
+    fila.cells[3].textContent = fila.dataset.docente;
+    fila.cells[4].innerHTML = '<span class="badge b-azul">Asignado</span>';
+    button.className = "btn btn-sm btn-secundario";
+    button.textContent = "Reasignar docente";
+    button.title = "Reasignar docente";
+    button.setAttribute("aria-label", "Reasignar docente");
+    cerrar();
+    if (typeof toast === "function") toast("Docente asignado correctamente", "ok");
+  });
+});
+"""
+
+
 def asignaciones():
     """Carga de docentes arriba, cola de asignaciones pendientes abajo."""
     cuerpo = callout("Un docente puede tener hasta <b>12 emprendimientos</b>. "
@@ -1467,6 +1456,15 @@ def asignaciones():
                    + "</div>")
     cuerpo += "</div></div>"
     cuerpo = formulario("asignaciones", cuerpo)
+    hoja = (".toolbar .toolbar-field{flex:1 1 220px;min-width:190px;margin-bottom:0}"
+            ".toolbar .toolbar-field label{margin-bottom:6px}"
+            ".toolbar .toolbar-field input.filtro,.toolbar .toolbar-field select.filtro{width:100%;}"
+            ".table-act svg{pointer-events:none}"
+            ".badge svg{width:14px;height:14px;flex:0 0 14px}"
+            ".callout>svg{flex:0 0 18px;color:var(--azul-real);margin-top:1px}"
+            ".page-head .btn svg{color:currentColor}"
+            "table.tabla .acc .btn{margin-left:4px;white-space:nowrap;max-width:100%;width:auto;min-width:0;padding:0 12px;justify-content:center;height:32px;flex:0 0 auto}")
+    js = HOJA_BTN_REASIGNAR + JS_ASIGNAR_DOCENTE
     return shell(R, "asignaciones", "Asignaciones", cuerpo,
                  migas=["Inicio", "Asignaciones"],
                  sub="Docente asignado por emprendimiento y carga semanal.")
@@ -1689,7 +1687,7 @@ def notificaciones():
     no_leidas = sum(1 for n in NOTIFS_ADMIN if not n[0])
     dias = [
         ("Hoy, 12 de noviembre", [
-            ("08:15", "3 emprendimientos siguen sin docente",
+            ("08:15", "1 emprendimiento sigue sin docente",
              "Asignaciones · Sin docente asignado",
              '<a class="btn btn-sm btn-primario" href="asignaciones.html">'
              'Asignar</a>'),
@@ -1703,10 +1701,6 @@ def notificaciones():
              "Eventos · Creado por docente tutor",
              '<a class="btn btn-sm btn-secundario" href="eventos.html">'
              'Aprobar</a>'),
-            ("11:05", "Moderaste 3 comentarios reportados",
-             "Moderación · Cola de reportes",
-             '<a class="btn btn-sm btn-secundario" href="comentarios.html">'
-             'Ver cola</a>'),
         ]),
         ("12 de noviembre", [
             ("18:20", "Reporte de seguimiento generado",
@@ -1801,7 +1795,6 @@ def registrar(reg):
         ("seguimiento.html", "07 Admin - Seguimiento", seguimiento),
         ("seguimiento-dashboard.html", "08 Admin - Tablero de seguimiento",
          seguimiento_dashboard),
-        ("comentarios.html", "10 Admin - Moderación de comentarios", comentarios),
         ("asesorias.html", "11 Admin - Asesorías", asesorias),
         ("eventos.html", "12 Admin - Eventos", eventos),
         ("evento-form.html", "13 Admin - Crear evento", evento_form),

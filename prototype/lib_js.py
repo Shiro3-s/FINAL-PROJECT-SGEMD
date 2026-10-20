@@ -2045,6 +2045,21 @@ guardar(estado);
     bComp.disabled = true;
     bComp.innerHTML = "Completada " + icono(ICO.check, 15);
   }
+  /* Calendario de Inicio: el dia con evento abre un modal en la misma
+     pagina (sin redireccionar). El detalle viaja en data-ev-*. */
+  $$(".cal-dia-btn").forEach(function (celda) {
+    celda.addEventListener("click", function () {
+      var titulo = celda.getAttribute("data-ev-titulo");
+      var detalle = celda.getAttribute("data-ev-detalle") || "";
+      abrirModal(titulo,
+        "<p><b>" + esc(titulo) + "</b></p><p>" + esc(detalle) + "</p>",
+        [
+          { txt: "Ver en Eventos", clase: "btn btn-primario",
+            alClic: function () { location.href = "eventos.html"; } },
+          { txt: "Cerrar", clase: "btn btn-secundario" }
+        ]);
+    });
+  });
   /* Estado inicial de los estados vacios de listas y tablas. */
   vacioRefrescar();
   document.documentElement.classList.add("js-listo");
