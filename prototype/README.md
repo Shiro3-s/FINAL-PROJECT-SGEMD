@@ -1,7 +1,7 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-71 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
+72 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
@@ -25,7 +25,7 @@ pantallas globales de acceso.
   - [2. Qué contiene](#2-qué-contiene)
   - [3. Las vistas por rol](#3-las-vistas-por-rol)
     - [3.1 Acceso global (4)](#31-acceso-global-4)
-    - [3.2 Estudiante (19 vistas, 26 archivos)](#32-estudiante-19-vistas-26-archivos)
+    - [3.2 Estudiante (20 vistas, 27 archivos)](#32-estudiante-20-vistas-27-archivos)
     - [3.3 Docente (23)](#33-docente-23)
     - [3.4 Administrador (18)](#34-administrador-18)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
@@ -41,6 +41,7 @@ pantallas globales de acceso.
   - [10. Publicación en Stitch](#10-publicación-en-stitch)
     - [Por qué el flujo es como es](#por-qué-el-flujo-es-como-es)
   - [11. Limitaciones conocidas](#11-limitaciones-conocidas)
+  - [12. Cambios del rol Estudiante (`prototype/Fixstudent`)](#12-cambios-del-rol-estudiante-prototypefixstudent)
   - [Ver también](#ver-también)
 
 ---
@@ -53,7 +54,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 71 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 72 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -88,18 +89,20 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 | Carpeta | Archivos | Contenido |
 |---|---|---|
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
-| `estudiante/` | 26 | Inicio, emprendimiento, diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
+| `estudiante/` | 27 | Inicio, emprendimiento (lista + detalle por emprendimiento), diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
 | `docente/` | 23 | Inicio (dashboard con calendario), emprendimientos asignados (por estudiante), expediente, avances, diagnóstico, tareas, asesorías, eventos (catálogo + detalle con recomendación), perfil (dashboard de la cuenta), configuración, notificaciones |
 | `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
-| **Total** | **71** | más `index.html` como índice local |
+| **Total** | **72** | más `index.html` como índice local |
 
-Son **61 vistas lógicas** repartidas en **71 archivos**: tres vistas se reproducen
-en varios archivos. El *detalle de tarea* del estudiante (#15) se reproduce en cinco
+Son **62 vistas lógicas** repartidas en **72 archivos**: varias vistas se reproducen
+en más de un archivo. El *detalle de tarea* del estudiante (#15) se reproduce en cinco
 estados (`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
-`completada-usuarios` y `completada-clientes`) y el *detalle del evento* —en el rol
+`completada-usuarios` y `completada-clientes`), el *detalle del evento* —en el rol
 Estudiante (#18b) y en el Docente (#36)— en cuatro archivos cada uno, uno por evento
 (`evento-detalle-startup`, `evento-detalle-capacitacion`,
-`evento-detalle-asesoria-grupal` y `evento-detalle-showroom`).
+`evento-detalle-asesoria-grupal` y `evento-detalle-showroom`), y el *detalle del
+emprendimiento* (#08) en uno por emprendimiento (`emprendimiento-detalle.html` y
+`emprendimiento-detalle-mochilas.html`).
 
 Elementos de interfaz comunes a todo el prototipo:
 
@@ -126,18 +129,19 @@ Elementos de interfaz comunes a todo el prototipo:
 | 03 | Verificar OTP | Código de 8 dígitos; explica que el perfil queda *Limitado* hasta la activación |
 | 04 | Recuperar contraseña | Correo + documento; respuesta genérica para no revelar qué cuentas existen |
 
-### 3.2 Estudiante (19 vistas, 26 archivos)
+### 3.2 Estudiante (20 vistas, 27 archivos)
 
 | # | Vista | Qué resuelve |
 |---|---|---|
 | 05 | Inicio | Resumen de estado, tareas por completar y próximas asesorías; las tarjetas muestran una vista previa al pasar el mouse |
-| 06 | Estado de seguimiento | Avance general por fase y requisitos por cumplir |
-| 07 | Mi emprendimiento | Listado de sus emprendimientos; **Crear emprendimiento** lleva al diagnóstico y **Exportar** descarga el expediente |
-| 08 | Detalle del emprendimiento | Ficha completa: tipo, sector, etapa, acta, avance por fase e historial |
+| 06 | Estado de seguimiento | Avance general por fase, con **una barra y su porcentaje por cada fase**, y requisitos por cumplir |
+| 07 | Mi emprendimiento | Listado de sus emprendimientos; el **detalle de cada uno se abre en su propia vista** |
+| 08 | Detalle del emprendimiento — Sabor y Sabe | Ficha completa por pestañas: resumen, diagnóstico, plan, seguimiento, tareas y asesorías |
+| 08b | Detalle del emprendimiento — Mochilas Origen | La misma plantilla con la ficha, las redes y el avance propios de Mochilas Origen |
 | 09 | Editar emprendimiento | Solo nombre, descripción y redes; el resto es de solo lectura |
 | 10 | Diagnóstico | Cuestionario por etapas, con selector de **sector** y **tipo de emprendimiento** |
 | 11 | Resultados del diagnóstico | Puntajes por dimensión y recomendaciones |
-| 12 | Plan de trabajo | Fases y tareas por emprendimiento; cada fase y cada tarea navega a su vista |
+| 12 | Plan de trabajo | Fases y tareas por emprendimiento; **Descargar plan** genera un documento con el resumen y el detalle por fase |
 | 13 | Seguimiento | Historial de avances (**solo lectura**) |
 | 13b | Detalle del seguimiento | Un registro: tipo, título, descripción y avance al momento |
 | 14 | Mis tareas | Tablero por emprendimiento y por estado, con fecha límite |
@@ -150,7 +154,7 @@ Elementos de interfaz comunes a todo el prototipo:
 | 18c | Detalle del evento — Asesoría grupal | En qué consiste, datos e inscripción (presencial) |
 | 18d | Detalle del evento — Showroom | En qué consiste, datos e inscripción (presencial) |
 | 19 | Mi perfil | Datos básicos del estudiante y sus emprendimientos; el botón para editar lleva a Configuración |
-| 19b | Configuración | Edita datos personales, académicos, contraseña y foto |
+| 19b | Configuración | Edita datos personales, **académicos condicionales** (pregrado / posgrado / egresado), contraseña y foto |
 | 20 | Notificaciones | Cada aviso enlaza a su vista; incluye filtros y campana |
 
 ### 3.3 Docente (23)
@@ -320,9 +324,9 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 71 pantallas + index.html
+├── generar.py              Orquestador: emite las 72 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
-├── paginas_estudiante.py   26 pantallas del estudiante
+├── paginas_estudiante.py   27 pantallas del estudiante
 ├── paginas_docente.py      23 pantallas del docente
 ├── paginas_admin.py        18 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
@@ -358,7 +362,7 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 71 pantallas + index.html)
+# Generar (emite las 72 pantallas + index.html)
 python generar.py
 
 # Regenerar las variantes de logo desde el PNG fuente (hoy fuera del repo)
@@ -377,7 +381,7 @@ python _reconciliar.py
 
 ## 9. Validación automática
 
-El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 71
+El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 72
 pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
 hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una
 salvedad: `_estructura.py` marca el presupuesto de **estilos inline** por encima
@@ -414,7 +418,7 @@ instalado, así que no se ejecutaron.
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Total:** 51 documentos — 50 pantallas de interfaz más una de marca
-  (`_marca/logo-color-1200.png`). El prototipo local ya genera **71 archivos HTML**;
+  (`_marca/logo-color-1200.png`). El prototipo local ya genera **72 archivos HTML**;
   Stitch conserva los 50 originales: no se subieron los cuatro estados extra de
   *detalle de tarea* ni las vistas nuevas (*detalle del seguimiento*, *configuración*
   y el detalle de cada evento).
@@ -454,9 +458,113 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
   porque se generaron así; un usuario real no debe depender de eso.
 - **Responsive validado en navegador de escritorio.** Chromium con viewport
   emulado; no se probó en Safari ni en un móvil físico.
-- **La tipografía depende de internet.** Si Google Fonts no responde, las 71
+- **La tipografía depende de internet.** Si Google Fonts no responde, las 72
   pantallas se ven con la fuente del sistema. El diseño aguanta el cambio, pero las
   medidas no son idénticas a las capturadas.
+
+---
+
+## 12. Cambios del rol Estudiante (`prototype/Fixstudent`)
+
+Rama **`prototype/Fixstudent`**: correcciones sobre las vistas del rol Estudiante.
+El alcance fue **solo estudiante** —las pantallas del rol y el kit compartido que
+necesitan (`lib_ui.py`, `lib_js.py`, `lib_css.py`)— sin tocar Docente ni
+Administrador. No hay cambios de backend: sigue siendo prototipo.
+
+### 12.1 Mochilas Origen tiene su propia vista de detalle
+
+**Antes:** el botón *Ver detalle* de Mochilas Origen llevaba a
+`emprendimiento-detalle.html`, que es la ficha de **Sabor y Sabe**. El estudiante
+veía otro emprendimiento y la miga decía `Inicio › Mi emprendimiento › Sabor y Sabe`.
+
+**Ahora:** cada emprendimiento abre su propia vista, con su información:
+
+| Archivo | Emprendimiento | Qué muestra |
+|---|---|---|
+| `emprendimiento-detalle.html` | Sabor y Sabe | Ficha de alimentos y bebidas, avance 62 %, docente asignado |
+| `emprendimiento-detalle-mochilas.html` | Mochilas Origen | Moda y accesorios · Textil, avance 24 %, diagnóstico 2 de 5, **sin docente asignado** |
+
+La plantilla se compartió (`_detalle_emp()`): pestañas de resumen, diagnóstico, plan
+de trabajo, seguimiento, tareas y asesorías. La lista *Mi emprendimiento* apunta cada
+botón a su vista y `lib_ui.py` resuelve la miga por emprendimiento.
+
+### 12.2 Avance por fases con una barra por fase
+
+En *Estado de seguimiento*, la barra apilada ponía la fase 1 al 100 % y **tapaba la
+fase 2 al 62 %**: el estudiante solo veía la primera. Se reemplazó por una barra
+independiente por fase, cada una con su nombre y su porcentaje:
+
+| Fase | Avance |
+|---|---|
+| FASE 1 · Ideación y priorización de ideas | 100 % |
+| FASE 2 · Estructuración y ejecución | 62 % |
+| FASE 3 · Consolidación del proceso | 0 % |
+| FASE 4 · Escalamiento | 0 % |
+
+Helper nuevo `_fase_avance()` en `paginas_estudiante.py` y clases `.fase-avance*`
+en `lib_css.py`. La barra repetida dentro de cada tarjeta del *plan de trabajo* se
+retiró: el porcentaje ya está en la cabecera de la fase.
+
+### 12.3 Descargar plan de trabajo ordenado
+
+**Antes:** la descarga volcaba un **CSV plano** con las celdas desordenadas.
+
+**Ahora:** genera un **documento estructurado** —el mismo formato del resto de
+descargas— con encabezado, una tabla **Resumen de avance** (fase · % · tareas
+completadas) y, debajo, el detalle de las tareas de cada fase. Se añadieron estilos
+al documento (`CSS_DOC` en `lib_js.py`) para que se lea bien al guardarlo como PDF.
+El botón pasó de `data-accion="descargar"` a `data-accion="descargar-plan"`.
+
+### 12.4 Detalle del seguimiento con más información
+
+El detalle de un registro de seguimiento se amplió: el panel *Plan de trabajo*
+resume el avance por fase y las tareas reales; *Seguimiento* incluye la tabla de
+registros **con quién los registró** más un gráfico de frecuencia de acompañamiento;
+y *Asesorías* trae fecha, motivo, docente y estado.
+
+### 12.5 Datos académicos condicionales
+
+En *Configuración → Datos académicos*, **Nivel académico** tiene tres opciones y cada
+una muestra un juego de campos distinto:
+
+| Nivel | Campos que muestra |
+|---|---|
+| **Pregrado** | Semestre (Primero–Décimo) y Modalidad |
+| **Posgrado** | Tipo de posgrado, duración, Semestre según el tipo y Modalidad |
+| **Egresado** | Fecha de grado del pregrado, Programa del que se graduó, Sede de graduación y Número de acta o diploma |
+
+El **Semestre depende del tipo de posgrado**, con la duración de referencia de
+UNIMINUTO:
+
+| Tipo de posgrado | Semestres | Opciones del campo |
+|---|---|---|
+| Especialización | 2 periodos | Primero – Segundo |
+| Maestría | 3 a 4 periodos | Primero – Cuarto |
+| Doctorado | 6 a 8 periodos | Primero – Octavo |
+
+Bajo *Tipo de posgrado* hay una nota que se actualiza sola (*"Duración: 3 a 4
+semestres; elige el semestre en el que vas"*). **Egresado** oculta Semestre y
+Modalidad: para ser egresado hay que haber culminado el pregrado, así que el dato
+central es la fecha del título (la del acta o el diploma), junto con el programa, la
+sede y el número de acta. **Modalidad** ahora ofrece Presencial · Virtual · **Mixta**.
+
+Implementado con `attrs=` en `select()`/`campo()` de `lib_ui.py` y el bloque
+`sincronizarAcademico()` de `lib_js.py`.
+
+### 12.6 Cómo regenerar
+
+El HTML no se edita a mano; se genera. Para emitir **solo** las pantallas del rol
+Estudiante (sin reescribir Docente, Administrador ni las de acceso):
+
+```powershell
+# desde prototype/
+python generar.py          # emite las 72 pantallas + index.html (todos los roles)
+```
+
+Si solo se tocó el rol Estudiante, `generar.py` completo reescribe también los otros
+roles porque comparten `lib_ui`/`lib_css`/`lib_js`. Para un alcance estricto conviene
+regenerar únicamente la carpeta `estudiante/` y revisar el `git status` antes de
+commitear.
 
 ---
 

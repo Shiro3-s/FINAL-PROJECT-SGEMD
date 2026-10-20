@@ -90,6 +90,7 @@ small{font-size:13px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -176,6 +177,32 @@ small{font-size:13px}
 @media (max-width:1023px){.g-3,.g-2-1,.g-1-2{grid-template-columns:1fr}}
 @media (max-width:767px){.g-4,.g-3,.g-2{grid-template-columns:1fr}}
 
+/* Utilidades de espaciado y de fila: sustituyen los estilos en linea que se
+   repetian en las vistas (separadores de altura fija, filas de botones, textos
+   secundarios). Mantienen la paleta via tokens. */
+.sep-8{height:8px}
+.sep-12{height:12px}
+.sep-16{height:16px}
+.sep-20{height:20px}
+.sep-22{height:22px}
+.sep-24{height:24px}
+.sep-28{height:28px}
+.g-col{gap:0 16px}
+.suave{font-size:13px;color:var(--tinta-2)}
+.fuerte{font-size:13px;color:var(--tinta)}
+.fila-acciones{display:flex;gap:10px}
+.fila-6{display:flex;gap:6px}
+.fila-fin{display:flex;justify-content:flex-end;gap:10px}
+.fila-col{display:flex;flex-direction:column;gap:10px}
+.kpi-caja{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px}
+.kpi-caja .k-lbl{font-size:13px;color:var(--tinta-2)}
+.kpi-caja .k-val{font-size:20px;font-weight:700;color:var(--tinta)}
+.fila-paso{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--gris)}
+.mt-8{margin-top:8px}
+.mt-10{margin-top:10px}
+.mt-14{margin-top:14px}
+.pt-8{padding-top:8px}
+
 .metrica{padding:20px}
 .metrica-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
 .metrica-ico{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-sm);background:var(--azul-08);color:var(--azul-real);display:flex;align-items:center;justify-content:center}
@@ -199,6 +226,7 @@ table.tabla tbody tr:nth-child(even){background:var(--noche-03)}
 table.tabla tbody tr:hover{background:var(--azul-06)}
 table.tabla .num{text-align:right;font-variant-numeric:tabular-nums}
 table.tabla .acc{text-align:right;white-space:nowrap}
+.acciones-cell{display:flex;align-items:center;justify-content:flex-end}
 table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
@@ -244,6 +272,7 @@ table.tabla tbody tr:last-child td{border-bottom:none}
 .buscador input::placeholder{color:var(--gris)}
 .buscador svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--azul-real)}
 select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}
+select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 8px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tinta);background:var(--blanco);cursor:pointer}
 .paginacion{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2);flex-wrap:wrap}
 .paginacion .pag{margin-left:auto;display:flex;gap:6px}
 
@@ -277,7 +306,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
-.drop.sobre{border-color:var(--azul-real);background:var(--azul-real-10);color:var(--azul-real)}
+.drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
@@ -433,7 +462,7 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 @media (max-width:767px){.fila-simple{flex-wrap:wrap}}
 
 @media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
-.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}.cal-envoltura{background:#ffffff}.cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}.cal-btn:hover{border-color:#004a93}.cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}.cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;color:#ffffff;font-weight:700}.cal-btn.activo .cal-punto{background:#ffd300}.cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}.cal-resumen b{font-size:16px;color:#051533}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kanban-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.k-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}
+.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}.cal-envoltura{background:#ffffff}.cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}.cal-btn:hover{border-color:#004a93}.cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}.cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;color:#ffffff;font-weight:700}.cal-btn.activo .cal-punto{background:#ffd300}.cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}.cal-resumen b{font-size:16px;color:#051533}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}
 /* El atributo [hidden] lo sobreescribia cualquier regla con display (por
    ejemplo .notif{display:flex}), asi que los filtros de la bandeja ocultaban
    filas que seguian visibles. Con !important [hidden] vuelve a mandar. */
@@ -559,6 +588,24 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
 .fase-link{color:inherit;text-decoration:none}
 .fase-link:hover{color:var(--azul-real);text-decoration:underline}
+
+/* --- Avance por fase del estudiante --------------------------------------- */
+/* Cada fase con su propia pista y su porcentaje: la barra apilada ocultaba las
+   fases posteriores cuando la primera estaba al 100%. */
+.fase-avance{margin-top:12px}
+.fase-avance:first-child{margin-top:0}
+.fase-avance-top{display:flex;align-items:baseline;gap:10px}
+.fase-avance-nombre{flex:1;font-size:13px;color:var(--tinta-2)}
+.fase-avance-pct{font-size:13px;color:var(--azul-noche);font-variant-numeric:tabular-nums}
+.fase-avance .barra{margin-top:6px}
+
+/* --- Tarjeta "sin docente asignado" -------------------------------------- */
+.estado-vacio-mini{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.estado-vacio-mini>svg{flex:0 0 22px;color:var(--azul-real);margin-top:2px}
+.estado-vacio-mini b{display:block;color:var(--tinta)}
+
+/* --- Ayuda bajo un select en formularios --------------------------------- */
+.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
 </style>
 </head>
 <body>
@@ -568,15 +615,15 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       <div class="brand-text"><div class="brand-name">SGEMD</div>
       <div class="brand-sub">Emprendimiento Minuto de Dios</div></div>
     </div>
-    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span>Inicio</span></a><div class="nav-group" data-grupo="mi-emprendimiento"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-mi-emprendimiento" data-grupo="mi-emprendimiento"><span>Mi emprendimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-mi-emprendimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Mi emprendimiento</span></a><a class="" href="diagnostico.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnóstico</span></a></div></div><div class="nav-group" data-grupo="planificacion-y-seguimiento"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-planificacion-y-seguimiento" data-grupo="planificacion-y-seguimiento"><span>Planificación y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-planificacion-y-seguimiento"><a class="" href="estado-seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Estado de seguimiento</span></a><a class="" href="plan-trabajo.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>Plan de trabajo</span></a><a class="" href="tareas.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tareas</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg><span>Seguimiento</span></a></div></div><div class="nav-group abierto" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="true" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompanamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="activo" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div></nav>
+    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span>Inicio</span></a><div class="nav-group" data-grupo="mi-emprendimiento"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-mi-emprendimiento" data-grupo="mi-emprendimiento"><span>Mi emprendimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-mi-emprendimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Mi emprendimiento</span></a><a class="" href="diagnostico.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnóstico</span></a></div></div><div class="nav-group" data-grupo="planificacion-y-seguimiento"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-planificacion-y-seguimiento" data-grupo="planificacion-y-seguimiento"><span>Planificación y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-planificacion-y-seguimiento"><a class="" href="estado-seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Estado de seguimiento</span></a><a class="" href="plan-trabajo.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>Plan de trabajo</span></a><a class="" href="tareas.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tareas</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg><span>Seguimiento</span></a></div></div><div class="nav-group abierto" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="true" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompañamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="activo" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div></nav>
     <div class="side-foot"><div class="side-card">
       <b>Institución Minuto de Dios</b>
-      <span>Modulo ESTUDIANTE</span>
+      <span>Módulo ESTUDIANTE</span>
     </div></div>
   </aside>
   <div class="main">
     <header class="topbar">
-      <button class="burger" data-accion="menu" aria-label="Abrir menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+      <button class="burger" data-accion="menu" aria-label="Abrir menú" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
       <div class="topbar-mark" aria-hidden="true"></div>
       <div class="search"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
@@ -584,7 +631,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       <div class="topbar-right">
         <button class="icon-btn" data-accion="notificaciones" aria-label="Notificaciones"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="count">3</span></button>
         <div class="who"><span class="avatar">ML</span>
-          <div><div class="who-name">Mariana Lopez</div><span class="who-role">ESTUDIANTE</span></div>
+          <div><div class="who-name">Mariana López</div><span class="who-role">ESTUDIANTE</span></div>
         </div>
       </div>
     </header>
@@ -677,7 +724,8 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       var el = document.createElement("button");
       el.className = b.clase || "btn btn-secundario";
       el.textContent = b.txt;
-      el.addEventListener("click", function () {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
         if (b.alClic) b.alClic(velo);
         if (b.cerrar !== false) cerrarModal();
       });
@@ -685,7 +733,10 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     });
     document.body.appendChild(velo);
     document.body.classList.add("sin-scroll");
-    $(".modal-x", velo).addEventListener("click", cerrarModal);
+    $(".modal-x", velo).addEventListener("click", function (e) {
+      e.stopPropagation();
+      cerrarModal();
+    });
     velo.addEventListener("click", function (e) { if (e.target === velo) cerrarModal(); });
     var foco = $(".modal input, .modal select, .modal textarea, .modal-foot button", velo);
     if (foco) foco.focus();
@@ -746,6 +797,49 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       { txt: "Cancelar", clase: "btn btn-secundario" },
       { txt: "Confirmar", clase: "btn btn-peligro", alClic: alConfirmar }
     ]);
+  }
+
+  /* Rechazo con motivo: modal con textarea + aviso. Reutilizado por la bandeja
+     de solicitudes y por la revision de emprendimientos. */
+  function rechazarConMotivo(titulo, aviso, msgOk, alRechazar) {
+    abrirModal(titulo,
+      '<div class="campo"><label for="m-motivo">Motivo del rechazo</label>' +
+      '<textarea id="m-motivo" rows="3" placeholder="Explica brevemente el motivo"></textarea></div>' +
+      '<p class="modal-aviso">' + esc(aviso) + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", alClic: function () {
+            toast(msgOk, "ok");
+            if (alRechazar) alRechazar();
+          } }
+      ]);
+  }
+
+  /* Revision de emprendimiento: lee los datos de la fila (dataset) y ofrece
+     aprobar o rechazar. Los botones abren un segundo modal, por eso llevan
+     cerrar:false (abrirModal ya reemplaza el modal abierto). */
+  function revisarEmprendimiento(boton) {
+    var d = boton.dataset;
+    abrirModal("Revisar emprendimiento",
+      '<p class="confirm-texto"><b>Emprendimiento:</b> ' + esc(d.emp || "") + "<br>" +
+      "<b>Código:</b> " + esc(d.cod || "") + "<br>" +
+      "<b>Estudiante:</b> " + esc(d.estu || "") + "<br>" +
+      "<b>Sector:</b> " + esc(d.sector || "") + "<br>" +
+      "<b>Tipo:</b> " + esc(d.tipo || "") + "<br>" +
+      "<b>Etapa:</b> " + esc(d.etapa || "") + "<br>" +
+      "<b>Docente:</b> " + esc(d.docente || "") + "</p>",
+      [
+        { txt: "Cancelar", clase: "btn btn-secundario" },
+        { txt: "Rechazar", clase: "btn btn-peligro", cerrar: false, alClic: function () {
+            rechazarConMotivo("Rechazar emprendimiento",
+              "Se notificará al estudiante con este motivo.", "Emprendimiento rechazado");
+          } },
+        { txt: "Aprobar", clase: "btn btn-primario", cerrar: false, alClic: function () {
+            confirmar("Aprobar emprendimiento",
+              "El emprendimiento " + (d.emp || "") + " pasará a estado Aprobado y quedará listo para asignar docente.",
+              function () { toast("Emprendimiento aprobado", "ok"); });
+          } }
+      ]);
   }
 
   /* --- barra lateral ---------------------------------------------------- */
@@ -842,7 +936,9 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   function aplicarFiltros() {
     var zona = $("[data-tabla-zona]") || document;
     var tabla = $("table.tabla", zona);
-    var selects = $$("select", zona).filter(function (s) { return s.dataset.filtro !== "off"; });
+    var selects = $$("select.filtro, select[data-filtro]", zona).filter(function (s) {
+      return s.dataset.filtro !== "off";
+    });
     var chips = $$(".chip.activo", zona).map(function (c) { return c.dataset.chip; });
     var input = $(".buscador input", zona);
     var q = ((input && input.value) || "").trim().toLowerCase();
@@ -873,13 +969,39 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     if (r) r.textContent = n + (n === 1 ? " resultado" : " resultados");
     guardar({ filtros: n });
   }
-  $$("[data-filtro], .chip").forEach(function (c) {
+  $$("[data-filtro]:not([data-filtro='off']), .chip").forEach(function (c) {
     c.addEventListener("click", function () {
       c.classList.toggle("activo");
       aplicarFiltros();
     });
   });
-  $$("select[data-filtro]").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+  $$("select[data-filtro]:not([data-filtro='off'])").forEach(function (s) { s.addEventListener("change", aplicarFiltros); });
+
+  /* --- estado de cuenta (Activo/Limitado/Inactivo) ----------------------- */
+  $$("select.sel-estado").forEach(function (s) {
+    var actual = s.value;
+    s.addEventListener("change", function () {
+      var nuevo = s.value, nombre = s.dataset.nombre || "la cuenta";
+      s.value = actual;
+      var aviso = nuevo === "Inactivo"
+        ? "La cuenta perderá el acceso hasta que la reactives."
+        : (nuevo === "Limitado"
+            ? "La cuenta conserva su registro pero con acceso restringido."
+            : "La cuenta recuperará el acceso completo.");
+      abrirModal("Cambiar estado de la cuenta",
+        '<p class="confirm-texto">¿Cambiar el acceso de <b>' + esc(nombre) +
+        '</b> a <b>' + esc(nuevo) + '</b>?</p>' +
+        '<p class="modal-aviso">' + aviso + '</p>',
+        [
+          { txt: "Cancelar", clase: "btn btn-secundario" },
+          { txt: "Confirmar", clase: "btn btn-primario", alClic: function () {
+              actual = nuevo;
+              s.value = nuevo;
+              toast("Estado actualizado a " + nuevo, "ok");
+          } }
+        ]);
+    });
+  });
 
   /* --- seleccion de filas ------------------------------------------------ */
   $$("table.tabla").forEach(function (t) {
@@ -959,6 +1081,61 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       ]);
   }
 
+  /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
+     para fusionar en la pantalla de gestion los formularios de edicion de
+     docente/estudiante, que antes eran paginas aparte. */
+  function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
+    var plantilla = document.getElementById(idForm);
+    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, plantilla.innerHTML, [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
+        toast(mensaje || "Cambios guardados", "ok");
+      } }
+    ]);
+  }
+
+  /* Nueva/editar asesoria: reusa el formulario #form-asesoria y, al editar,
+     prefilla los campos con los data-* de la fila. */
+  function abrirFormAsesoria(boton) {
+    var d = boton ? boton.dataset : null;
+    var editar = !!(d && d.cod);
+    abrirFormulario(editar ? "Editar asesoría" : "Nueva asesoría",
+      "form-asesoria", boton,
+      editar ? "Guardar cambios" : "Crear asesoría",
+      editar ? "Cambios guardados en la asesoría" : "Asesoría creada");
+    if (editar && d) {
+      var m = $(".modal");
+      if (!m) return;
+      [["estudiante", d.estu], ["docente", d.doc], ["fecha", d.fecha],
+       ["hora", d.hora], ["tema", d.tema], ["modalidad", d.mod],
+       ["estado", d.estado]].forEach(function (p) {
+        var el = m.querySelector("[name='" + p[0] + "']");
+        if (el && p[1]) el.value = p[1];
+      });
+    }
+  }
+
+  /* A07: edicion de emprendimiento desde el registro maestro. Reusa el
+     formulario #form-emprendimiento y prefilla con los data-* de la fila. */
+  function abrirFormEmprendimiento(boton) {
+    var d = boton ? boton.dataset : null;
+    if (!d || !d.emp) return;
+    abrirFormulario("Editar emprendimiento", "form-emprendimiento", boton,
+      "Guardar cambios", "Cambios guardados en el emprendimiento");
+    var m = $(".modal");
+    if (!m) return;
+    /* El campo "Código" se pinta con bloqueo (sin name): se setea directo. */
+    var cod = m.querySelector("input[disabled]");
+    if (cod && d.cod) cod.value = d.cod;
+    [["nombre", d.emp], ["estudiante", d.estu],
+     ["sector", d.sector], ["tipo", d.tipo], ["etapa", d.etapa],
+     ["avance", d.avance], ["docente", d.doc]].forEach(function (p) {
+      var el = m.querySelector("[name='" + p[0] + "']");
+      if (el && p[1]) el.value = p[1];
+    });
+  }
+
   /* --- ficha de un registro (detalle real, no el modal generico) -------- */
   /* Item 2: en vez del texto de relleno "Detalle del registro", se arma una
      ficha con los datos reales de la fila/tarjeta que disparo el boton. Las
@@ -1021,6 +1198,70 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     return h;
   }
 
+  /* --- kanban (A03) -------------------------------------------------------- */
+  /* Mueve una tarjeta entre columnas del kanban de eventos, ajusta su pie
+     (badge + acciones) y actualiza los contadores y las notas de columna vacia. */
+  function kanbanColumnas(titulo) {
+    var col = null;
+    $$(".kan-col").forEach(function (c) {
+      var t = c.querySelector(".kan-titulo");
+      if (t && t.textContent === titulo) col = c;
+    });
+    return col;
+  }
+  function kanbanContar() {
+    $$(".kan-col").forEach(function (c) {
+      var n = c.querySelector(".kan-n");
+      if (n) n.textContent = String(c.querySelectorAll(".kan-card").length);
+    });
+  }
+  function kanbanMover(card, tituloDestino, badgeHTML, pieHTML) {
+    var pie = card.querySelector(".kan-foot");
+    if (pie) pie.innerHTML = (badgeHTML || "") + (pieHTML || "");
+    var origen = card.closest(".kan-col");
+    var destino = kanbanColumnas(tituloDestino);
+    if (destino) {
+      var v = destino.querySelector(".kan-empty");
+      if (v) destino.insertBefore(card, v);
+      else destino.appendChild(card);
+    }
+    if (origen && !origen.querySelector(".kan-card") &&
+        !origen.querySelector(".kan-empty")) {
+      var e = document.createElement("div");
+      e.className = "kan-empty";
+      e.textContent = "Sin pendientes";
+      origen.appendChild(e);
+    }
+    kanbanContar();
+  }
+  function editarEventoLink() {
+    return '<a class="btn btn-sm btn-secundario" href="evento-form.html">Editar</a>';
+  }
+  function botonAprobarEvento(b) {
+    var d = b.dataset;
+    var f = {
+      titulo: "Detalle del evento",
+      filas: [
+        ["Evento", esc(d.titulo || "")],
+        ["Fecha y hora", esc(d.fecha || "")],
+        ["Lugar", esc(d.lugar || "")],
+        ["Confirmados", esc((d.confirmados || "") + " confirmaciones")],
+        ["Dirigido a", esc(d.sector || "")],
+      ],
+    };
+    var nota = "Se publicará y notificará a los estudiantes del sector correspondiente.";
+    abrirModal("Aprobar evento", htmlFicha(f, nota), [
+      { txt: "Cancelar", clase: "btn btn-secundario" },
+      { txt: "Publicar y notificar", clase: "btn btn-primario", alClic: function () {
+          var card = b.closest(".kan-card");
+          kanbanMover(card, "Publicado",
+            '<span class="badge b-azul">' + icono(ICO.check, 12) + " Publicado</span>",
+            editarEventoLink());
+          toast("Evento publicado y notificado a los estudiantes", "ok");
+        } }
+    ]);
+  }
+
   /* --- descargas reales (item 3) ---------------------------------------- */
   function descargarArchivo(nombre, contenido, mime) {
     try {
@@ -1050,8 +1291,31 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     });
     return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
   }
+  /* A27: pantallas sin tabla (metricas, tableros) exportan un resumen de los
+     indicadores mostrados en lugar de no exportar nada. */
+  function csvDeMetricas() {
+    var tiles = $$(".metricas .metrica, .grid.g-4 > .metrica, .metrica");
+    var filas = [];
+    tiles.forEach(function (t) {
+      var lbl = $(".metrica-lbl", t), val = $(".metrica-val", t);
+      if (lbl && val) {
+        filas.push('"' + lbl.textContent.trim().replace(/"/g, '""') + '";' +
+          '"' + val.textContent.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"');
+      }
+    });
+    return filas.length ? "\uFEFF" + filas.join("\r\n") : null;
+  }
+  /* F1 (vista #10): plantilla de exportacion de reportes. Se descarga con la
+     misma cabecera que el reporte maestro para cargar la informacion luego. */
+  function csvPlantillaReporte() {
+    var filas = [
+      '"Emprendimiento";"Docente";"Estudiante";"Sector";"Etapa";"% de avance";"Horas trabajadas";"Nota promedio"',
+      '"";"";"";"";"";"";"";""',
+    ];
+    return "\uFEFF" + filas.join("\r\n");
+  }
   function tablaComoHTML() {
-    var t = $("main table.tabla") || $("table.tabla");
+    var t = tablaDoc();
     if (!t) return "";
     var c = t.cloneNode(true);
     $$("th.acc, td.acc, input, button, a.table-act", c).forEach(function (n) { n.remove(); });
@@ -1060,13 +1324,21 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   /* Item 3: documento imprimible de la pantalla. Si hay tabla principal se
      imprime la tabla; si no (tarjetas, kanban, linea de tiempo) se imprime una
      copia legible del contenido, sin controles ni paneles ocultos. */
+  /* Las tablas dentro de [data-doc] pertenecen al documento aunque no sean
+     la tabla principal de la pantalla; [data-no-doc] excluye lo que solo
+     sirve en vivo (la barra de progreso, por ejemplo). */
+  function tablaDoc() {
+    var t = $("main [data-doc] table.tabla") || $("main [data-doc]") ||
+      $("main table.tabla") || $("table.tabla");
+    return t ? t.cloneNode(true) : null;
+  }
   function vistaDocumento() {
     var t = tablaComoHTML();
     if (t) return t;
     var main = $("main.content") || $("main");
     if (!main) return "";
     var c = main.cloneNode(true);
-    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [hidden]", c)
+    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [data-no-doc], [hidden]", c)
       .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
     return c.innerHTML;
   }
@@ -1081,8 +1353,11 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     "dt{width:190px;color:#162644;font-size:13px}dd{margin:0;flex:1;font-size:13px}" +
     "table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}" +
     "th,td{border:1px solid #bbbbbb;padding:6px 8px;text-align:left}th{background:#ffffff}" +
+    "tbody tr:nth-child(even) td{background:#fafafa}" +
     "footer{margin-top:24px;font-size:13px;color:#162644;border-top:1px solid #bbbbbb;padding-top:8px}" +
     "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
+    ".doc-suave{color:#162644;font-size:12px}" +
+    "h2{margin-top:22px;padding-top:10px;border-top:1px solid #bbbbbb}" +
     ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
     ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
     ".kan-col,.ln-item,.aviso{margin-bottom:8px}" +
@@ -1193,9 +1468,104 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
         break;
       }
 
-      case "editar":
       case "editar-docente":
+        e.preventDefault();
+        abrirFormulario("Editar docente", "form-docente", b);
+        break;
+
       case "editar-estudiante":
+        e.preventDefault();
+        abrirFormulario("Editar estudiante", "form-estudiante", b);
+        break;
+
+      case "nuevo-docente":
+        e.preventDefault();
+        abrirFormulario("Nuevo docente", "form-nuevo-docente", b,
+          "Crear docente", "Docente creado. Se enviará el correo de activación.");
+        break;
+
+      case "nuevo-estudiante":
+        e.preventDefault();
+        abrirFormulario("Nuevo estudiante", "form-nuevo-estudiante", b,
+          "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
+        break;
+
+      case "solicitud-aprobar":
+        e.preventDefault();
+        confirmar("Aprobar solicitud",
+          "Se aplicará el cambio y se notificará al solicitante. ¿Confirmas la aprobación?",
+          function () { toast("Solicitud aprobada", "ok"); });
+        break;
+
+      case "solicitud-rechazar":
+        e.preventDefault();
+        rechazarConMotivo("Rechazar solicitud",
+          "El solicitante recibirá este motivo en su notificación.", "Solicitud rechazada");
+        break;
+
+      case "revisar-emprendimiento":
+        e.preventDefault();
+        revisarEmprendimiento(b);
+        break;
+
+      case "nueva-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-asesoria":
+        e.preventDefault();
+        abrirFormAsesoria(b);
+        break;
+
+      case "editar-emprendimiento":
+        /* A07: abre el formulario real de edicion del emprendimiento. */
+        e.preventDefault();
+        abrirFormEmprendimiento(b);
+        break;
+
+      case "ver-instrumento": {
+        /* A16: desplega el instrumento del diagnostico (solo lectura). */
+        e.preventDefault();
+        var instr = document.getElementById("contenido-instrumento");
+        if (!instr) { toast("Instrumento no disponible", "error"); break; }
+        abrirModal("Instrumento del diagnóstico", instr.innerHTML,
+          [{ txt: "Cerrar", clase: "btn btn-primario" }]);
+        break;
+      }
+
+      case "cancelar-asesoria": {
+        e.preventDefault();
+        var dd = b.dataset;
+        confirmar("Cancelar asesoría",
+          "Se cancelará la asesoría de " + (dd.estu || "se") +
+          " del " + (dd.fecha || "esa fecha") +
+          (dd.hora ? " a las " + dd.hora : "") + ". ¿Confirmas?",
+          function () { toast("Asesoría cancelada", "ok"); });
+        break;
+      }
+
+      case "aprobar-evento": {
+        e.preventDefault();
+        botonAprobarEvento(b);
+        break;
+      }
+
+      case "rechazar-evento": {
+        e.preventDefault();
+        var cardEv = b.closest(".kan-card");
+        rechazarConMotivo("Rechazar evento",
+          "El evento volverá a borrador y su autor será notificado.",
+          "Evento rechazado",
+          function () {
+            kanbanMover(cardEv, "Borrador",
+              '<span class="badge b-neutra">' + icono(ICO.alerta, 12) + " Rechazado</span>",
+              editarEventoLink());
+          });
+        break;
+      }
+
+      case "editar":
       case "registrar-avance":
       case "asignar":
       case "editar-sensores":
@@ -1252,7 +1622,9 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 
       case "exportar":
       case "exportar-reporte": {
-        var csv = csvDeTabla();
+        /* A27: exporta CSV de la tabla de la pantalla y, si no hay tabla
+           (paginas de metricas/tablero), un resumen de las metricas. */
+        var csv = csvDeTabla() || csvDeMetricas();
         e.preventDefault();
         if (csv) {
           descargarArchivo(slug(tituloPagina() || "reporte") + ".csv", csv, "text/csv;charset=utf-8");
@@ -1264,13 +1636,76 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       }
 
       case "exportar-expediente": {
-        /* El boton "Exportar" de Mi emprendimiento genera el expediente: el
-           reporte completo de la pantalla, listo para guardar como PDF. */
+        /* El boton "Exportar" de Mi emprendimiento genera el expediente del
+           emprendimiento: la tabla del listado mas los bloques que el
+           estudiante ve en pantalla (avance por fase e historial). */
         e.preventDefault();
+        var clonExp = tablaDoc();
+        var tablaExp = clonExp ? clonExp.outerHTML : "";
+        var bloquesExp = "";
+        $$("[data-expediente]").forEach(function (z) {
+          var cc = z.cloneNode(true);
+          $$("button, input, select, textarea, script, [data-no-doc], [hidden]", cc)
+            .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+          bloquesExp += cc.innerHTML;
+        });
+        if (tablaExp) bloquesExp = tablaExp + bloquesExp;
+        var resumenExp = csvDeMetricas() ? "" : "";
         imprimirDocumento("Expediente - " + tituloPagina(),
           '<p class="doc-meta">' + esc(tituloPagina()) +
-          " &middot; reporte completo</p>" + vistaDocumento());
+          " &middot; expediente completo</p>" +
+          (bloquesExp || vistaDocumento()));
         toast("Abriendo el expediente para guardar como PDF…", "info");
+        break;
+      }
+
+      case "descargar-plan": {
+        /* Descargar el plan de trabajo: un documento con encabezado, resumen de
+           las cuatro fases y el detalle de tareas por fase. Antes volcaba un
+           CSV plano con las celdas desordenadas; ahora la lectura es la misma
+           de la pantalla. */
+        e.preventDefault();
+        var raizPlan = $("[data-panel-nombre]:not([hidden])") || document;
+        var resumen = "", detalle = "";
+        $$(".card", raizPlan).forEach(function (card) {
+          var t = $(".card-head h3 a, .card-head h3", card);
+          var fase = t ? t.textContent.replace(/\s+/g, " ").trim() : "";
+          if (!fase) return;
+          var pctEl = $(".card-head > span:last-child", card);
+          var pct = pctEl ? pctEl.textContent.replace(/\s+/g, " ").trim() : "";
+          var tareas = $$(".fila-tarea", card);
+          var hechas = 0;
+          var filasHtml = tareas.map(function (f) {
+            var c = f.cloneNode(true);
+            var b = $(".badge", c);
+            var estado = b ? b.textContent.replace(/\s+/g, " ").trim() : "";
+            if (b) b.parentNode.removeChild(b);
+            var sub = $(".fila-sub", c);
+            var meta = sub ? sub.textContent.replace(/\s+/g, " ").trim() : "";
+            if (sub) sub.parentNode.removeChild(sub);
+            var titulo = c.textContent.replace(/\s+/g, " ").trim();
+            if (estado.toLowerCase().indexOf("completada") >= 0) hechas++;
+            return "<tr><td><b>" + esc(titulo) + "</b><br><span class=\"doc-suave\">" +
+              esc(meta) + "</span></td><td>" + esc(estado) + "</td></tr>";
+          }).join("");
+          if (!filasHtml) {
+            filasHtml = '<tr><td colspan="2" class="doc-suave">Sin tareas asignadas en esta fase.</td></tr>';
+          }
+          resumen += "<tr><td><b>" + esc(fase) + "</b></td><td>" + esc(pct) +
+            "</td><td>" + hechas + " de " + tareas.length + "</td></tr>";
+          detalle += "<h2>" + esc(fase) + " &middot; " + esc(pct) + "</h2>" +
+            "<table><thead><tr><th>Tarea</th><th>Estado</th></tr></thead><tbody>" +
+            filasHtml + "</tbody></table>";
+        });
+        var cuerpoPlan =
+          '<p class="doc-meta">' + esc(tituloPagina()) +
+          " &middot; las cuatro fases del programa con el avance y las tareas de cada una</p>" +
+          "<h2>Resumen de avance</h2>" +
+          "<table><thead><tr><th>Fase</th><th>Avance</th><th>Tareas completadas</th></tr></thead>" +
+          "<tbody>" + resumen + "</tbody></table>" +
+          detalle;
+        imprimirDocumento("Plan de trabajo - " + tituloPagina(), cuerpoPlan);
+        toast("Abriendo el plan de trabajo para guardar como PDF...", "info");
         break;
       }
 
@@ -1318,12 +1753,14 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
         break;
 
       case "enviar-diagnostico":
-        /* DG4: persiste el envio del cuestionario completo. */
+        /* DG4: persiste el envio del cuestionario completo. Al terminar se
+           vuelve a la pagina de resultados (E001: re-responder y regresar). */
         e.preventDefault();
         guardar({ enviado: true, fecha: new Date().toISOString().slice(0, 10) });
         toast("Diagnóstico enviado al docente", "ok");
         b.innerHTML = "Diagnóstico enviado " + icono(ICO.check, 15);
         b.disabled = true;
+        setTimeout(function () { location.href = "diagnostico-resultados.html"; }, 750);
         break;
 
       case "guardar-borrador":
@@ -1374,7 +1811,8 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       case "guardar-perfil":
         /* PE1: persiste los datos personales del perfil (localStorage). */
         e.preventDefault();
-        guardar({ perfil: serializarCampos(b.closest(".card") || document) });
+        var activo = document.querySelector(".campos-perfil") || b.closest(".card") || document;
+        guardar({ perfil: serializarCampos(activo) });
         toast("Datos personales guardados", "ok");
         break;
 
@@ -1507,7 +1945,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 
       case "cerrar-sesion":
         e.preventDefault();
-        cerrarSesion();
+        confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
         break;
 
       case "marcar-todas-como-leidas":
@@ -1521,9 +1959,57 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
             porLeer++;
           }
         });
+        $$(".aviso").forEach(function (aviso) {
+          var leer = $('[data-accion="aprobar"]', aviso);
+          if (leer && !leer.classList.contains("hecho")) {
+            leer.classList.add("hecho");
+            leer.setAttribute("aria-pressed", "true");
+            porLeer++;
+          }
+        });
         if (typeof notifRefrescar === "function") notifRefrescar();
         if (typeof notifPersistir === "function") notifPersistir();
         toast(porLeer ? "Todas las notificaciones marcadas como leídas" : "No hay notificaciones sin leer", porLeer ? "ok" : "info");
+        break;
+
+        /* F1 (vista #10): los botones de las pantallas de flujo sin accion
+         asignada ahora ejecutan su transicion correspondiente. */
+      case "confirmar-asignacion":
+        e.preventDefault();
+        confirmar("Confirmar asignación",
+          "Se confirmará la asignación de Carlos Mendoza como docente de Aromas del Sur (2 h por semana).",
+          function () {
+            toast("Asignación confirmada", "ok");
+            setTimeout(function () { window.location.href = "asignaciones.html"; }, 750);
+          });
+        break;
+
+      case "publicar-evento":
+        e.preventDefault();
+        confirmar("Publicar evento",
+          "El evento quedará visible para docentes y estudiantes. ¿Publicar?",
+          function () {
+            toast("Evento publicado", "ok");
+            setTimeout(function () { window.location.href = "eventos.html"; }, 750);
+          });
+        break;
+
+      case "generar-reporte":
+        e.preventDefault();
+        confirmar("Generar reporte",
+          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          function () { toast("Reporte en cola de generación", "info"); });
+        break;
+
+      case "descargar-plantilla":
+        e.preventDefault();
+        descargarArchivo("plantilla-reporte.csv", csvPlantillaReporte(), "text/csv;charset=utf-8");
+        toast("Plantilla descargada", "ok");
+        break;
+
+      case "asignar-tarea":
+        e.preventDefault();
+        abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
         break;
 
       default:
@@ -1821,9 +2307,12 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   });
 
   /* --- arrastrar y soltar (kanban) --------------------------------------- */
+  /* Solo en Admin y Estudiante: la vista de Docente conserva su tablero
+     inerte a propósito (no se toca ese rol). */
+  if (location.pathname.indexOf("/docente/") === -1) {
   $$(".kanban, [data-kanban]").forEach(function (tablero) {
     var arrastre = null;
-    $$(".k-col, .kanban-col", tablero).forEach(function (col) {
+    $$(".kan-col", tablero).forEach(function (col) {
       col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("sobre"); });
       col.addEventListener("dragleave", function () { col.classList.remove("sobre"); });
       col.addEventListener("drop", function (e) {
@@ -1832,21 +2321,22 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
         if (!arrastre) return;
         col.appendChild(arrastre);
         var estado = { tablero: tablero.dataset.kanban || "kanban", tareas: [] };
-        $$(".kanban-col", tablero).forEach(function (c) {
-          $$(".k-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
+        $$(".kan-col", tablero).forEach(function (c) {
+          $$(".kan-card", c).forEach(function (k) { estado.tareas.push(k.textContent.replace(/\s+/g, " ").trim().slice(0, 40)); });
         });
 guardar(estado);
         toast("Tarea movida a " + nombreCol(col), "ok");
       });
     });
-    $$(".k-card", tablero).forEach(function (k) {
+    $$(".kan-card", tablero).forEach(function (k) {
       k.setAttribute("draggable", "true");
       k.addEventListener("dragstart", function () { arrastre = k; k.classList.add("arrastrando"); });
       k.addEventListener("dragend", function () { k.classList.remove("arrastrando"); arrastre = null; });
     });
   });
+  }
   function nombreCol(col) {
-    var h = $(".k-col-t, .kanban-col-t, h3, .hint", col);
+    var h = $(".kan-titulo, h3, .hint", col);
     return (h && h.textContent.replace(/\s+/g, " ").trim()) || "la columna";
   }
 
@@ -1952,7 +2442,7 @@ guardar(estado);
               return;
             }
             if (b.dataset.accion === "cerrar-sesion") {
-              cerrarSesion();
+              confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion);
               return;
             }
             toast(b.textContent.trim() + ": disponible en el módulo correspondiente", "info");
@@ -1967,6 +2457,98 @@ guardar(estado);
   document.addEventListener("click", function () {
     $$(".who-menu.visible").forEach(function (m) { m.classList.remove("visible"); });
   });
+
+  /* --- datos academicos del perfil (estudiante) -------------------------- */
+  /* Tres niveles: pregrado, posgrado y egresado. Cada uno muestra un juego
+     distinto de campos; el semestre depende del programa (posgrado) o
+     desaparece (egresado). */
+  function opcionSelect(sel, valor) {
+    if (!sel || !valor) return false;
+    var ok = false;
+    $$("option", sel).forEach(function (o) {
+      if (o.value === valor || o.textContent.trim() === valor) { o.selected = true; ok = true; }
+    });
+    return ok;
+  }
+  function sincronizarAcademico() {
+    var nivel = $("[data-acad-nivel]");
+    if (!nivel) return;
+    var v = (nivel.value || "").toLowerCase();
+    var posgrado = v.indexOf("posgrado") >= 0;
+    var egresado = v.indexOf("egresado") >= 0;
+    var tipo = $("[data-acad-tipo]");
+    var semestre = $("[data-acad-semestre]");
+    var modalidad = $("[data-acad-modalidad]");
+    var posgradoCampos = $("[data-acad-posgrado-campos]");
+    var egresadoCampos = $("[data-acad-egresado-campos]");
+    var semestreCampo = $("[data-acad-semestre-campo]");
+    var duracion = $("[data-acad-duracion]");
+    if (posgradoCampos) posgradoCampos.hidden = !posgrado;
+    if (egresadoCampos) egresadoCampos.hidden = !egresado;
+    if (semestreCampo) semestreCampo.hidden = egresado;
+    if (modalidad && modalidad.closest(".campo")) {
+      modalidad.closest(".campo").hidden = egresado;
+    }
+
+    /* Duracion por tipo de posgrado en UNIMINUTO (El programa confirma 2
+       periodos para especializacion; la maestria va de 3 a 4; el doctorado
+       depende del programa y suele ir de 6 a 8). El minimo y el maximo
+       marcan cuantos semestres ofrece el campo "Semestre". */
+    var DURACION = {
+      "especialización": [2, 2], "especializacion": [2, 2],
+      "maestría": [3, 4], "maestria": [3, 4],
+      "doctorado": [6, 8]
+    };
+    var ORD = ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto",
+      "Séptimo", "Octavo", "Noveno", "Décimo", "Undécimo", "Duodécimo"];
+    var NUM = {};
+    ORD.forEach(function (o, k) { NUM[o] = k + 1; });
+
+    function llenarSemestre(desde, hasta) {
+      if (!semestre) return;
+      var previo = semestre.value;
+      var n = hasta;
+      var opciones = [];
+      for (var k = 1; k <= n; k++) opciones.push(ORD[k - 1]);
+      if ($$("option", semestre).length !== n) {
+        semestre.innerHTML = opciones.map(function (o) {
+          return "<option>" + o + "</option>";
+        }).join("");
+      }
+      var queria = NUM[previo] || desde;
+      if (queria < desde) queria = desde;
+      if (queria > hasta) queria = hasta;
+      semestre.value = ORD[queria - 1];
+    }
+
+    if (posgrado) {
+      var tipoVal = (tipo ? tipo.value : "").toLowerCase();
+      var rango = DURACION[tipoVal] || [3, 4];
+      llenarSemestre(rango[0], rango[1]);
+      if (duracion) {
+        duracion.textContent = rango[0] === rango[1]
+          ? ("Duración: " + rango[0] + " semestres.")
+          : ("Duración: " + rango[0] + " a " + rango[1] + " semestres; elige el semestre en el que vas.");
+      }
+    } else {
+      /* Pregrado conserva los diez semestres de un programa profesional. */
+      llenarSemestre(1, 10);
+      if (duracion) duracion.textContent = "";
+    }
+  }
+  var nivelAcad = $("[data-acad-nivel]");
+  if (nivelAcad) {
+    nivelAcad.addEventListener("change", sincronizarAcademico);
+    var tipoAcad = $("[data-acad-tipo]");
+    if (tipoAcad) tipoAcad.addEventListener("change", sincronizarAcademico);
+    var prevAcad = store(true);
+    var nivelPrevio = prevAcad && prevAcad.perfil && prevAcad.perfil["nivel academico"];
+    if (nivelPrevio && opcionSelect(nivelAcad, nivelPrevio)) {
+      setTimeout(sincronizarAcademico, 0);
+    } else {
+      sincronizarAcademico();
+    }
+  }
 
   /* --- estado inicial ----------------------------------------------------- */
   var previo = store(true);
