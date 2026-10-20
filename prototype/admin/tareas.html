@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Asignar emprendimiento — SGEMD</title>
+<title>Tareas — SGEMD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -86,11 +86,11 @@ small{font-size:13px}
 .nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
 .nav-group.abierto .nav-hijos{max-height:190px}
 @media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
-.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.25;margin-bottom:1px}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
-.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:13px;font-weight:700;line-height:1.4;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -191,6 +191,7 @@ small{font-size:13px}
 .suave{font-size:13px;color:var(--tinta-2)}
 .fuerte{font-size:13px;color:var(--tinta)}
 .fila-acciones{display:flex;gap:10px}
+.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .fila-6{display:flex;gap:6px}
 .fila-fin{display:flex;justify-content:flex-end;gap:10px}
 .fila-col{display:flex;flex-direction:column;gap:10px}
@@ -213,6 +214,8 @@ small{font-size:13px}
 .barra{height:6px;background:var(--azul-15);border-radius:var(--r-full);overflow:hidden;margin-top:12px}
 .barra span{display:block;height:100%;background:var(--azul-real);border-radius:var(--r-full)}
 .barra.amarilla span{background:var(--amarillo)}
+.barra-celda{min-width:110px}
+.barra-pct{font-size:13px;color:var(--azul-profundo)}
 
 table.tabla{width:100%;border-collapse:collapse;font-size:14px}
 table.tabla thead th{
@@ -232,6 +235,9 @@ table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);bo
 table.tabla tbody tr:last-child td{border-bottom:none}
 .tabla-scroll{overflow-x:auto}
 .tabla-envoltura{overflow:hidden}
+/* A31: el checkbox de seleccion de tabla ya no lleva accent-color inline;
+   color y medidas salen de los tokens (antes style="...#004a93..." x2). */
+.tabla th input[type=checkbox],.tabla td.sel input[type=checkbox]{accent-color:var(--azul-real);width:16px;height:16px}
 
 /* La tabla de administracion tiene 9 columnas. A 16px de padding horizontal por
    celda se pasa del ancho disponible y obliga a desplazar en horizontal, asi que
@@ -308,6 +314,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
 .drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
+.drop-tit{display:block;color:var(--azul-noche);font-size:13px}
+.drop-nota{font-size:13px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
 .radio-card{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
@@ -318,6 +326,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 .vacio svg{color:var(--gris);margin:0 auto 12px}
 .vacio h3{margin-bottom:6px}
 .vacio p{font-size:13px;max-width:420px;margin:0 auto 16px}
+/* Formulario envolvente de cada vista admin (hallazgo C-01). display:contents
+   anula la caja del <form> para que el layout de .content no cambie ni se
+   rompan los selectores que esperan los hijos reales dentro de .main. */
+.vista-form{display:contents}
 
 .steps{display:flex;align-items:center;gap:0;margin-bottom:28px;flex-wrap:wrap}
 .step{display:flex;align-items:center;gap:9px}
@@ -462,7 +474,133 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 @media (max-width:767px){.fila-simple{flex-wrap:wrap}}
 
 @media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
-.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}</style>
+.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}.cal-envoltura{background:#ffffff}.cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}.cal-btn:hover{border-color:#004a93}.cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}.cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;color:#ffffff;font-weight:700}.cal-btn.activo .cal-punto{background:#ffd300}.cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}.cal-resumen b{font-size:16px;color:#051533}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}
+/* El atributo [hidden] lo sobreescribia cualquier regla con display (por
+   ejemplo .notif{display:flex}), asi que los filtros de la bandeja ocultaban
+   filas que seguian visibles. Con !important [hidden] vuelve a mandar. */
+[hidden]{display:none!important}
+
+/* --- Migas de pan navegables --------------------------------------------- */
+.crumbs a{color:var(--tinta-2)}
+.crumbs a:hover{color:var(--azul-real)}
+.crumbs .miga-item{color:var(--tinta-2)}
+
+/* --- Previsualizacion de las metricas al pasar el mouse ------------------- */
+.metrica-enlace{position:relative;display:block;color:inherit;text-decoration:none;
+  transition:border-color .15s ease,box-shadow .15s ease}
+.metrica-enlace:hover,.metrica-enlace:focus-visible{border-color:var(--azul-real);
+  box-shadow:var(--shadow-2);text-decoration:none}
+.mini-prev{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:40;
+  background:var(--azul-noche);color:var(--blanco);border-radius:var(--r-sm);
+  padding:12px 14px;box-shadow:var(--shadow-3);opacity:0;visibility:hidden;
+  transform:translateY(-4px);pointer-events:none;
+  transition:opacity .15s ease,transform .15s ease,visibility .15s}
+.mini-prev b{display:block;font-size:13px;margin-bottom:4px;color:var(--blanco)}
+.mini-prev span{display:block;font-size:13px;color:var(--blanco);opacity:.85;line-height:1.5}
+.mini-prev em{display:block;margin-top:8px;font-style:normal;font-weight:700;
+  font-size:13px;color:var(--amarillo)}
+.metrica-enlace:hover .mini-prev,.metrica-enlace:focus-visible .mini-prev{
+  opacity:1;visibility:visible;transform:none}
+@media (prefers-reduced-motion:reduce){.mini-prev{transition:none}}
+
+/* --- Aviso superior de Inicio (tareas pendientes) ------------------------- */
+.mini-aviso{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border:1px solid var(--azul-real);border-left:4px solid var(--amarillo);
+  border-radius:var(--r-sm);background:var(--azul-06);color:var(--tinta-2);
+  text-decoration:none}
+.mini-aviso:hover{background:var(--azul-12);text-decoration:none}
+.mini-aviso b{color:var(--tinta)}
+.mini-aviso .mini-aviso-ico{flex:0 0 18px;color:var(--azul-real);margin-top:1px}
+.mini-aviso .mini-aviso-cta{margin-left:auto;font-weight:700;color:var(--azul-real);white-space:nowrap}
+
+/* --- Desplegable de opciones de tareas ------------------------------------ */
+.desplegable{border:1px solid var(--gris);border-radius:var(--r-sm);background:var(--blanco)}
+.desplegable>summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:13px;
+  color:var(--azul-real);list-style:none;display:flex;align-items:center;gap:8px}
+.desplegable>summary::-webkit-details-marker{display:none}
+.desplegable[open]>summary{border-bottom:1px solid var(--gris)}
+.desp-lista{display:flex;flex-direction:column}
+.desp-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-bottom:1px solid var(--gris);font-size:13px;color:var(--tinta);text-decoration:none}
+.desp-item:last-child{border-bottom:none}
+.desp-item:hover{background:var(--azul-06);text-decoration:none}
+.desp-item svg{flex:0 0 16px;color:var(--azul-real)}
+.desp-item span{margin-left:auto;color:var(--tinta-2);white-space:nowrap}
+
+/* --- Comentarios del docente ---------------------------------------------- */
+.coment{display:flex;gap:12px;align-items:flex-start;padding:12px 0}
+.coment+.coment{border-top:1px solid var(--gris)}
+.coment .avatar{width:34px;height:34px;flex:0 0 34px;font-size:13px}
+.coment-cab{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.coment-cab b{font-size:13px;color:var(--tinta)}
+.coment-cab .who-role{padding:0 7px}
+.coment-cab time{font-size:13px;color:var(--tinta-2)}
+.coment-txt{margin-top:7px;font-size:13px;color:var(--tinta);
+  background:var(--noche-03);border-left:3px solid var(--azul-real);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;line-height:1.55}
+
+/* --- Cabecera de perfil (patron tipo GitHub) ------------------------------ */
+.perfil-cab{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.perfil-foto{width:132px;height:132px;flex:0 0 132px;border-radius:var(--r-full);
+  background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;
+  justify-content:center;font-size:32px;font-weight:700;border:1px solid var(--gris);overflow:hidden}
+.perfil-foto img{width:100%;height:100%;object-fit:cover}
+.perfil-datos{flex:1;min-width:240px}
+.perfil-nombre{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.perfil-usuario{font-size:16px;color:var(--tinta-2);margin-top:2px}
+.perfil-bio{font-size:14px;color:var(--tinta-2);margin-top:12px;max-width:640px}
+.perfil-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;
+  font-size:13px;color:var(--tinta-2)}
+.perfil-meta span{display:inline-flex;align-items:center;gap:6px}
+.perfil-meta svg{color:var(--azul-real);flex:0 0 15px}
+.perfil-acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.perfil-repo{display:block;color:inherit;text-decoration:none}
+.perfil-repo:hover{text-decoration:none}
+
+/* --- Diagnostico: selector por tarjetas ----------------------------------- */
+.radio-grupo{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.radio-card strong{display:block;font-size:13px;color:var(--tinta)}
+.radio-card small{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.radio-card.sel{background:var(--azul-06)}
+.radio-card input:checked+div strong{color:var(--azul-real)}
+
+/* --- Kanban de 4 columnas (tareas: comple., en curso, revision, pendiente) -- */
+.kanban[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1279px){.kanban[data-cols="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:767px){.kanban[data-cols="4"]{grid-template-columns:1fr}}
+
+/* --- Bandeja de notificaciones: cada aviso navega ------------------------- */
+a.notif{color:inherit;text-decoration:none;cursor:pointer;align-items:center}
+a.notif:hover{background:var(--azul-06);text-decoration:none}
+.notif-flecha{margin-left:auto;flex:0 0 16px;color:var(--gris)}
+.notif-ico{flex:0 0 34px;width:34px;height:34px;border-radius:8px;
+  background:var(--azul-06);color:var(--azul-real);display:flex;align-items:center;
+  justify-content:center}
+.notif-cuerpo{flex:1;min-width:0}
+.chip{cursor:pointer}
+.chip:hover{border-color:var(--azul-real);color:var(--azul-real)}
+
+/* --- Drawer de la campana: avisos enlazados ------------------------------ */
+.sg-drawer-lista a{display:flex;gap:10px;align-items:flex-start;padding:12px;
+  border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;
+  color:var(--tinta);text-decoration:none}
+.sg-drawer-lista a:hover{background:var(--azul-06);text-decoration:none}
+.sg-drawer-lista a svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}
+.sg-drawer-lista a b{display:block;font-size:13px;color:var(--tinta)}
+.sg-drawer-lista a span{display:block;color:var(--tinta-2);margin-top:2px}
+.sg-drawer-lista a time{display:block;color:var(--gris);margin-top:3px;font-size:13px}
+
+/* --- Filas de tarea del plan (navegan al detalle) ------------------------- */
+.fila-tarea{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--gris);color:inherit;text-decoration:none}
+.fila-tarea:last-child{border-bottom:none}
+.fila-tarea:hover{background:var(--azul-06);text-decoration:none}
+.fila-ico{flex:0 0 16px;color:var(--azul-real);display:flex}
+.fila-txt{flex:1;font-size:13px;color:var(--tinta)}
+.fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.fase-link{color:inherit;text-decoration:none}
+.fase-link:hover{color:var(--azul-real);text-decoration:underline}
+</style>
 </head>
 <body>
 <div class="shell">
@@ -471,7 +609,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       <div class="brand-text"><div class="brand-name">SGEMD</div>
       <div class="brand-sub">Emprendimiento Minuto de Dios</div></div>
     </div>
-    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Inicio</span></a><a class="" href="solicitudes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Solicitudes</span><span class="nav-badge">10</span></a><div class="nav-group abierto" data-grupo="usuarios-y-asignaciones"><button type="button" class="nav-label" aria-expanded="true" aria-controls="hij-usuarios-y-asignaciones" data-grupo="usuarios-y-asignaciones"><span>Usuarios y asignaciones</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-usuarios-y-asignaciones"><a class="" href="usuarios.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de perfiles</span></a><a class="activo" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Asignaciones</span></a></div></div><div class="nav-group" data-grupo="emprendimientos-y-seguimiento"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-emprendimientos-y-seguimiento" data-grupo="emprendimientos-y-seguimiento"><span>Emprendimientos y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-emprendimientos-y-seguimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Emprendimientos</span></a><a class="" href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnósticos</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Seguimiento</span></a></div></div><div class="nav-group" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompañamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div><div class="nav-group" data-grupo="institucional"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-institucional" data-grupo="institucional"><span>Institucional</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-institucional"><a class="" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Reportes</span></a></div></div><a class="" href="notificaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificaciones</span></a><a class="" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></a></nav>
+    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Inicio</span></a><a class="" href="solicitudes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Solicitudes</span><span class="nav-badge">10</span></a><div class="nav-group" data-grupo="usuarios-y-asignaciones"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-usuarios-y-asignaciones" data-grupo="usuarios-y-asignaciones"><span>Usuarios y asignaciones</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-usuarios-y-asignaciones"><a class="" href="usuarios.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de perfiles</span></a><a class="" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Asignaciones</span></a></div></div><div class="nav-group abierto" data-grupo="emprendimientos-y-seguimiento"><button type="button" class="nav-label" aria-expanded="true" aria-controls="hij-emprendimientos-y-seguimiento" data-grupo="emprendimientos-y-seguimiento"><span>Emprendimientos y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-emprendimientos-y-seguimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Emprendimientos</span></a><a class="" href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnósticos</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Seguimiento</span></a><a class="activo" href="tareas.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tareas</span></a></div></div><div class="nav-group" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompañamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div><div class="nav-group" data-grupo="institucional"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-institucional" data-grupo="institucional"><span>Institucional</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-institucional"><a class="" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Reportes</span></a><a class="" href="respaldos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg><span>Respaldos</span></a></div></div><a class="" href="notificaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificaciones</span></a><a class="" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></a></nav>
     <div class="side-foot"><div class="side-card">
       <b>Institución Minuto de Dios</b>
       <span>Módulo ADMINISTRADOR</span>
@@ -485,17 +623,17 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
       </div>
       <div class="topbar-right">
-        <button class="icon-btn" data-accion="notificaciones" aria-label="Notificaciones"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="count">3</span></button>
+        <button class="icon-btn" data-accion="notificaciones" aria-label="Notificaciones"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="count">2</span></button>
         <div class="who"><span class="avatar">AR</span>
           <div><div class="who-name">Ana Restrepo</div><span class="who-role">ADMINISTRADOR</span></div>
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <span class="miga-item">Asignaciones</span> &rsaquo; <b>Asignar emprendimiento</b></div><div class="page-head"><h1>Asignar emprendimiento</h1><p class="sub">Asigna un docente a los emprendimientos que aún no lo tienen.</p><div class="acciones"><a class="btn btn-secundario" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver</a></div></div><div class="steps"><div class="step hecho"><i><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></i><b>Seleccionar emprendimiento</b></div><div class="step-line"></div><div class="step activo"><i>2</i><b>Elegir docente</b></div><div class="step-line"></div><div class="step "><i>3</i><b>Confirmar asignación</b></div></div><div class="sep sep-22"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Emprendimiento sin docente</h3><span class="hint"></span></div><div class="card-body"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Código</th><th scope="col">Emprendimiento</th><th scope="col">Estudiante</th><th scope="col">Sector</th><th scope="col">Etapa</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Código">EMP-038</td><td data-label="Emprendimiento"><b>Aromas del Sur</b></td><td data-label="Estudiante">Sofia Ramirez</td><td data-label="Sector">Alimentos</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="aprobar" title="Seleccionar" aria-label="Seleccionar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div></td></tr><tr><td data-label="Código">EMP-036</td><td data-label="Emprendimiento"><b>Sabores de la Costa</b></td><td data-label="Estudiante">Daniel Rojas</td><td data-label="Sector">Alimentos</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="aprobar" title="Seleccionar" aria-label="Seleccionar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div></td></tr><tr><td data-label="Código">EMP-034</td><td data-label="Emprendimiento"><b>Eco Hogar</b></td><td data-label="Estudiante">Valeria Cruz</td><td data-label="Sector">Muebles</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="aprobar" title="Seleccionar" aria-label="Seleccionar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div></td></tr></tbody></table></div></div></div></div><div class="card"><div class="card-head"><h3>Docente disponible</h3><span class="hint"></span></div><div class="card-body"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Docente</th><th scope="col">Área</th><th scope="col">Carga actual</th><th scope="col">Horas disponibles</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Docente">Carlos Mendoza</td><td data-label="Área">Alimentos</td><td data-label="Carga actual">3 h de 5 h</td><td data-label="Horas disponibles">2 h</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="aprobar" title="Seleccionar" aria-label="Seleccionar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div></td></tr><tr><td data-label="Docente">Paula Andrea Rios</td><td data-label="Área">Moda</td><td data-label="Carga actual">2 h de 4 h</td><td data-label="Horas disponibles">2 h</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="aprobar" title="Seleccionar" aria-label="Seleccionar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div></td></tr><tr><td data-label="Docente">Rafael Nieto</td><td data-label="Área">Tecnología</td><td data-label="Carga actual">5 h de 6 h</td><td data-label="Horas disponibles">1 h</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="aprobar" title="Seleccionar" aria-label="Seleccionar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div></td></tr></tbody></table></div></div></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Asignación seleccionada</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Emprendimiento</dt><dd>Aromas del Sur</dd></div><div class="def-row"><dt>Estudiante</dt><dd>Sofia Ramirez</dd></div><div class="def-row"><dt>Docente</dt><dd>Carlos Mendoza</dd></div><div class="def-row"><dt>Horas asignadas</dt><dd>2 h por semana</dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="fila-col"><button class="btn btn-primario" data-accion="confirmar-asignacion"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Confirmar asignación</button><button class="btn btn-secundario"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg> Cancelar</button></div><div class="nota-foot">El docente y el estudiante reciben una notificación con la asignación.</div></div></div></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <b>Tareas</b></div><div class="page-head"><h1>Tareas</h1><p class="sub">Consulta, alta y baja de tareas por emprendimiento.</p><div class="acciones"><button class="btn btn-primario btn-sm" data-accion="nueva-tarea"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nueva tarea</button></div></div><form class="vista-form" id="vista-tareas" action="#" method="post" novalidate onsubmit="return false"><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>Como administrador puedes <b>consultar, añadir y eliminar</b> tareas de cualquier emprendimiento. La calificación de las entregas la realiza el docente.</div></div><div class="sep sep-20"></div><div class="toolbar"><div class="buscador crece"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Buscar" aria-label="Buscar"></div><select class="filtro" data-filtro="filtrar-por-estado" aria-label="Filtrar por estado" data-filtro-col="5"><option value="">Todos los estados</option><option>Pendiente</option><option>En revisión</option><option>Completada</option></select><select class="filtro" data-filtro="filtrar-por-prioridad" aria-label="Filtrar por prioridad" data-filtro-col="3"><option value="">Toda la prioridad</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="card"><div class="card-head"><h3>Emprendimientos con tareas</h3><span class="hint"></span></div><div class="card-body sin-pad"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><caption class="visually-hidden">Emprendimientos con tareas asignadas</caption><thead><tr><th scope="col">Código</th><th scope="col">Emprendimiento</th><th scope="col">Estudiante</th><th scope="col">Etapa</th><th scope="col">Tareas</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Código">EMP-041</td><td data-label="Emprendimiento"><b>Sabor y Sabe</b></td><td data-label="Estudiante">Mariana López</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td data-label="Tareas">2</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="ver-tareas" title="Ver tareas" aria-label="Ver tareas"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td></tr><tr><td data-label="Código">EMP-039</td><td data-label="Emprendimiento"><b>Krea Textil</b></td><td data-label="Estudiante">Jhon Ospina</td><td data-label="Etapa"><span class="badge b-linea">FASE 3 - Validación</span></td><td data-label="Tareas">1</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="ver-tareas" title="Ver tareas" aria-label="Ver tareas"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td></tr><tr><td data-label="Código">EMP-037</td><td data-label="Emprendimiento"><b>EcoPack</b></td><td data-label="Estudiante">Lucía Fernández</td><td data-label="Etapa"><span class="badge b-linea">FASE 2 - Prototipo</span></td><td data-label="Tareas">1</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="ver-tareas" title="Ver tareas" aria-label="Ver tareas"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td></tr><tr><td data-label="Código">EMP-038</td><td data-label="Emprendimiento"><b>Aromas del Sur</b></td><td data-label="Estudiante">Sofía Ramírez</td><td data-label="Etapa"><span class="badge b-linea">FASE 1 - Ideación</span></td><td data-label="Tareas">1</td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="ver-tareas" title="Ver tareas" aria-label="Ver tareas"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td></tr></tbody></table></div><div data-vacio hidden><div class="vacio"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h3>Sin resultados para esta búsqueda</h3><p>No hay registros que coincidan con la búsqueda o los filtros actuales. Límpialos para volver a ver todos los registros.</p></div></div></div></div></div><div class="sep sep-20"></div><div id="zona-tareas"><div class="card"><div class="card-head"><h3>Tareas asignadas a estudiantes</h3><button class="btn btn-primario btn-sm" data-accion="nueva-tarea"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nueva tarea</button><span class="hint"></span></div><div class="card-body sin-pad"><div class="card tabla-envoltura"><div class="tabla-scroll"><table class="tabla"><caption class="visually-hidden">Tareas asignadas a estudiantes</caption><thead><tr><th scope="col">Tarea</th><th scope="col">Emprendimiento</th><th scope="col">Estudiante</th><th scope="col">Prioridad</th><th scope="col">Vence</th><th scope="col">Estado</th><th scope="col" class="acc">Acciones</th></tr></thead><tbody><tr><td data-label="Tarea"><b>Evidencia fotográfica del punto de venta</b></td><td data-label="Emprendimiento">Sabor y Sabe</td><td data-label="Estudiante">Mariana López</td><td data-label="Prioridad"><span class="badge b-amarillo">Alta</span></td><td data-label="Vence">12 nov 2024</td><td data-label="Estado"><span class="badge b-amarillo">En revisión</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-tarea" title="Editar" aria-label="Editar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr><tr><td data-label="Tarea"><b>Presupuesto de insumos</b></td><td data-label="Emprendimiento">Sabor y Sabe</td><td data-label="Estudiante">Mariana López</td><td data-label="Prioridad"><span class="badge b-azul">Media</span></td><td data-label="Vence">15 nov 2024</td><td data-label="Estado"><span class="badge b-azul">Completada</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-tarea" title="Editar" aria-label="Editar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr><tr><td data-label="Tarea"><b>Perfil en redes sociales</b></td><td data-label="Emprendimiento">Krea Textil</td><td data-label="Estudiante">Jhon Ospina</td><td data-label="Prioridad"><span class="badge b-linea">Baja</span></td><td data-label="Vence">16 nov 2024</td><td data-label="Estado"><span class="badge b-neutra">Pendiente</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-tarea" title="Editar" aria-label="Editar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr><tr><td data-label="Tarea"><b>Prototipo de empaque</b></td><td data-label="Emprendimiento">EcoPack</td><td data-label="Estudiante">Lucía Fernández</td><td data-label="Prioridad"><span class="badge b-amarillo">Alta</span></td><td data-label="Vence">14 nov 2024</td><td data-label="Estado"><span class="badge b-amarillo">En revisión</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-tarea" title="Editar" aria-label="Editar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr><tr><td data-label="Tarea"><b>Análisis de competencia</b></td><td data-label="Emprendimiento">Aromas del Sur</td><td data-label="Estudiante">Sofía Ramírez</td><td data-label="Prioridad"><span class="badge b-azul">Media</span></td><td data-label="Vence">18 nov 2024</td><td data-label="Estado"><span class="badge b-neutra">Pendiente</span></td><td class="acc" data-label="Acciones"><div class="acciones-cell"><button data-accion="editar-tarea" title="Editar" aria-label="Editar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr></tbody></table></div><div data-vacio hidden><div class="vacio"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h3>Sin resultados para esta búsqueda</h3><p>No hay registros que coincidan con la búsqueda o los filtros actuales. Límpialos para volver a ver todos los registros.</p></div></div></div></div></div></div><div class="paginacion" data-paginacion data-pag-actual="1" data-pag-total="1" data-pag-tam="5" data-pag-regs="5"><span data-pag-texto>Mostrando 1 a 5 de 5</span><div class="pag"><button class="btn btn-secundario btn-sm" data-pagina="prev" disabled><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Anterior</button><button class="btn btn-sm btn-acento" data-pagina="1" aria-current="page">1</button><button class="btn btn-secundario btn-sm" data-pagina="next" disabled>Siguiente <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div></div><div id="form-tarea" hidden><div class="grid g-2 g-col"><div class="campo"><label for="f188">Título de la tarea<span class="req">*</span></label><input id="f188" type="text" value="" placeholder="Ej.: Presentación de pitch" required></div><div class="campo"><label for="s189">Emprendimiento</label><select id="s189"><option>- Elegir -</option><option>Sabor y Sabe</option><option>Krea Textil</option><option>EcoPack</option><option>Aromas del Sur</option></select></div><div class="campo"><label for="s190">Estudiante</label><select id="s190"><option>- Elegir -</option><option>Mariana López</option><option>Jhon Ospina</option><option>Lucía Fernández</option><option>Sofía Ramírez</option></select></div><div class="campo"><label for="s191">Prioridad</label><select id="s191"><option>Baja</option><option selected>Media</option><option>Alta</option></select></div><div class="campo"><label for="f192">Vence el</label><input id="f192" type="date" value="" placeholder=""></div><div class="campo"><label for="f193">Puntos</label><input id="f193" type="number" value="100" placeholder=""></div></div><div class="campo"><label for="f194">Descripción (opcional)</label><textarea id="f194" placeholder="Detalla qué debe entregar el estudiante"></textarea></div></div></form></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
-
+<ul class="sg-notif-fuente" hidden data-notif-fuente><li><a href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><b>3 emprendimientos sin docente</b><span>Tres emprendimientos siguen sin docente asignado en la fase actual.</span><time>hoy, 08:15</time></a></li><li><a href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><b>5 diagnosticos sin revisión</b><span>Cinco diagnosticos enviados por estudiantes esperan tu revisión.</span><time>hoy, 09:40</time></a></li><li><a href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><b>Evento aprobado: Jornada de mentoria</b><span>Aprobaste el evento Jornada de mentoria para el 25 de noviembre.</span><time>ayer, 16:40</time></a></li><li><a href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg><b>Reporte de seguimiento generado</b><span>El informe de seguimiento del mes está listo para descargar.</span><time>12 nov 2024, 18:20</time></a></li></ul>
 <script>
 (function () {
   "use strict";
@@ -714,10 +852,11 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   });
 
   /* --- acordeon del menu lateral (grupos desplegables) ------------------- */
-  /* Los grupos solo existen en el rol Estudiante (ver NAV en lib_ui). El
-     grupo con la pagina activa viene marcado "abierto" desde el servidor;
-     los demas recuerdan su estado entre paginas con localStorage. El click
-     en el boton nav-label togglea la clase y su aria-expanded. */
+  /* Los grupos existen en el NAV jerarquico de Estudiante, Docente y
+     Administrador (ver NAV en lib_ui). El grupo con la pagina activa viene
+     marcado "abierto" desde el servidor; los demas recuerdan su estado
+     entre paginas con localStorage. El click en el boton nav-label togglea
+     la clase y su aria-expanded. */
   var CLAVE_NAV = "sgemd:v1:nav:acordeon";
   function navLeer() {
     try { return JSON.parse(localStorage.getItem(CLAVE_NAV)) || []; } catch (e) { return []; }
@@ -766,6 +905,25 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     var zonas = $$(".tabla-envoltura");
     return zonas.length ? zonas : [document];
   }
+  /* Estados vacios de listas y tablas (hallazgo MEDIO P6-P10). Cada bloque
+     [data-vacio] arranca oculto y se muestra solo cuando su lista queda sin
+     items visibles (datos vacios o filtro sin resultados). El alcance es el
+     contenedor marcado con data-vacio-lista, la tarjeta/envoltura de tabla
+     mas cercana, o el nodo padre; data-vacio-fuente permite apuntar al
+     selector concreto de los items de esa lista. */
+  function vacioRefrescar() {
+    $$("[data-vacio]").forEach(function (v) {
+      var sel = v.getAttribute("data-vacio-fuente");
+      var caja = v.closest("[data-vacio-lista]") || v.closest(".tabla-envoltura, .card") || v.parentNode;
+      var items;
+      if (sel) items = $$(sel, caja);
+      else if ($("table.tabla", caja)) items = $$("table.tabla tbody tr", caja);
+      else items = $$("[data-buscar], .notif", caja);
+      if (!sel && !items.length && !$("table.tabla", caja)) return; /* no es una lista */
+      var ver = items.filter(function (i) { return !i.hidden; }).length;
+      v.hidden = ver > 0;
+    });
+  }
   function filtrar(input) {
     var q = input.value.trim().toLowerCase();
     var n = 0;
@@ -780,6 +938,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     });
     var aviso = $("[data-resultados]", input.closest("[data-tabla-zona]") || document);
     if (aviso) aviso.textContent = n + (n === 1 ? " resultado" : " resultados");
+    vacioRefrescar();
   }
   $$('input[type="text"][placeholder*="Buscar" i], .buscador input')
     .forEach(function (i) {
@@ -824,6 +983,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
     var r = $("[data-resultados]", zona);
     if (r) r.textContent = n + (n === 1 ? " resultado" : " resultados");
     guardar({ filtros: n });
+    vacioRefrescar();
   }
   $$("[data-filtro]:not([data-filtro='off']), .chip").forEach(function (c) {
     c.addEventListener("click", function () {
@@ -940,10 +1100,23 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
      para fusionar en la pantalla de gestion los formularios de edicion de
      docente/estudiante, que antes eran paginas aparte. */
+  var SEQ_FORM = 0;
+  /* A34: copia del formulario con ids (y labels for) re-sufijados "-mN" para
+     que el modal no duplique los ids del original oculto. Devuelve null si el
+     contenedor no existe. */
+  function plantillaModal(id) {
+    var plantilla = document.getElementById(id);
+    if (!plantilla) return null;
+    SEQ_FORM += 1;
+    var suf = "-m" + SEQ_FORM;
+    return plantilla.innerHTML
+      .replace(/id="([^"]+)"/g, function (m0, x) { return 'id="' + x + suf + '"'; })
+      .replace(/for="([^"]+)"/g, function (m0, x) { return 'for="' + x + suf + '"'; });
+  }
   function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
-    var plantilla = document.getElementById(idForm);
-    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
-    abrirModal(titulo, plantilla.innerHTML, [
+    var htmlPlant = plantillaModal(idForm);
+    if (!htmlPlant) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, htmlPlant, [
       { txt: "Cancelar", clase: "btn btn-secundario" },
       { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
         toast(mensaje || "Cambios guardados", "ok");
@@ -1335,6 +1508,27 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
           "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
         break;
 
+      case "dar-de-baja":
+        /* A-4: baja lógica con efecto en cascada. Las asignaciones,
+           solicitudes y comentarios del usuario quedan inactivos. */
+        e.preventDefault();
+        var filaBaja = filaDe(b);
+        var nomBaja = "";
+        if (filaBaja && filaBaja.children[1]) {
+          nomBaja = (filaBaja.children[1].textContent || "")
+            .replace(/\s+/g, " ").trim();
+        }
+        confirmar("Dar de baja",
+          "Se dará de baja a " + (nomBaja || "este usuario") + ". Sus asignaciones, " +
+          "solicitudes y comentarios quedarán inactivos. Puedes revertirlo cambiando " +
+          "el estado de acceso a Activo.",
+          function () {
+            if (filaBaja) filaBaja.remove();
+            toast("Usuario dado de baja. Cascada aplicada.", "ok");
+            if (typeof vacioRefrescar === "function") vacioRefrescar();
+          });
+        break;
+
       case "solicitud-aprobar":
         e.preventDefault();
         confirmar("Aprobar solicitud",
@@ -1411,11 +1605,58 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       }
 
       case "editar":
-      case "registrar-avance":
-      case "asignar":
-      case "editar-sensores":
         e.preventDefault();
         abrirEditor("Editar registro", registro);
+        break;
+
+      case "registrar-avance":
+        e.preventDefault();
+        var fila = filaDe(b);
+        if (!fila) return;
+        var cod = fila.dataset.cod;
+        var emp = fila.dataset.emp;
+        var estu = fila.dataset.estu;
+        var etapa = fila.dataset.etapa;
+        var avanceActual = Number(fila.dataset.avance || 0);
+        // Llenar prefill en el formulario embebido
+        document.querySelector("[name=emp]").value = emp;
+        document.querySelector("[name=estu]").value = estu;
+        document.querySelector("[name=etapa]").value = etapa;
+        document.querySelector("[name=avance]").value = Math.round(avanceActual);
+        abrirFormulario("Registrar avance", "form-avance", b, "Guardar", "Avance guardado");
+        break;
+
+      case "asignar-docente":
+        e.preventDefault();
+        var fila = filaDe(b);
+        if (!fila) return;
+        var cod = fila.dataset.cod;
+        var emp = fila.dataset.emp;
+        var estu = fila.dataset.estu;
+        // Prefill: bloquear campos Estudiante/Emprendimiento/Correo
+        var modal = document.querySelector("#form-asignar-docente");
+        if (modal) {
+          modal.querySelector("[name=estudiante]").value = estu;
+          modal.querySelector("[name=emprendimiento]").value = emp;
+          modal.querySelector("[name=correo]").value = CORREOS_EST[estu] || "";
+          // Bloquear inputs
+          var campos = modal.querySelectorAll("input, select");
+          campos.forEach(function(c) { c.disabled = true; });
+          // Mostrar badge asignado
+          var badge = modal.querySelector(".badge-asignado");
+          if (badge) badge.textContent = "Asignado a " + estu;
+          // Refrescar vacío
+          if (typeof vacioRefrescar === "function") vacioRefrescar();
+          abrirModal("Asignar docente", plantillaModal("form-asignar-docente"), [
+            { txt: "Cancelar", clase: "btn btn-secundario" },
+            { txt: "Confirmar", clase: "btn btn-primario", alClic: function() {
+              // Guardar asignación y cerrar
+              toast("Docente asignado", "ok");
+              if (typeof vacioRefrescar === "function") vacioRefrescar();
+              cerrarModal();
+            } }
+          ]);
+        }
         break;
 
       case "aprobar":
@@ -1776,10 +2017,37 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
           });
         break;
 
+      case "crear-respaldo":
+        e.preventDefault();
+        confirmar("Crear respaldo",
+          "Se generará un respaldo completo de la base de datos (aprox. 84 MB).",
+          function () {
+            var tarjeta = b.closest(".card");
+            var tb = tarjeta ? $("tbody", tarjeta) : null;
+            if (tb) {
+              var f = document.createElement("tr");
+              var d = new Date();
+              var hh = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+              var fecha = d.getDate() + " " + ["ene", "feb", "mar", "abr", "may", "jun",
+                "jul", "ago", "sep", "oct", "nov", "dic"][d.getMonth()] + " " +
+                d.getFullYear() + ", " + hh;
+              var cod = "BKP-" + d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) +
+                ("0" + d.getDate()).slice(-2) + "-" + hh.replace(":", "");
+              f.innerHTML =
+                "<td><b>" + cod + "</b></td><td>Completo</td><td>" + fecha + "</td>" +
+                "<td>84 MB</td><td>Exitosa</td>" +
+                '<td class="acciones-cell"><button data-accion="descargar" title="Descargar" ' +
+                'aria-label="Descargar">' + icono(ICO.descargar, 16) + "</button></td>";
+              tb.insertBefore(f, tb.firstElementChild);
+            }
+            toast("Respaldo creado", "ok");
+          });
+        break;
+
       case "generar-reporte":
         e.preventDefault();
         confirmar("Generar reporte",
-          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          "Se generará el reporte maestro para 46 emprendimientos (aprox. 1.284 filas). El archivo quedará disponible en Reportes.",
           function () { toast("Reporte en cola de generación", "info"); });
         break;
 
@@ -1792,6 +2060,95 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       case "asignar-tarea":
         e.preventDefault();
         abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
+        break;
+
+      case "editar-tarea":
+        e.preventDefault();
+        abrirFormulario("Editar tarea", "form-tarea", b, "Guardar cambios",
+          "Tarea actualizada");
+        break;
+
+      case "eliminar-tarea":
+        e.preventDefault();
+        var filaTarea = filaDe(b);
+        var titTarea = "";
+        if (filaTarea && filaTarea.children[0]) {
+          titTarea = (filaTarea.children[0].textContent || "")
+            .replace(/\s+/g, " ").trim();
+        }
+        confirmar("Eliminar tarea",
+          "Se eliminará: " + (titTarea || "la tarea") + ". Los estudiantes " +
+          "dejarán de verla. Esta acción no se puede deshacer.",
+          function () {
+            if (filaTarea) filaTarea.remove();
+            toast("Tarea eliminada", "ok");
+            if (typeof vacioRefrescar === "function") vacioRefrescar();
+          });
+        break;
+
+      case "nueva-tarea":
+        /* V3: alta real. El modal reutiliza #form-tarea y, al confirmar,
+           lee los campos y agrega la fila a la tabla del admin. */
+        e.preventDefault();
+        var plantNueva = plantillaModal("form-tarea");
+        if (!plantNueva) break;
+        abrirModal("Nueva tarea", plantNueva, [
+          { txt: "Cancelar", clase: "btn btn-secundario" },
+          { txt: "Crear tarea", clase: "btn btn-primario", alClic: function (veloT) {
+              var vals = {};
+              $$(".campo", veloT).forEach(function (c) {
+                var lbl = $("label", c);
+                var el = $("input, select, textarea", c);
+                if (lbl && el) {
+                  vals[lbl.textContent.replace(/\*/g, "").replace(/\s+/g, " ")
+                    .trim().toLowerCase()] = el.value;
+                }
+              });
+              var titT = (vals["título de la tarea"] || "").trim() || "Nueva tarea";
+              var empT = (vals["emprendimiento"] || "").trim();
+              if (!empT || empT.indexOf("- Elegir") === 0) empT = "Sin emprendimiento";
+              var estT = (vals["estudiante"] || "").trim();
+              if (!estT || estT.indexOf("- Elegir") === 0) estT = "Sin estudiante";
+              var prioT = (vals["prioridad"] || "Media").trim() || "Media";
+              var venceT = (vals["vence el"] || "").trim() || "Sin fecha";
+              if (/^\d{4}-\d{2}-\d{2}$/.test(venceT)) {
+                var mesesT = ["ene", "feb", "mar", "abr", "may", "jun", "jul",
+                              "ago", "sep", "oct", "nov", "dic"];
+                var pT = venceT.split("-");
+                venceT = parseInt(pT[2], 10) + " " +
+                  mesesT[parseInt(pT[1], 10) - 1] + " " + pT[0];
+              }
+              var prioCls = prioT === "Alta" ? "b-amarillo"
+                : prioT === "Baja" ? "b-linea" : "b-azul";
+              var tbT = document.querySelector("#zona-tareas tbody");
+              if (tbT) {
+                var filaN = document.createElement("tr");
+                filaN.innerHTML =
+                  '<td data-label="Tarea"><b>' + esc(titT) + "</b></td>" +
+                  '<td data-label="Emprendimiento">' + esc(empT) + "</td>" +
+                  '<td data-label="Estudiante">' + esc(estT) + "</td>" +
+                  '<td data-label="Prioridad"><span class="badge ' + prioCls + '">' +
+                    esc(prioT) + "</span></td>" +
+                  '<td data-label="Vence">' + esc(venceT) + "</td>" +
+                  '<td data-label="Estado"><span class="badge b-neutra">Pendiente</span></td>' +
+                  '<td class="acc" data-label="Acciones"><div class="acciones-cell">' +
+                    '<button data-accion="editar-tarea" title="Editar" aria-label="Editar">' +
+                      icono(ICO.lapiz, 16) + "</button>" +
+                    '<button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar">' +
+                      icono(ICO.x, 16) + "</button>" +
+                  "</div></td>";
+                tbT.insertBefore(filaN, tbT.firstElementChild);
+              }
+              toast("Tarea asignada", "ok");
+            } }
+        ]);
+        break;
+
+      case "ver-tareas":
+        /* Emprendimientos -> baja suave al tablero de tareas de la vista. */
+        e.preventDefault();
+        var zonaT = document.getElementById("zona-tareas");
+        if (zonaT) zonaT.scrollIntoView({ behavior: "smooth", block: "start" });
         break;
 
       default:
@@ -2036,6 +2393,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
         x.dataset.tipo === f;
       x.hidden = !ok;
     });
+    vacioRefrescar();
   }
   if (notifs.length) {
     $$(".chip[data-chip]").forEach(function (ch) {
@@ -2060,7 +2418,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   }
 
   /* --- validacion de formularios ----------------------------------------- */
-  $$("form").forEach(function (f) {
+  /* Los envoltorios .vista-form (un <form> por vista admin) quedan fuera:
+     su proposito es semantico y las acciones reales viajan por data-accion,
+     asi que validarlos aqui mostraria "Guardado correctamente" en cada clic. */
+  $$("form:not(.vista-form)").forEach(function (f) {
     f.addEventListener("submit", function (e) {
       e.preventDefault();
       var malos = $$("[required]", f).filter(function (c) { return !c.value.trim(); });
@@ -2304,6 +2665,8 @@ guardar(estado);
     bComp.disabled = true;
     bComp.innerHTML = "Completada " + icono(ICO.check, 15);
   }
+  /* Estado inicial de los estados vacios de listas y tablas. */
+  vacioRefrescar();
   document.documentElement.classList.add("js-listo");
 })();
 </script>

@@ -45,6 +45,10 @@ def esqueleto(h):
     m = re.search(r"<main\b.*?</main>", h, re.S)
     if m:
         cuerpo = m.group(0)
+    # El <form> envolvente .vista-form (una pantalla admin) es layout-neutro
+    # (display:contents): si contara como bloque, dos paginas con tabla+callout
+    # pasarian a ser clones solo por compartirlo. Se elimina antes de medir.
+    cuerpo = re.sub(r'<form class="vista-form".*?</form>', "", cuerpo, flags=re.S)
     found = [n for n, rx in BLOQUES if re.search(rx, cuerpo)]
     return "+".join(found) if len(found) >= 3 else ""
 

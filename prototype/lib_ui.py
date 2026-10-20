@@ -111,6 +111,7 @@ NAV = {
             ("Emprendimientos", "maleta", "emprendimientos"),
             ("Diagnósticos", "clipboard", "diagnosticos"),
             ("Seguimiento", "trend", "seguimiento"),
+            ("Tareas", "checklist", "tareas"),
         ]),
         ("Acompañamiento y actividades", [
             ("Asesorías", "chat", "asesorias"),
@@ -118,6 +119,7 @@ NAV = {
         ]),
         ("Institucional", [
             ("Reportes", "download", "reportes"),
+            ("Respaldos", "bd", "respaldos"),
         ]),
         ("Notificaciones", "bell", "notificaciones"),
         ("Perfil", "user", "perfil"),
@@ -191,17 +193,19 @@ MIGAS = {
         "editar docente": "usuario-docente.html",
         "editar estudiante": "usuario-estudiante.html",
         "emprendimientos": "emprendimientos.html",
+        "sabor y sabe": "emprendimiento-expediente.html",
         "plan de trabajo": "emprendimiento-plan.html",
         "seguimiento": "seguimiento.html",
         "tablero": "seguimiento-dashboard.html",
         "asignaciones": "asignaciones.html",
-        "asignar emprendimiento": "asignar-emprendimiento.html",
+        "asignar emprendimiento": "asignaciones.html",
         "moderación de comentarios": "comentarios.html",
         "asesorías": "asesorias.html",
         "eventos": "eventos.html",
         "crear evento": "evento-form.html",
         "diagnosticos": "diagnosticos.html",
         "reportes": "reportes.html",
+        "tareas": "tareas.html",
         "mi perfil": "perfil.html",
         "notificaciones": "notificaciones.html",
     },
@@ -223,6 +227,25 @@ NOTIFS_EST = [
     (False, "Evento nuevo",
      "Se publicó el evento Startup Minuto de Dios. Postulación hasta el 25 de noviembre.",
      "10 nov 2024", "calendar", "sistema", "eventos.html"),
+]
+
+# Fuente unica de notificaciones del administrador: la campana (badge y drawer) y
+# la metrica "Sin leer" de la bandeja leen de aqui, igual que el estudiante, para
+# que el topbar y la vista no puedan divergir. Campos:
+# (leida, titulo, texto, fecha, icono, tipo, href).
+NOTIFS_ADMIN = [
+    (False, "3 emprendimientos sin docente",
+     "Tres emprendimientos siguen sin docente asignado en la fase actual.",
+     "hoy, 08:15", "users", "asignacion", "asignaciones.html"),
+    (False, "5 diagnosticos sin revisión",
+     "Cinco diagnosticos enviados por estudiantes esperan tu revisión.",
+     "hoy, 09:40", "clipboard", "diagnostico", "diagnosticos.html"),
+    (True, "Evento aprobado: Jornada de mentoria",
+     "Aprobaste el evento Jornada de mentoria para el 25 de noviembre.",
+     "ayer, 16:40", "calendar", "evento", "eventos.html"),
+    (True, "Reporte de seguimiento generado",
+     "El informe de seguimiento del mes está listo para descargar.",
+     "12 nov 2024, 18:20", "doc", "reporte", "reportes.html"),
 ]
 
 # El logo aparece UNA sola vez por pantalla. En escritorio vive en la sidebar
@@ -319,12 +342,14 @@ def _notif_fuente(items):
     return ('<ul class="sg-notif-fuente" hidden data-notif-fuente>%s</ul>' % lis)
 
 
-def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None,
+def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=None,
           extra_head="", notif_lista=None):
     """Envoltorio completo: sidebar + header + contenido.
 
     notif_lista: [(icono, titulo, texto, hora, href)] que alimenta el drawer de
-    la campana. Si no se pasa, la campana conserva su contenido generico."""
+    la campana. Estudiante y administrador tienen su propia fuente (NOTIFS_EST /
+    NOTIFS_ADMIN): el badge y el drawer de su rol salen de ahi. El resto conserva
+    el contenido generico."""
     etiqueta, nombre, iniciales = ROLES[rol]
     items = _nav_html(rol, activo)
     mapa = MIGAS.get(rol, {})
@@ -344,6 +369,11 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
             _miga(i, x) for i, x in enumerate(migas)) + "</div>"
     if notif_lista is None and rol == "estudiante":
         notif_lista = [(n[4], n[1], n[2], n[3], n[6]) for n in NOTIFS_EST]
+    elif notif_lista is None and rol == "administrador":
+        notif_lista = [(n[4], n[1], n[2], n[3], n[6]) for n in NOTIFS_ADMIN]
+    if notif is None:
+        notif = (sum(1 for n in NOTIFS_ADMIN if not n[0])
+                 if rol == "administrador" else 3)
     fuente = _notif_fuente(notif_lista) if notif_lista else ""
     encabezado = "<h1>%s</h1>" % titulo
     if sub:
@@ -503,18 +533,17 @@ def _etiqueta(c):
     return re.sub(r"<[^>]+>", "", str(c)).strip()
 
 
-def tabla(cabeceras, filas, con_checkbox=False, id=""):
+def tabla(cabeceras, filas, con_checkbox=False, id="", caption=""):
     """cabeceras: lista de 'Etiqueta' | ('num','Etiqueta') | '@ACC'.
     filas: listas de HTML con la misma longitud que cabeceras.
-    id: id opcional para la <table>, usado por EV2 (inscripción a eventos)."""
+    id: id opcional para la <table>, usado por EV2 (inscripción a eventos).
+    caption: titulo accesible de la tabla (oculto visualmente, C6/a11y)."""
     cab = ""
     if con_checkbox:
         cab += ('<th scope="col" style="width:44px">'
-                '<input type="checkbox" aria-label="Seleccionar todo" '
-                'style="accent-color:#004a93;width:16px;height:16px"></th>')
+                '<input type="checkbox" aria-label="Seleccionar todo"></th>')
     cab += "".join(th(c) for c in cabeceras)
-    sel = ('<td class="sel"><input type="checkbox" aria-label="Seleccionar fila" '
-           'style="accent-color:#004a93;width:16px;height:16px"></td>') if con_checkbox else ""
+    sel = ('<td class="sel"><input type="checkbox" aria-label="Seleccionar fila"></td>') if con_checkbox else ""
     etiquetas = [_etiqueta(c) for c in cabeceras]
     body = ""
     for f in filas:
@@ -528,10 +557,19 @@ def tabla(cabeceras, filas, con_checkbox=False, id=""):
                 celdas += '<td data-label="%s">%s</td>' % (eti, x)
         body += "<tr>%s%s</tr>" % (sel, celdas)
     tid = ' id="%s"' % id if id else ""
+    cap = ('<caption class="visually-hidden">%s</caption>' % caption) if caption else ""
+    # Estado vacio enlazado a la tabla (hallazgo MEDIO P6-P10): arranca oculto
+    # y lib_js (#vacioRefrescar) lo muestra cuando no hay filas visibles
+    # (datos vacios o filtro/buscador sin resultados).
+    vacio = ('<div data-vacio hidden>%s</div>' % estado_vacio(
+        "Sin resultados para esta búsqueda",
+        "No hay registros que coincidan con la búsqueda o los filtros "
+        "actuales. Límpialos para volver a ver todos los registros.",
+        "", "search"))
     return (
         '<div class="card tabla-envoltura"><div class="tabla-scroll">'
-        '<table class="tabla"%s><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
-        "</div></div>" % (tid, cab, body)
+        '<table class="tabla"%s>%s<thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
+        "</div>%s</div>" % (tid, cap, cab, body, vacio)
     )
 
 
@@ -649,6 +687,23 @@ def card(titulo, cuerpo, hint="", accion="", sin_pad=False):
 def estado_vacio(titulo, txt, accion="", icono="doc"):
     return ('<div class="vacio">%s<h3>%s</h3><p>%s</p>%s</div>'
             % (ico(icono, 40), titulo, txt, accion))
+
+
+def formulario(id_vista, cuerpo):
+    """<form> nativo que envuelve el contenido de una vista (hallazgo C-01).
+
+    Cada pantalla admin lleva un id unico (prefijo vista-) para que labels,
+    aria-describedby y las auditorias puedan referenciar el formulario de la
+    vista. La clase .vista-form resuelve display:contents en lib_css, asi la
+    caja del <form> no altera el layout ni corta los selectores .content > *.
+    novalidate + onsubmit="return false" conservan el comportamiento simulado
+    del prototipo y lib_js ignora estos envoltorios (form:not(.vista-form)),
+    de modo que los botones de accion siguen resolviendose por data-accion
+    sin disparar el toast de "Guardado correctamente".
+    """
+    return ('<form class="vista-form" id="vista-%s" action="#" method="post" '
+            'novalidate onsubmit="return false">%s</form>'
+            % (_slug_id(id_vista), cuerpo))
 
 
 def lista_def(filas):

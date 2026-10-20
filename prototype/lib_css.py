@@ -107,11 +107,11 @@ SHELL_CSS = """
 .nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
 .nav-group.abierto .nav-hijos{max-height:190px}
 @media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
-.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.25;margin-bottom:1px}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
-.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:13px;font-weight:700;line-height:1.4;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -215,6 +215,7 @@ COMPONENTES_CSS = """
 .suave{font-size:13px;color:var(--tinta-2)}
 .fuerte{font-size:13px;color:var(--tinta)}
 .fila-acciones{display:flex;gap:10px}
+.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .fila-6{display:flex;gap:6px}
 .fila-fin{display:flex;justify-content:flex-end;gap:10px}
 .fila-col{display:flex;flex-direction:column;gap:10px}
@@ -237,6 +238,8 @@ COMPONENTES_CSS = """
 .barra{height:6px;background:var(--azul-15);border-radius:var(--r-full);overflow:hidden;margin-top:12px}
 .barra span{display:block;height:100%;background:var(--azul-real);border-radius:var(--r-full)}
 .barra.amarilla span{background:var(--amarillo)}
+.barra-celda{min-width:110px}
+.barra-pct{font-size:13px;color:var(--azul-profundo)}
 
 table.tabla{width:100%;border-collapse:collapse;font-size:14px}
 table.tabla thead th{
@@ -256,6 +259,9 @@ table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);bo
 table.tabla tbody tr:last-child td{border-bottom:none}
 .tabla-scroll{overflow-x:auto}
 .tabla-envoltura{overflow:hidden}
+/* A31: el checkbox de seleccion de tabla ya no lleva accent-color inline;
+   color y medidas salen de los tokens (antes style="...#004a93..." x2). */
+.tabla th input[type=checkbox],.tabla td.sel input[type=checkbox]{accent-color:var(--azul-real);width:16px;height:16px}
 
 /* La tabla de administracion tiene 9 columnas. A 16px de padding horizontal por
    celda se pasa del ancho disponible y obliga a desplazar en horizontal, asi que
@@ -332,6 +338,8 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
 .drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
+.drop-tit{display:block;color:var(--azul-noche);font-size:13px}
+.drop-nota{font-size:13px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
 .radio-card{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
@@ -342,6 +350,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 .vacio svg{color:var(--gris);margin:0 auto 12px}
 .vacio h3{margin-bottom:6px}
 .vacio p{font-size:13px;max-width:420px;margin:0 auto 16px}
+/* Formulario envolvente de cada vista admin (hallazgo C-01). display:contents
+   anula la caja del <form> para que el layout de .content no cambie ni se
+   rompan los selectores que esperan los hijos reales dentro de .main. */
+.vista-form{display:contents}
 
 .steps{display:flex;align-items:center;gap:0;margin-bottom:28px;flex-wrap:wrap}
 .step{display:flex;align-items:center;gap:9px}

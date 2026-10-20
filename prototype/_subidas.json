@@ -127,22 +127,6 @@
     "pantalla": "projects/3060781598377201049/screens/3409022568498847134",
     "titulo": "39 Administrador - Seguimiento (lista)"
   },
-  "admin/usuario-docente.html": {
-    "alto": "2552",
-    "ancho": "2560",
-    "duplicadas": 0,
-    "estado": "ok",
-    "pantalla": "projects/3060781598377201049/screens/1960180871206547555",
-    "titulo": "35 Administrador - Editar docente"
-  },
-  "admin/usuario-estudiante.html": {
-    "alto": "2470",
-    "ancho": "2560",
-    "duplicadas": 0,
-    "estado": "ok",
-    "pantalla": "projects/3060781598377201049/screens/8971375182830065292",
-    "titulo": "36 Administrador - Editar estudiante"
-  },
   "admin/usuarios.html": {
     "alto": "3070",
     "ancho": "2560",

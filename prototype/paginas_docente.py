@@ -1381,6 +1381,21 @@ def diagnostico_revision():
                                "btn btn-secundario"))
 
 
+def _cuerpo_tarea():
+    emps = ["Sabor y Sabe", "Krea Textil", "EcoPack", "Aromas del Sur"]
+    ests = ["Mariana Lopez", "Jhon Ospina", "Lucia Fernandez", "Sofia Ramirez"]
+    return ('<div class="grid g-2 g-col">'
+            + campo("Título de la tarea", ph="Ej.: Presentación de pitch", req=True)
+            + select("Emprendimiento", ["- Elegir -"] + emps)
+            + select("Estudiante", ["- Elegir -"] + ests)
+            + select("Prioridad", ["Baja", "Media", "Alta"], valor="Media")
+            + campo("Vence el", tipo="date")
+            + campo("Puntos", tipo="number", valor="100")
+            + "</div>"
+            + campo("Descripción (opcional)", alto=True,
+                    ph="Detalla qué debe entregar el estudiante"))
+
+
 # --- 31. Tareas asignadas ----------------------------------------------------
 def tareas():
     filas = []
