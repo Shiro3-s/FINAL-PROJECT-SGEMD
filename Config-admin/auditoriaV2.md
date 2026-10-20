@@ -128,8 +128,16 @@ mapeo intención→destino**, no de maquetación.
    Etapa 3 — hecho: los 8 botones inertes de F1 quedaron cableados a sus `case` y el cierre de sesión
    de F2 pide `confirmar()`. El estado "sesión expirada"/403 se dejó fuera por decisión del usuario.)*
 8. 🟡 **A29/A32** — Deuda CSS (`.acciones-cell` inexistente, `--azul-real-10` inexistente).
-9. 🟡 **A12** — Limpiar entradas stale en `_subidas.json`.
-10. 🟡 **A25/A14/A26** — Consistencia de métricas y del drawer de notificaciones.
+   *(Ítem 8 de la limpieza — hecho: `.acciones-cell` definida como fila de botones alineada a la
+   derecha y `.drop.sobre` usa el token existente `--azul-06`.)*
+9. 🟡 **A12** — Limpiar entradas stale en `_subidas.json`. *(Ítem 9 de la limpieza — hecho:
+   eliminadas `admin/usuario-docente.html` y `admin/usuario-estudiante.html` del manifiesto (51 → 49
+   entradas). Nota: `docente/seguimiento*.html` también quedó obsoleto tras reestructurar el
+   prototipo, pero se dejó fuera por ser limpieza solo de admin.)*
+10. 🟡 **A25/A14/A26** — Consistencia de métricas y del drawer de notificaciones. *(Ítem 10 de la
+    limpieza — hecho: dashboard "Eventos por aprobar" 2→1; perfil "Decisiones pendientes" 6→12 (= suma
+    del desglose del dashboard); una fuente única `NOTIFS_ADMIN` (`lib_ui.py`) alimenta el badge de la
+    campana, el drawer y la métrica "Sin leer"; `shell()` deriva ambos del rol administrador.)*
 
 ---
 
@@ -289,3 +297,61 @@ Verificado en navegador en usuarios (Moda → [1,5], Tecnología → [1,5], limp
   `confirmar("Cerrar sesión", "¿Seguro que quieres cerrar tu sesión?", cerrarSesion)`. Verificado en
   navegador: el mini menú muestra el modal y "Cancelar" mantiene la sesión. *(El estado "sesión
   expirada"/403 se dejó fuera por decisión del usuario; ver §5 ítem 7.)*
+
+- **A29 — `.acciones-cell` definida (ítem 8, limpieza).** `_acc()` (`paginas_admin.py`,
+  `paginas_docente.py`) emitía `<div class="acciones-cell">…</div>` sin regla en el CSS. Se agregó en
+  `lib_css.py` junto a las reglas de tabla: `.acciones-cell{display:flex;align-items:center;
+  justify-content:flex-end}` — la fila de botones queda alineada a la derecha como la celda `.acc`.
+  Verificado en navegador: la celda de acciones computa `display:flex; justify-content:flex-end;
+  align-items:center` y los botones (32 px) siguen pegados al borde derecho.
+
+- **A32 — `--azul-real-10` inexistente (ítem 8, limpieza).** `.drop.sobre` (`lib_css.py`) usaba una
+  variable que no existía en `:root` (el fondo no se aplicaba). Se cambió al token existente
+  `--azul-06`, el mismo que emplea el estado de arrastre hermano `.kan-col.sobre`. Verificado en
+  navegador: `.drop.sobre` pasa a `rgba(0,74,147,0.06)` con borde `rgb(0,74,147)`. Además, una
+  auditoría de variables CSS confirma `USADAS SIN DECLARAR: []` (antes listaba `--azul-real-10`).
+
+- **A12 — Entradas stale en `_subidas.json` (ítem 9, limpieza).** El manifiesto de pantallas subidas
+  a Stitch aún listaba dos páginas del admin ya eliminadas del prototipo: `admin/usuario-docente.html`
+  ("Editar docente") y `admin/usuario-estudiante.html` ("Editar estudiante"). Se eliminaron ambas
+  entradas; el JSON pasa de **51 a 49** claves y sigue siendo válido. *(El manifiesto también
+   conserva `docente/seguimiento.html`, `-dashboard` y `-notas`, obsoletos tras la reestructuración del
+   prototipo; se dejaron por estar fuera del alcance admin de esta limpieza.)*
+
+- **A25/A14/A26 — Consistencia de métricas y del drawer de notificaciones (ítem 10, limpieza).**
+  - **A25 (métricas):** en `paginas_admin.py`, dashboard **"Eventos por aprobar" 2 → 1** (coincide con
+    la única tarjeta de la columna "Por aprobar" del kanban y con la agenda de notificaciones) y perfil
+    **"Decisiones pendientes" 6 → 12** (= 3 + 1 + 3 + 5, la suma del desglose "Pendientes de decisión"
+    del dashboard).
+  - **A14/A26 (campana y drawer):** nueva fuente única `NOTIFS_ADMIN` en `lib_ui.py` (misma forma que
+    `NOTIFS_EST`: `(leida, titulo, texto, fecha, icono, tipo, href)`), con voz de administrador y **2
+    sin leer**. `shell()` ahora, para `rol == "administrador"`, deriva `notif_lista` de `NOTIFS_ADMIN`
+    (drawer) y el badge del número de no leídas; su parámetro `notif` pasa de valor fijo `3` a `None`
+    (solo cambia el admin; estudiante y docente conservan su comportamiento). La métrica "Sin leer" de
+    `admin/notificaciones.html` se calcula desde la misma fuente.
+    Verificado en navegador (`python generar.py`, 70 pantallas): las 17 páginas de admin muestran badge
+    **2** y `<ul class="sg-notif-fuente" data-notif-fuente>`; la campana abre el drawer con 4 avisos de
+    voz admin que enlazan a `asignar-emprendimiento.html`, `diagnosticos.html`, `eventos.html` y
+    `reportes.html`; dashboard "Eventos por aprobar" = 1, perfil "Decisiones pendientes" = 12,
+    notificaciones "Sin leer" = 2. Estudiante (badge 3, fuente presente) y docente (badge 3, sin fuente)
+    sin cambios; sin errores de consola nuevos (solo el ruido `file:` preexistente).
+
+- **Barrido final de verificación del admin (cierre de Etapa 3).** Verificación de las **17 páginas** de
+  `admin/` (dashboard, usuarios, solicitudes, emprendimientos, emprendimiento-plan, seguimiento,
+  seguimiento-dashboard, asignar-emprendimiento, comentarios, asesorias, eventos, evento-form,
+  asignaciones, diagnosticos, reportes, perfil, notificaciones). Sin hallazgos nuevos:
+  - **Acciones cableadas:** las **30** acciones `data-accion` reales del DOM de admin tienen su `case`
+    en `lib_js.py` → **0 inertes**. Las aparentes faltantes `perfil`/`configuracion`/`preferencias` se
+    resuelven inline en el mini‑menú (`.who`, `lib_js.py`): `perfil`→`perfil.html`, `configuracion` solo
+    existe en estudiante/docente, y en admin "Preferencias" es **intencionalmente "sin vista"** (toast
+    informativo). Nota: una extracción ingenua marca acciones falsas porque incluye los literales del JS
+    inlinado; hay que recortar el `<script>` antes de extraer.
+  - **Enlaces:** **0** enlaces `*.html` muertos dentro de `admin/`.
+  - **Consola:** **0 errores** en las 17 páginas en carga limpia. El mensaje
+    `Unsafe attempt to load URL … 'file:' URLs are treated as unique security origins` visto al inicio
+    era un **artefacto preservado** del DevTools (no se reproduce en pestaña nueva ni en carga limpia del
+    dashboard); no es un error de la aplicación.
+  - **Plantilla/robustez:** sin `{{`, `%(`, `None`, `undefined`, `TODO` ni `Lorem`; todas las páginas con
+    `<title>`. (Los `}}` detectados son llaves de cierre de `@media` en CSS, no fuga de plantilla.)
+  - **Sin regresiones:** badge `2` en las 17 páginas admin y drawer con los 4 avisos de voz
+    administrador; estudiante (badge 3, fuente presente) y docente (badge 3, sin fuente) intactos.

@@ -49,7 +49,7 @@ small{font-size:13px}
 .shell{display:flex;min-height:100vh;background:var(--blanco)}
 .sidebar{
   width:264px;flex:0 0 264px;background:var(--azul-noche);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 .brand{
   display:flex;flex-direction:column;align-items:center;gap:12px;
@@ -66,7 +66,7 @@ small{font-size:13px}
 .brand-text{text-align:center}
 .brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
-.nav{padding:10px 10px 8px;overflow-y:auto;flex:1}
+.nav{padding:10px 10px 8px;flex:1 0 auto;overflow:visible}
 .nav-group{margin-bottom:6px}
 .nav-label{
   display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;
@@ -84,13 +84,13 @@ small{font-size:13px}
    El max-height se ajusta al grupo mas largo (4 hijos) para que la animacion
    no quede con una cola muerta antes de terminar de abrir. */
 .nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
-.nav-group.abierto .nav-hijos{max-height:190px}
+.nav-group.abierto .nav-hijos{max-height:400px}
 @media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
-.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.25;margin-bottom:1px}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
 .nav a svg{flex:0 0 16px}
-.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:var(--r-full)}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:13px;font-weight:700;line-height:1.4;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -462,7 +462,137 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 @media (max-width:767px){.fila-simple{flex-wrap:wrap}}
 
 @media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
-.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}</style>
+.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.barra-celda{min-width:110px}
+.barra-pct{font-size:13px;color:var(--azul-profundo)}
+/* A31: el checkbox de seleccion de tabla ya no lleva accent-color inline;
+   color y medidas salen de los tokens (antes style="...#004a93..." x2). */
+.tabla th input[type=checkbox],.tabla td.sel input[type=checkbox]{accent-color:var(--azul-real);width:16px;height:16px}
+.drop-tit{display:block;color:var(--azul-noche);font-size:13px}
+.drop-nota{font-size:13px}
+/* Formulario envolvente de cada vista admin (hallazgo C-01). display:contents
+   anula la caja del <form> para que el layout de .content no cambie ni se
+   rompan los selectores que esperan los hijos reales dentro de .main. */
+.vista-form{display:contents}
+.cal-envoltura{background:#ffffff}
+.cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}
+.cal-btn:hover{border-color:#004a93}
+.cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}
+.cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;color:#ffffff;font-weight:700}
+.cal-btn.activo .cal-punto{background:#ffd300}
+.cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}
+.cal-resumen b{font-size:16px;color:#051533}
+/* El atributo [hidden] lo sobreescribia cualquier regla con display (por
+   ejemplo .notif{display:flex}
+), asi que los filtros de la bandeja ocultaban
+   filas que seguian visibles. Con !important [hidden] vuelve a mandar. */
+[hidden]{display:none!important}
+/* --- Migas de pan navegables --------------------------------------------- */
+.crumbs a{color:var(--tinta-2)}
+.crumbs a:hover{color:var(--azul-real)}
+.crumbs .miga-item{color:var(--tinta-2)}
+/* --- Previsualizacion de las metricas al pasar el mouse ------------------- */
+.metrica-enlace{position:relative;display:block;color:inherit;text-decoration:none;
+  transition:border-color .15s ease,box-shadow .15s ease}
+.metrica-enlace:hover,.metrica-enlace:focus-visible{border-color:var(--azul-real);
+  box-shadow:var(--shadow-2);text-decoration:none}
+.mini-prev{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:40;
+  background:var(--azul-noche);color:var(--blanco);border-radius:var(--r-sm);
+  padding:12px 14px;box-shadow:var(--shadow-3);opacity:0;visibility:hidden;
+  transform:translateY(-4px);pointer-events:none;
+  transition:opacity .15s ease,transform .15s ease,visibility .15s}
+.mini-prev b{display:block;font-size:13px;margin-bottom:4px;color:var(--blanco)}
+.mini-prev span{display:block;font-size:13px;color:var(--blanco);opacity:.85;line-height:1.5}
+.mini-prev em{display:block;margin-top:8px;font-style:normal;font-weight:700;
+  font-size:13px;color:var(--amarillo)}
+.metrica-enlace:hover .mini-prev,.metrica-enlace:focus-visible .mini-prev{
+  opacity:1;visibility:visible;transform:none}
+/* --- Aviso superior de Inicio (tareas pendientes) ------------------------- */
+.mini-aviso{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border:1px solid var(--azul-real);border-left:4px solid var(--amarillo);
+  border-radius:var(--r-sm);background:var(--azul-06);color:var(--tinta-2);
+  text-decoration:none}
+.mini-aviso:hover{background:var(--azul-12);text-decoration:none}
+.mini-aviso b{color:var(--tinta)}
+.mini-aviso .mini-aviso-ico{flex:0 0 18px;color:var(--azul-real);margin-top:1px}
+.mini-aviso .mini-aviso-cta{margin-left:auto;font-weight:700;color:var(--azul-real);white-space:nowrap}
+/* --- Desplegable de opciones de tareas ------------------------------------ */
+.desplegable{border:1px solid var(--gris);border-radius:var(--r-sm);background:var(--blanco)}
+.desplegable>summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:13px;
+  color:var(--azul-real);list-style:none;display:flex;align-items:center;gap:8px}
+.desplegable>summary::-webkit-details-marker{display:none}
+.desplegable[open]>summary{border-bottom:1px solid var(--gris)}
+.desp-lista{display:flex;flex-direction:column}
+.desp-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-bottom:1px solid var(--gris);font-size:13px;color:var(--tinta);text-decoration:none}
+.desp-item:last-child{border-bottom:none}
+.desp-item:hover{background:var(--azul-06);text-decoration:none}
+.desp-item svg{flex:0 0 16px;color:var(--azul-real)}
+.desp-item span{margin-left:auto;color:var(--tinta-2);white-space:nowrap}
+/* --- Comentarios del docente ---------------------------------------------- */
+.coment{display:flex;gap:12px;align-items:flex-start;padding:12px 0}
+.coment+.coment{border-top:1px solid var(--gris)}
+.coment .avatar{width:34px;height:34px;flex:0 0 34px;font-size:13px}
+.coment-cab{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.coment-cab b{font-size:13px;color:var(--tinta)}
+.coment-cab .who-role{padding:0 7px}
+.coment-cab time{font-size:13px;color:var(--tinta-2)}
+.coment-txt{margin-top:7px;font-size:13px;color:var(--tinta);
+  background:var(--noche-03);border-left:3px solid var(--azul-real);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;line-height:1.55}
+/* --- Cabecera de perfil (patron tipo GitHub) ------------------------------ */
+.perfil-cab{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.perfil-foto{width:132px;height:132px;flex:0 0 132px;border-radius:var(--r-full);
+  background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;
+  justify-content:center;font-size:32px;font-weight:700;border:1px solid var(--gris);overflow:hidden}
+.perfil-foto img{width:100%;height:100%;object-fit:cover}
+.perfil-datos{flex:1;min-width:240px}
+.perfil-nombre{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.perfil-usuario{font-size:16px;color:var(--tinta-2);margin-top:2px}
+.perfil-bio{font-size:14px;color:var(--tinta-2);margin-top:12px;max-width:640px}
+.perfil-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;
+  font-size:13px;color:var(--tinta-2)}
+.perfil-meta span{display:inline-flex;align-items:center;gap:6px}
+.perfil-meta svg{color:var(--azul-real);flex:0 0 15px}
+.perfil-acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.perfil-repo{display:block;color:inherit;text-decoration:none}
+.perfil-repo:hover{text-decoration:none}
+/* --- Diagnostico: selector por tarjetas ----------------------------------- */
+.radio-grupo{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.radio-card strong{display:block;font-size:13px;color:var(--tinta)}
+.radio-card small{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.radio-card input:checked+div strong{color:var(--azul-real)}
+/* --- Kanban de 4 columnas (tareas: comple., en curso, revision, pendiente) -- */
+.kanban[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* --- Bandeja de notificaciones: cada aviso navega ------------------------- */
+a.notif{color:inherit;text-decoration:none;cursor:pointer;align-items:center}
+a.notif:hover{background:var(--azul-06);text-decoration:none}
+.notif-flecha{margin-left:auto;flex:0 0 16px;color:var(--gris)}
+.notif-ico{flex:0 0 34px;width:34px;height:34px;border-radius:8px;
+  background:var(--azul-06);color:var(--azul-real);display:flex;align-items:center;
+  justify-content:center}
+.notif-cuerpo{flex:1;min-width:0}
+.chip:hover{border-color:var(--azul-real);color:var(--azul-real)}
+/* --- Drawer de la campana: avisos enlazados ------------------------------ */
+.sg-drawer-lista a{display:flex;gap:10px;align-items:flex-start;padding:12px;
+  border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;
+  color:var(--tinta);text-decoration:none}
+.sg-drawer-lista a:hover{background:var(--azul-06);text-decoration:none}
+.sg-drawer-lista a svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}
+.sg-drawer-lista a b{display:block;font-size:13px;color:var(--tinta)}
+.sg-drawer-lista a span{display:block;color:var(--tinta-2);margin-top:2px}
+.sg-drawer-lista a time{display:block;color:var(--gris);margin-top:3px;font-size:13px}
+/* --- Filas de tarea del plan (navegan al detalle) ------------------------- */
+.fila-tarea{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--gris);color:inherit;text-decoration:none}
+.fila-tarea:last-child{border-bottom:none}
+.fila-tarea:hover{background:var(--azul-06);text-decoration:none}
+.fila-ico{flex:0 0 16px;color:var(--azul-real);display:flex}
+.fila-txt{flex:1;font-size:13px;color:var(--tinta)}
+.fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.fase-link{color:inherit;text-decoration:none}
+.fase-link:hover{color:var(--azul-real);text-decoration:underline}
+</style>
 </head>
 <body>
 <div class="shell">
@@ -471,7 +601,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
       <div class="brand-text"><div class="brand-name">SGEMD</div>
       <div class="brand-sub">Emprendimiento Minuto de Dios</div></div>
     </div>
-    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Inicio</span></a><a class="" href="solicitudes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Solicitudes</span><span class="nav-badge">10</span></a><div class="nav-group" data-grupo="usuarios-y-asignaciones"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-usuarios-y-asignaciones" data-grupo="usuarios-y-asignaciones"><span>Usuarios y asignaciones</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-usuarios-y-asignaciones"><a class="" href="usuarios.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de perfiles</span></a><a class="" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Asignaciones</span></a></div></div><div class="nav-group abierto" data-grupo="emprendimientos-y-seguimiento"><button type="button" class="nav-label" aria-expanded="true" aria-controls="hij-emprendimientos-y-seguimiento" data-grupo="emprendimientos-y-seguimiento"><span>Emprendimientos y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-emprendimientos-y-seguimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Emprendimientos</span></a><a class="activo" href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnósticos</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Seguimiento</span></a></div></div><div class="nav-group" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompañamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div><div class="nav-group" data-grupo="institucional"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-institucional" data-grupo="institucional"><span>Institucional</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-institucional"><a class="" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Reportes</span></a></div></div><a class="" href="notificaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificaciones</span></a><a class="" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></a></nav>
+    <nav class="nav"><a class="" href="dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Inicio</span></a><a class="" href="solicitudes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Solicitudes</span><span class="nav-badge">10</span></a><div class="nav-group" data-grupo="usuarios-y-asignaciones"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-usuarios-y-asignaciones" data-grupo="usuarios-y-asignaciones"><span>Usuarios y asignaciones</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-usuarios-y-asignaciones"><a class="" href="usuarios.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de perfiles</span></a><a class="" href="asignaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Asignaciones</span></a></div></div><div class="nav-group abierto" data-grupo="emprendimientos-y-seguimiento"><button type="button" class="nav-label" aria-expanded="true" aria-controls="hij-emprendimientos-y-seguimiento" data-grupo="emprendimientos-y-seguimiento"><span>Emprendimientos y seguimiento</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-emprendimientos-y-seguimiento"><a class="" href="emprendimientos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg><span>Emprendimientos</span></a><a class="activo" href="diagnosticos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span>Diagnósticos</span></a><a class="" href="seguimiento.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg><span>Seguimiento</span></a><a class="" href="tareas.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tareas</span></a></div></div><div class="nav-group" data-grupo="acompanamiento-y-actividades"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-acompanamiento-y-actividades" data-grupo="acompanamiento-y-actividades"><span>Acompañamiento y actividades</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-acompanamiento-y-actividades"><a class="" href="asesorias.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Asesorías</span></a><a class="" href="eventos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Eventos</span></a></div></div><div class="nav-group" data-grupo="institucional"><button type="button" class="nav-label" aria-expanded="false" aria-controls="hij-institucional" data-grupo="institucional"><span>Institucional</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="nav-hijos" id="hij-institucional"><a class="" href="reportes.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Reportes</span></a><a class="" href="respaldos.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg><span>Respaldos</span></a></div></div><a class="" href="notificaciones.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificaciones</span></a><a class="" href="perfil.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></a></nav>
     <div class="side-foot"><div class="side-card">
       <b>Institución Minuto de Dios</b>
       <span>Módulo ADMINISTRADOR</span>

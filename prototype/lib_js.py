@@ -232,10 +232,11 @@ JS = r"""
   });
 
   /* --- acordeon del menu lateral (grupos desplegables) ------------------- */
-  /* Los grupos solo existen en el rol Estudiante (ver NAV en lib_ui). El
-     grupo con la pagina activa viene marcado "abierto" desde el servidor;
-     los demas recuerdan su estado entre paginas con localStorage. El click
-     en el boton nav-label togglea la clase y su aria-expanded. */
+  /* Los grupos existen en el NAV jerarquico de Estudiante, Docente y
+     Administrador (ver NAV en lib_ui). El grupo con la pagina activa viene
+     marcado "abierto" desde el servidor; los demas recuerdan su estado
+     entre paginas con localStorage. El click en el boton nav-label togglea
+     la clase y su aria-expanded. */
   var CLAVE_NAV = "sgemd:v1:nav:acordeon";
   function navLeer() {
     try { return JSON.parse(localStorage.getItem(CLAVE_NAV)) || []; } catch (e) { return []; }
@@ -284,6 +285,25 @@ JS = r"""
     var zonas = $$(".tabla-envoltura");
     return zonas.length ? zonas : [document];
   }
+  /* Estados vacios de listas y tablas (hallazgo MEDIO P6-P10). Cada bloque
+     [data-vacio] arranca oculto y se muestra solo cuando su lista queda sin
+     items visibles (datos vacios o filtro sin resultados). El alcance es el
+     contenedor marcado con data-vacio-lista, la tarjeta/envoltura de tabla
+     mas cercana, o el nodo padre; data-vacio-fuente permite apuntar al
+     selector concreto de los items de esa lista. */
+  function vacioRefrescar() {
+    $$("[data-vacio]").forEach(function (v) {
+      var sel = v.getAttribute("data-vacio-fuente");
+      var caja = v.closest("[data-vacio-lista]") || v.closest(".tabla-envoltura, .card") || v.parentNode;
+      var items;
+      if (sel) items = $$(sel, caja);
+      else if ($("table.tabla", caja)) items = $$("table.tabla tbody tr", caja);
+      else items = $$("[data-buscar], .notif", caja);
+      if (!sel && !items.length && !$("table.tabla", caja)) return; /* no es una lista */
+      var ver = items.filter(function (i) { return !i.hidden; }).length;
+      v.hidden = ver > 0;
+    });
+  }
   function filtrar(input) {
     var q = input.value.trim().toLowerCase();
     var n = 0;
@@ -298,6 +318,7 @@ JS = r"""
     });
     var aviso = $("[data-resultados]", input.closest("[data-tabla-zona]") || document);
     if (aviso) aviso.textContent = n + (n === 1 ? " resultado" : " resultados");
+    vacioRefrescar();
   }
   $$('input[type="text"][placeholder*="Buscar" i], .buscador input')
     .forEach(function (i) {
@@ -342,6 +363,7 @@ JS = r"""
     var r = $("[data-resultados]", zona);
     if (r) r.textContent = n + (n === 1 ? " resultado" : " resultados");
     guardar({ filtros: n });
+    vacioRefrescar();
   }
   $$("[data-filtro]:not([data-filtro='off']), .chip").forEach(function (c) {
     c.addEventListener("click", function () {
@@ -458,10 +480,23 @@ JS = r"""
   /* Abre en un modal el formulario que la pagina dejo oculto por id. Se usa
      para fusionar en la pantalla de gestion los formularios de edicion de
      docente/estudiante, que antes eran paginas aparte. */
+  var SEQ_FORM = 0;
+  /* A34: copia del formulario con ids (y labels for) re-sufijados "-mN" para
+     que el modal no duplique los ids del original oculto. Devuelve null si el
+     contenedor no existe. */
+  function plantillaModal(id) {
+    var plantilla = document.getElementById(id);
+    if (!plantilla) return null;
+    SEQ_FORM += 1;
+    var suf = "-m" + SEQ_FORM;
+    return plantilla.innerHTML
+      .replace(/id="([^"]+)"/g, function (m0, x) { return 'id="' + x + suf + '"'; })
+      .replace(/for="([^"]+)"/g, function (m0, x) { return 'for="' + x + suf + '"'; });
+  }
   function abrirFormulario(titulo, idForm, boton, txtOk, mensaje) {
-    var plantilla = document.getElementById(idForm);
-    if (!plantilla) { abrirEditor(titulo, celdaDe(boton)); return; }
-    abrirModal(titulo, plantilla.innerHTML, [
+    var htmlPlant = plantillaModal(idForm);
+    if (!htmlPlant) { abrirEditor(titulo, celdaDe(boton)); return; }
+    abrirModal(titulo, htmlPlant, [
       { txt: "Cancelar", clase: "btn btn-secundario" },
       { txt: txtOk || "Guardar", clase: "btn btn-primario", alClic: function () {
         toast(mensaje || "Cambios guardados", "ok");
@@ -864,6 +899,27 @@ JS = r"""
           "Crear estudiante", "Estudiante creado. Se enviará el correo de activación.");
         break;
 
+      case "dar-de-baja":
+        /* A-4: baja lógica con efecto en cascada. Las asignaciones,
+           solicitudes y comentarios del usuario quedan inactivos. */
+        e.preventDefault();
+        var filaBaja = filaDe(b);
+        var nomBaja = "";
+        if (filaBaja && filaBaja.children[1]) {
+          nomBaja = (filaBaja.children[1].textContent || "")
+            .replace(/\s+/g, " ").trim();
+        }
+        confirmar("Dar de baja",
+          "Se dará de baja a " + (nomBaja || "este usuario") + ". Sus asignaciones, " +
+          "solicitudes y comentarios quedarán inactivos. Puedes revertirlo cambiando " +
+          "el estado de acceso a Activo.",
+          function () {
+            if (filaBaja) filaBaja.remove();
+            toast("Usuario dado de baja. Cascada aplicada.", "ok");
+            if (typeof vacioRefrescar === "function") vacioRefrescar();
+          });
+        break;
+
       case "solicitud-aprobar":
         e.preventDefault();
         confirmar("Aprobar solicitud",
@@ -940,11 +996,58 @@ JS = r"""
       }
 
       case "editar":
-      case "registrar-avance":
-      case "asignar":
-      case "editar-sensores":
         e.preventDefault();
         abrirEditor("Editar registro", registro);
+        break;
+
+      case "registrar-avance":
+        e.preventDefault();
+        var fila = filaDe(b);
+        if (!fila) return;
+        var cod = fila.dataset.cod;
+        var emp = fila.dataset.emp;
+        var estu = fila.dataset.estu;
+        var etapa = fila.dataset.etapa;
+        var avanceActual = Number(fila.dataset.avance || 0);
+        // Llenar prefill en el formulario embebido
+        document.querySelector("[name=emp]").value = emp;
+        document.querySelector("[name=estu]").value = estu;
+        document.querySelector("[name=etapa]").value = etapa;
+        document.querySelector("[name=avance]").value = Math.round(avanceActual);
+        abrirFormulario("Registrar avance", "form-avance", b, "Guardar", "Avance guardado");
+        break;
+
+      case "asignar-docente":
+        e.preventDefault();
+        var fila = filaDe(b);
+        if (!fila) return;
+        var cod = fila.dataset.cod;
+        var emp = fila.dataset.emp;
+        var estu = fila.dataset.estu;
+        // Prefill: bloquear campos Estudiante/Emprendimiento/Correo
+        var modal = document.querySelector("#form-asignar-docente");
+        if (modal) {
+          modal.querySelector("[name=estudiante]").value = estu;
+          modal.querySelector("[name=emprendimiento]").value = emp;
+          modal.querySelector("[name=correo]").value = CORREOS_EST[estu] || "";
+          // Bloquear inputs
+          var campos = modal.querySelectorAll("input, select");
+          campos.forEach(function(c) { c.disabled = true; });
+          // Mostrar badge asignado
+          var badge = modal.querySelector(".badge-asignado");
+          if (badge) badge.textContent = "Asignado a " + estu;
+          // Refrescar vacío
+          if (typeof vacioRefrescar === "function") vacioRefrescar();
+          abrirModal("Asignar docente", plantillaModal("form-asignar-docente"), [
+            { txt: "Cancelar", clase: "btn btn-secundario" },
+            { txt: "Confirmar", clase: "btn btn-primario", alClic: function() {
+              // Guardar asignación y cerrar
+              toast("Docente asignado", "ok");
+              if (typeof vacioRefrescar === "function") vacioRefrescar();
+              cerrarModal();
+            } }
+          ]);
+        }
         break;
 
       case "aprobar":
@@ -1368,10 +1471,37 @@ JS = r"""
           });
         break;
 
+      case "crear-respaldo":
+        e.preventDefault();
+        confirmar("Crear respaldo",
+          "Se generará un respaldo completo de la base de datos (aprox. 84 MB).",
+          function () {
+            var tarjeta = b.closest(".card");
+            var tb = tarjeta ? $("tbody", tarjeta) : null;
+            if (tb) {
+              var f = document.createElement("tr");
+              var d = new Date();
+              var hh = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+              var fecha = d.getDate() + " " + ["ene", "feb", "mar", "abr", "may", "jun",
+                "jul", "ago", "sep", "oct", "nov", "dic"][d.getMonth()] + " " +
+                d.getFullYear() + ", " + hh;
+              var cod = "BKP-" + d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) +
+                ("0" + d.getDate()).slice(-2) + "-" + hh.replace(":", "");
+              f.innerHTML =
+                "<td><b>" + cod + "</b></td><td>Completo</td><td>" + fecha + "</td>" +
+                "<td>84 MB</td><td>Exitosa</td>" +
+                '<td class="acciones-cell"><button data-accion="descargar" title="Descargar" ' +
+                'aria-label="Descargar">' + icono(ICO.descargar, 16) + "</button></td>";
+              tb.insertBefore(f, tb.firstElementChild);
+            }
+            toast("Respaldo creado", "ok");
+          });
+        break;
+
       case "generar-reporte":
         e.preventDefault();
         confirmar("Generar reporte",
-          "Se generará el reporte maestro para 46 emprendimientos (≈1.284 filas). El archivo quedará disponible en Reportes.",
+          "Se generará el reporte maestro para 46 emprendimientos (aprox. 1.284 filas). El archivo quedará disponible en Reportes.",
           function () { toast("Reporte en cola de generación", "info"); });
         break;
 
@@ -1384,6 +1514,95 @@ JS = r"""
       case "asignar-tarea":
         e.preventDefault();
         abrirFormulario("Asignar tarea", "form-tarea", b, "Crear tarea", "Tarea asignada");
+        break;
+
+      case "editar-tarea":
+        e.preventDefault();
+        abrirFormulario("Editar tarea", "form-tarea", b, "Guardar cambios",
+          "Tarea actualizada");
+        break;
+
+      case "eliminar-tarea":
+        e.preventDefault();
+        var filaTarea = filaDe(b);
+        var titTarea = "";
+        if (filaTarea && filaTarea.children[0]) {
+          titTarea = (filaTarea.children[0].textContent || "")
+            .replace(/\s+/g, " ").trim();
+        }
+        confirmar("Eliminar tarea",
+          "Se eliminará: " + (titTarea || "la tarea") + ". Los estudiantes " +
+          "dejarán de verla. Esta acción no se puede deshacer.",
+          function () {
+            if (filaTarea) filaTarea.remove();
+            toast("Tarea eliminada", "ok");
+            if (typeof vacioRefrescar === "function") vacioRefrescar();
+          });
+        break;
+
+      case "nueva-tarea":
+        /* V3: alta real. El modal reutiliza #form-tarea y, al confirmar,
+           lee los campos y agrega la fila a la tabla del admin. */
+        e.preventDefault();
+        var plantNueva = plantillaModal("form-tarea");
+        if (!plantNueva) break;
+        abrirModal("Nueva tarea", plantNueva, [
+          { txt: "Cancelar", clase: "btn btn-secundario" },
+          { txt: "Crear tarea", clase: "btn btn-primario", alClic: function (veloT) {
+              var vals = {};
+              $$(".campo", veloT).forEach(function (c) {
+                var lbl = $("label", c);
+                var el = $("input, select, textarea", c);
+                if (lbl && el) {
+                  vals[lbl.textContent.replace(/\*/g, "").replace(/\s+/g, " ")
+                    .trim().toLowerCase()] = el.value;
+                }
+              });
+              var titT = (vals["título de la tarea"] || "").trim() || "Nueva tarea";
+              var empT = (vals["emprendimiento"] || "").trim();
+              if (!empT || empT.indexOf("- Elegir") === 0) empT = "Sin emprendimiento";
+              var estT = (vals["estudiante"] || "").trim();
+              if (!estT || estT.indexOf("- Elegir") === 0) estT = "Sin estudiante";
+              var prioT = (vals["prioridad"] || "Media").trim() || "Media";
+              var venceT = (vals["vence el"] || "").trim() || "Sin fecha";
+              if (/^\d{4}-\d{2}-\d{2}$/.test(venceT)) {
+                var mesesT = ["ene", "feb", "mar", "abr", "may", "jun", "jul",
+                              "ago", "sep", "oct", "nov", "dic"];
+                var pT = venceT.split("-");
+                venceT = parseInt(pT[2], 10) + " " +
+                  mesesT[parseInt(pT[1], 10) - 1] + " " + pT[0];
+              }
+              var prioCls = prioT === "Alta" ? "b-amarillo"
+                : prioT === "Baja" ? "b-linea" : "b-azul";
+              var tbT = document.querySelector("#zona-tareas tbody");
+              if (tbT) {
+                var filaN = document.createElement("tr");
+                filaN.innerHTML =
+                  '<td data-label="Tarea"><b>' + esc(titT) + "</b></td>" +
+                  '<td data-label="Emprendimiento">' + esc(empT) + "</td>" +
+                  '<td data-label="Estudiante">' + esc(estT) + "</td>" +
+                  '<td data-label="Prioridad"><span class="badge ' + prioCls + '">' +
+                    esc(prioT) + "</span></td>" +
+                  '<td data-label="Vence">' + esc(venceT) + "</td>" +
+                  '<td data-label="Estado"><span class="badge b-neutra">Pendiente</span></td>' +
+                  '<td class="acc" data-label="Acciones"><div class="acciones-cell">' +
+                    '<button data-accion="editar-tarea" title="Editar" aria-label="Editar">' +
+                      icono(ICO.lapiz, 16) + "</button>" +
+                    '<button data-accion="eliminar-tarea" title="Eliminar" aria-label="Eliminar">' +
+                      icono(ICO.x, 16) + "</button>" +
+                  "</div></td>";
+                tbT.insertBefore(filaN, tbT.firstElementChild);
+              }
+              toast("Tarea asignada", "ok");
+            } }
+        ]);
+        break;
+
+      case "ver-tareas":
+        /* Emprendimientos -> baja suave al tablero de tareas de la vista. */
+        e.preventDefault();
+        var zonaT = document.getElementById("zona-tareas");
+        if (zonaT) zonaT.scrollIntoView({ behavior: "smooth", block: "start" });
         break;
 
       default:
@@ -1628,6 +1847,7 @@ JS = r"""
         x.dataset.tipo === f;
       x.hidden = !ok;
     });
+    vacioRefrescar();
   }
   if (notifs.length) {
     $$(".chip[data-chip]").forEach(function (ch) {
@@ -1652,7 +1872,10 @@ JS = r"""
   }
 
   /* --- validacion de formularios ----------------------------------------- */
-  $$("form").forEach(function (f) {
+  /* Los envoltorios .vista-form (un <form> por vista admin) quedan fuera:
+     su proposito es semantico y las acciones reales viajan por data-accion,
+     asi que validarlos aqui mostraria "Guardado correctamente" en cada clic. */
+  $$("form:not(.vista-form)").forEach(function (f) {
     f.addEventListener("submit", function (e) {
       e.preventDefault();
       var malos = $$("[required]", f).filter(function (c) { return !c.value.trim(); });
@@ -1988,6 +2211,23 @@ guardar(estado);
     bComp.disabled = true;
     bComp.innerHTML = "Completada " + icono(ICO.check, 15);
   }
+  /* Calendario de Inicio: el dia con evento abre un modal en la misma
+     pagina (sin redireccionar). El detalle viaja en data-ev-*. */
+  $$(".cal-dia-btn").forEach(function (celda) {
+    celda.addEventListener("click", function () {
+      var titulo = celda.getAttribute("data-ev-titulo");
+      var detalle = celda.getAttribute("data-ev-detalle") || "";
+      abrirModal(titulo,
+        "<p><b>" + esc(titulo) + "</b></p><p>" + esc(detalle) + "</p>",
+        [
+          { txt: "Ver en Eventos", clase: "btn btn-primario",
+            alClic: function () { location.href = "eventos.html"; } },
+          { txt: "Cerrar", clase: "btn btn-secundario" }
+        ]);
+    });
+  });
+  /* Estado inicial de los estados vacios de listas y tablas. */
+  vacioRefrescar();
   document.documentElement.classList.add("js-listo");
 })();
 """
