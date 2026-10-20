@@ -471,6 +471,10 @@ El alcance fue **solo estudiante** —las pantallas del rol y el kit compartido 
 necesitan (`lib_ui.py`, `lib_js.py`, `lib_css.py`)— sin tocar Docente ni
 Administrador. No hay cambios de backend: sigue siendo prototipo.
 
+La rama sale de **`prototype/student`** y añade **un commit** con los cinco puntos
+de abajo: 32 archivos (27 pantallas de `estudiante/`, el kit compartido, el
+generador del rol y este README).
+
 ### 12.1 Mochilas Origen tiene su propia vista de detalle
 
 **Antes:** el botón *Ver detalle* de Mochilas Origen llevaba a
@@ -517,10 +521,17 @@ El botón pasó de `data-accion="descargar"` a `data-accion="descargar-plan"`.
 
 ### 12.4 Detalle del seguimiento con más información
 
-El detalle de un registro de seguimiento se amplió: el panel *Plan de trabajo*
-resume el avance por fase y las tareas reales; *Seguimiento* incluye la tabla de
-registros **con quién los registró** más un gráfico de frecuencia de acompañamiento;
-y *Asesorías* trae fecha, motivo, docente y estado.
+El **detalle de un registro** de seguimiento (vista 13b) se reorganizó en dos
+columnas: a la izquierda *Datos del registro* (título, tipo, fecha, fase,
+emprendimiento, **registrado por**) y la *Descripción* del avance; a la derecha el
+**avance del emprendimiento al momento del registro** (el anillo de porcentaje) y la
+tarjeta ***Cómo leer el seguimiento***, que explica que cada registro documenta un
+avance concreto y que la frecuencia de acompañamiento se calcula sobre estos
+registros y alimenta el estado de seguimiento.
+
+> Queda pendiente añadir al detalle las **evidencias** del registro, el **historial
+> de cambios de la fase** y el bloque **qué sigue**. Hoy el detalle cubre datos,
+> descripción, avance y la guía de lectura.
 
 ### 12.5 Datos académicos condicionales
 
