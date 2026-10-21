@@ -629,9 +629,9 @@ def _detalle_emp(d):
                + ico("layers", 16) + " Ver plan de trabajo</a>"
                '<a class="btn btn-secundario" href="tareas.html" style="width:100%">'
                + ico("checklist", 16) + " Ver mis tareas</a>"
-               '<button class="btn btn-secundario btn-sm" data-accion="descargar" '
-               'data-doc="1" title="Solo aparece en el documento, no en el PDF" '
-               'style="display:none">Descargar expediente</button>'
+               '<button class="btn btn-secundario" data-accion="descargar" '
+               'style="width:100%">'
+               + ico("download", 16) + " Descargar expediente</button>"
                "</div>"
                '<div class="nota-foot">Solo puedes editar nombre, descripcion y redes '
                "sociales. El tipo, el sector, la etapa y el acta los administra el rol "
@@ -688,6 +688,13 @@ def _detalle_emp(d):
             for i, (_, pid, cont) in enumerate(paneles)
         )
     )
+    # El "expediente" que descarga el estudiante: la ficha exportable del
+    # emprendimiento. [data-doc] marca el bloque que arma el PDF. Antes ese
+    # atributo estaba puesto en el propio boton oculto, asi que tablaDoc() lo
+    # devolvia a el en vez de una tabla y la descarga salia practicamente vacia.
+    cuerpo = cuerpo.replace(
+        '<div data-panel-nombre="resumen">',
+        '<div data-panel-nombre="resumen" data-doc="1">', 1)
     return shell(R, "emprendimientos-detalle", nombre, cuerpo,
                  migas=["Inicio", "Mi emprendimiento", nombre],
                  sub="Detalle de tu emprendimiento.",

@@ -42,6 +42,7 @@ pantallas globales de acceso.
     - [Por qué el flujo es como es](#por-qué-el-flujo-es-como-es)
   - [11. Limitaciones conocidas](#11-limitaciones-conocidas)
   - [12. Cambios del rol Estudiante (`prototype/Fixstudent`)](#12-cambios-del-rol-estudiante-prototypefixstudent)
+    - [12.6 Auditoría funcional de las vistas de Estudiante](#126-auditoría-funcional-de-las-vistas-de-estudiante)
   - [Ver también](#ver-también)
 
 ---
@@ -562,7 +563,38 @@ sede y el número de acta. **Modalidad** ahora ofrece Presencial · Virtual · *
 Implementado con `attrs=` en `select()`/`campo()` de `lib_ui.py` y el bloque
 `sincronizarAcademico()` de `lib_js.py`.
 
-### 12.6 Cómo regenerar
+### 12.6 Auditoría funcional de las vistas de Estudiante
+
+Se recorrieron las 27 pantallas del rol con un Chrome real (CDP) haciendo clic en
+todos los controles (`data-accion`, enlaces, pestañas, chips, acordeones,
+paginación y filtros) y verificando el efecto observable de cada uno. Resultado:
+**27/27 sin errores de JavaScript**, sin enlaces roto y sin botones muertos.
+
+Se encontró y corrigió **un solo fallo real**:
+
+- **`emprendimiento-detalle-mochilas.html` · "Descargar expediente"** generaba un
+  PDF prácticamente vacío (55 caracteres, sin datos). El botón estaba oculto
+  (`display:none`) y llevaba `data-doc="1"`; como `tablaDoc()` de `lib_js.py`
+  selecciona `main [data-doc]` como el contenedor del documento, devolvía **el
+  propio botón** en lugar de una tabla. Ahora el botón es visible y la ficha
+  exportable es el **panel "Resumen"** (`data-doc="1"`), de modo que el PDF incluye
+  datos básicos, descripción, redes y etapa. La descarga pasó de 55 a ~1007
+  caracteres útiles.
+
+Verificado además como correcto (no eran fallos):
+
+| Control | Comprobación |
+|---|---|
+| Filtros de Mi emprendimiento | FASE 2 → 1 fila, Textil → 1 fila |
+| Chips de Notificaciones | Sin leer → 3, Tareas/Asesorías/Seguimiento → 1 |
+| Pestañas (detalle, plan, tareas, estado) | Cambian el panel visible |
+| Diagnóstico por secciones | Avanza sección 1→4 y se detiene en la última |
+| Adjuntar evidencia → Marcar completada | Habilita el botón al adjuntar y persiste el estado |
+| Datos académicos condicionales | Pregrado 10, Especialización 2, Maestría 4, Doctorado 8; Egresado oculta semestre y modalidad |
+| Descargar plan de trabajo | Documento de ~5.6 KB con 7 tablas |
+| "Subir imagen" / "Adjuntar ahora" | Abren el selector de archivos nativo (el test automático no puede observarlo) |
+
+### 12.7 Cómo regenerar
 
 El HTML no se edita a mano; se genera. Para emitir **solo** las pantallas del rol
 Estudiante (sin reescribir Docente, Administrador ni las de acceso):
