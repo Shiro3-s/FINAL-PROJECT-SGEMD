@@ -106,6 +106,8 @@ NAV = {
         ("Usuarios y asignaciones", [
             ("Gestión de perfiles", "users", "usuarios"),
             ("Asignaciones", "sliders", "asignaciones"),
+            ("Asignar docente", "user", "asignaciones",
+             "asignaciones.html#asignar-docente"),
         ]),
         ("Emprendimientos y seguimiento", [
             ("Emprendimientos", "maleta", "emprendimientos"),
@@ -206,6 +208,7 @@ MIGAS = {
         "reportes": "reportes.html",
         "tareas": "tareas.html",
         "mi perfil": "perfil.html",
+        "configuración": "configuracion.html",
         "notificaciones": "notificaciones.html",
     },
 }
@@ -287,10 +290,11 @@ def boton_accion(icono, etiqueta, clase=""):
             % (c, accion, etiqueta, etiqueta, ico(icono, 16)))
 
 
-def _item_nav(txt, ic, clave, activo, badge=""):
+def _item_nav(txt, ic, clave, activo, badge="", href=""):
     bd = '<span class="nav-badge">%s</span>' % badge if badge else ""
-    return '<a class="%s" href="%s.html">%s<span>%s</span>%s</a>' % (
-        "activo" if clave == activo else "", clave, ico(ic, 16), txt, bd)
+    destino = href or ("%s.html" % clave)
+    return '<a class="%s" href="%s">%s<span>%s</span>%s</a>' % (
+        "activo" if clave == activo else "", destino, ico(ic, 16), txt, bd)
 
 
 _ACENTOS_ID = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
@@ -305,6 +309,9 @@ def _nav_html(rol, activo):
     """Renderiza el menú lateral. Cada entrada de NAV es un ítem plano
     (txt, ic, clave [, badge]) o un grupo (etiqueta, [(txt, ic, clave), ...]).
 
+    Un ítem de grupo puede traer un cuarto elemento con el href exacto, por si
+    el destino no es "<clave>.html" (por ejemplo una vista con ancla).
+
     Los grupos son acordeones: la etiqueta es un botón que despliega sus
     ítems. El grupo que contiene la página activa arranca abierto; el resto
     arranca cerrado y recuerda su estado mientras se navega (ver lib_js)."""
@@ -314,10 +321,13 @@ def _nav_html(rol, activo):
             out.append(_item_nav(e[0], e[1], e[2], activo, e[3] if len(e) > 3 else ""))
         else:
             etiqueta, hijos = e
-            abierto = " abierto" if any(c == activo for _, _, c in hijos) else ""
+            abierto = " abierto" if any(hijo[2] == activo for hijo in hijos) else ""
             gid = _slug_id(etiqueta)
             chev = ico("abajo", 12)
-            hij = "".join(_item_nav(t, i, c, activo) for t, i, c in hijos)
+            hij = ""
+            for hijo in hijos:
+                href = hijo[3] if len(hijo) > 3 else ""
+                hij += _item_nav(hijo[0], hijo[1], hijo[2], activo, "", href)
             out.append(
                 '<div class="nav-group%s" data-grupo="%s">'
                 '<button type="button" class="nav-label" aria-expanded="%s" '
@@ -387,7 +397,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>%(css)s</style>
+<style>%(css)s%(extra_head)s</style>
 </head>
 <body>
 <div class="shell">
@@ -426,6 +436,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
 </html>""" % {
         "titulo": titulo,
         "css": CSS,
+        "extra_head": extra_head,
         "logo": LOGO_TILE,
         "items": items,
         "rol": etiqueta,
@@ -580,13 +591,18 @@ def toolbar(buscar=True, filtros="", acciones="", extra=""):
     return '<div class="toolbar">%s%s%s</div>' % (s, filtros, extra or acciones)
 
 
-def paginas(desde, hasta, total, pag=1, tam=None):
+def paginas(desde, hasta, total, pag=1, tam=None, tabla_id=""):
     """Control de paginación con estado real.
 
     EM5: antes "Anterior/Siguiente" no traían `data-paginacion` (el gancho que
     el kit JS usa), así que solo mostraban un toast. Ahora el control publica
     su página actual y su tamaño de página, y `lib_js` lo mueve, actualiza el
     rango "Mostrando X a Y de Z" y recuerda la página en `localStorage`.
+
+    tabla_id: cuando se indica, el control es de una TABLA concreta y lo lleva
+    el JS propio del rol (no el kit): se marca con `data-pag-adm` y
+    `data-pag-tabla`, y NO lleva `data-paginacion`, de modo que el kit no lo
+    toque y no haya dos paginadores peleando por la misma tabla.
     """
     tam = tam or max(1, hasta - desde + 1)
     n_pag = max(1, (total + tam - 1) // tam)
@@ -606,6 +622,16 @@ def paginas(desde, hasta, total, pag=1, tam=None):
         '<button class="btn btn-secundario btn-sm" data-pagina="next"%s>Siguiente %s</button>'
         % (" disabled" if pag >= n_pag else "", ico("der", 14))
     )
+    if tabla_id:
+        return (
+            '<div class="paginacion" data-pag-adm data-pag-tabla="%s" data-pag-actual="%d" '
+            'data-pag-total="%d" data-pag-tam="%d" data-pag-regs="%d">'
+            '<span data-pag-texto>Mostrando %s de %d</span><div class="pag">%s</div>'
+            '<template data-pg-ico-prev>%s</template>'
+            '<template data-pg-ico-next>%s</template></div>'
+            % (tabla_id, pag, n_pag, tam, total, mostrados, total, botones,
+               ico("izq", 14), ico("der", 14))
+        )
     return (
         '<div class="paginacion" data-paginacion data-pag-actual="%d" data-pag-total="%d" '
         'data-pag-tam="%d" data-pag-regs="%d">'
@@ -638,8 +664,12 @@ def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", 
     h = '<div class="campo"' + ((" " + attrs) if attrs else "") + '><label for="%s">%s%s</label>' % (
         i, label, '<span class="req">*</span>' if req else "")
     if bloqueo:
-        h += ('<input id="%s" type="text" value="%s" disabled>'
-              '<div class="bloqueo">%s%s</div></div>' % (i, valor, ico("lock", 12), bloqueo))
+        # El name se mantiene tambien en los campos bloqueados: el kit los
+        # localiza por nombre para rellenar el formulario antes de abrirlo.
+        h += ('<input id="%s" type="text" value="%s"%s disabled>'
+              '<div class="bloqueo">%s%s</div></div>'
+              % (i, valor, (' name="%s"' % name) if name else "",
+                 ico("lock", 12), bloqueo))
     elif alto:
         h += '<textarea id="%s"%s placeholder="%s">%s</textarea>' % (
             i, (' name="%s"' % name) if name else "", ph, valor)

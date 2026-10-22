@@ -1900,7 +1900,7 @@ def perfil():
         '<div class="perfil-datos">'
         '<h2 class="perfil-nombre">Mariana Lopez Herrera</h2>'
         '<div class="perfil-usuario">mariana.lopez@minutodedios.edu.co &middot; '
-        "Número de estudiante 2024105678</div>"
+        "Número de estudiante 912646</div>"
         '<p class="perfil-bio">Estudiante de Ingeniería Industrial (quinto semestre), modalidad '
         "presencial, sede Norte. Emprendedora a cargo de Sabor y Sabe y Mochilas Origen dentro "
         "del programa Startup Minuto de Dios.</p>"
@@ -1972,7 +1972,7 @@ def configuracion():
                        bloqueo="Solo ADMINISTRADOR puede modificarlo.")
                + "</div>"
                + '<div class="grid g-2" style="gap:0 16px">'
-               + campo("Número de estudiante", valor="2024105678",
+               + campo("Número de estudiante", valor="912646",
                        bloqueo="Solo ADMINISTRADOR puede modificarlo.")
                + campo("Fecha de nacimiento", tipo="date", valor="1999-04-18")
                + "</div>"
