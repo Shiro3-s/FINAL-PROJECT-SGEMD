@@ -8,9 +8,18 @@ Emite HTML autocontenido (CSS embebido, sin dependencias locales) en:
     prototype/docente/       rol DOCENTE
     prototype/admin/         rol ADMINISTRADOR
 
-Uso:  python generar.py
+Uso:
+    python generar.py                              # todas las pantallas
+    python generar.py --rol admin                  # solo el rol administrador
+    python generar.py --rol estudiante --vista perfil.html --vista configuracion.html
+    python generar.py --vista dashboard.html       # ese archivo en todos los roles
+
+`--rol` y `--vista` acotan lo que se reescribe: el resto de archivos queda
+byte-identico en disco. `index.html` se regenera siempre (es el indice de
+navegacion y depende del registro completo de pantallas).
 """
 
+import argparse
 import io
 import os
 import sys
@@ -19,6 +28,8 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 
 SALIDAS = {}
+
+ROLES = ["compartido", "estudiante", "docente", "admin"]
 
 
 def registrar(carpeta, nombre, titulo, fn, orden):
@@ -75,21 +86,38 @@ except ImportError:
 
 
 def main():
+    ap = argparse.ArgumentParser(
+        description="Genera el prototipo SGEMD (HTML autocontenido por rol).")
+    ap.add_argument("--rol", action="append", choices=ROLES, default=None,
+                    help="Genera solo ese rol (repetible). Por defecto, todos.")
+    ap.add_argument("--vista", action="append", default=None,
+                    help="Genera solo ese archivo (repetible). Por defecto, todos.")
+    args = ap.parse_args()
+
+    roles = args.rol or ROLES
+    vistas = set(args.vista) if args.vista else None
+
     total = 0
     indice = []
-    for carpeta in ["compartido", "estudiante", "docente", "admin"]:
+    for carpeta in ROLES:
         items = SALIDAS.get(carpeta, [])
         if not items:
             continue
         d = os.path.join(BASE, carpeta)
         os.makedirs(d, exist_ok=True)
         for it in sorted(items, key=lambda x: x["orden"]):
+            # El indice de navegacion necesita TODAS las pantallas, aunque
+            # en esta corrida solo se reescriban algunas.
+            indice.append((carpeta, it["archivo"], it["titulo"]))
+            if carpeta not in roles:
+                continue
+            if vistas is not None and it["archivo"] not in vistas:
+                continue
             html = it["fn"]()
             ruta = os.path.join(d, it["archivo"])
             with io.open(ruta, "w", encoding="utf-8") as f:
                 f.write(html)
             total += 1
-            indice.append((carpeta, it["archivo"], it["titulo"]))
             print("  ok  %-12s %s" % (carpeta, it["archivo"]))
     print("\n%d pantallas generadas." % total)
 
@@ -118,7 +146,7 @@ def main():
             "docente": "Rol DOCENTE",
             "admin": "Rol ADMINISTRADOR",
         }
-        for carpeta in ["compartido", "estudiante", "docente", "admin"]:
+        for carpeta in ROLES:
             filas = [x for x in indice if x[0] == carpeta]
             if not filas:
                 continue

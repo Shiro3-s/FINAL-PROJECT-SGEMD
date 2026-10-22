@@ -41,23 +41,28 @@ Una sesión real exige backend, `bcrypt` para el hash y JWT para el token; ningu
 ## 3. Vistas por Rol
 
 ### 3.1. Perfil Administrativo
-Cuenta con un menú lateral extenso que le otorga control total sobre los múltiples módulos del sistema.
+El menú lateral agrupa el control institucional en **Inicio**, **Solicitudes** (con contador), el grupo *Usuarios y asignaciones*, el grupo *Emprendimientos y seguimiento*, el grupo *Acompañamiento y actividades*, el grupo *Institucional*, más *Notificaciones* y *Perfil*. El rol se compone de **19 pantallas** en `admin/` y fue objeto de un refactor UX/UI completo — ver [`../prototype/cambios-a-admin.md`](../prototype/cambios-a-admin.md). Todo el HTML se genera desde `prototype/paginas_admin.py`: las tablas se pintan con los datos del generador, cada fila abre su **ficha** en modal y los buscadores y filtros responden de verdad. Hay **enlaces profundos** por `hash` (`#est-912646`, `#emp-EMP-041`, `#doc-DOC-014`, `#sol-…`) y un atajo (`#asignar-docente`) que abre la asignación de docente sobre el primer emprendimiento sin docente.
 
-*   **Módulo "Gestionar Perfiles"**
-    *   **Listado de Docentes y Estudiantes:** Tabla con ID, Nombre y Correo de los usuarios. Incluye barra de búsqueda, opciones por fila (Editar/Eliminar) y un botón para "Crear".
-    *   **Formularios (Crear/Editar):** Formularios simplificados para docentes (Nombre, Correo, ID) y estudiantes (añadiendo Tipo y Número de documento). Cuentan con botones de acción principal y de retroceso.
-*   **Módulo "Emprendimientos"**
-    *   **Lista General:** Tabla de proyectos con ID, Nombre, Tipo, Fecha de Creación y opciones (Ver/Editar/Eliminar).
-    *   **Vista Detallada (Plan de Trabajo):** Matriz estructurada por fases (diferenciadas por colores) que detalla Actividad, Objetivo, Profesor encargado, Fechas (inicio/fin), Recursos y Resultados.
-    *   **Lista de Seguimiento:** Tabla densa de actividades con fechas, frecuencia y progreso acumulado ("Accumulated progress") codificado por colores (rojo, amarillo, azul, verde).
-    *   **Dashboard Visual de Seguimiento:** Pantalla analítica con porcentaje total completado. Muestra tareas completadas/no completadas en gráficos circulares y de barras categorizados por prioridad. Incluye tabla de próximas tareas.
-*   **Módulo "Docentes"**
-    *   **Asignar a Emprendimiento:** Interfaz que cruza emprendimientos (arriba) y docentes (abajo) con buscador y un botón central de "ASIGNAR".
-    *   **Seguimiento (Comentarios):** Editor de texto con formato básico para registrar observaciones formales del acompañamiento de un docente a un emprendimiento.
-    *   **Asesorías (Métricas):** Panel con velocímetros e indicadores de variables académicas (estudiantes, participación, evaluaciones).
-*   **Módulo "Eventos"**
-    *   **Creación/Edición:** Formulario con calendarios/relojes para fechas, selectores de "Tipo" y "Temática", datos del organizador y un editor de texto enriquecido para los detalles del evento.
-    *   **Listado y Calendario:** Tarjetas rectangulares de eventos activos y un calendario interactivo de vista mensual fijo a la derecha.
+*   **Inicio (`dashboard.html`):** panorama institucional con métricas y series reales del programa (emprendimientos, sedes, estados) y conmutador de gráfico (barras / anillo).
+*   **Solicitudes (`solicitudes.html`):** bandeja con pestañas por estado —desbloqueos de cuenta, segundo emprendimiento y citas de asesoría—, ficha de detalle por fila y flujo de aprobación.
+*   **Grupo "Usuarios y asignaciones"**
+    *   **Gestión de perfiles (`usuarios.html`):** **dos tablas** (docentes y estudiantes) con buscador, filtros, paginación y contador; alta, edición y bloqueo de cuentas; ficha por registro.
+    *   **Asignaciones (`asignaciones.html`):** tabla de emprendimientos con su docente, estado y sede; **Reasignar docente** abre un modal con el docente preseleccionado y confirma contra la fila.
+    *   **Asignar docente:** ítem del menú que abre directamente ese modal sobre el primer emprendimiento pendiente (`asignaciones.html#asignar-docente`).
+*   **Grupo "Emprendimientos y seguimiento"**
+    *   **Emprendimientos (`emprendimientos.html`):** registro maestro con filtros por sector, etapa y sede, y ficha por emprendimiento.
+    *   **Expediente (`emprendimiento-expediente.html`) y Plan (`emprendimiento-plan.html`):** ficha completa del emprendimiento y de su grupo, y matriz por fases con actividad, objetivo, docente, fechas, recursos y resultados.
+    *   **Seguimiento (`seguimiento.html`):** estado y avance de los emprendimientos; **Registrar avance** abre un modal con los datos de la fila ya cargados.
+    *   **Tablero de seguimiento (`seguimiento-dashboard.html`):** métricas consolidadas de seguimiento institucional.
+    *   **Tareas (`tareas.html`):** consulta, alta y baja de tareas por emprendimiento.
+    *   **Diagnósticos (`diagnosticos.html`):** resultados del diagnóstico de los estudiantes.
+*   **Grupo "Acompañamiento y actividades"**
+    *   **Asesorías (`asesorias.html`):** indicadores de uso, respuesta y programación del servicio.
+    *   **Eventos (`eventos.html`) y Crear evento (`evento-form.html`):** catálogo con calendario, y formulario de alta con validación.
+*   **Grupo "Institucional"**
+    *   **Reportes (`reportes.html`):** exportación institucional en CSV, PDF o XLSX.
+    *   **Respaldos (`respaldos.html`):** gestión de respaldos y verificación de integridad.
+*   **Perfil, Notificaciones y Configuración:** `perfil.html` (datos y actividad del administrador), `notificaciones.html` (registro de aprobaciones y decisiones) y `configuracion.html` (parámetros del programa, sedes, notificaciones y bitácora).
 
 ### 3.2. Perfil Emprendedor (Estudiante)
 Enfocado en el desarrollo del proyecto, seguimiento de tareas y solicitud de asesorías.

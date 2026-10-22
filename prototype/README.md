@@ -1,7 +1,7 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-72 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
+73 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
 pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
@@ -27,7 +27,7 @@ pantallas globales de acceso.
     - [3.1 Acceso global (4)](#31-acceso-global-4)
     - [3.2 Estudiante (20 vistas, 27 archivos)](#32-estudiante-20-vistas-27-archivos)
     - [3.3 Docente (23)](#33-docente-23)
-    - [3.4 Administrador (18)](#34-administrador-18)
+    - [3.4 Administrador (19)](#34-administrador-19)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
   - [5. Sistema de diseño](#5-sistema-de-diseño)
     - [Paleta cerrada](#paleta-cerrada)
@@ -43,6 +43,8 @@ pantallas globales de acceso.
   - [11. Limitaciones conocidas](#11-limitaciones-conocidas)
   - [12. Cambios del rol Estudiante (`prototype/Fixstudent`)](#12-cambios-del-rol-estudiante-prototypefixstudent)
     - [12.6 Auditoría funcional de las vistas de Estudiante](#126-auditoría-funcional-de-las-vistas-de-estudiante)
+  - [13. Cambios del rol Administrador (`prototype/Admin-Refactor`)](#13-cambios-del-rol-administrador-prototypeadmin-refactor)
+    - [13.7 Verificación](#137-verificación)
   - [Ver también](#ver-también)
 
 ---
@@ -55,7 +57,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 72 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 73 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -92,10 +94,10 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 | `compartido/` | 4 | Login, registro, verificación OTP, recuperación de contraseña |
 | `estudiante/` | 27 | Inicio, emprendimiento (lista + detalle por emprendimiento), diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
 | `docente/` | 23 | Inicio (dashboard con calendario), emprendimientos asignados (por estudiante), expediente, avances, diagnóstico, tareas, asesorías, eventos (catálogo + detalle con recomendación), perfil (dashboard de la cuenta), configuración, notificaciones |
-| `admin/` | 18 | Inicio, gestión de perfiles, emprendimientos, seguimiento, asignaciones, moderación, métricas, eventos, reportes, perfil, notificaciones |
-| **Total** | **72** | más `index.html` como índice local |
+| `admin/` | 19 | Inicio, gestión de perfiles, solicitudes, emprendimientos (lista + expediente + plan), seguimiento (lista + tablero), tareas, asesorías, eventos (catálogo + alta), asignaciones, diagnósticos, reportes, respaldos, perfil, notificaciones, configuración |
+| **Total** | **73** | más `index.html` como índice local |
 
-Son **62 vistas lógicas** repartidas en **72 archivos**: varias vistas se reproducen
+Son **66 vistas lógicas** repartidas en **73 archivos**: varias vistas se reproducen
 en más de un archivo. El *detalle de tarea* del estudiante (#15) se reproduce en cinco
 estados (`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
 `completada-usuarios` y `completada-clientes`), el *detalle del evento* —en el rol
@@ -198,28 +200,38 @@ Las acciones del docente son **vistas completas**, no ventanas emergentes (solo 
 > `python generar.py` **reproduce** los cambios sin pérdida. Detalle en
 > [`../docs/docente-rol-ux.md`](../docs/docente-rol-ux.md).
 
-### 3.4 Administrador (18)
+### 3.4 Administrador (19)
 
 | # | Vista | Qué resuelve |
 |---|---|---|
-| 33 | Inicio | Métricas generales del programa |
-| 34 | Gestión de perfiles | Alta, edición y baja de docentes y estudiantes |
-| 35 | Editar docente | Formulario de docente |
-| 36 | Editar estudiante | Formulario de estudiante + documento |
-| 37 | Emprendimientos | Los 46 emprendimientos del programa |
-| 38 | Plan de trabajo del emprendimiento | Vista completa del plan |
-| 39 | Seguimiento (lista) | Filtros por rol, estado y fecha |
-| 40 | Tablero de seguimiento | Consolidado de avances del programa |
-| 41 | Asignar emprendimiento | Asigna docente mentor a un emprendimiento |
-| 42 | Moderación de comentarios | Aprueba, oculta y elimina comentarios |
-| 43 | Métricas de asesorías | Gráficos de uso y cumplimiento |
-| 44 | Eventos | Listado y estado de aprobación |
-| 45 | Crear evento | Formulario de evento con validación |
-| 46 | Asignaciones | Historial de asignaciones docente ↔ emprendimiento |
-| 47 | Diagnósticos respondidos | Todos los diagnósticos del programa |
-| 48 | Exportar reportes | Reportes en CSV/Excel |
-| 49 | Mi perfil | Datos del administrador |
-| 50 | Notificaciones | Avisos del sistema |
+| 01 | Inicio | Panorama institucional: usuarios, emprendimientos y seguimiento, con series reales del programa |
+| 02 | Gestión de perfiles | **Dos tablas** (docentes y estudiantes) con buscador, filtros, paginación y ficha por fila; alta, edición y bloqueo de cuentas |
+| 03 | Solicitudes pendientes | Bandejas de desbloqueo, segundo emprendimiento y citas de asesoría, con pestañas por estado, ficha y aprobación |
+| 04 | Emprendimientos | Registro maestro del programa: filtros por sector, etapa y sede, y ficha de cada emprendimiento |
+| 05 | Expediente del emprendimiento | Ficha completa del emprendimiento y de su grupo |
+| 06 | Plan de trabajo | Plan, fases y carga de trabajo del emprendimiento |
+| 07 | Seguimiento | Estado y avance de los emprendimientos, con registro de avance desde la fila |
+| 08 | Tablero de seguimiento | Métricas consolidadas de seguimiento institucional |
+| 11 | Asesorías | Indicadores de uso, respuesta y programación del servicio de asesorías |
+| 12 | Eventos | Aprueba y publica eventos del programa, con calendario |
+| 13 | Crear evento | Publica un evento y notifica a los asistentes |
+| 14 | Asignaciones | Asigna docentes registrados a los emprendimientos y permite **reasignar** en modal |
+| 15 | Diagnósticos | Resultados del diagnóstico de los estudiantes |
+| 16 | Reportes | Exporta reportes institucionales en CSV, PDF o XLSX |
+| 17 | Tareas | Consulta, alta y baja de tareas por emprendimiento |
+| 18 | Mi perfil | Datos del administrador y su actividad |
+| 19 | Notificaciones | Registro de aprobaciones y decisiones del equipo |
+| 20 | Respaldos y recuperación | Gestión de respaldos y verificación de integridad |
+| 21 | Configuración | Parámetros del programa, sedes, notificaciones y bitácora |
+
+> **Refactor UX/UI del Rol Administrador:** las 19 pantallas se regeneraron desde
+> `paginas_admin.py` (no se editó HTML a mano), de modo que las tablas se pintan con
+> los datos del generador, cada fila abre su **ficha** en modal y los
+> **buscadores/filtros responden de verdad**. Hay **enlaces profundos** por `hash`
+> (`#est-912646`, `#emp-EMP-041`, `#doc-DOC-014`, `#sol-…`) y un acceso directo
+> (`#asignar-docente`) que abre el primer emprendimiento sin docente. El CSS/JS del
+> rol va embebido en cada HTML y `python generar.py --rol admin` reproduce los
+> cambios. Detalle en [`cambios-a-admin.md`](cambios-a-admin.md).
 
 ---
 
@@ -325,11 +337,11 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 72 pantallas + index.html
+├── generar.py              Orquestador: emite las 73 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
 ├── paginas_estudiante.py   27 pantallas del estudiante
 ├── paginas_docente.py      23 pantallas del docente
-├── paginas_admin.py        18 pantallas del administrador
+├── paginas_admin.py        19 pantallas del administrador
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
 ├── lib_css.py              Tokens, paleta, responsive, componentes
 ├── lib_js.py               Interacciones (filtros, menús, modales, toasts)
@@ -363,8 +375,16 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 72 pantallas + index.html)
+# Generar (emite las 73 pantallas + index.html)
 python generar.py
+
+# Generar solo un rol, para no reescribir el resto
+python generar.py --rol admin
+python generar.py --rol estudiante --rol docente
+
+# Generar solo una pantalla (repetible), en los roles que se pidan
+python generar.py --vista dashboard.html
+python generar.py --rol estudiante --vista perfil.html --vista configuracion.html
 
 # Regenerar las variantes de logo desde el PNG fuente (hoy fuera del repo)
 python _marca\preparar_logo.py
@@ -382,7 +402,7 @@ python _reconciliar.py
 
 ## 9. Validación automática
 
-El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 72
+El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 73
 pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
 hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una
 salvedad: `_estructura.py` marca el presupuesto de **estilos inline** por encima
@@ -419,7 +439,7 @@ instalado, así que no se ejecutaron.
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Total:** 51 documentos — 50 pantallas de interfaz más una de marca
-  (`_marca/logo-color-1200.png`). El prototipo local ya genera **72 archivos HTML**;
+  (`_marca/logo-color-1200.png`). El prototipo local ya genera **73 archivos HTML**;
   Stitch conserva los 50 originales: no se subieron los cuatro estados extra de
   *detalle de tarea* ni las vistas nuevas (*detalle del seguimiento*, *configuración*
   y el detalle de cada evento).
@@ -459,7 +479,7 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
   porque se generaron así; un usuario real no debe depender de eso.
 - **Responsive validado en navegador de escritorio.** Chromium con viewport
   emulado; no se probó en Safari ni en un móvil físico.
-- **La tipografía depende de internet.** Si Google Fonts no responde, las 72
+- **La tipografía depende de internet.** Si Google Fonts no responde, las 73
   pantallas se ven con la fuente del sistema. El diseño aguanta el cambio, pero las
   medidas no son idénticas a las capturadas.
 
@@ -601,7 +621,7 @@ Estudiante (sin reescribir Docente, Administrador ni las de acceso):
 
 ```powershell
 # desde prototype/
-python generar.py          # emite las 72 pantallas + index.html (todos los roles)
+python generar.py          # emite las 73 pantallas + index.html (todos los roles)
 ```
 
 Si solo se tocó el rol Estudiante, `generar.py` completo reescribe también los otros
@@ -611,8 +631,103 @@ commitear.
 
 ---
 
+## 13. Cambios del rol Administrador (`prototype/Admin-Refactor`)
+
+Rama **`prototype/Admin-Refactor`**: refactor del rol Administrador. Sale de
+**`prototype/student`** (commit `8e71c8c`, el punto de clone) y añade **dos commits**:
+el refactor y la documentación. 36 archivos en total.
+
+Alcance: las **19 pantallas** de `prototype/admin/` y, porque el kit es compartido,
+los cambios mínimos de `lib_ui.py` y el nuevo CLI de `generar.py`. Se
+regeneraron además **8 pantallas** de Docente y Estudiante (los identificadores de
+estudiante ahora son los mismos de 6 dígitos que usa la gestión de perfiles del
+administrador). **Ningún otro archivo del repo cambia.**
+
+### 13.1 Los datos salen del generador
+
+Antes, varias pantallas pintaban literales sueltos en el HTML. Ahora estudiantes,
+docentes, emprendimientos, solicitudes, tareas, asesorías y eventos se modelan
+como tuplas en `paginas_admin.py` y las tablas se construyen con `_tabla_adm()`:
+zona filtrable, buscador, filtros por columna, paginación, contador de
+resultados y estados vacíos. Una celda puede ser `("html", "valor")` cuando
+lleva markup (por ejemplo el `<select>` de estado de cada fila).
+
+### 13.2 Buscadores, filtros y paginación que responden
+
+Los filtros comparan contra el **valor vivo** del `<select>` de la celda (no
+contra su texto), con un pequeño retardo de 220 ms para no filtrar en cada
+pulsación. El filtro de *Estado* de la gestión de perfiles es el caso que
+exponía el bug: antes ocultaba o mostraba todas las filas.
+
+### 13.3 Fichas y enlaces profundos
+
+Cada fila abre su **ficha** en modal (mismo origen de datos: los `data-*` de la
+fila) y hay **enlaces profundos** por `hash`:
+
+| Hash | Qué abre |
+|---|---|
+| `#est-912646` | La ficha del estudiante (salta de página y resalta la fila) |
+| `#emp-EMP-041` | La ficha del emprendimiento |
+| `#doc-DOC-014` | La ficha del docente |
+| `#sol-…` | La ficha de la solicitud |
+| `#asignar-docente` | El modal de asignación sobre el primer emprendimiento sin docente |
+
+### 13.4 Asignaciones: asignar y reasignar docente
+
+La acción **Reasignar docente** clona una plantilla oculta (`#form-asignar-docente`),
+la rellena con los datos de la fila y abre el modal con el docente preseleccionado;
+al confirmar, la fila, la celda y el título del botón se actualizan. El ítem
+**Asignar docente** del menú apunta a `asignaciones.html#asignar-docente`.
+
+### 13.5 Seguimiento: registrar avance con prefill
+
+El modal **Registrar avance** (lo abre el kit) llega con el emprendimiento, el
+estudiante, la etapa y el avance de la fila. Como el kit clona las plantillas con
+`innerHTML` —lo que pierde el `option` seleccionado y los valores escritos a
+mano—, el `ADMIN_JS` del rol repone esos valores después (su listener se
+registra después del del kit).
+
+### 13.6 Solicitudes, Configuración y el resto de pantallas
+
+**Solicitudes** quedó con pestañas por estado, tabla por bandeja, ficha de
+detalle y el flujo de aprobación del kit. **Configuración** (`configuracion.html`)
+es una pantalla **nueva** del rol: parámetros del programa, sedes, notificaciones
+y bitácora. El resto de pantallas (Inicio, Emprendimientos, Expediente, Plan,
+Tablero, Tareas, Asesorías, Eventos, Diagnósticos, Reportes, Perfil,
+Notificaciones, Respaldos) se regeneraron con el mismo criterio.
+
+### 13.7 Verificación
+
+- `python verify.py` → **10/10 OK**. Dos de esas comprobaciones (**Asignar
+  docente** y **`#form-asignar-docente`**) **ya fallaban en `HEAD`**: son deuda
+  preexistente, y este refactor las resuelve.
+- Comprobación estructural propia de las 19 pantallas: **sin etiquetas sin
+  cerrar, sin `id` duplicados** y con el bundle JS del rol validado con
+  `node --check`.
+- Navegador real (Chrome DevTools) sobre las 19 pantallas: **0 errores y 0
+  warnings de consola**. Probados: las dos tablas de la gestión de perfiles
+  (búsqueda, filtros, paginación, ficha), el flujo completo de reasignar docente
+  (modal con prefill → confirmar → la fila cambia + aviso), las pestañas de
+  solicitudes, el modal de registrar avance con su prefill y los enlaces
+  profundos de tipo `#emp-` y `#doc-`.
+- `git status` antes de commitear: **solo** los 36 archivos del alcance. El resto
+  del repo queda byte-idéntico.
+
+### 13.8 Fuera de alcance (deuda preexistente)
+
+Se documentó pero **no** se unificó, porque tocaría a otros roles o excede el
+refactor: los dominios de correo (`@sgemd.edu.co` en el administrador frente a
+`@minutodedios.edu.co` en el estudiante), los nombres sin tilde heredados de la
+línea base en algunas bandejas y la función `asignar()` de `paginas_admin.py`,
+que no está registrada en el mapa de pantallas. Detalle en
+[`cambios-a-admin.md`](cambios-a-admin.md) §6.
+
+---
+
 ## Ver también
 
 - [`DESIGN.md`](DESIGN.md) — guía de diseño completa (paleta, tipografía, componentes)
+- [`cambios-a-admin.md`](cambios-a-admin.md) — registro del refactor del rol Administrador
+- [`cambios-a-docente.md`](cambios-a-docente.md) — registro del refactor del rol Docente
 - [`../README.md`](../README.md) — especificación maestra del SGEMD
 - [`../docs/fr_nfr_sgemd.md`](../docs/fr_nfr_sgemd.md) — requisitos funcionales y no funcionales

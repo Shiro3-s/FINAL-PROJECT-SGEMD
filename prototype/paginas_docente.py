@@ -435,17 +435,18 @@ DIAG_FASES = [
 
 # Grupo de cada emprendimiento: un emprendimiento puede tener varios estudiantes
 # y un estudiante puede tener varios emprendimientos (relación N:N).
-# Campos: (estudiante, codigo, sede)
+# Campos: (estudiante, codigo, sede). El código es el mismo ID de 6 dígitos que
+# usa el administrador en la gestión de perfiles.
 ESTUDIANTES_EMP = {
-    "Sabor y Sabe": [("Mariana Lopez", "EST-087", "Sede Norte"),
-                     ("Diego Torres", "EST-090", "Sede Norte")],
-    "Krea Textil": [("Jhon Ospina", "EST-086", "Sede Centro"),
-                    ("Mariana Lopez", "EST-087", "Sede Norte")],
-    "EcoPack": [("Lucia Fernandez", "EST-085", "Sede Norte"),
-                ("Diego Torres", "EST-090", "Sede Norte")],
-    "Aromas del Sur": [("Sofia Ramirez", "EST-084", "Sede Sur"),
-                       ("Camilo Rojas", "EST-091", "Sede Sur")],
-    "Muebles Origen": [("Andres Felipe", "EST-083", "Sede Centro")],
+    "Sabor y Sabe": [("Mariana Lopez", "912646", "Sede Norte"),
+                     ("Diego Torres", "912658", "Sede Norte")],
+    "Krea Textil": [("Jhon Ospina", "912647", "Sede Centro"),
+                    ("Mariana Lopez", "912646", "Sede Norte")],
+    "EcoPack": [("Lucia Fernandez", "912648", "Sede Norte"),
+                ("Diego Torres", "912658", "Sede Norte")],
+    "Aromas del Sur": [("Sofia Ramirez", "912649", "Sede Sur"),
+                       ("Camilo Rojas", "912651", "Sede Sur")],
+    "Muebles Origen": [("Andres Felipe", "912650", "Sede Centro")],
 }
 
 # Cartera del docente. Campos: (emprendimiento, sector, etapa, avance,
