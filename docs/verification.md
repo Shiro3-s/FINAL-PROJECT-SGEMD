@@ -42,7 +42,7 @@
 ## Etapa 1 — Esqueleto del repositorio y entorno
 
 - **Fecha:** 2026-10-25
-- **Commit:** _pendiente de commitear al cerrar la entrada_
+- **Commit:** `78aa8e6` (esqueleto) + `a32ffe7` (cierre de la puerta con Docker)
 
 ### Hecho
 
