@@ -1,13 +1,11 @@
 import { Router } from 'express';
-import type { Request } from 'express';
-import { z } from 'zod';
 import { requireActiveAccount } from '../../middleware/accountState.js';
 import { requireAuth, requireUser } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/role.js';
 import { queryOf, validateBody, validateQuery } from '../../middleware/validate.js';
 import { ROLES } from '../../policy/roles.js';
-import { AppError } from '../../utils/AppError.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
+import { parseId } from '../../utils/params.js';
 import { sendData, sendMessage } from '../../utils/respond.js';
 import { toPublicUser } from '../auth/types.js';
 import {
@@ -33,19 +31,6 @@ import {
 } from './service.js';
 
 export const usersRouter = Router();
-
-const idSchema = z.coerce.number().int().positive();
-
-/** `:id` numérico; cualquier otra cosa es un 400 de validación, no un 404 ambiguo. */
-function idOf(req: Request): number {
-  const parsed = idSchema.safeParse(req.params.id);
-  if (!parsed.success) {
-    throw new AppError(400, 'VALIDATION_ERROR', 'El identificador del usuario no es válido.', {
-      id: 'Debe ser un número entero positivo',
-    });
-  }
-  return parsed.data;
-}
 
 /** Cadena de autorización de la gestión de cuentas: sesión, rol y cuenta operativa. */
 const admin = [requireAuth, requireRole(ROLES.ADMIN), requireActiveAccount];
@@ -117,7 +102,7 @@ usersRouter.get(
   '/users/:id',
   requireAuth,
   asyncHandler(async (req, res) => {
-    sendData(res, await getUser(idOf(req), requireUser(req)));
+    sendData(res, await getUser(parseId(req, 'usuario'), requireUser(req)));
   }),
 );
 
@@ -126,7 +111,7 @@ usersRouter.put(
   ...admin,
   validateBody(updateUserSchema),
   asyncHandler(async (req, res) => {
-    const user = await updateUser(idOf(req), req.body, requireUser(req), req.ip ?? null);
+    const user = await updateUser(parseId(req, 'usuario'), req.body, requireUser(req), req.ip ?? null);
     sendData(res, user);
   }),
 );
@@ -135,7 +120,7 @@ usersRouter.delete(
   '/users/:id',
   ...admin,
   asyncHandler(async (req, res) => {
-    await deleteUser(idOf(req), requireUser(req), req.ip ?? null);
+    await deleteUser(parseId(req, 'usuario'), requireUser(req), req.ip ?? null);
     sendMessage(res, 'Cuenta dada de baja.');
   }),
 );
@@ -148,7 +133,7 @@ usersRouter.post(
   '/users/:id/validate',
   ...admin,
   asyncHandler(async (req, res) => {
-    sendData(res, await validateUser(idOf(req), requireUser(req), req.ip ?? null));
+    sendData(res, await validateUser(parseId(req, 'usuario'), requireUser(req), req.ip ?? null));
   }),
 );
 
@@ -157,7 +142,7 @@ usersRouter.post(
   ...admin,
   validateBody(rejectSchema),
   asyncHandler(async (req, res) => {
-    await rejectActivation(idOf(req), req.body.motivo, requireUser(req), req.ip ?? null);
+    await rejectActivation(parseId(req, 'usuario'), req.body.motivo, requireUser(req), req.ip ?? null);
     sendMessage(res, 'Activación rechazada. Se notificó al titular.');
   }),
 );
@@ -166,7 +151,7 @@ usersRouter.post(
   '/users/:id/reactivate',
   ...admin,
   asyncHandler(async (req, res) => {
-    sendData(res, await reactivateUser(idOf(req), requireUser(req), req.ip ?? null));
+    sendData(res, await reactivateUser(parseId(req, 'usuario'), requireUser(req), req.ip ?? null));
   }),
 );
 
@@ -175,6 +160,6 @@ usersRouter.patch(
   ...admin,
   validateBody(stateSchema),
   asyncHandler(async (req, res) => {
-    sendData(res, await changeState(idOf(req), req.body, requireUser(req), req.ip ?? null));
+    sendData(res, await changeState(parseId(req, 'usuario'), req.body, requireUser(req), req.ip ?? null));
   }),
 );

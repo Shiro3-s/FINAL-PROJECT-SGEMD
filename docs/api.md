@@ -1,6 +1,6 @@
 # API — SGEMD
 
-Contrato de la API HTTP del MVP. Se amplía en cada etapa; las etapas 1–3 están
+Contrato de la API HTTP del MVP. Se amplía en cada etapa; las etapas 1–5 están
 implementadas y probadas.
 
 - **Prefijo:** todo cuelga de `/api` en el mismo origen que la SPA (sin CORS).
@@ -55,6 +55,7 @@ stack, una ruta interna ni un valor de configuración.
 | 403 | `EMAIL_NOT_VERIFIED` | La cuenta existe y la contraseña es correcta, pero el correo no está verificado |
 | 403 | `ACCOUNT_NOT_ACTIVE` | Cuenta `Limitado` o `Inactivo` en un módulo de trabajo (AQ-07) |
 | 403 | `ROLE_NOT_ALLOWED` | El rol de la fila no está autorizado para la ruta |
+| 403 | `FIELD_NOT_ALLOWED` | El rol puede editar el recurso, pero no ese campo (p. ej. un estudiante cambiando el sector) |
 | 403 | `ORIGIN_NOT_ALLOWED` | Mutación con `Origin` ajeno o ausente |
 | 404 | `NOT_FOUND` | Recurso inexistente **o fuera de alcance** (un estudiante pidiendo el id de otro) |
 | 409 | `EMAIL_TAKEN` | Correo institucional ya registrado |
@@ -63,6 +64,15 @@ stack, una ruta interna ni un valor de configuración.
 | 422 | `INVALID_STATE_TRANSITION` | Transición de cuenta no permitida (BR-003, R34) |
 | 422 | `SELF_STATE_CHANGE_NOT_ALLOWED` | El administrador intenta cambiar el estado de su propia cuenta |
 | 422 | `SELF_DELETE_NOT_ALLOWED` | Intento de baja lógica de la propia cuenta |
+| 422 | `INVALID_APPROVAL_STATE` | Aprobar o rechazar un emprendimiento que ya no está `Pendiente` |
+| 422 | `PARALLEL_REQUIRED` | El estudiante ya tiene un emprendimiento vigente y el alta no pide autorización de paralelo |
+| 422 | `PARALLEL_LIMIT_REACHED` | Se alcanzó `paralelos_maximos` (D5) |
+| 422 | `NOT_A_PARALLEL` | El primer emprendimiento del estudiante no puede ser paralelo |
+| 422 | `INITIAL_STAGE_NOT_CONFIGURED` | `etapa_inicial` falta en `configuracion_programa` o no existe en el catálogo |
+| 422 | `ACCOUNT_ALREADY_ACTIVE` | Una cuenta `Activo` pide su propio desbloqueo |
+| 422 | `ENTREPRENEURSHIP_NOT_APPROVED` | Se pide un paralelo sobre un emprendimiento que no está `Aprobado` |
+| 422 | `REQUEST_ALREADY_RESOLVED` | La solicitud ya fue aprobada o rechazada |
+| 422 | `REQUEST_TARGET_MISSING` | La cuenta o el emprendimiento de la solicitud ya no existe |
 | 429 | `OTP_COOLDOWN` | Reenvío antes del cooldown (60 s); incluye `Retry-After` |
 | 429 | `OTP_ATTEMPTS_EXCEEDED` | Se agotaron los 5 intentos del código; incluye `Retry-After` |
 | 429 | `RATE_LIMITED` | Se superó el límite de peticiones del endpoint; incluye `Retry-After` |
@@ -261,7 +271,7 @@ Listado paginado de todas las cuentas vigentes (las dadas de baja no aparecen).
 | Parámetro | Tipo | Default | Notas |
 |---|---|---|---|
 | `page` | entero ≥ 1 | 1 | |
-| `pageSize` | entero 1–100 | 20 | |
+| `pageSize` | entero 1–100 | 25 | |
 | `q` | texto ≤ 100 | — | Busca en nombres, apellidos, correo, código y documento (`ILIKE`) |
 | `rol` | 1–4 | — | 1 Admin · 2 Estudiante · 3 Docente · 4 Auditor |
 | `estado` | `Limitado` · `Activo` · `Inactivo` | — | |
@@ -279,7 +289,7 @@ Cualquier otro parámetro produce `400 VALIDATION_ERROR` (`.strict()`).
     "items": [ { "id": 4, "codigo": "100001", "nombres": "…", "estado": "Activo" } ],
     "total": 42,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 25
   }
 }
 ```
@@ -405,6 +415,268 @@ sigue en `Limitado`**; se audita `Rechazo de activación` con el motivo y se not
 titular. Solo sobre una cuenta `Limitado`.
 
 `200`: `{ "success": true, "message": "Activación rechazada. Se notificó al titular." }`
+
+## Catálogos
+
+Los 14 catálogos son de **solo lectura**. Todos exigen sesión salvo `GET /api/type-doc`,
+que lo necesita el formulario de registro antes de que exista una cuenta. Ninguno exige
+cuenta `Activo`: alimentan también la edición del perfil, disponible a una cuenta
+`Limitado` (AQ-07 opción A).
+
+| Ruta | Tabla | Forma de cada elemento |
+|---|---|---|
+| `GET /api/roles` | `roles` | `{ id, nombre }` |
+| `GET /api/type-doc` | `tipodocumentos` | `{ id, nombre }` — **público** |
+| `GET /api/type-users` | `tipousuarios` | `{ id, nombre }` |
+| `GET /api/uni-centers` | `centrouniversitarios` | `{ id, nombre }` |
+| `GET /api/type-pop` | `tipopoblacion` | `{ id, nombre }` |
+| `GET /api/academic-programs` | `programaacademico` | `{ id, nombre }` |
+| `GET /api/entrep-stage` | `etapaemprendimiento` | `{ id, nombre }` |
+| `GET /api/plan-phase` | `faseplan` | `{ id, nombre }` |
+| `GET /api/econo-sector` | `sectoreconomico` | `{ id, nombre }` |
+| `GET /api/mode` | `modalidad` | `{ id, nombre }` |
+| `GET /api/type-event` | `tipo_evento` | `{ id, nombre }` |
+| `GET /api/modules` | `modulos` | `{ id, nombre }` |
+| `GET /api/municipalities` | `municipios` | `{ id, nombre, departamento }` — `nombre` es la ciudad |
+| `GET /api/date-times` | `fecha_y_horarios` | `{ id, nombre, fecha, horaInicio, horaFin }` — `nombre` es `YYYY-MM-DD HH:MM–HH:MM` |
+
+`200`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [ { "id": 1, "nombre": "CC" }, { "id": 2, "nombre": "CE" } ]
+  }
+}
+```
+
+No hay rutas de escritura: cualquier `POST`/`PUT` sobre un catálogo responde `404`.
+
+## Emprendimientos
+
+Módulo de trabajo: todas las rutas exigen sesión **y** cuenta `Activo` (AQ-07 opción A).
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/entrepreneurship` | Admin, Estudiante, Docente | Admin ve todos; estudiante los propios; docente los de sus `asignaciones` activas |
+| `GET /api/entrepreneurship/:id` | Admin, Estudiante, Docente | Fuera de alcance: `404` (NFR-002) |
+| `POST /api/entrepreneurship` | Admin | Nace `Pendiente`, `avance = 0`, código `EMP-###` |
+| `PUT /api/entrepreneurship/:id` | Admin, estudiante propietario | El estudiante solo nombre, descripción y redes |
+| `DELETE /api/entrepreneurship/:id` | Admin | Baja lógica (`fecha_eliminacion`) |
+| `POST /api/entrepreneurship/:id/approve` | Admin | Solo desde `Pendiente` |
+| `POST /api/entrepreneurship/:id/reject` | Admin | Motivo obligatorio |
+
+Forma de un emprendimiento:
+
+```json
+{
+  "id": 1,
+  "codigo": "EMP-001",
+  "nombre": "Sabor y Sabe",
+  "descripcion": "Snacks artesanales…",
+  "redesSociales": "@saborysabe",
+  "estadoAprobacion": "Aprobado",
+  "motivoRechazo": null,
+  "esParalelo": false,
+  "avance": 0,
+  "etapa": { "id": 1, "nombre": "FASE 1 - Ideación" },
+  "sector": { "id": 1, "nombre": "Alimentos" },
+  "centroUniversitario": { "id": 1, "nombre": "Sede Norte" },
+  "estudiante": {
+    "id": 4,
+    "codigo": "100001",
+    "nombres": "Estudiante",
+    "apellidos": "Demo Uno",
+    "correoInstitucional": "estudiante.demo1@uniminuto.edu.co"
+  }
+}
+```
+
+### `GET /api/entrepreneurship`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `q` | texto ≤ 100 | — | Nombre o código (`ILIKE`) |
+| `estado` | `Pendiente` · `Aprobado` · `Rechazado` | — | |
+| `etapaId` | entero > 0 | — | |
+| `sectorId` | entero > 0 | — | |
+| `estudianteId` | entero > 0 | — | |
+| `paralelo` | `true` · `false` | — | |
+| `sort` | `codigo` · `nombre` · `estadoAprobacion` · `avance` · `estudiante` | `codigo` | Lista blanca: otra columna da `400` |
+| `order` | `asc` · `desc` | `asc` | |
+
+`200`: `{ items, total, page, pageSize }`. Cualquier otro parámetro produce `400`.
+
+### `POST /api/entrepreneurship`
+
+```json
+{
+  "nombre": "Sabor y Sabe",
+  "descripcion": "Snacks artesanales…",
+  "redesSociales": "@saborysabe",
+  "estudianteId": 4,
+  "sectorId": 1,
+  "etapaId": 1,
+  "centroUniversitarioId": 1,
+  "esParalelo": false
+}
+```
+
+- `estudianteId` debe existir, estar vigente y tener rol Estudiante (`400`).
+- `etapaId` es opcional: sin él se usa `configuracion_programa.etapa_inicial`
+  (`422 INITIAL_STAGE_NOT_CONFIGURED` si falta o no existe en el catálogo).
+- `esParalelo` es la **autorización expresa** de BR-004, no un dato descriptivo:
+  - primer emprendimiento + `esParalelo: true` → `422 NOT_A_PARALLEL`;
+  - segundo (o posterior) sin `esParalelo` → `422 PARALLEL_REQUIRED`;
+  - se alcanzó `paralelos_maximos` → `422 PARALLEL_LIMIT_REACHED`.
+  Un emprendimiento `Rechazado` no ocupa cupo.
+- `estadoAprobacion`, `motivoRechazo`, `codigo`, `avance` y `usuarioId` no se aceptan
+  (`.strict()` → `400`).
+
+`201` con el emprendimiento creado. Audita `Alta de emprendimiento` y notifica al
+estudiante.
+
+### `PUT /api/entrepreneurship/:id`
+
+Campos editables: `nombre`, `descripcion`, `redesSociales`, `sectorId`, `etapaId`,
+`centroUniversitarioId` (`null` limpia un catálogo). El administrador puede cambiar
+todos; el estudiante propietario solo `nombre`, `descripcion` y `redesSociales`; si envía
+los otros, `403 FIELD_NOT_ALLOWED`. El propietario no se cambia.
+
+`200` con el emprendimiento actualizado.
+
+### `POST /api/entrepreneurship/:id/approve`
+
+Sin cuerpo. `200` con `estadoAprobacion: "Aprobado"`. Solo desde `Pendiente`
+(`422 INVALID_APPROVAL_STATE`). Audita y notifica al estudiante en la misma transacción.
+
+### `POST /api/entrepreneurship/:id/reject`
+
+```json
+{ "motivo": "La propuesta no está suficientemente definida" }
+```
+
+`motivo` obligatorio (`.strict()` y sin espacios). `200` con `estadoAprobacion:
+"Rechazado"` y `motivoRechazo`. Solo desde `Pendiente`.
+
+### `DELETE /api/entrepreneurship/:id`
+
+`200` con `{ "success": true, "message": "Emprendimiento dado de baja." }`. La fila queda
+con `fecha_eliminacion` y desaparece de listados y detalles.
+
+## Solicitudes
+
+Bandeja única de R38: desbloqueos de cuenta, autorización de un paralelo y citas de
+asesoría.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `POST /api/requests` | Cualquier sesión | El solicitante es siempre la sesión actual |
+| `GET /api/requests` | Admin | Bandeja paginada con contador de pendientes |
+| `GET /api/requests/:id` | Admin | |
+| `PUT /api/requests/:id/approve` | Admin | Aplica el efecto de dominio una sola vez |
+| `PUT /api/requests/:id/reject` | Admin | Motivo obligatorio, sin efecto de dominio |
+
+Forma de una solicitud:
+
+```json
+{
+  "id": 1,
+  "tipo": "Desbloqueo",
+  "detalle": "Cuenta inactiva por 90 días sin acceso",
+  "estado": "Pendiente",
+  "motivoRechazo": null,
+  "fechaSolicitud": "2026-10-25T18:00:00.000Z",
+  "fechaResolucion": null,
+  "solicitante": {
+    "id": 5,
+    "codigo": "100002",
+    "nombres": "Estudiante",
+    "apellidos": "Demo Dos",
+    "correoInstitucional": "estudiante.demo2@uniminuto.edu.co"
+  },
+  "emprendimiento": null,
+  "resueltoPor": null
+}
+```
+
+### `POST /api/requests`
+
+```json
+{
+  "tipo": "Desbloqueo",
+  "detalle": "Cuenta inactiva por 90 días sin acceso",
+  "emprendimientoId": null
+}
+```
+
+- `Desbloqueo`: lo puede pedir una cuenta `Limitado` o `Inactivo` (es el único camino para
+  salir de ese estado). Una cuenta `Activo` recibe `422 ACCOUNT_ALREADY_ACTIVE` y no se
+  admite `emprendimientoId`.
+- `Paralelo` y `Cita`: exigen cuenta `Activo` (`403 ACCOUNT_NOT_ACTIVE`), rol Estudiante
+  (`403 ROLE_NOT_ALLOWED`) y un emprendimiento propio vigente (`400` si falta o es ajeno).
+  `Paralelo` exige además que esté `Aprobado` (`422 ENTREPRENEURSHIP_NOT_APPROVED`).
+- `detalle` es texto libre: el diagrama no tiene columnas para los campos del prototipo
+  (P-20).
+
+`201` con la solicitud. Audita `Solicitud creada` y notifica a los administradores
+`Activo` con la URL de la bandeja.
+
+### `GET /api/requests`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `tipo` | `Desbloqueo` · `Paralelo` · `Cita` | — | |
+| `estado` | `Pendiente` · `Aprobada` · `Rechazada` | — | |
+| `q` | texto ≤ 100 | — | Nombres, apellidos, código, correo o detalle |
+| `sort` | `fecha` · `tipo` · `estado` | `fecha` | |
+| `order` | `asc` · `desc` | `desc` | |
+
+`200`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [ ],
+    "total": 3,
+    "page": 1,
+    "pageSize": 25,
+    "pendientes": { "total": 3, "Desbloqueo": 1, "Paralelo": 1, "Cita": 1 }
+  }
+}
+```
+
+`pendientes` cuenta **toda** la bandeja, no el filtro aplicado.
+
+### `PUT /api/requests/:id/approve`
+
+Sin cuerpo. `200` con la solicitud en `Aprobada`, `fechaResolucion` y `resueltoPor`.
+
+| Tipo | Efecto |
+|---|---|
+| `Desbloqueo` | `Limitado`/`Inactivo` → `Activo` (si ya estaba `Activo`, solo se resuelve) |
+| `Paralelo` | `es_paralelo = TRUE` en el emprendimiento, recalculando `paralelos_maximos` |
+| `Cita` | Ninguno todavía: la asesoría se crea en su módulo (P-19) |
+
+Una segunda aprobación responde `422 REQUEST_ALREADY_RESOLVED`. Si la cuenta o el
+emprendimiento ya no existen: `422 REQUEST_TARGET_MISSING`. Audita `Solicitud aprobada`
+con el efecto aplicado y notifica al solicitante.
+
+### `PUT /api/requests/:id/reject`
+
+```json
+{ "motivo": "La cuenta no cumple los requisitos de activación" }
+```
+
+`motivo` obligatorio. `200` con `estado: "Rechazada"`, `motivoRechazo`, `fechaResolucion` y
+`resueltoPor`. No cambia el estado de la cuenta ni del emprendimiento; audita
+`Solicitud rechazada` y notifica al solicitante con el motivo.
 
 ## Diagnóstico
 

@@ -32,6 +32,14 @@ export const AUDIT_ACTIONS = {
   DELETE_USER: 'Baja lógica de usuario',
   STATE_CHANGE: 'Cambio de estado de cuenta',
   REJECT_ACTIVATION: 'Rechazo de activación',
+  CREATE_ENTREPRENEURSHIP: 'Alta de emprendimiento',
+  UPDATE_ENTREPRENEURSHIP: 'Edición de emprendimiento',
+  DELETE_ENTREPRENEURSHIP: 'Baja lógica de emprendimiento',
+  APPROVE_ENTREPRENEURSHIP: 'Aprobación de emprendimiento',
+  REJECT_ENTREPRENEURSHIP: 'Rechazo de emprendimiento',
+  CREATE_REQUEST: 'Solicitud creada',
+  APPROVE_REQUEST: 'Solicitud aprobada',
+  REJECT_REQUEST: 'Solicitud rechazada',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {

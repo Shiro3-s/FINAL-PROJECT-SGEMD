@@ -129,6 +129,8 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | P-16 | R36 dice que la baja es «lógica y **reversible**», pero el master §13.3 no declara ningún endpoint para restaurar una cuenta dada de baja | La baja solo marca `fecha_eliminacion`; la fila y sus datos siguen ahí. La restauración se hará con un endpoint propio cuando se confirme (Etapa 12) | Nada |
 | P-17 | NFR-002 describe al **Auditor** como «solo lectura», pero §13.3 no le asigna ningún endpoint de usuarios y AQ-08 sigue pendiente | Se deniega por defecto: los listados y la gestión de cuentas son solo del Admin. El alcance del Auditor se fija con el módulo de auditoría | Nada (Etapa 11) |
 | P-18 | «CRUD de usuarios» podría incluir cambiar el **rol**, pero ninguna regla lo pide y el cambio afecta asignaciones, topes docentes y auditoría | El rol es **inmutable** en `PUT /users/:id` (`.strict()` → `400`). Cambiar el rol exigirá una operación dedicada con su propia validación | Nada |
+| P-19 | El prototipo resuelve una solicitud de **Cita** con «Docente sugerido», «Fecha propuesta» y «Motivo», pero `solicitudes` no tiene esas columnas y `asesorias` exige un docente y un bloque de `fecha_y_horarios` | Aprobar una `Cita` **no crea la asesoría**: solo resuelve la solicitud (efecto `null` en la auditoría). La coordinación registra la asesoría en su módulo (Etapa 8) | Cerrar Etapa 8 |
+| P-20 | `solicitudes` solo tiene `detalle` (texto libre): no hay columnas para «Emprendimiento actual», «Nuevo emprendimiento», «Sector», «Docente sugerido» ni «Fecha propuesta» del prototipo | Todo lo que no es `tipo` + `emprendimientoId` viaja en `detalle`. No se inventan columnas; si la Coordinadora necesita filtrar por esos datos, se añaden en una etapa posterior | Nada (diseño de la bandeja) |
 ### 5.4 Inferencias de esta etapa que no son huecos del diagrama
 
 | Elemento | Qué se infirió | Dónde queda |
@@ -148,6 +150,23 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | Auto-gestión | Nadie cambia el estado ni da de baja su propia cuenta | Con un único administrador activo, el autodesplazamiento dejaría el sistema sin quien lo revierta |
 | Rol | Inmutable en la edición (P-18) | Cambiarlo altera asignaciones, topes y semántica de la auditoría |
 | Baja lógica | Solo marca `fecha_eliminacion`; no borra adjuntos porque todavía no existen (Etapa 6/7) | BR-006 pide el borrado físico de adjuntos; se implementará con el módulo de adjuntos |
+
+### 5.6 Decisiones tomadas en la Etapa 5
+
+| Tema | Decisión | Motivo |
+|---|---|---|
+| Alta de emprendimiento | Solo el administrador (`POST /entrepreneurship`); nace `Pendiente`, `avance = 0`, código `EMP-###` y la etapa de `configuracion_programa.etapa_inicial` | R37 y D4: el prototipo no tiene formulario de registro para el estudiante; el avance se deriva de las tareas (R21), nunca lo envía el cliente |
+| Autorización de paralelo | `esParalelo` es la **autorización expresa** de BR-004, no un dato descriptivo: sin ella, un segundo emprendimiento vigente responde `422 PARALLEL_REQUIRED`; el primero no puede ser paralelo (`422 NOT_A_PARALLEL`) | El prototipo la resuelve con un botón de la bandeja, no con un campo del formulario |
+| Tope de paralelos | `paralelos_maximos` (=1, D5) cuenta solo los no rechazados; al alcanzarlo: `422 PARALLEL_LIMIT_REACHED` | Un `Rechazado` se conserva con su motivo pero no ocupa cupo |
+| Edición | El administrador cambia nombre, descripción, redes, sector, etapa y sede; el estudiante propietario solo nombre, descripción y redes (`403 FIELD_NOT_ALLOWED` para el resto) | Master §13.2; el propietario, el estado, el motivo, el paralelo y el avance no se editan por esta vía (`.strict()` → `400`) |
+| Lectura | Admin: todos; estudiante: los propios; docente: los que tiene con `asignaciones.estado = 'activa'`; fuera de alcance: `404` | R4, R5, R25 y NFR-002: no se revela la existencia de un expediente ajeno |
+| Aprobación y rechazo | Solo desde `Pendiente` (`422 INVALID_APPROVAL_STATE`); el rechazo exige motivo y lo guarda en `motivo_rechazo`; auditoría y notificación en la misma transacción | BR-004, T11, T12. El `UPDATE … WHERE estado = 'Pendiente'` impide aplicar la decisión dos veces |
+| Catálogos | 13 exigen sesión; `GET /type-doc` es público porque lo necesita el registro. Ninguno exige cuenta `Activo` | Alimentan también la edición del perfil, que AQ-07 opción A deja disponible a una cuenta `Limitado` |
+| Bandeja de solicitudes | `POST /requests` solo exige sesión: una cuenta `Limitado` o `Inactivo` debe poder pedir su desbloqueo. `Paralelo` y `Cita` exigen `Activo`, rol Estudiante y un emprendimiento propio vigente (`Paralelo`, además, `Aprobado`) | La política de cuenta no puede impedir el único camino para salir de `Limitado` |
+| Resolución | Cada aprobación aplica su efecto **una sola vez** (`SELECT … FOR UPDATE` + `UPDATE … WHERE estado = 'Pendiente'` → `422 REQUEST_ALREADY_RESOLVED`): Desbloqueo → `Activo`; Paralelo → `es_paralelo = TRUE` con recuento del tope; Cita → sin efecto de dominio (P-19) | T36: nunca una solicitud aprobada sin efecto ni un efecto duplicado |
+| Rechazo de solicitudes | Exige motivo, no aplica ningún efecto de dominio y notifica al solicitante | R38 |
+| Paginación | `pageSize` por defecto **25** (máximo 100) en todos los listados, también en `GET /users` | Master §13.3 |
+| Aviso a la coordinación | Crear una solicitud notifica a todos los administradores `Activo` con la URL de la bandeja | El contador de pendientes es la señal; no hay otro canal en el MVP |
 
 
 ---
@@ -202,11 +221,14 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | 24 | El prototipo carga Inter desde Google Fonts (`lib_ui.py`); D21 exige autoalojarla | Misma tipografía, distinto medio de entrega; se autoaloja con `@fontsource/inter` |
 | 25 | `docs/diagrama-clases.md` v2 dice "si este documento y el master discrepan, manda el master"; la instrucción del propietario para este build es lo contrario en tablas | Se aplica la instrucción del propietario (tablas = diagrama) y se registra aquí. Toda diferencia restante se resuelve caso por caso en las tablas #18–#19 |
 | 26 | El prototipo (`compartido/registro.html`) y AQ-06 hablan de **7 campos + casilla**: nombres, apellidos, tipo y número de documento, **correo personal**, correo institucional, **celular** (obligatorios) y **teléfono fijo** (opcional). El diagrama v2 no tiene columnas para correo personal, celular ni teléfono fijo | **Manda el diagrama**: `POST /auth/register` acepta 6 campos (los cinco primeros más la contraseña) + la casilla. Los tres datos de contacto que no existen no se inventan ni se piden; si la Coordinadora los necesita, se añaden columnas en una etapa posterior y se actualiza AQ-06 |
-
 | 27 | El selector de estado de `admin/usuarios.html` ofrece **`Activo → Limitado`** (y `Limitado → Inactivo`), pero FR-013 y BR-003 solo definen `Limitado → Activo`, `Inactivo → Activo` y `Activo → Inactivo` | **Mandan los requisitos**: la tabla de `policy/accountTransitions.ts` rechaza esas transiciones con `422 INVALID_STATE_TRANSITION`; el selector de la SPA solo ofrecerá las válidas |
 | 28 | Los formularios de alta de `admin/usuarios.html` piden **teléfono**, **área de conocimiento**, **horas de asesoría por semana** (docente) y **sector, emprendimiento y etapa** (estudiante). `usuarios` no tiene esas columnas; los topes docentes son claves de `configuracion_programa` y el emprendimiento es otra entidad | **Manda el diagrama**: `POST /users` crea la cuenta con los campos de `usuarios`. El emprendimiento se crea en la Etapa 5; teléfono, área y horas no se inventan (ver #18 y #26) |
 | 29 | `POST /users/:id/reject` (master §13.3) no tiene estado de destino en el diagrama: no existe «Rechazado» para la cuenta | Se mantiene `Limitado`, con motivo obligatorio auditado y notificación (P-15). El alta rechazada no se borra |
 | 30 | El prototipo muestra el estado del docente en la tabla de usuarios junto a «Carga semanal» y «Emprendimientos», pero esas dos columnas no existen en `usuarios` | El listado devuelve la cuenta; los topes y el conteo de emprendimientos se calculan en la Etapa 6 (asignaciones), no se guardan en la fila |
+| 31 | `admin/emprendimientos.html` pide un **«Tipo»** (`Comercio`, `Moda`, `Industrial`, `Alimentos`, `Artesanal`) distinto de «Sector» (`sectoreconomico`: Alimentos, Moda, Ambiental, Muebles, Tecnología, Comercio). El diagrama v2 no tiene columna ni catálogo para ese «Tipo» | **Manda el diagrama**: no se crea columna ni catálogo y el formulario no pide «Tipo». Se registra como decisión pendiente para la Coordinadora (¿es `modalidad`? ¿un catálogo nuevo?) |
+| 32 | El formulario de `admin/emprendimientos.html` deja **editar «Avance (%)»** y lo guarda, pero R21 define el avance como derivado de las tareas completadas | **Mandan los requisitos**: `avance` no se acepta en `POST` ni en `PUT` (`.strict()` → `400`); se calculará en la Etapa 7 |
+| 33 | El formulario de `admin/emprendimientos.html` incluye **«Docente asignado»**, pero el mentor vive en `asignaciones` (con horas, estado y fecha), no en `emprendimiento` | El campo pertenece al módulo de asignaciones (Etapa 6): se asigna después de aprobar y con el acta aprobada (BR-001). El formulario de emprendimiento no lo pide |
+
 ---
 
 ## 7. Versiones fijadas

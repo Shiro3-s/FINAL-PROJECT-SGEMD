@@ -1,16 +1,13 @@
+import { ROLES } from '@sgemd/shared';
+
 /**
  * Ids de `roles`, tal como los siembra `database/seed.sql`.
  *
- * No son un `enum` del diagrama: son filas de catálogo. Se declaran una sola vez aquí
- * para que ni los servicios ni los routers repitan números mágicos.
+ * No son un `enum` del diagrama: son filas de catálogo. La definición canónica vive en
+ * `shared/src/enums.ts` (la comparten backend, frontend y pruebas); aquí solo se reexporta
+ * para que los servicios no importen del paquete compartido por un detalle de estilo.
  */
-export const ROLES = {
-  ADMIN: 1,
-  ESTUDIANTE: 2,
-  DOCENTE: 3,
-  AUDITOR: 4,
-} as const;
-
+export { ROLES };
 export type RolId = (typeof ROLES)[keyof typeof ROLES];
 
 /** Roles que el administrador puede dar de alta (R33: estudiantes y docentes). */

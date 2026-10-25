@@ -1,10 +1,6 @@
-import request from 'supertest';
-import type { Response, Test } from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { createApp } from '../src/app.js';
 import { closePool, query } from '../src/db/pool.js';
 import { resetRateLimits } from '../src/middleware/rateLimit.js';
-import { SESSION_COOKIE } from '../src/modules/auth/session.js';
 import {
   clearMailbox,
   countMailFiles,
@@ -12,63 +8,7 @@ import {
   uniqueDocument,
   uniqueEmail,
 } from './helpers.js';
-
-const app = createApp();
-const ORIGIN = 'https://localhost';
-
-const post = (path: string) => request(app).post(path).set('Origin', ORIGIN);
-const put = (path: string) => request(app).put(path).set('Origin', ORIGIN);
-const patch = (path: string) => request(app).patch(path).set('Origin', ORIGIN);
-const del = (path: string) => request(app).delete(path).set('Origin', ORIGIN);
-
-interface Session {
-  token: string;
-  id: number;
-  get: (path: string) => Test;
-  post: (path: string) => Test;
-  put: (path: string) => Test;
-  patch: (path: string) => Test;
-  del: (path: string) => Test;
-}
-
-function sessionCookie(response: Response): string {
-  const headers = response.headers['set-cookie'] as unknown as string[] | undefined;
-  const cookie = headers?.find((value) => value.startsWith(`${SESSION_COOKIE}=`));
-  if (!cookie) throw new Error('La respuesta no trae la cookie de sesión');
-  return cookie;
-}
-
-/**
- * Inicia sesión y devuelve un cliente que reenvía la cookie explícitamente (la cookie es
- * `Secure` y el jar de supertest no la manda por HTTP plano).
- */
-async function loginSession(correo: string, password = 'Demo1234'): Promise<Session> {
-  const response = await post('/api/auth/login').send({
-    correoInstitucional: correo,
-    password,
-  });
-
-  expect(response.status).toBe(200);
-
-  const cookie = `${SESSION_COOKIE}=${decodeURIComponent(
-    sessionCookie(response).split(';')[0]!.slice(SESSION_COOKIE.length + 1),
-  )}`;
-
-  const withCookie = (method: 'get' | 'post' | 'put' | 'patch' | 'delete') => (path: string) => {
-    const test = request(app)[method](path).set('Cookie', cookie);
-    return method === 'get' ? test : test.set('Origin', ORIGIN);
-  };
-
-  return {
-    token: cookie,
-    id: response.body.data.usuario.id as number,
-    get: withCookie('get'),
-    post: withCookie('post'),
-    put: withCookie('put'),
-    patch: withCookie('patch'),
-    del: withCookie('delete'),
-  };
-}
+import { loginSession, post } from './api.js';
 
 interface CreateOverrides {
   nombres?: string;

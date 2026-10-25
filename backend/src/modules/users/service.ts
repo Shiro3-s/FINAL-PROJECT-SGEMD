@@ -1,9 +1,10 @@
 import { randomBytes } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { query, withTransaction } from '../../db/pool.js';
-import { assertTransition } from '../../policy/accountTransitions.js';
 import { ROLES } from '../../policy/roles.js';
+import { applyAccountTransition } from '../../services/accountLifecycle.js';
 import { AUDIT_ACTIONS, audit } from '../../services/audit.js';
+import { assertCatalogIds } from '../../services/catalogs.js';
 import { userCode } from '../../services/codes.js';
 import {
   assertInstitutionalEmail,
@@ -33,51 +34,6 @@ import type {
 
 function notFound(): AppError {
   return new AppError(404, 'NOT_FOUND', 'El usuario no existe.');
-}
-
-/** Catálogos que el diagrama referencia desde `usuarios`, con su tabla y su columna. */
-const CATALOGS: Record<string, { table: string; column: string; label: string }> = {
-  tipoDocumentoId: {
-    table: 'tipodocumentos',
-    column: 'id_tipodocumentos',
-    label: 'tipo de documento',
-  },
-  programaAcademicoId: {
-    table: 'programaacademico',
-    column: 'id_programaacademico',
-    label: 'programa académico',
-  },
-  centroUniversitarioId: {
-    table: 'centrouniversitarios',
-    column: 'id_centrouniversitarios',
-    label: 'centro universitario',
-  },
-  municipioId: { table: 'municipios', column: 'id_municipios', label: 'municipio' },
-  tipoPoblacionId: {
-    table: 'tipopoblacion',
-    column: 'id_tipopoblacion',
-    label: 'tipo de población',
-  },
-  tipoUsuarioId: { table: 'tipousuarios', column: 'id_tipousuarios', label: 'tipo de usuario' },
-};
-
-/** Los nombres de tabla y columna son constantes del código, nunca datos del cliente. */
-async function assertCatalogIds(db: PoolClient, input: Record<string, unknown>): Promise<void> {
-  for (const [field, catalog] of Object.entries(CATALOGS)) {
-    const value = input[field];
-    if (typeof value !== 'number') continue;
-
-    const { rows } = await db.query<{ id: number }>(
-      `SELECT ${catalog.column} AS id FROM ${catalog.table} WHERE ${catalog.column} = $1`,
-      [value],
-    );
-
-    if (!rows[0]) {
-      throw new AppError(400, 'VALIDATION_ERROR', `El ${catalog.label} no existe.`, {
-        [field]: `Selecciona un ${catalog.label} válido`,
-      });
-    }
-  }
 }
 
 /** Unicidad de correo y documento (FR-016, R35). `excludeId` deja fuera la propia fila. */
@@ -429,51 +385,14 @@ async function applyTransition(
     );
   }
 
-  const existing = await findUserById(id);
-  if (!existing) throw notFound();
+  const result = await withTransaction((db) =>
+    applyAccountTransition(db, { usuarioId: id, to, actorId: actor.id, ip }),
+  );
 
-  assertTransition(existing.estado, to);
-
-  await withTransaction(async (db) => {
-    const { rowCount } = await db.query(
-      'UPDATE usuarios SET estado = $3 WHERE id_usuarios = $1 AND estado = $2',
-      [id, existing.estado, to],
-    );
-
-    if (rowCount === 0) {
-      throw new AppError(
-        422,
-        'INVALID_STATE_TRANSITION',
-        'La cuenta cambió de estado mientras se procesaba la solicitud. Vuelve a intentarlo.',
-      );
-    }
-
-    await audit(db, {
-      accion: AUDIT_ACTIONS.STATE_CHANGE,
-      entidad: 'usuarios',
-      entidadId: id,
-      valorAnterior: { estado: existing.estado },
-      valorNuevo: { estado: to },
-      usuarioId: actor.id,
-      ip,
-    });
-
-    await notify(db, {
-      usuarioId: id,
-      tipo: 'Sistema',
-      mensaje:
-        to === 'Activo'
-          ? 'Tu cuenta fue activada. Ya puedes usar los módulos de trabajo.'
-          : 'Tu cuenta fue desactivada. Contacta a la coordinación del programa.',
-      tipoObjeto: 'usuarios',
-      objetoId: id,
-    });
-  });
-
-  if (to === 'Activo') {
+  if (result.to === 'Activo') {
     await sendMailBestEffort(
-      existing.correoInstitucional,
-      welcomeMail(existing.nombres),
+      result.correoInstitucional,
+      welcomeMail(result.nombres),
       'bienvenida',
     );
   }

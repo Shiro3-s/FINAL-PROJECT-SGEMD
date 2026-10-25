@@ -116,7 +116,7 @@ export const rejectSchema = z
 export const listUsersQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).default(1),
-    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+    pageSize: z.coerce.number().int().min(1).max(100).default(25),
     q: z
       .string()
       .max(100)
