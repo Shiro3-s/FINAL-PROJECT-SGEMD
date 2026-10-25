@@ -29,6 +29,7 @@ services:
     env_file:
       - .env
     environment:
+      NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
       APP_ORIGIN: ${APP_ORIGIN}
       PROXY_MAX_BODY_MB: ${PROXY_MAX_BODY_MB}

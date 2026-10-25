@@ -73,26 +73,37 @@
 | `python3 -c "yaml.safe_load(open('docker-compose.yml'))"` | YAML válido |
 | Tags de imagen `caddy:2.10.0-alpine` y `node:22-alpine` | Existen en Docker Hub (HTTP 200) |
 
-### Sin verificar — **puerta no superada**
+### Verificado con la pila en marcha (puerta superada)
 
-La puerta de la Etapa 1 exige `docker compose up` con `/api/health` en 200 **a través de Caddy**.
-No se pudo ejecutar:
+| Comprobación | Resultado |
+|---|---|
+| `docker compose up -d --build` | `caddy`, `backend` y `postgres` arriba; backend y postgres `healthy` |
+| `curl -sk https://localhost/api/health` | `200` · `{"success":true,"data":{"status":"ok","db":"up",...}}` **a través de Caddy** |
+| `GET /` y `GET /estudiante/tareas` por Caddy | `200` (el fallback de SPA sirve `index.html`) |
+| Cabeceras de la SPA | `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options: nosniff` presentes |
+| `ss -ltn` en el host | `3000` y `5432` **no escuchan**; solo se publican `80` y `443` |
+| `docker compose exec backend pg_dump --version` | `17.11` — se corrigió: `postgresql-client` instalaba la 18 y rompía la regla del master §15 |
+| `rsync --version` en el backend | `3.5.0` (prerrequisito de D22) |
+| `NODE_ENV` dentro del contenedor | `production` (Compose lo fuerza; `.env` es plantilla de desarrollo) |
+| `docker compose down` → `up -d` | Baja limpio y vuelve a levantar; health `200` otra vez |
 
-```
-systemctl is-enabled docker → disabled
-systemctl is-active docker  → inactive
-docker compose             → plugin no instalado
-usuario                    → no pertenece al grupo docker
-```
+### Notas de entorno
 
-- **Bloqueo:** entorno local. Se necesita `sudo systemctl enable --now docker`, el plugin
-  `docker-compose` y agregar al usuario al grupo `docker` (o `sudo` para cada comando).
-- **No se avanza a la Etapa 2** hasta verificar la puerta (master §16).
-- **Tampoco verificado:** TLS interno de Caddy, límite de cuerpo real, entrega SSE y
-  `pg_dump`/`rsync` dentro de la imagen del backend (dependen de Docker).
+- El grupo `docker` no estaba activo en la sesión del agente (se añadió después de iniciarla);
+  los comandos se ejecutaron con `newgrp docker`. Tras reiniciar sesión funciona directo.
+- Plugin: `docker compose` v5.6.1. Daemon 29.9.2.
+
+### Sin verificar (se prueba en la Etapa 12)
+
+- TLS con certificado institucional: se usa la CA interna de Caddy (D15 abierta con TI).
+- Límite real de cuerpo de 500 MB y entrega SSE: necesitan el endpoint de subida y el canal
+  de notificaciones, que llegan en las etapas 7 y 8.
+- Restauración de un respaldo: simulacro de la Etapa 12 (D22).
 
 ### Pendiente de decisión
 
 - D15: hostname y certificado fuera de `localhost` (TI).
 - D14: credenciales reales de Microsoft 365 / relay (TI).
 - D22: disco separado para `backups/` y copia fuera del servidor (TI).
+
+**Puerta:** superada el 2026-10-25 (healthcheck 200 a través de Caddy, puertos internos, `down`/`up` limpio).

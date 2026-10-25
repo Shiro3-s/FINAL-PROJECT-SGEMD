@@ -19,8 +19,9 @@ FROM node:22-alpine AS runtime
 WORKDIR /app
 
 # tzdata: la aplicación muestra America/Bogota. rsync: instantáneas de respaldo.
-# postgresql-client: pg_dump de la misma versión mayor que el servidor (17).
-RUN apk add --no-cache tzdata rsync postgresql-client \
+# postgresql17-client: pg_dump de la MISMA versión mayor que el servidor (17).
+# Ojo: `postgresql-client` a secas instala la 18 en Alpine y rompe la regla del master §15.
+RUN apk add --no-cache tzdata rsync postgresql17-client \
     && cp /usr/share/zoneinfo/America/Bogota /etc/localtime \
     && echo "America/Bogota" > /etc/timezone
 
