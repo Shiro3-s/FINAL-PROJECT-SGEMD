@@ -1,0 +1,5 @@
+-- SGEMD — esquema de la base de datos.
+-- Etapa 1: archivo de inicialización vacío (sin tablas). La Etapa 2 lo completa con
+-- las 41 tablas derivadas de `docs/diagrama-clases.md` (27 entidades + 14 catálogos).
+-- Se monta en /docker-entrypoint-initdb.d/01-schema.sql y solo se ejecuta al crear el
+-- volumen desde cero.

@@ -1,0 +1,4 @@
+-- SGEMD — datos iniciales.
+-- Etapa 1: archivo vacío. La Etapa 2 carga los 14 catálogos, 1 administrador, usuarios
+-- ficticios y las 22 preguntas del diagnóstico transcritas del prototipo (provisional,
+-- AQ-12). Nunca datos personales reales (Ley 1581/2012).

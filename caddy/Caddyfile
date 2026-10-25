@@ -1,0 +1,44 @@
+{
+	admin off
+}
+
+{$APP_HOST:localhost} {
+	# TLS local con la CA interna de Caddy mientras TI no entregue el hostname y el
+	# certificado institucionales (decisión D15). Al desplegar con un nombre público,
+	# sustituir `tls internal` por el emisor real (ACME o certificado de la institución).
+	tls internal
+
+	encode zstd gzip
+	root * /srv
+
+	# Límite de cuerpo para evidencias de hasta PROXY_MAX_BODY_MB (D1).
+	# Es el único valor de configuración que vive en el entorno y no en configuracion_programa.
+	request_body {
+		max_size {$PROXY_MAX_BODY_MB:500}MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'"
+		-Server
+	}
+
+	# API y SSE. flush_interval -1 evita el buffering de text/event-stream (D2).
+	handle /api/* {
+		reverse_proxy backend:3000 {
+			flush_interval -1
+			transport http {
+				read_timeout 15m
+				write_timeout 15m
+			}
+		}
+	}
+
+	# SPA: cualquier ruta desconocida devuelve index.html.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

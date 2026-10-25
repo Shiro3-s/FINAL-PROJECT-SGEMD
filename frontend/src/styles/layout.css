@@ -1,0 +1,50 @@
+/* Layout mínimo de la Etapa 1. Los componentes del producto llegan en la Etapa 11. */
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+  background: var(--noche-02);
+}
+
+.card {
+  width: min(520px, 100%);
+  background: var(--blanco);
+  border: 1px solid var(--gris);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+  padding: var(--s-3);
+}
+
+.app-sub {
+  margin: var(--s-1) 0 var(--s-3);
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.app-status {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-1) var(--s-2);
+  margin: 0;
+}
+
+.app-status dt {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.app-status dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.app-error {
+  margin: 0;
+  padding: var(--s-2);
+  border: 1px solid var(--gris);
+  border-radius: var(--r-sm);
+  background: var(--noche-03);
+  color: var(--tinta);
+  font-size: 13px;
+}

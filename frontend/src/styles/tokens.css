@@ -1,0 +1,41 @@
+/*
+ * Tokens del sistema. Copiados literalmente de `prototype/lib_css.py` (TOKENS_CSS).
+ * Solo estos seis hex y sus variantes de opacidad: no se añade ningún color nuevo.
+ */
+:root {
+  --amarillo: #ffd300;
+  --blanco: #ffffff;
+  --azul-profundo: #162644;
+  --azul-noche: #051533;
+  --azul-real: #004a93;
+  --gris: #bbbbbb;
+  --tinta: #051533;
+  --tinta-2: #162644;
+  --linea: #bbbbbb;
+  --azul-06: rgba(0, 74, 147, 0.06);
+  --azul-12: rgba(0, 74, 147, 0.12);
+  --azul-28: rgba(0, 74, 147, 0.28);
+  --azul-15: rgba(0, 74, 147, 0.15);
+  --azul-08: rgba(0, 74, 147, 0.08);
+  --noche-02: rgba(5, 21, 51, 0.02);
+  --noche-03: rgba(5, 21, 51, 0.03);
+  --noche-04: rgba(5, 21, 51, 0.04);
+  --noche-06: rgba(5, 21, 51, 0.06);
+  --noche-55: rgba(5, 21, 51, 0.55);
+  --noche-28: rgba(5, 21, 51, 0.28);
+  --amarillo-14: rgba(255, 211, 0, 0.14);
+  --blanco-08: rgba(255, 255, 255, 0.08);
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-full: 999px;
+  --s-1: 8px;
+  --s-2: 16px;
+  --s-3: 24px;
+  --s-4: 32px;
+  --s-5: 40px;
+  --s-6: 48px;
+  --shadow-1: 0 1px 2px rgba(5, 21, 51, 0.06);
+  --shadow-2: 0 8px 24px rgba(5, 21, 51, 0.04);
+  --shadow-3: 0 24px 64px rgba(5, 21, 51, 0.28);
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}

@@ -3,3 +3,37 @@ docs/centroProgresa/
 docs/estudiante/
 docs/transcription_*.md
 docs/prompts/prompt_interview.md
+
+# Node
+node_modules/
+npm-debug.log*
+*.tsbuildinfo
+dist/
+.vite/
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Datos de la aplicación
+storage/*
+!storage/.gitkeep
+backups/*
+!backups/.gitkeep
+database/dumps/
+*.dump
+*.sql.gz
+
+# Correo generado en desarrollo
+storage/mail/
+
+# Registros y temporales
+logs/
+*.log
+coverage/
+test-results/
+playwright-report/
+
+# Sistema
+.DS_Store
