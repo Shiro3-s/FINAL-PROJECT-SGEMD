@@ -107,3 +107,63 @@
 - D22: disco separado para `backups/` y copia fuera del servidor (TI).
 
 **Puerta:** superada el 2026-10-25 (healthcheck 200 a través de Caddy, puertos internos, `down`/`up` limpio).
+
+---
+
+## Etapa 2 — Esquema y datos iniciales
+
+- **Fecha:** 2026-10-25
+- **Commit:** _pendiente de commitear al cerrar la entrada_
+
+### Hecho
+
+- `database/schema.sql`: las **41 tablas** del diagrama v2 (27 entidades + 14 catálogos),
+  con nombres físicos en `snake_case`, claves foráneas, `CHECK` de las cadenas canónicas,
+  claves primarias compuestas (`usuarios_has_eventos` y las tres `adjuntos_*`), borrado
+  lógico en las siete entidades de BR-006 e índices de las columnas que filtran las pantallas.
+- Restricciones que el dibujo no expresa: índice único **parcial** de una sola asignación
+  `activa` por emprendimiento (R11); únicos de correo, documento, código de emprendimiento y
+  código de respaldo; único `(pregunta, diagnóstico)`; motivo obligatorio al rechazar
+  emprendimiento, acta y solicitud, y al devolver una tarea.
+- `database/seed.sql`: los 14 catálogos con sus valores canónicos, 18 claves de
+  `configuracion_programa`, 5 usuarios ficticios (contraseña `Demo1234` con bcrypt de
+  `pgcrypto`), 1 emprendimiento aprobado con acta aprobada y asignación activa, 2 tareas y
+  las **22 preguntas** del diagnóstico transcritas de `prototype/estudiante/diagnostico.html`.
+- `scripts/check-schema.mjs` (`npm run check:schema`): compara el diagrama con el esquema y
+  con `shared/src/enums.ts`. Falla si falta una columna, si sobra una, si el número de tablas
+  no es 41 o si un `CHECK` no coincide con su constante.
+- `shared/src/enums.ts`: se añaden `TIPOS_MIME_ADJUNTO` y `TIPOS_DATO_CONFIGURACION`.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm run check:schema` | 27 clases con todas sus columnas · 14 catálogos · 41 tablas · 22 listas `CHECK` coinciden |
+| Prueba negativa del verificador (columna borrada, valor de enum cambiado, tabla extra) | Detecta los 5 problemas y sale con código 1 |
+| `docker compose down -v && up -d --build` | La inicialización aplica esquema y seed sin errores; los tres servicios quedan `healthy` |
+| `information_schema` — tablas base en `public` | **41** |
+| Catálogos | roles 4 · tipodocumentos 3 · programaacademico 5 · centrouniversitarios 3 · municipios 3 · tipopoblacion 5 · tipousuarios 4 · etapaemprendimiento 4 · faseplan 4 · sectoreconomico 6 · modalidad 3 · tipo_evento 5 · fecha_y_horarios 2 · modulos 8 |
+| `preguntas_diagnostico` | **22** en 5 secciones (5 · 4 · 4 · 4 · 5) |
+| Contraseña de las 5 cuentas demo | `crypt('Demo1234', password)` devuelve `true` en todas |
+| Expediente de demo | `EMP-001` aprobado · acta `Aprobada` · asignación `activa` de 4 h/semana |
+| Integridad referencial (5 uniones) | 0 filas huérfanas |
+| Índices clave | `asignaciones_una_activa_por_emprendimiento`, `usuarios_correo_institucional_key`, `usuarios_numero_documento_key` presentes |
+| Rechazo sin motivo (`emprendimiento`) | Rechazado por `emprendimiento_rechazo_con_motivo` |
+| Segunda asignación activa al mismo emprendimiento | Rechazada por el índice único parcial |
+| `GET /api/health` tras recrear la base | `200` con `db: "up"` |
+| Datos personales | Solo ficticios (`admin.demo@…`, documento `900000001`…); ninguna fuente real |
+
+### Sin verificar / pendiente
+
+- El banco de preguntas es **provisional**: `tipo` y `origen` no tienen valores canónicos
+  (P-9) y el Excel definitivo sigue pendiente (AQ-12).
+- `usuarios.codigo` queda sin `UNIQUE` a propósito (P-10); la unicidad se decidirá con la
+  Coordinadora y, mientras tanto, la valida el servicio en la Etapa 4.
+- Los `CHECK` de `valoracion.dimension`, `auditoria_eventos.accion`, `habilitaciones.estado`,
+  `usuarios_has_eventos.estado_asistencia`, `recomendaciones_evento.estado` y
+  `preguntas_diagnostico.tipo/origen` **no se crean** hasta tener los valores (P-4, P-8, P-9).
+- El usuario de la base de datos es todavía el superusuario del contenedor; se corrige en la
+  Etapa 12 (§15).
+
+**Puerta:** superada (41 tablas, catálogos completos, 22 preguntas, integridad y restricciones
+comprobadas sobre una base recreada desde cero).

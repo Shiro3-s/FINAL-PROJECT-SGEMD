@@ -118,6 +118,16 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | P-6 | `CodigosVerificacion.Proposito` es nuevo (el master tiene T39 pero ninguna tabla de tokens) | Se implementa con `Verificación` · `Recuperación`, marcado como **inferido** | Nada |
 | P-7 | El diagrama v2 no tiene columna para la **imagen de perfil**, pero el master §13.3 declara `POST /users/:id/avatar` | El endpoint queda **diferido**; no se inventa la columna. Alternativa a decidir: reutilizar `adjuntos` con un tipo de uso | Cerrar el perfil P1 |
 | P-8 | `Habilitaciones.Estado` es `enum` en el diagrama, pero la tabla de enumeraciones no lista sus valores | Columna creada **sin `CHECK`** y tabla vacía; los valores llegan con AQ-07 | Nada (Etapa 3/4) |
+| P-9 | Cuatro columnas son `enum` en el diagrama y **no** tienen lista canónica: `PreguntasDiagnostico.Tipo`, `PreguntasDiagnostico.Origen`, `UsuariosHasEventos.Estado_asistencia` y `RecomendacionesEvento.Estado` | `Tipo` y `Origen` se siembran con valores **provisionales** (`Texto` · `Texto largo` · `Selección única`; `Prototipo`) y quedan sin `CHECK`; las otras dos no tienen `CHECK` y sus tablas permanecen vacías | Nada (Etapa 9 para el banco definitivo) |
+| P-10 | `Usuarios.Codigo` no se declara único en el diagrama y ningún requisito lo exige; el prototipo usa `EMP-###`, `DOC-###` y el código estudiantil | No se crea `UNIQUE`. El servicio de usuarios validará duplicados al crear (Etapa 4) y se confirma con la Coordinadora si debe ser único por rol | Nada |
+
+### 5.4 Inferencias de esta etapa que no son huecos del diagrama
+
+| Elemento | Qué se infirió | Dónde queda |
+|---|---|---|
+| `ConfiguracionPrograma.TipoDato` | El diagrama lo declara `string`; se fijan cuatro valores (`int`, `bool`, `text`, `date`) para tipar el valor en la interfaz | `TIPOS_DATO_CONFIGURACION` en `shared/src/enums.ts`; `CHECK` en el esquema |
+| `Adjuntos.TipoMime` | Lista blanca de MIME del master §15 (JPG/JPEG, PNG, PDF); `jpg` y `jpeg` comparten `image/jpeg` | `TIPOS_MIME_ADJUNTO` en `shared/src/enums.ts` |
+| Motivo obligatorio | `CHECK` en `emprendimiento` (BR-004), `actas` (BR-009), `solicitudes` (bandeja única) y `tareas` (R19b), además de la validación del servicio | `database/schema.sql` |
 
 ---
 

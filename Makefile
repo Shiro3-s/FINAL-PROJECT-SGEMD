@@ -3,7 +3,7 @@
 
 SHELL := /bin/bash
 
-.PHONY: help env up down reset-db logs ps typecheck test build check seed
+.PHONY: help env up down reset-db logs ps typecheck test build check check-schema seed
 
 help:
 	@echo "make env        copia .env.example a .env y genera secretos locales"
@@ -11,6 +11,7 @@ help:
 	@echo "make down       detiene la pila"
 	@echo "make reset-db   borra el volumen de PostgreSQL y reinicializa"
 	@echo "make check      comprueba /api/health a través de Caddy"
+	@echo "make check-schema  contrasta schema.sql con el diagrama de clases"
 	@echo "make typecheck  typecheck de los tres workspaces"
 	@echo "make test       pruebas del backend"
 	@echo "make build      compila shared, backend y frontend"
@@ -45,6 +46,9 @@ ps:
 check:
 	@curl -sk --fail https://localhost/api/health && echo "" || \
 		(echo "healthcheck falló: revisa 'make logs' y la CA interna de Caddy"; exit 1)
+
+check-schema:
+	npm run check:schema
 
 typecheck:
 	npm run typecheck

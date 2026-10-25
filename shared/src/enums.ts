@@ -101,6 +101,25 @@ export type NotificacionTipo = (typeof NOTIFICACION_TIPOS)[number];
 export const CODIGO_PROPOSITOS = ['Verificación', 'Recuperación'] as const;
 export type CodigoProposito = (typeof CODIGO_PROPOSITOS)[number];
 
+/**
+ * Allow-list de MIME para adjuntos (master §15: JPG/JPEG, PNG y PDF). `jpg` y `jpeg`
+ * comparten `image/jpeg`; el MIME se verifica por contenido, no por extensión.
+ */
+export const TIPOS_MIME_ADJUNTO = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+] as const;
+export type TipoMimeAdjunto = (typeof TIPOS_MIME_ADJUNTO)[number];
+
+/**
+ * Tipos de dato de `configuracion_programa`. Inferido: el diagrama declara
+ * `TipoDato: string` y no enumera valores; se fijan estos cuatro para poder tipar el
+ * valor en la interfaz de configuración.
+ */
+export const TIPOS_DATO_CONFIGURACION = ['int', 'bool', 'text', 'date'] as const;
+export type TipoDatoConfiguracion = (typeof TIPOS_DATO_CONFIGURACION)[number];
+
 /** Roles del catálogo `roles`. El 4 (Auditor) es P2. */
 export const ROLES = {
   ADMIN: 1,
