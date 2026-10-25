@@ -246,7 +246,7 @@ token).
 ## Etapa 4 — Usuarios, roles y ciclo de vida
 
 - **Fecha:** 2026-10-25
-- **Commit:** _pendiente de commitear al cerrar la entrada_
+- **Commit:** `267919e`
 
 ### Hecho
 
