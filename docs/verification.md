@@ -113,7 +113,7 @@
 ## Etapa 2 — Esquema y datos iniciales
 
 - **Fecha:** 2026-10-25
-- **Commit:** _pendiente de commitear al cerrar la entrada_
+- **Commit:** `a95b6cd`
 
 ### Hecho
 
