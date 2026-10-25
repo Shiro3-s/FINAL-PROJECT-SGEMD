@@ -319,3 +319,83 @@ token).
 
 **Puerta:** superada (T06 y T13 en verde; un estudiante no puede cambiar su propio estado
 ni su rol; la auditoría guarda el valor anterior y el nuevo).
+
+---
+
+## Etapa 5 — Catálogos, emprendimientos y solicitudes
+
+- **Fecha:** 2026-10-25
+- **Commit:** `26f3442`
+
+### Hecho
+
+- `modules/catalogs`: los 14 catálogos de solo lectura. `GET /type-doc` es público (lo
+  necesita el registro); el resto exige sesión y ninguno exige cuenta `Activo`, porque
+  alimentan la edición del propio perfil de una cuenta `Limitado`. `municipalities` y
+  `date-times` devuelven la etiqueta compuesta que la interfaz necesita.
+- `modules/entrepreneurship`: listado con alcance por rol, detalle, alta administrativa,
+  edición con campos por rol, baja lógica, aprobación y rechazo con motivo.
+- `modules/requests`: bandeja única de R38 (Desbloqueo, Paralelo, Cita) con contador de
+  pendientes por tipo, aprobación que aplica el efecto de dominio una sola vez y rechazo
+  con motivo.
+- `services/accountLifecycle.ts`: `applyAccountTransition` extraído de `modules/users` para
+  que el cambio de estado de la cuenta y la aprobación de un desbloqueo sean el mismo
+  camino, con el mismo `SELECT … FOR UPDATE`, la misma auditoría y la misma notificación.
+- `services/catalogs.ts`: `assertCatalogIds` compartido por usuarios y emprendimientos
+  (tabla y columna son constantes del código, nunca datos de la petición).
+- `services/programSettings.ts`: lector de `configuracion_programa` (`etapa_inicial`,
+  `paralelos_maximos`) con valor de respaldo si la clave falta o está corrupta.
+- `services/codes.ts`: `EMP-###` con el mismo `nextSequential` de `DOC-###`/`ADM-###`;
+  `pg_advisory_xact_lock` serializa las altas simultáneas.
+- `utils/params.ts`: `parseId` compartido; un `:id` no numérico es `400`, no un `404`
+  ambiguo.
+- Acciones de auditoría nuevas: `Alta`, `Edición`, `Baja lógica`, `Aprobación` y `Rechazo
+  de emprendimiento`; `Solicitud creada`, `Solicitud aprobada` y `Solicitud rechazada`.
+- `tests/api.ts`: helpers de sesión compartidos (`loginSession` reenvía la cookie `Secure`
+  de forma explícita); `users.test.ts` migrado a ellos.
+- `docs/api.md`: secciones de catálogos, emprendimientos y solicitudes, códigos de error
+  nuevos y `pageSize` por defecto 25 (master §13.3).
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 6 archivos) | **95 pruebas en verde** (65 de las etapas 3–4 + 6 de catálogos + 10 de emprendimientos + 14 de solicitudes) |
+| Catálogos | `/type-doc` público con CC, CE, TI; los otros 13 responden `401 AUTH_REQUIRED` sin sesión y `200` con sesión; una cuenta `Limitado` los lee; no hay rutas de escritura (`404`); `municipalities` y `date-times` devuelven sus campos compuestos |
+| T11 · alta y aprobación | El administrador crea en `Pendiente` con `avance = 0`, `EMP-###` y la etapa inicial de la configuración; auditoría `{Pendiente} → {Aprobado}` con el actor; notificación al estudiante; docente y estudiante reciben `403`; aprobar dos veces o aprobar un rechazado da `422 INVALID_APPROVAL_STATE` |
+| T11 · paralelos | Primer emprendimiento con `esParalelo` → `422 NOT_A_PARALLEL`; segundo sin autorización → `422 PARALLEL_REQUIRED`; con autorización → `201`; tercero → `422 PARALLEL_LIMIT_REACHED` (`paralelos_maximos = 1`); un `Rechazado` no ocupa cupo |
+| T12 · rechazo | Sin motivo o con espacios → `400` con `fields.motivo`; con motivo → `200`, `motivo_rechazo` persistido, auditoría con el motivo y notificación que lo incluye |
+| Edición y alcance | El estudiante propietario cambia nombre, descripción y redes; sector/etapa/sede → `403 FIELD_NOT_ALLOWED`; el propietario, el estado, el motivo, el paralelo, el avance y el código se rechazan con `400`; un emprendimiento ajeno responde `404`; el docente solo ve los asignados; `Limitado` → `403 ACCOUNT_NOT_ACTIVE` |
+| T36 · desbloqueo | Una cuenta `Limitado` y otra `Inactivo` piden el desbloqueo (`201`) y la aprobación las deja `Activo` con auditoría `{Limitado} → {Activo}` y notificación `Solicitud`; una cuenta `Activo` recibe `422 ACCOUNT_ALREADY_ACTIVE`; la segunda aprobación da `422 REQUEST_ALREADY_RESOLVED` sin reescribir la auditoría |
+| T36 · paralelo y cita | La aprobación de un paralelo pone `es_paralelo = TRUE` una sola vez; una cita se resuelve sin efecto de dominio (`efecto: null`); sin emprendimiento, ajeno o no aprobado → `400`/`422 ENTREPRENEURSHIP_NOT_APPROVED`; un docente no puede pedirlos (`403`) |
+| T36 · rechazo y bandeja | Rechazar exige motivo, lo persiste, notifica y no toca la cuenta ni el emprendimiento; el contador `pendientes` desglosa por tipo sobre toda la bandeja; el filtro por tipo no lo altera; estudiante y docente reciben `403 ROLE_NOT_ALLOWED` en toda la bandeja; `:id` no numérico `400`, inexistente `404`, filtro/orden/`pageSize` fuera de rango `400` |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Pila recreada desde cero (`down -v` + `up --build`): los 14 catálogos `200`; alta de estudiante y de emprendimiento `201` (`Pendiente`, `avance 0`, etapa inicial); aprobación `200` y doble aprobación `422`; `PARALLEL_REQUIRED`, `PARALLEL_LIMIT_REACHED` y `NOT_A_PARALLEL` según el caso; `FIELD_NOT_ALLOWED` al editar el sector como estudiante; rechazo sin motivo `400` y con motivo `200`; desbloqueo de una cuenta `Limitado` aprobado `200` (cuenta `Activo`, doble aprobación `422`, desbloqueo de una cuenta ya activa `422`); paralelo aprobado deja `esParalelo = true`; cita aprobada sin efecto; bandeja `403` para estudiante; auditorías, notificaciones y correos escritos |
+
+### Decisiones y huecos registrados
+
+- P-19: aprobar una `Cita` no crea la asesoría (faltan columnas y el bloque de agenda); el
+  efecto de dominio llega con el módulo de asesorías (Etapa 8).
+- P-20: `solicitudes` solo tiene `detalle`; «nuevo emprendimiento», «sector», «docente
+  sugerido» y «fecha propuesta» viajan en ese texto libre.
+- Discrepancias #31 (el «Tipo» del prototipo no tiene columna ni catálogo), #32 (el
+  prototipo edita `avance`; aquí se deriva de las tareas) y #33 («Docente asignado»
+  pertenece a `asignaciones`, Etapa 6).
+- §5.6: alta administrativa, autorización de paralelo, tope, edición por rol, alcance de
+  lectura, aprobación/rechazo, catálogos, política de la bandeja, resolución única,
+  `pageSize` 25 y aviso a la coordinación.
+
+### Sin verificar / pendiente
+
+- El borrado físico de adjuntos al dar de baja un emprendimiento (BR-006) espera al módulo
+  de adjuntos (Etapa 7).
+- La asignación de docente, los topes por docente y el acta previa son de la Etapa 6.
+- `avance` se calculará con las tareas completadas (R21, Etapa 7); hoy se crea en 0 y no se
+  edita.
+- El «Tipo» de emprendimiento del prototipo (#31) queda a la espera de la Coordinadora: no
+  se creó columna ni catálogo.
+
+**Puerta:** superada (T11, T12 y T36 en verde; un emprendimiento solo se aprueba desde
+`Pendiente`; el paralelo exige autorización y respeta el tope; una solicitud se resuelve
+una sola vez y siempre notifica).
