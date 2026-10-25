@@ -3,7 +3,7 @@
 
 SHELL := /bin/bash
 
-.PHONY: help env up down reset-db logs ps typecheck test build check check-schema seed
+.PHONY: help env up down reset-db logs ps typecheck test test-db test-db-down build check check-schema seed
 
 help:
 	@echo "make env        copia .env.example a .env y genera secretos locales"
@@ -13,7 +13,9 @@ help:
 	@echo "make check      comprueba /api/health a través de Caddy"
 	@echo "make check-schema  contrasta schema.sql con el diagrama de clases"
 	@echo "make typecheck  typecheck de los tres workspaces"
-	@echo "make test       pruebas del backend"
+	@echo "make test-db    levanta la base desechable de las pruebas (127.0.0.1:55432)"
+	@echo "make test       pruebas del backend (requiere 'make test-db')"
+	@echo "make test-db-down  apaga y borra la base de pruebas"
 	@echo "make build      compila shared, backend y frontend"
 
 env:
@@ -55,6 +57,12 @@ typecheck:
 
 test:
 	npm run test
+
+test-db:
+	docker compose -p sgemd-test -f docker-compose.test.yml up -d --wait postgres
+
+test-db-down:
+	docker compose -p sgemd-test -f docker-compose.test.yml down -v
 
 build:
 	npm run build

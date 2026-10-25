@@ -11,7 +11,8 @@ describe('GET /api/health', () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.status).toBe('ok');
-    expect(response.body.data.db).toBe('down');
+    // La suite corre contra el PostgreSQL real de `docker-compose.test.yml`.
+    expect(response.body.data.db).toBe('up');
     expect(Object.keys(response.body.data).sort()).toEqual(['db', 'status', 'uptimeSeconds']);
   });
 });

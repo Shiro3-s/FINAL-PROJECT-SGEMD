@@ -167,3 +167,76 @@
 
 **Puerta:** superada (41 tablas, catálogos completos, 22 preguntas, integridad y restricciones
 comprobadas sobre una base recreada desde cero).
+
+---
+
+## Etapa 3 — Autenticación
+
+- **Fecha:** 2026-10-25
+- **Commit:** _pendiente de commitear al cerrar la entrada_
+
+### Hecho
+
+- `modules/auth`: registro, verificación de correo, reenvío de código, inicio y cierre de
+  sesión, solicitud y consumo del código de recuperación. OTP de 8 dígitos guardado como
+  HMAC-SHA256 ligado a `correo:proposito:codigo` (D20, D23), TTL 5 min, un solo uso,
+  máximo 5 intentos y cooldown de reenvío.
+- Sesión: JWT HS256 con **solo** `{ id, role }` y 8 h, en la cookie `sgemd_session`
+  (`HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`). El cuerpo del login lleva el
+  usuario, nunca el token.
+- Middleware: `requireAuth` (relee la fila en cada petición y toma el rol de ella),
+  `requireRole`, `requireActiveAccount` (`403 ACCOUNT_NOT_ACTIVE`), `originCheck`
+  (mutaciones del mismo origen), `rateLimit` (memoria, por IP) y `validateBody` (zod
+  `.strict()`).
+- Adaptador de correo con tres transportes: `file` (dev y pruebas, escribe `.eml`),
+  `relay` y `oauth2` (XOAUTH2). Solo `file` se ejercita; los otros dos fallan al arrancar
+  si faltan las credenciales de TI (D14).
+- `GET /api/users/me` y `GET /api/diagnosis/form`. Este último se adelanta **solo** porque
+  T03 exige un endpoint restringido real; el módulo de diagnóstico completo es la Etapa 9.
+- `policy/accountState.ts` aísla AQ-07: `Limitado` puede ver perfil; los módulos de trabajo
+  exigen `Activo`.
+- Auditoría en la misma transacción que el cambio (`auditoria_eventos`), sin contraseñas ni
+  códigos.
+- `docs/api.md` con el contrato de los nueve endpoints y la tabla de códigos de error.
+- Banco de pruebas: `docker-compose.test.yml` (proyecto `sgemd-test`, `127.0.0.1:55432`) y
+  `globalSetup` que recrea el esquema desde `schema.sql` + `seed.sql` en cada ejecución.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 2 archivos) | **36 pruebas en verde** |
+| T01 · registro | Cuenta `Limitado` sin verificar, rol 2, bcrypt `$2b$10$`; OTP de 8 dígitos en el correo, HMAC de 64 hex en la fila, vigencia ≈5 min, `usado=false`, `intentos=0`; transporte de correo invocado |
+| T01 · duplicados y validación | `409 EMAIL_TAKEN`, `409 DOCUMENT_TAKEN`, `400 EMAIL_DOMAIN_NOT_ALLOWED`, casilla obligatoria y campos desconocidos (`roles_id_roles`, `estado`, `verificado`) rechazados con `400` |
+| T01 · OTP | Correcto verifica; incorrecto, vencido y reutilizado dan `422 OTP_INVALID`; al quinto fallo `429 OTP_ATTEMPTS_EXCEEDED` y el código correcto ya no sirve; cooldown `429 OTP_COOLDOWN` con `Retry-After` y reenvío permitido al pasar |
+| T01 · no filtración | El OTP y la contraseña no aparecen en el cuerpo de registro, verificación, reenvío ni recuperación |
+| T02 · login | Contraseña incorrecta y correo inexistente → `401 INVALID_CREDENTIALS` sin cookie; cuenta sin verificar → `403 EMAIL_NOT_VERIFIED`; éxito con las cuatro banderas y `Max-Age=28800`; cuerpo `{ usuario }` sin token ni hash; JWT con exactamente `{exp, iat, id, role}` y `exp - iat = 28800` |
+| T03 · cuenta `Limitado` | `GET /diagnosis/form` → `403 ACCOUNT_NOT_ACTIVE` con el motivo; `GET /users/me` → `200`; una cuenta `Activo` obtiene las 22 preguntas |
+| T04 · sesión | Sin cookie `401 AUTH_REQUIRED`; firma alterada y token de otro secreto `401 AUTH_INVALID`; baja lógica invalida la cookie vigente en la petición siguiente; `Inactivo` pasa a `403` en la petición siguiente; el rol se toma de la fila (cambio 2→3 visible sin renovar token); logout devuelve `Expires=Thu, 01 Jan 1970`; `Origin` ajeno `403 ORIGIN_NOT_ALLOWED` |
+| T39 · recuperación | El código válido cambia la contraseña una vez, la anterior deja de servir y la nueva entra; el código usado y el vencido dan `422`; la contraseña no cambió tras el fallo; correo desconocido responde `200` sin enviar nada |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Login `200` con `Set-Cookie: sgemd_session=…; Max-Age=28800; Path=/; HttpOnly; Secure; SameSite=Strict`; `GET /users/me` `200`; `GET /diagnosis/form` `200` con 22 preguntas para `Activo` y `403 ACCOUNT_NOT_ACTIVE` para `Limitado`; logout limpia la cookie; `Origin` ajeno `403`; un registro real deja el `.eml` con el OTP en el volumen `storage/mail` |
+
+### Defecto encontrado y corregido
+
+El contador de intentos del OTP se incrementaba dentro de la transacción y el `throw`
+posterior provocaba `ROLLBACK`: el límite de 5 intentos **nunca se alcanzaba**. T05 lo
+detectó. Ahora `consumeOtp` devuelve el resultado y el error se lanza **después** del
+`COMMIT`, de modo que el incremento (y el quemado del código) queda guardado.
+
+### Sin verificar / pendiente
+
+- Los transportes `relay` y `oauth2` no se ejercitan: faltan credenciales de TI (D14).
+- El cooldown de reenvío (60 s, P-11) y los umbrales de rate limit (P-12) son valores
+  iniciales, no requisitos confirmados.
+- El consentimiento de tratamiento de datos se exige pero **no se persiste** (P-14); no hay
+  columna en el diagrama.
+- `POST /auth/register` acepta 6 campos + casilla: el prototipo pide además correo personal,
+  celular y teléfono fijo, que el diagrama no tiene (#26).
+- El cierre de sesión limpia la cookie pero no revoca el JWT en el servidor (es
+  autocontenido y expira a las 8 h), tal como pide el master.
+
+**Puerta:** superada (T01–T05 y T39 en verde; el OTP no aparece en ninguna respuesta; el
+código vencido se rechaza; la cookie se emite con las cuatro banderas y el cuerpo no lleva
+token).

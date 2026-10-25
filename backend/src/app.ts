@@ -3,11 +3,14 @@ import express from 'express';
 import helmet from 'helmet';
 import { errorHandler, notFound } from './middleware/error.js';
 import { originCheck } from './middleware/originCheck.js';
+import { authRouter } from './modules/auth/routes.js';
+import { diagnosisRouter } from './modules/diagnosis/routes.js';
 import { healthRouter } from './modules/health/routes.js';
+import { usersRouter } from './modules/users/routes.js';
 
 /**
- * Aplicación Express. En esta etapa solo expone `GET /api/health`: cero endpoints de
- * negocio hasta que la Etapa 2 cree el esquema.
+ * Aplicación Express. Los routers se montan bajo `/api`; cada módulo decide su
+ * autenticación y su autorización en el servicio, no en el cliente.
  */
 export function createApp(): express.Express {
   const app = express();
@@ -23,6 +26,9 @@ export function createApp(): express.Express {
   app.use(originCheck);
 
   app.use('/api', healthRouter);
+  app.use('/api', authRouter);
+  app.use('/api', usersRouter);
+  app.use('/api', diagnosisRouter);
 
   app.use(notFound);
   app.use(errorHandler);

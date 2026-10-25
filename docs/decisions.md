@@ -120,6 +120,10 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | P-8 | `Habilitaciones.Estado` es `enum` en el diagrama, pero la tabla de enumeraciones no lista sus valores | Columna creada **sin `CHECK`** y tabla vacía; los valores llegan con AQ-07 | Nada (Etapa 3/4) |
 | P-9 | Cuatro columnas son `enum` en el diagrama y **no** tienen lista canónica: `PreguntasDiagnostico.Tipo`, `PreguntasDiagnostico.Origen`, `UsuariosHasEventos.Estado_asistencia` y `RecomendacionesEvento.Estado` | `Tipo` y `Origen` se siembran con valores **provisionales** (`Texto` · `Texto largo` · `Selección única`; `Prototipo`) y quedan sin `CHECK`; las otras dos no tienen `CHECK` y sus tablas permanecen vacías | Nada (Etapa 9 para el banco definitivo) |
 | P-10 | `Usuarios.Codigo` no se declara único en el diagrama y ningún requisito lo exige; el prototipo usa `EMP-###`, `DOC-###` y el código estudiantil | No se crea `UNIQUE`. El servicio de usuarios validará duplicados al crear (Etapa 4) y se confirma con la Coordinadora si debe ser único por rol | Nada |
+| P-11 | El master §15 exige **cooldown de reenvío** del OTP pero no fija los segundos | **60 s**, configurable con `OTP_RESEND_COOLDOWN_SECONDS`; antes responde `429 OTP_COOLDOWN` con `Retry-After` | Nada (valor de producto a confirmar) |
+| P-12 | El master §15 exige límites en login, registro, OTP y recuperación, pero **no fija umbrales** | Valores iniciales por IP en `src/modules/auth/routes.ts` (registro 10/h, login 10/min por IP+correo, verificación 15/min, reenvío/recuperación 10/h). Se revisan con el uso real | Nada (ajustable en código) |
+| P-13 | `CodigosVerificacion` no tiene columna de **fecha de creación**, así que no se puede medir el cooldown directamente | Se deriva de `expiracion - vigencia` (5 min): `creado ≈ expiracion - 5 min`. Si se confirma el hueco, se añade `fecha_creacion` en la Etapa 12 | Nada |
+| P-14 | El prototipo exige la casilla de **autorización de tratamiento de datos**, pero el diagrama no tiene columna para el consentimiento ni su fecha | Se valida como obligatoria (`aceptaTratamiento: true`) y **no se persiste**. Se propone `usuarios.fecha_consentimiento` para la Etapa 12, previa confirmación | Nada (cumplimiento Ley 1581 a revisar) |
 
 ### 5.4 Inferencias de esta etapa que no son huecos del diagrama
 
@@ -180,6 +184,7 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | 23 | `DESIGN.md` línea 53 incluye "Seguimiento" en el sidebar docente; no existe `docente/seguimiento.html` entre las 73 pantallas | **Mandan las pantallas**: el módulo docente es "Registrar avance" + columna Evidencia |
 | 24 | El prototipo carga Inter desde Google Fonts (`lib_ui.py`); D21 exige autoalojarla | Misma tipografía, distinto medio de entrega; se autoaloja con `@fontsource/inter` |
 | 25 | `docs/diagrama-clases.md` v2 dice "si este documento y el master discrepan, manda el master"; la instrucción del propietario para este build es lo contrario en tablas | Se aplica la instrucción del propietario (tablas = diagrama) y se registra aquí. Toda diferencia restante se resuelve caso por caso en las tablas #18–#19 |
+| 26 | El prototipo (`compartido/registro.html`) y AQ-06 hablan de **7 campos + casilla**: nombres, apellidos, tipo y número de documento, **correo personal**, correo institucional, **celular** (obligatorios) y **teléfono fijo** (opcional). El diagrama v2 no tiene columnas para correo personal, celular ni teléfono fijo | **Manda el diagrama**: `POST /auth/register` acepta 6 campos (los cinco primeros más la contraseña) + la casilla. Los tres datos de contacto que no existen no se inventan ni se piden; si la Coordinadora los necesita, se añaden columnas en una etapa posterior y se actualiza AQ-06 |
 
 ---
 

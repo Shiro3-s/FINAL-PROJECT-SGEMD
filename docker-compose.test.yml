@@ -1,0 +1,32 @@
+# Solo para pruebas de integración (`make test-db`).
+#
+# La pila principal NO publica el puerto de PostgreSQL (puerta de la Etapa 1). Este
+# archivo crea una base desechable en un proyecto Compose aparte (`sgemd-test`) y la
+# expone **solo en loopback** para que vitest pueda recrearla desde `schema.sql` y
+# `seed.sql` en cada ejecución.
+#
+# Uso:
+#   docker compose -p sgemd-test -f docker-compose.test.yml up -d --wait postgres
+#   docker compose -p sgemd-test -f docker-compose.test.yml down -v
+
+name: sgemd-test
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: sgemd_test
+      POSTGRES_USER: sgemd
+      POSTGRES_PASSWORD: test
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - pgdata_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sgemd -d sgemd_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pgdata_test:

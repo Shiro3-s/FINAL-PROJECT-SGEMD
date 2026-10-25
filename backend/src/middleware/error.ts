@@ -22,6 +22,9 @@ export function errorHandler(
   }
 
   if (error instanceof AppError) {
+    if (error.retryAfter !== undefined) {
+      res.setHeader('Retry-After', String(error.retryAfter));
+    }
     res.status(error.status).json({
       success: false,
       error: {
