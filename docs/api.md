@@ -1,6 +1,6 @@
 # API — SGEMD
 
-Contrato de la API HTTP del MVP. Se amplía en cada etapa; las etapas 1–5 están
+Contrato de la API HTTP del MVP. Se amplía en cada etapa; las etapas 1–6 están
 implementadas y probadas.
 
 - **Prefijo:** todo cuelga de `/api` en el mismo origen que la SPA (sin CORS).
@@ -60,6 +60,7 @@ stack, una ruta interna ni un valor de configuración.
 | 404 | `NOT_FOUND` | Recurso inexistente **o fuera de alcance** (un estudiante pidiendo el id de otro) |
 | 409 | `EMAIL_TAKEN` | Correo institucional ya registrado |
 | 409 | `DOCUMENT_TAKEN` | Número de documento ya registrado |
+| 409 | `ASSIGNMENT_ALREADY_ACTIVE` | El emprendimiento ya tiene una asignación `activa` (R11) |
 | 422 | `OTP_INVALID` | Código incorrecto, vencido, ya usado o inexistente |
 | 422 | `INVALID_STATE_TRANSITION` | Transición de cuenta no permitida (BR-003, R34) |
 | 422 | `SELF_STATE_CHANGE_NOT_ALLOWED` | El administrador intenta cambiar el estado de su propia cuenta |
@@ -69,6 +70,11 @@ stack, una ruta interna ni un valor de configuración.
 | 422 | `PARALLEL_LIMIT_REACHED` | Se alcanzó `paralelos_maximos` (D5) |
 | 422 | `NOT_A_PARALLEL` | El primer emprendimiento del estudiante no puede ser paralelo |
 | 422 | `INITIAL_STAGE_NOT_CONFIGURED` | `etapa_inicial` falta en `configuracion_programa` o no existe en el catálogo |
+| 422 | `ACTA_NOT_APPROVED` | El emprendimiento no tiene un acta de compromiso `Aprobada` (BR-001) |
+| 422 | `ASSIGNMENT_NOT_ACTIVE` | Se intenta editar o dar de baja una asignación que ya está `inactiva` |
+| 422 | `MENTOR_NOT_ACTIVE` | El docente destinatario no tiene la cuenta `Activo` |
+| 422 | `TEACHER_HOURS_LIMIT_REACHED` | La asignación supera `carga_max_horas` (FR-016, R35) |
+| 422 | `TEACHER_ENTREPRENEURSHIP_LIMIT_REACHED` | La asignación supera `max_emprendimientos_docente` (FR-016, R35) |
 | 422 | `ACCOUNT_ALREADY_ACTIVE` | Una cuenta `Activo` pide su propio desbloqueo |
 | 422 | `ENTREPRENEURSHIP_NOT_APPROVED` | Se pide un paralelo sobre un emprendimiento que no está `Aprobado` |
 | 422 | `REQUEST_ALREADY_RESOLVED` | La solicitud ya fue aprobada o rechazada |
@@ -566,6 +572,120 @@ Sin cuerpo. `200` con `estadoAprobacion: "Aprobado"`. Solo desde `Pendiente`
 
 `200` con `{ "success": true, "message": "Emprendimiento dado de baja." }`. La fila queda
 con `fecha_eliminacion` y desaparece de listados y detalles.
+
+## Asignaciones
+
+Módulo de trabajo: todas las rutas exigen sesión **y** cuenta `Activo`. Solo el
+administrador escribe (R9); la lectura se filtra por rol (R10).
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/assignments` | Admin, Docente, Estudiante | Admin todas; docente las suyas; estudiante las suyas |
+| `GET /api/assignments/mentor/:id` | Admin, Docente | El docente solo puede consultar su propio id (otro → `404`); un estudiante → `403` |
+| `GET /api/assignments/student/:id` | Admin, Docente, Estudiante | El estudiante solo el propio; un docente, solo estudiantes con los que tenga alguna asignación |
+| `GET /api/assignments/:id` | Admin, Docente, Estudiante | Fuera de alcance: `404` |
+| `POST /api/assignments` | Admin | Exige acta `Aprobada` y respeta los dos topes docentes |
+| `PUT /api/assignments/:id` | Admin | Reasigna el mentor y/o ajusta las horas |
+| `DELETE /api/assignments/:id` | Admin | Baja lógica: `estado = 'inactiva'` |
+
+Forma de una asignación:
+
+```json
+{
+  "id": 1,
+  "fechaAsignacion": "2026-10-22T15:04:05.000Z",
+  "estado": "activa",
+  "horasSemanales": 4,
+  "mentor": {
+    "id": 2,
+    "codigo": "DOC-001",
+    "nombres": "Carlos",
+    "apellidos": "Mendoza",
+    "correoInstitucional": "carlos.mendoza@uniminuto.edu.co"
+  },
+  "estudiante": {
+    "id": 4,
+    "codigo": "100001",
+    "nombres": "Estudiante",
+    "apellidos": "Demo Uno",
+    "correoInstitucional": "estudiante.demo1@uniminuto.edu.co"
+  },
+  "emprendimiento": {
+    "id": 1,
+    "codigo": "EMP-001",
+    "nombre": "Sabor y Sabe",
+    "estadoAprobacion": "Aprobado"
+  }
+}
+```
+
+### `GET /api/assignments`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `q` | texto ≤ 100 | — | Nombre, apellido, código o correo del estudiante; nombre o código del emprendimiento; nombre del docente (`ILIKE`) |
+| `estado` | `activa` · `inactiva` | — | |
+| `mentorId` | entero > 0 | — | |
+| `estudianteId` | entero > 0 | — | |
+| `emprendimientoId` | entero > 0 | — | |
+| `sort` | `fecha` · `mentor` · `estudiante` · `emprendimiento` · `horas` | `fecha` | Lista blanca: otra columna da `400` |
+| `order` | `asc` · `desc` | `desc` | |
+
+`200`: `{ items, total, page, pageSize }`. Cualquier otro parámetro produce `400`.
+
+### `POST /api/assignments`
+
+```json
+{
+  "mentorId": 2,
+  "emprendimientoId": 1,
+  "horasSemanales": 4
+}
+```
+
+- `estudianteId` **no** se envía: se deriva del propietario del emprendimiento.
+  Enviarlo produce `400` (`.strict()`).
+- `mentorId` debe existir, estar vigente y tener rol Docente (`400`); además debe estar
+  `Activo` (`422 MENTOR_NOT_ACTIVE`).
+- `emprendimientoId` debe existir y estar vigente (`400`).
+- El emprendimiento debe tener al menos un acta `Aprobada` (`422 ACTA_NOT_APPROVED`,
+  BR-001). No existe bandera para omitir esta comprobación.
+- Si ya hay una asignación `activa` para ese emprendimiento: `409
+  ASSIGNMENT_ALREADY_ACTIVE` (R11).
+- Topes, sobre las asignaciones activas del mentor:
+  - `SUM(horas_semanales) + horasSemanales ≤ carga_max_horas` → si no,
+    `422 TEACHER_HOURS_LIMIT_REACHED` con `fields.horasSemanales`;
+  - `COUNT(DISTINCT emprendimiento) + 1 ≤ max_emprendimientos_docente` → si no,
+    `422 TEACHER_ENTREPRENEURSHIP_LIMIT_REACHED` con `fields.mentorId`.
+  Ambos valores se leen de `configuracion_programa` y se comprueban dentro de la
+  transacción, bajo un lock por mentor.
+- `horasSemanales` es un entero de 1 a 20 (rango del formulario del prototipo).
+
+`201` con la asignación creada. Audita `Alta de asignación` y notifica al docente y al
+estudiante en la misma transacción.
+
+### `PUT /api/assignments/:id`
+
+```json
+{ "mentorId": 3, "horasSemanales": 6 }
+```
+
+Ambos campos son opcionales, pero debe llegar al menos uno (`.strict()`). Solo se edita
+una asignación `activa` (`422 ASSIGNMENT_NOT_ACTIVE`). Si cambia el mentor se revalidan
+los dos topes del destino y el acta del emprendimiento; el docente anterior libera su
+carga. `estudianteId`, `emprendimientoId`, `estado`, `codigo` y `fechaAsignacion` no se
+aceptan (`400`).
+
+`200` con la asignación actualizada. Audita `Edición de asignación`.
+
+### `DELETE /api/assignments/:id`
+
+`200` con `{ "success": true, "message": "Asignación dada de baja." }`. La fila queda
+`estado = 'inactiva'` (la tabla no tiene `fecha_eliminacion`), libera el cupo del
+emprendimiento y la carga del docente. Una segunda baja responde `422
+ASSIGNMENT_NOT_ACTIVE`; para volver a vincular se crea una asignación nueva.
 
 ## Solicitudes
 

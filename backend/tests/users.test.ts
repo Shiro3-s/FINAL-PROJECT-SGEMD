@@ -159,9 +159,14 @@ describe('T06 · alta de cuentas por el administrador', () => {
 
     expect(primero.response.status).toBe(201);
     expect(primero.response.body.data.rol.id).toBe(3);
-    // El seed trae DOC-001 y DOC-002.
-    expect(primero.response.body.data.codigo).toBe('DOC-003');
-    expect(segundo.response.body.data.codigo).toBe('DOC-004');
+
+    // El código es secuencial, pero el valor absoluto depende de cuántos docentes haya
+    // creado la suite antes: se comprueba el formato y el incremento, no un número fijo.
+    const firstCode = primero.response.body.data.codigo as string;
+    const secondCode = segundo.response.body.data.codigo as string;
+    expect(firstCode).toMatch(/^DOC-\d{3}$/);
+    expect(secondCode).toMatch(/^DOC-\d{3}$/);
+    expect(Number(secondCode.slice(4))).toBe(Number(firstCode.slice(4)) + 1);
   });
 
   it('rechaza un correo institucional repetido con 409', async () => {

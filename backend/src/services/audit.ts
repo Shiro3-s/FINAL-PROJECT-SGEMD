@@ -40,6 +40,9 @@ export const AUDIT_ACTIONS = {
   CREATE_REQUEST: 'Solicitud creada',
   APPROVE_REQUEST: 'Solicitud aprobada',
   REJECT_REQUEST: 'Solicitud rechazada',
+  CREATE_ASSIGNMENT: 'Alta de asignación',
+  UPDATE_ASSIGNMENT: 'Edición de asignación',
+  DEACTIVATE_ASSIGNMENT: 'Baja de asignación',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {
