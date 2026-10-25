@@ -402,6 +402,16 @@ python _reconciliar.py
 
 ## 9. Validación automática
 
+> **Nota de verificación (2026-10-25):** los scripts de auditoría que cita esta
+> sección —`_estructura.py`, `_auditar.py`, `_check_firmas.py`,
+> `_check_tipografia.py`, `_check_pct.py`, `_responsive.py`, `_interaccion.py`,
+> `_accesos.py`, `_normalizar_tipografia.py`, `_analisis_controles.py`,
+> `_analisis_inline.py` y `_reconciliar.py`— **no están en el repositorio**. Solo
+> se versionan `generar.py`, `verify.py`, `subir.py`, las libs y los parches
+> `fix_*.py` / `add_modal*.py`. Por tanto, **las cifras de auditoría de esta
+> sección no son reproducibles** con lo publicado; se conservan como registro
+> histórico, no como evidencia ejecutable.
+
 El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 73
 pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
 hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una

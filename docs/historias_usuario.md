@@ -29,9 +29,10 @@
 
 ### Proceso: Registro y Aprobación de Emprendimientos
 * **Propósito:** Autorizar la creación de un emprendimiento y controlar la existencia de proyectos paralelos.
-* **Desencadenante:** El estudiante registra un emprendimiento.
-* **Actores Involucrados:** Estudiante y Administrador.
-* **Journey del Usuario:** El estudiante registra el emprendimiento; queda en **Pendiente de aprobación**. El Administrador lo revisa en la **bandeja de solicitudes** y lo aprueba o rechaza con motivo. Si el estudiante ya tiene un proyecto activo, la aprobación se registra como **paralelo autorizado**. El estudiante recibe la notificación.
+* **Desencadenante:** El Administrador crea un emprendimiento para un estudiante.
+* **Actores Involucrados:** Administrador y Estudiante.
+* **Journey del Usuario:** El Administrador registra el emprendimiento; queda en **Pendiente**. Lo revisa en la **bandeja de solicitudes** y lo aprueba o rechaza con motivo. Si el estudiante ya tiene un proyecto activo, la aprobación se registra como **paralelo autorizado**. El estudiante recibe la notificación.
+* **Nota de alcance:** el prototipo **no incluye el alta por el estudiante** (`README.md` §17.4).
 * **Interacciones con el Sistema:** El estado del emprendimiento y la decisión quedan trazables; el rechazo notifica al estudiante.
 
 ### Proceso: Agendamiento y Seguimiento de Asesorías
@@ -118,7 +119,7 @@
 * **Escenario:** Solicitud de cita queda en estado pendiente  
   * **Dado** que un estudiante requiere asesoría  
   * **Cuando** envía su solicitud a través de la plataforma  
-  * **Entonces** esta solicitud queda en estado "Pendiente de aprobación" en el panel de la Coordinadora  
+  * **Entonces** esta solicitud queda en estado "Pendiente" en el panel de la Coordinadora  
 
 * **Escenario:** Prevención de duplicidad mediante propiedades ACID  
   * **Dado** que la Coordinadora intenta cruzar y confirmar una cita en un espacio horario específico  
@@ -197,7 +198,7 @@
 **Para** mantener el control sobre los proyectos activos  
 
 * **Escenario:** Aprobación de un emprendimiento pendiente  
-  * **Dado** un emprendimiento en estado "Pendiente de aprobación"  
+  * **Dado** un emprendimiento en estado "Pendiente"  
   * **Cuando** lo apruebo desde la bandeja de solicitudes  
   * **Entonces** cambia a "Aprobado" y el estudiante recibe la notificación  
 * **Escenario:** Rechazo con motivo  
@@ -276,10 +277,15 @@
   * **Dado** un formulario de alta de usuario  
   * **Cuando** ingreso un documento o correo ya registrado  
   * **Entonces** el sistema muestra el error en el campo y no guarda  
-* **Escenario:** Tope de carga docente  
-  * **Dado** un docente con la carga máxima configurada  
-  * **Cuando** intento asignarle un nuevo emprendimiento  
-  * **Entonces** el sistema advierte que se supera el tope de 12 horas  
+* **Escenario:** Tope de horas semanales  
+  * **Dado** un docente con **12 horas** semanales ya asignadas  
+  * **Cuando** intento asignarle un nuevo emprendimiento que sume horas  
+  * **Entonces** el sistema advierte que se supera el tope y no confirma  
+* **Escenario:** Tope de emprendimientos  
+  * **Dado** un docente con **12 emprendimientos** asignados  
+  * **Cuando** intento asignarle uno más  
+  * **Entonces** el sistema advierte que se supera el tope y no confirma  
+> Ambos topes son **independientes y configurables** en `admin/configuracion.html` (`carga_max_horas` y `max_emprendimientos_docente`). Superar uno no implica superar el otro.
 
 *Cubre:* FR-016
 
@@ -474,7 +480,7 @@
 2. **Validación Administrativa:** El Administrador recibe al estudiante, realiza la reunión de socialización y **desbloquea** el perfil (Limitado → Activo). El cambio es exclusivo del Administrador.
 3. **Auto-diagnóstico:** El Estudiante completa el formulario digital de valoración. El sistema calcula inmediatamente las métricas y le brinda el diagnóstico.
 4. **Requisito Legal:** El Estudiante firma el acta de confidencialidad y la registra.
-5. **Alta del Emprendimiento:** El Estudiante registra su emprendimiento. Queda en **Pendiente de aprobación** hasta que el Administrador lo apruebe; un segundo proyecto requiere autorización de **paralelo**.
+5. **Alta del Emprendimiento:** El Administrador crea el emprendimiento y lo deja en **Pendiente** hasta aprobarlo; un segundo proyecto requiere autorización de **paralelo**. *(El prototipo no incluye el alta por el estudiante; se documenta como pendiente en `README.md` §17.4.)*
 6. **Emparejamiento:** El Administrador asigna el proyecto al Docente correspondiente desde Asignaciones.
 7. **Seguimiento Continuo:** Cuando el estudiante necesita asesoría, **solicita** la cita o el Administrador la crea y asigna directamente. El Docente **acepta o propone otra fecha**. El sistema notifica a ambas partes vía notificaciones In-App.
 8. **Evidencias:** El Estudiante adjunta archivos a sus tareas; el sistema exige al menos una evidencia para habilitar **Marcar como completada**.
@@ -484,9 +490,9 @@
 * **Caso Límite 1: Solicitud de Cita sin Avances.** El estudiante pide mentoría sin completar trazabilidad reciente. El sistema permite la solicitud pero la resalta visualmente en color rojo para el docente.
 * **Caso Límite 2: Caída del Servidor.** El sistema web sufre una interrupción. El Administrador utiliza el archivo CSV/Excel de contingencia descargado previamente para continuar operaciones de forma manual temporalmente.
 * **Caso Límite 3: Cambio de Asesor.** El proyecto evoluciona y cambia de tutor. El nuevo docente ingresa y ve el Expediente Central intacto, ya que los datos están vinculados al proyecto y no al usuario docente.
-* **Caso Límite 4: Estudiante con dos emprendimientos.** El segundo registro no sobrescribe al primero; queda en **Pendiente de aprobación** y solo coexiste si el Administrador autoriza el paralelo.
+* **Caso Límite 4: Estudiante con dos emprendimientos.** El segundo registro no sobrescribe al primero; queda en **Pendiente** y solo coexiste si el Administrador autoriza el paralelo.
 * **Caso Límite 5: Cuenta inactiva que desea volver.** El estudiante no puede reactivarse solo; debe solicitarlo y el Administrador ejecuta la transición Inactivo → Activo.
-* **Caso Límite 6: Docente con carga completa.** Al superar el tope configurado (12 h), el sistema impide una nueva asignación y muestra el motivo.
+* **Caso Límite 6: Docente con carga completa.** Al alcanzar cualquiera de los dos topes configurados (**12 h/semana** o **12 emprendimientos**), el sistema impide una nueva asignación y muestra el motivo.
 * **Caso Límite 7: Tarea sin evidencia.** El estudiante intenta completarla sin adjuntos; el botón permanece deshabilitado hasta que suba al menos un archivo.
 * **Caso Límite 8: Rechazo de emprendimiento.** El Administrador debe indicar el motivo; el estudiante lo ve en su notificación y puede corregir y reenviar.
 

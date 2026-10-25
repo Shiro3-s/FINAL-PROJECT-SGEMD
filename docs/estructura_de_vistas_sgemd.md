@@ -2,11 +2,13 @@
 
 El sistema SGEMD presenta una interfaz web dividida por roles, con características y vistas específicas orientadas a la gestión y seguimiento de emprendimientos. A continuación, se detalla la estructuración de sus vistas y módulos.
 
+> **Actualizado el 2026-10-25** contra el prototipo real: **73 pantallas** = 4 compartidas + **27** estudiante + **23** docente + **19** administrador. El prototipo es la fuente principal de verdad; este documento lo describe, no lo rediseña.
+
 ---
 
 ## 1. Elementos de Interfaz Generales
 
-*   **Navegación Principal (Sidebar):** Menú lateral izquierdo que agrupa categorías como *Perfil, Gestionar perfiles, Emprendimientos, Docentes* y *Eventos*, adaptándose según el rol del usuario.
+*   **Navegación Principal (Sidebar):** Menú lateral izquierdo con grupos en acordeón que cambian según el rol: *Mi emprendimiento*, *Diagnóstico*, *Tareas*, *Asesorías*, *Eventos* (estudiante); *Mis emprendimientos*, *Acompañamiento y actividades*, *Eventos* (docente); *Solicitudes*, *Usuarios y asignaciones*, *Emprendimientos y seguimiento*, *Acompañamiento y actividades*, *Institucional* (administrador).
 *   **Barra Superior (Navbar):** Incluye el logotipo del sistema "SGEMD", un icono de notificaciones (campana) y el identificador visual/avatar del perfil del usuario activo.
 *   **Gestión de Datos (Tablas):** Uso frecuente de tablas de datos para listar elementos. Estas incorporan columnas de ID, Nombres y botones de acción rápida como "Ver", "Editar" o "Eliminar" integrados en cada fila.
 *   **Ventanas Emergentes (Modales):** Utilizadas como validación de seguridad para confirmar acciones críticas (ej. "¿Está seguro que lo quiere eliminar?") y para mostrar notificaciones o mensajes de éxito (ej. "Profesor eliminado correctamente").
@@ -65,21 +67,35 @@ El menú lateral agrupa el control institucional en **Inicio**, **Solicitudes** 
 *   **Perfil, Notificaciones y Configuración:** `perfil.html` (datos y actividad del administrador), `notificaciones.html` (registro de aprobaciones y decisiones) y `configuracion.html` (parámetros del programa, sedes, notificaciones y bitácora).
 
 ### 3.2. Perfil Emprendedor (Estudiante)
-Enfocado en el desarrollo del proyecto, seguimiento de tareas y solicitud de asesorías.
+Enfocado en el desarrollo del proyecto, el seguimiento de tareas y la solicitud de asesorías. El rol se compone de **27 archivos** en `estudiante/`: 18 vistas base y 9 variantes de detalle. **El estudiante no agenda asesorías por su cuenta** (BR-002): solo las **solicita** y el docente confirma fecha y modalidad.
 
-*   **Pantalla Principal (Dashboard de Inicio)**
-    *   Panel de control con un resumen general: incluye un gráfico de barras comparativo (ej. Dollars vs Profit), un calendario mensual y perfiles informativos circulares.
-*   **Módulo "Emprendimientos"**
-    *   **Listado y Detalles:** Tabla de proyectos propios. Al abrir uno, detalla información profunda como el "Sector Productivo".
-    *   **Diagnóstico Emprendedor:** Cuestionario paginado para recolectar datos estructurales (tipo de usuario, centro universitario, modalidad, programa, actividad productiva).
-    *   **Resultados del Diagnóstico:** Panel visual con diagramas de barras, gráfico circular de objetivos y un sistema NPS (Detractors, Passives, Promoters) usando emoticonos y gradientes (rojo a verde).
-    *   **Plan de Trabajo:** Matriz por bloques (FASE 1, FASE 2) para el seguimiento de actividades, objetivos, profesores asignados, fechas y recursos.
-    *   **Estado de Seguimiento (Dashboard):** Tarjetas de casos abiertos/cerrados, gráficos circulares ("Cases Per Person") y de barras ("Cases Per Filing Date"). Incluye lista de "Mis Tareas" marcadas por prioridad (rojo, amarillo, verde).
-*   **Módulo "Docentes y Asesorías"**
-    *   **Listado de Asesorías:** Tabla que relaciona a los docentes con el emprendimiento. Permite Asignar, Editar y Eliminar (con modal de seguridad).
-    *   **Programar/Editar Asesorías:** Formularios para agendar reuniones, eligiendo fecha/hora, temática, selección de profesor y datos de contacto.
+*   **Inicio (`dashboard.html`):** resumen del emprendimiento, tareas y asesorías de la semana; avance general y por fase, y accesos a las tareas pendientes y a la próxima asesoría.
+*   **Módulo "Mi emprendimiento"**
+    *   **Listado (`emprendimientos.html`):** los emprendimientos propios con su estado actual. **No incluye alta**: el prototipo no tiene formulario de registro del emprendimiento y la creación la realiza el Administrador (ver `README.md` §17.4).
+    *   **Detalle (`emprendimiento-detalle.html`):** ficha del emprendimiento (descripción, sector, etapa, redes sociales, acompañamiento y acta de compromiso). La variante `emprendimiento-detalle-mochilas.html` muestra un segundo emprendimiento del mismo estudiante.
+    *   **Editar (`emprendimiento-editar.html`):** solo los campos que el estudiante tiene permitido modificar (nombre, descripción y redes sociales); tipo, sector, etapa y estado los administra el Administrador (BR-003).
+    *   **Plan de trabajo (`plan-trabajo.html`):** las **cuatro fases** del programa y el avance por emprendimiento, con las actividades, objetivos, docente, fechas y recursos de cada fase.
+    *   **Estado de seguimiento (`estado-seguimiento.html`):** avance por fase (barras y porcentaje) y lista de lo que falta por completar. Es la vista que bloquea el diagnóstico cuando la cuenta está en estado *Limitado* (contradicción AQ-07, aún abierta).
+*   **Módulo "Diagnóstico"**
+    *   **Diagnóstico inicial (`diagnostico.html`):** cuestionario de **5 secciones y 22 preguntas** (perfil del emprendimiento, problema o necesidad, propuesta de valor, mercado objetivo y modelo de negocio), con validación de campos obligatorios.
+    *   **Resultado (`diagnostico-resultados.html`):** puntaje, **6 dimensiones** del comportamiento emprendedor (Visión, Creatividad, Resiliencia, Liderazgo, Trabajo en equipo y Capacidad de decisión), **4 bandas** de calificación y recomendaciones del docente. **No hay cálculo automático**: el prototipo muestra resultados fijos.
+*   **Módulo "Tareas"**
+    *   **Mis tareas (`tareas.html`):** tareas por emprendimiento y por estado (`Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta`), con prioridad (`Alta` · `Media` · `Baja`).
+    *   **Detalle (`tarea-detalle.html`):** enunciado, fecha límite, puntos, evidencia requerida y carga de archivos. **El botón de completar permanece deshabilitado hasta adjuntar evidencia** (BR-007). Las variantes `tarea-detalle-en-revision.html` y las tres `tarea-detalle-completada-*.html` muestran los estados *En revisión* y *Completada/Calificada* con su retroalimentación.
+*   **Módulo "Asesorías"**
+    *   **Mis asesorías (`asesorias.html`):** historial y próximas asesorías con estado (`Por agendar` · `Programada` · `Confirmada` · `En curso` · `Completada` · `Cancelada`).
+    *   **Solicitar asesoría (`solicitar-asesoria.html`):** el estudiante registra la necesidad y propone disponibilidad; **el docente confirma fecha y modalidad**. No elige docente ni agenda directamente.
+*   **Módulo "Seguimiento"**
+    *   **Seguimiento (`seguimiento.html`)** y **Detalle del seguimiento (`seguimiento-detalle.html`):** historial de los acompañamientos registrados por el docente, en **solo lectura** (descripción, fase, puntaje, estado de revisión y evidencia).
 *   **Módulo "Eventos"**
-    *   **Consultar Eventos:** Vista de catálogo mediante tarjetas con barra de búsqueda superior y calendario lateral.
+    *   **Eventos (`eventos.html`):** catálogo en tarjetas con buscador, filtros y calendario lateral.
+    *   **Detalle (`evento-detalle-startup.html`, `evento-detalle-capacitacion.html`, `evento-detalle-asesoria-grupal.html`, `evento-detalle-showroom.html`):** información del evento (fecha, modalidad, lugar, organizador, cupos), acceso virtual cuando aplica e inscripción.
+*   **Cuenta**
+    *   **Mi perfil (`perfil.html`):** datos básicos y emprendimientos a cargo.
+    *   **Configuración (`configuracion.html`):** datos personales, **datos académicos condicionales por nivel** (pregrado, posgrado, egresado), preferencias de notificación y cambio de contraseña.
+    *   **Notificaciones (`notificaciones.html`):** alertas de tareas, asesorías y seguimiento, con filtros **Todas · Sin leer · Tareas · Asesorías · Seguimiento** y preferencias de envío.
+
+> **Corrección respecto de la versión anterior:** este apartado describía un dashboard con gráficos *"Dollars vs Profit"*, *"Cases Per Person"* y un **NPS con emoticonos**, y un módulo donde el estudiante **asignaba, editaba y eliminaba asesorías eligiendo profesor**. Nada de eso existe en las 27 pantallas actuales: era texto de una versión anterior del prototipo y, además, **violaba BR-002** (el estudiante no agenda asesorías).
 
 ### 3.3. Perfil Docente (Asesor)
 El menú lateral se adapta para centrarse en las herramientas de tutoría, retroalimentación y seguimiento académico y usa la **misma estructura de grupos/acordeón que el rol Estudiante** (Inicio + grupo *Mis emprendimientos* + grupo *Acompañamiento y actividades*; Notificaciones y Perfil viven en la barra superior). El rol se compone de **23 pantallas** en `docente/` y fue objeto de un refactor UX/UI completo — ver [`docente-rol-ux.md`](docente-rol-ux.md). Como principio, las acciones del docente son **vistas completas** y no ventanas emergentes: ver un avance, calificar o devolver una tarea, registrar o confirmar una asesoría, ver un evento y recomendar a los estudiantes y cambiar la contraseña llevan a su propia pantalla. El **grupo *Mis emprendimientos*** reúne *Emprendimientos asignados*, *Diagnóstico* y *Tareas*; **Acompañamiento y actividades** contiene *Asesorías*; **Eventos**, *Mi perfil*, *Configuración* y *Notificaciones* completan el rol.

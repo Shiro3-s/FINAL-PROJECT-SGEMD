@@ -4,6 +4,8 @@
 >
 > **Orquestación aplicada:** [`orquestacion-actualizacion-requisitos-2026-10.md`](./orquestacion-actualizacion-requisitos-2026-10.md).
 
+> **Nota de lectura (2026-10-25, segunda sincronización):** este registro es **histórico** y refleja el cierre del 2026-10-25 *antes* de adoptar el prototipo como fuente principal de verdad. Las cifras de **29 tablas / 42 relaciones**, el conteo de 71 pantallas y algunos estados de requisitos fueron **corregidos después**: el modelo vigente es de **41 tablas** (27 de negocio + 14 catálogos) y el prototipo tiene **73 pantallas**. El cambio posterior está en [`sincronizacion-prototipo-2026-10.md`](./sincronizacion-prototipo-2026-10.md).
+
 - **Fecha de ejecución:** 25 de octubre de 2026
 - **Modo:** **local**. Sin rama nueva, sin commit, sin push y sin publicación en GitHub.
 - **Repositorio:** `C:\Users\storm\Videos\profesor`

@@ -40,6 +40,7 @@
 14. [Orden recomendado de construcción](#14-orden-recomendado-de-construcción)
 15. [Estado final esperado](#15-estado-final-esperado)
 16. [Fuentes y trazabilidad del alcance ampliado](#16-fuentes-y-trazabilidad-del-alcance-ampliado)
+17. [Reconciliación con el prototipo (2026-10-25)](#17-reconciliación-con-el-prototipo-2026-10-25)
 
 ---
 
@@ -89,6 +90,7 @@ Existe **un único campo de rol** en el usuario, con valores:
 
 - **Puede hacer:** gestionar cualquier usuario (**crear, editar, activar/desactivar y dar de baja lógica**), **aprobar o rechazar emprendimientos** (incluido el **paralelo**), crear/editar/eliminar emprendimientos, crear/eliminar/reasignar asignaciones, **crear y asignar asesorías directamente**, resolver la **bandeja de solicitudes** (desbloqueos, paralelos y citas), consultar todos los emprendimientos/seguimientos/tareas/asesorías, dashboard global, **configurar los parámetros del programa** y **exportar/verificar respaldos**. Modifica variables bloqueadas para el estudiante (Mentor asignado, observaciones, sector productivo y etapa).
 - **Estados de cuenta:** **Limitado → Activo → Inactivo**. Solo el Administrador desbloquea y reactiva. La inactividad se marca a los **90 días**.
+- **Tope de asignación:** no puede confirmar una asignación si el docente ya alcanzó los topes configurados en `admin/configuracion.html`: **12 horas de asesoría por semana** y **12 emprendimientos**. Ambos son parámetros del programa y pueden cambiarse (ver [§6](#6-reglas-de-negocio)).
 - **No debería:** crear seguimientos/tareas como si fuera el docente asignado (puede administrarlos pero no "firmarlos"), ni ver credenciales o secretos.
 
 ### Docente / Mentor (rol 3)
@@ -96,12 +98,14 @@ Existe **un único campo de rol** en el usuario, con valores:
 - **Puede hacer:** ver únicamente los emprendimientos que **le fueron asignados** (vía asignaciones), registrar avances y su evidencia de esos emprendimientos (vista *Registrar avance* y columna *Evidencia*), crear/editar/eliminar tareas y asesorías de sus asignados, **aceptar, rechazar o reprogramar** las asesorías que le corresponden, ver el perfil de sus estudiantes, consultar su dashboard. Revisa el **detalle de cada evento** y lo **recomienda** a estudiantes individuales o a todo un emprendimiento.
 - **Capacidades del rol (refactor UX/UI):** registrar **avance con calificación** (puntaje 0–100 + retroalimentación) y **estado de revisión** (Pendiente · En revisión · Calificada · Devuelta); **confirmar o reprogramar** asesorías de sus estudiantes (el estudiante no agenda solo, BR-002); **revisar el diagnóstico y guardar recomendaciones**; **recomendar eventos** por emprendimiento o por estudiante; seguir sus **compromisos en un calendario interactivo**; mantener una **bitácora de comentarios** por emprendimiento; y **gestionar sus notificaciones** (filtro por tipo, marcar como leído).
 - **No debería:** ver emprendimientos/estudiantes de otros docentes, modificar el emprendimiento del estudiante, eliminar usuarios ni cambiar roles.
+- **Tope de carga:** máximo **12 emprendimientos** y **12 horas semanales** por docente (valores configurables en `admin/configuracion.html`). El prototipo aplica ambos topes; el modelo los almacena en `asignaciones.HorasSemanales` y `configuracion_programa`.
 
 > Detalle del refactor y de las 23 pantallas del rol en **[docs/docente-rol-ux.md](docs/docente-rol-ux.md)**.
 
 ### Estudiante (rol 2)
 
-- **Puede hacer:** **registrar su emprendimiento** (queda en **Pendiente de aprobación** hasta que el Administrador lo apruebe), consultar **sus** emprendimientos, ver su progreso/etapas **por fase**, consultar (solo lectura) el seguimiento de su emprendimiento, consultar y **completar** sus tareas **con evidencia obligatoria**, **solicitar** asesorías (no agendarlas por su cuenta), consultar su dashboard y **descargar su plan de trabajo**. **Permisos de edición de su emprendimiento:** puede editar el Nombre, Descripción, Redes Sociales y, opcionalmente, el plan de trabajo.
+- **Puede hacer:** consultar **sus** emprendimientos, ver su progreso/etapas **por fase**, consultar (solo lectura) el seguimiento de su emprendimiento, consultar y **completar** sus tareas **con evidencia obligatoria**, **solicitar** asesorías (no agendarlas por su cuenta), consultar su dashboard y **descargar su plan de trabajo**. **Permisos de edición de su emprendimiento:** puede editar el Nombre, Descripción, Redes Sociales y, opcionalmente, el plan de trabajo.
+- **Vacío del prototipo:** el **alta de emprendimiento por el estudiante no está representada** en las 73 pantallas. La bandeja de aprobación del Admin sí existe, pero no hay formulario de registro del emprendimiento ni vista del estado *Pendiente* (de aprobación). Se documenta como pendiente ([§17.4](#173-vacíos-del-prototipo-que-no-se-inventan)).
 - **No debería:** crear seguimientos ni tareas, ver emprendimientos de otros, ni ver datos de otros usuarios.
 
 **Regla general de autorización:** cada endpoint de negocio valida **rol** y **alcance** en **backend** (no solo en la UI). Un docente solo ve lo asignado a él; un estudiante solo lo propio; el admin todo.
@@ -132,14 +136,15 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 - **Qué puede hacer:** listar usuarios, **crear estudiantes y docentes** (`Nuevo estudiante` / `Nuevo docente`), editar, activar/desactivar, **dar de baja lógica**, cambiar estado (Activo · Limitado · Inactivo) y subir avatar.
 - **Información que maneja:** todos los datos del usuario. La contraseña **nunca** se devuelve ni se muestra.
 - **Flujo:** el admin crea o edita usuarios con rol y estado; el estudiante/docente edita su perfil. La baja es reversible y conserva el historial.
-- **Validación:** campos obligatorios, documento y correo únicos; el docente no se repite en la misma asignación ni supera el tope de carga (**12 h**).
+- **Validación:** campos obligatorios, documento y correo únicos; el docente no se repite en la misma asignación ni supera los topes configurados (**12 h/semana** y **12 emprendimientos**).
 
 ### Emprendimientos
 
-- **Quién lo usa:** el **estudiante registra**; el **admin aprueba/rechaza**; el docente consulta (los asignados).
-- **Qué puede hacer:** registrar un emprendimiento con propietario-estudiante; el estado inicial es **Pendiente de aprobación**. El Administrador lo **aprueba o rechaza con motivo** y autoriza el **segundo emprendimiento paralelo**. Si un estudiante inicia un nuevo emprendimiento, el anterior no se sobrescribe.
-- **Información que maneja:** nombre, descripción, tipo, sector productivo, redes sociales, acompañamiento, acta de compromiso, etapa, propietario, fechas y estado de aprobación.
-- **Flujo:** el estudiante registra → el admin revisa en la **bandeja de solicitudes** → aprueba o rechaza → el docente lo ve si tiene asignación; el estudiante lo ve si es el propietario.
+- **Quién lo usa:** el **admin crea, aprueba y rechaza**; el docente consulta (los asignados). El prototipo **no incluye el alta por el estudiante**.
+- **Qué puede hacer:** registrar un emprendimiento con propietario-estudiante desde el panel del Administrador; el estado inicial es **Pendiente**. El Administrador lo **aprueba o rechaza con motivo** y autoriza el **segundo emprendimiento paralelo**. Si un estudiante inicia un nuevo emprendimiento, el anterior no se sobrescribe.
+- **Estados observados en el prototipo:** `Pendiente` · `Aprobado` · `Rechazado`, más la marca `EsParalelo`.
+- **Información que maneja:** nombre, descripción, tipo, sector productivo, redes sociales (Instagram, WhatsApp, tienda propia), acompañamiento, acta de compromiso, etapa, propietario, fechas y estado de aprobación.
+- **Flujo:** el admin crea el registro y revisa en la **bandeja de solicitudes** → aprueba o rechaza → el docente lo ve si tiene asignación; el estudiante lo ve si es el propietario.
 
 ### Asignaciones estudiante/docente/emprendimiento
 
@@ -165,7 +170,8 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 
 - **Quién lo usa:** estudiante (solicita/consulta), docente (acepta/reprograma/crea/consulta), admin (**crea y asigna directamente**, consulta).
 - **Qué puede hacer:** el estudiante **solicita**; el admin **crea y asigna** (emprendimiento, docente, fecha, horario y modalidad); el docente **acepta, rechaza o propone otra fecha**.
-- **Información que maneja:** nombre, descripción, fecha, modalidad, horario, estado (por agendar/agendada/completada/cancelada), estudiante, docente.
+- **Información que maneja:** nombre, descripción, fecha, modalidad (Presencial · Virtual · Mixta), horario, lugar o enlace, estado, estudiante, docente.
+- **Estados observados en el prototipo:** `Por agendar` · `Programada` · `Confirmada` · `En curso` · `Completada` · `Cancelada`.
 - **Flujo:** el estudiante solicita **o** el admin crea la cita → el docente la ve y la acepta/reprograma → ambos consultan la agenda. El sistema envía notificaciones In-App accionables. El estudiante **no agenda por su cuenta** (R22/BR-002).
 
 ### Bandeja de solicitudes
@@ -194,8 +200,9 @@ Cada módulo describe: quién lo usa, qué puede hacer, qué información maneja
 
 - **Quién lo usa:** docente (crea/edita/elimina/califica), estudiante (consulta y completa), admin (consulta).
 - **Qué puede hacer:** crear tareas ligadas a un emprendimiento y a un estudiante, con fecha límite, prioridad y evidencia requerida; **calificarlas** (puntaje + retroalimentación) y **devolverlas** al estudiante.
-- **Información que maneja:** título, descripción, fecha límite, estado (pendiente/completada/vencida), prioridad, evidencia requerida, puntaje y retroalimentación, emprendimiento, estudiante, docente.
-- **Flujo:** el docente crea la tarea → el estudiante la ve → la completa → el sistema calcula el avance (% de completadas). El docente puede calificarla (puntaje y retroalimentación) o devolverla al estudiante. El sistema envía notificaciones en tiempo real a los usuarios cuando un docente asigna una nueva tarea o la devuelve.
+- **Información que maneja:** título, descripción, fecha límite, estado, prioridad, evidencia requerida, puntaje, retroalimentación, emprendimiento, estudiante, docente.
+- **Estados observados en el prototipo:** tarea `Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta`; revisión `Pendiente` · `En revisión` · `Calificada` · `Devuelta`; prioridad `Alta` · `Media` · `Baja`.
+- **Flujo:** el docente crea la tarea → el estudiante la ve → la completa → el sistema calcula el avance (% de completadas). El docente puede calificarla (puntaje y retroalimentación) o devolverla al estudiante. El sistema notifica al usuario cuando un docente asigna una nueva tarea o la devuelve; la emisión en tiempo real queda pendiente (el prototipo solo simula la bandeja).
 
 ### Gestión de Archivos
 
@@ -211,9 +218,10 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 ### Progreso
 
 - **Quién lo usa:** estudiante y docente.
-- **Qué puede hacer:** visualizar el avance del emprendimiento (etapa actual) y de las tareas.
-- **Información que maneja:** etapa del emprendimiento, % de tareas completadas.
-- **Flujo:** datos calculados a partir de la BD (etapa y tareas).
+- **Qué puede hacer:** visualizar el avance del emprendimiento por **fase del plan** y el % de tareas completadas.
+- **Información que maneja:** fase actual del plan (`faseplan`), % de avance por fase y % de tareas completadas.
+- **Fases observadas en el prototipo:** **FASE 1** Ideación y priorización de ideas · **FASE 2** Estructuración y ejecución · **FASE 3** Consolidación del proceso · **FASE 4** Escalamiento.
+- **Flujo:** datos calculados a partir de la BD (fase y tareas).
 
 ### Eventos
 
@@ -251,13 +259,15 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 - **Qué puede hacer:** descargar la plantilla, subir el acta firmada y quedar en estado **en revisión**.
 - **Información que maneja:** archivo del acta, estado (pendiente/en revisión/aprobada/rechazada), observaciones y fechas.
 - **Flujo:** el estudiante descarga, firma y sube → queda **en revisión** → el administrativo aprueba o rechaza. El acta **aprobada** es **precondición para asignar docente** ([§6](#6-reglas-de-negocio)).
+- **Vacío del prototipo:** **no existe vista de acta** en las 73 pantallas. `admin/asignaciones.html` exige que el acta de confidencialidad esté aceptada, pero no hay pantalla para descargarla, cargarla ni revisarla; el manejo del botón `ver-acta` es un manejador huérfano. Se documenta como pendiente ([§17.4](#173-vacíos-del-prototipo-que-no-se-inventan)).
 
 ### Notificaciones
 
 - **Quién lo usa:** todos (destinatarios); el sistema las emite.
-- **Qué puede hacer:** notificar al **personal administrativo** cuando el emprendedor completa el registro/la información, completa el diagnóstico, registra un emprendimiento o solicita una asesoría; y notificar al **estudiante** cuando lo validan, cambia el estado del acta, le asignan docente, le recomiendan un evento o le crean tareas/asesorías. Cada aviso es **accionable**: abre el objeto referido.
+- **Qué puede hacer:** notificar al **personal administrativo** cuando el emprendedor completa el registro/la información, completa el diagnóstico, se crea un emprendimiento o se solicita una asesoría; y notificar al **estudiante** cuando lo validan, cambia el estado del acta, le asignan docente, le recomiendan un evento o le crean tareas/asesorías. Cada aviso es **accionable**: abre el objeto referido.
 - **Información que maneja:** destinatario, tipo, mensaje, leída/no leída, fecha y enlace al objeto.
-- **Flujo:** un evento dispara la notificación; el usuario la consulta, la abre y la marca como leída (individual o masivamente). El contador de no leídas refleja el estado real. (Complementa las notificaciones en tiempo real de [Asesorías](#asesorías) y [Tareas](#tareas--plan-de-trabajo).)
+- **Flujo:** un evento dispara la notificación; el usuario la consulta, la abre y la marca como leída (individual o masivamente). El contador de no leídas refleja el estado real.
+- **Alcance en el prototipo:** la bandeja existe con filtros **Todas · Sin leer · Tareas · Asesorías · Seguimiento** y preferencias de notificación (correo, sistema y recordatorio de tareas). **No hay emisión en tiempo real**: el envío está simulado y no existe WebSocket ni `Socket.io`.
 
 ---
 
@@ -265,13 +275,9 @@ El sistema soporta la subida, almacenamiento y descarga de archivos adjuntos (PD
 
 La nueva implementación es **desde cero** y no debe conservar estructuras innecesarias ni errores del proyecto anterior.
 
-> **Diagrama de componentes (desactualizado):** el repositorio conserva `docs/diagrama-componentes.drawio` y su `.png`, que describen una arquitectura Cliente/Navegador → Backend Node.js + Express → Persistencia/Infraestructura, pero **no reflejan los roles ni los módulos añadidos**.
+> **Diagramas (regenerados el 2026-10-25):** `docs/diagrama-clases.md` (en tres bloques), `docs/diagrama-componentes.md` y `docs/context-diagram.mmd` están alineados con el modelo vigente, el rol auditor, los servicios de solicitudes, configuración, respaldos y auditoría, y los procesos programados. Sus **PNG se regeneraron** desde el mismo Mermaid. Los `.drawio` anteriores siguen siendo **obsoletos**; la fuente de verdad es el archivo Mermaid/Markdown.
 >
-> **Diagrama de clases (desactualizado):** `docs/diagrama-clases.md` (fuente Mermaid), `.png` y `.drawio` editable. Declara **20 clases y 31 relaciones**; su contenido **no coincide** con el modelo textual vigente.
->
-> **Modelo de datos:** el modelo objetivo es de **29 tablas y 42 relaciones** (16 de negocio con comportamiento + 13 catálogos de lectura), descritas en la [sección 5](#5-modelo-de-datos).
->
-> **Aviso sobre los diagramas (2026-10-25):** `docs/diagrama-clases.*`, `docs/diagrama-componentes.*` y `docs/context-diagram.png` están **desactualizados** y **no son fuente de verdad ni evidencia**. No coinciden en alcance ni en conteo con el modelo textual, el de componentes no refleja los roles ni los módulos añadidos y el de contexto no cubre el alcance ampliado. **No se usan para decidir ni se actualizan en este ciclo**; su actualización es un trabajo aparte. La fuente vigente es la [sección 5](#5-modelo-de-datos) y el dossier [`docs/dossier-decisiones-pendientes-2026-10.md`](./docs/dossier-decisiones-pendientes-2026-10.md).
+> **Modelo de datos:** el modelo objetivo es de **41 tablas = 27 de negocio + 14 catálogos**, descritas en la [sección 5](#5-modelo-de-datos). **No se declara un total de relaciones**: el "42" anterior no era trazable a partir de ningún listado. Las relaciones se leen por ficha y se garantizan con claves foráneas.
 
 ### Frontend
 
@@ -348,130 +354,235 @@ SGEMD/
 
 ## 5. Modelo de datos
 
-> Diseño **conceptual** objetivo. No es una réplica del `schema.sql` anterior. No implementar la BD todavía; solo usar como guía. No incluir secretos ni datos sensibles en los scripts.
+> **Procedencia (2026-10-25):** este modelo se contrastó contra las 73 pantallas de `prototype/`: todo campo, estado y catálogo que muestra la interfaz tiene aquí su tabla o columna. Los vacíos detectados se registran en la [§17](#17-reconciliación-con-el-prototipo-2026-10-25).
 >
-> **Convenciones del modelo:** la versión corregida aplica **snake_case** a todas las columnas, vincula `codigosverificacion` por `usuario_id`, modela los módulos como `habilitaciones` por persona y agrega `adjuntos` con sus tres tablas pivote.
+> **Estado de implementación:** no existe `schema.sql`, ni PostgreSQL, ni migraciones en este repositorio. Esta sección es el **modelo objetivo** para el backend.
 >
-> **Fuente única:** esta sección es el **modelo textual vigente** (AQ-11). `adjuntos` y sus tres pivotes se anuncian en las convenciones, pero aún **no tienen ficha individual**; `auditoria_eventos` **no está modelada** y es `Pendiente de backend`. Los diagramas no se usan como fuente (ver [§4](#4-arquitectura-propuesta)).
+> **Convenciones:** `snake_case` en columnas nuevas; los nombres heredados en camelCase se conservan cuando ya estaban en uso, para no romper mapeos. Los catálogos son de solo lectura. Las columnas `Estado` usan los valores exactos del prototipo (enumerados en cada ficha).
+>
+> **Conteo declarado:** **41 tablas = 27 de negocio + 14 catálogos**. Ya **no se declara un total de relaciones**: el "42" anterior no era trazable (el desglose 16+13 suma 29 tablas, no 42 relaciones). Las relaciones se leen por ficha y se garantizan con claves foráneas.
 
-### Catalogos (referenciados por claves foráneas)
+### Catálogos (14, solo lectura)
 
-| Tabla                  | PK                     | Propósito                                                             | Cardinalidad              |
-| ---------------------- | ---------------------- | --------------------------------------------------------------------- | ------------------------- |
-| `roles`                | idRoles                | Rol: 1=Admin, 2=Estudiante, 3=Docente                                 | 1 → N usuarios            |
-| `tipodocumentos`       | idTipoDocumento        | Tipo de documento                                                     | 1 → N usuarios            |
-| `programaacademico`    | idProgramaAcademico    | Programa académico                                                    | 1 → N usuarios            |
-| `centrouniversitarios` | idCentroUniversitarios | Centro/campus universitario                                           | 1 → N usuarios            |
-| `municipios`           | idMunicipio            | Municipio                                                             | 1 → N usuarios            |
-| `tipopoblacion`        | idTipoPoblacion        | Población vulnerable                                                  | 1 → N usuarios            |
-| `tipousuarios`         | idTipoUsuarios         | Estudiante/Egresado/Docente/Administrativo                            | 1 → N usuarios            |
-| `etapaemprendimiento`  | idEtapaEmprendimiento  | Etapa del emprendimiento (`TipoEtapa`)                                | 1 → N emprendimientos     |
-| `sectoreconomico`      | idSectorEconomico      | Sector económico                                                      | 1 → N diagnósticos        |
-| `modalidad`            | idModalidad            | Presencial/Distancia                                                  | 1 → N asesorías/eventos   |
-| `tipo_evento`          | idTipo_evento          | Tipo de evento                                                        | 1 → N eventos             |
-| `fecha_y_Horarios`     | idFecha_y_Horarios     | Bloque de fecha/hora                                                  | 1 → N asesorías / eventos |
-| `modulos`              | idModulos              | Controla qué partes de la plataforma están disponibles para cada rol. | 1 → N usuarios (opcional) |
+| Tabla | PK | Valores observados en el prototipo | Propósito |
+|---|---|---|---|
+| `roles` | `idRoles` | 1=Admin · 2=Estudiante · 3=Docente · 4=Auditor (Post-MVP) | Rol del usuario |
+| `tipodocumentos` | `idTipoDocumento` | CC · TI · CE | Tipo de documento |
+| `programaacademico` | `idProgramaAcademico` | Ingeniería Industrial, etc. | Programa académico |
+| `centrouniversitarios` | `idCentroUniversitarios` | Sede Norte · Sede Centro · Sede Sur | Sede / centro universitario |
+| `municipios` | `idMunicipio` | Departamento + ciudad | Residencia |
+| `tipopoblacion` | `idTipoPoblacion` | Población vulnerable | Caracterización |
+| `tipousuarios` | `idTipoUsuarios` | Estudiante · Egresado · Docente · Administrativo | Tipo de usuario |
+| `etapaemprendimiento` | `idEtapaEmprendimiento` | FASE 1 - Ideación · FASE 2 - Prototipo · FASE 3 - Validación · FASE 4 - Formalización | Etapa actual del emprendimiento |
+| `faseplan` | `idFasePlan` | FASE 1 Ideación y priorización de ideas · FASE 2 Estructuración y ejecución · FASE 3 Consolidación del proceso · FASE 4 Escalamiento | Fase del plan de trabajo y de los avances |
+| `sectoreconomico` | `idSectorEconomico` | Alimentos · Moda · Ambiental · Muebles · Tecnología · Comercio | Sector productivo |
+| `modalidad` | `idModalidad` | Presencial · Virtual · Mixta | Modalidad de asesoría o evento |
+| `tipo_evento` | `idTipo_evento` | Startup · Capacitación · Asesoría grupal · Showroom · Taller | Tipo de evento |
+| `fecha_y_Horarios` | `idFecha_y_Horarios` | fecha · hora inicio · hora fin | Bloque de agenda |
+| `modulos` | `idModulos` | Perfil · Emprendimiento · Diagnóstico · Tareas · Asesorías · Seguimiento · Eventos · Reportes | Módulo habilitable por persona |
 
-### Entidades de negocio
+> **Nota sobre fases:** el prototipo usa dos conceptos distintos. **Etapa** (`etapaemprendimiento`) es el avance global del emprendimiento (4 valores). **Fase del plan** (`faseplan`) es la agrupación de tareas y avances (4 valores). El detalle del emprendimiento usa alias cortos (*Ideación · Ejecución · Crecimiento · Consolidación*); deben normalizarse a `faseplan` en el próximo pase del prototipo (§17.4).
+
+### Entidades de negocio (27)
+
+> Las fichas de esta sección son **23 encabezados** que describen **27 tablas**: la ficha de `adjuntos` agrupa la tabla de adjuntos y sus **tres pivotes** (`adjuntos_tareas`, `adjuntos_seguimientos`, `adjuntos_asesorias`). El conteo 23 + 4 = 27 es el vigente.
 
 #### `usuarios`
 
-- **Propósito:** todos los usuarios del sistema (admin, docente, estudiante).
-- **Campos importantes:** idUsuarios, Nombre, CorreoInstitucional (único), CorreoPersonal, Password (hash bcrypt — nunca se devuelve), Verificado (0/1), Estado (1 activo / 0 desactivado), Celular, Telefono, Direccion, Genero, EstadoCivil, FechaNacimiento, Semestre, Modalidad, img_perfil, FechaCreacion, FechaActualizacion.
-- **Fks:** Roles_idRoles1 → roles, TipoDocumentos_idTipoDocumento → tipodocumentos, ProgramaAcademico_idProgramaAcademico → programaacademico, CentroUniversitarios_idCentroUniversitarios → centrouniversitarios, Municipios_idMunicipio → municipios, TipoPoblacion_idTipoPoblacion → tipopoblacion, TipoUsuarios_idTipoUsuarios → tipousuarios, Modulos_idModulos (opcional) → modulos.
-- **Relaciones:** un usuario (estudiante) puede ser propietario de N emprendimientos; puede participar como mentor o estudiante en N asignaciones; puede ser autor de N seguimientos; puede tener N tareas; puede solicitar N asesorías.
+- **Propósito:** todas las cuentas (admin, docente, estudiante; auditor post-MVP).
+- **Campos:**
+  - Identidad: `idUsuarios`, `Codigo` (6 dígitos para estudiante, `DOC-###` para docente, `ADM-###` para admin), `Nombres`, `Apellidos`, `TipoDocumento`, `NumeroDocumento`, `FechaNacimiento`, `Genero`, `EstadoCivil`, `img_perfil`.
+  - Contacto: `CorreoInstitucional` (único), `CorreoPersonal`, `Celular`, `Celular2`, `Telefono`, `Direccion`, `Departamento`, `Ciudad`.
+  - Académicos: `NivelAcademico` (Pregrado · Posgrado · Egresado), `TipoPosgrado` (Especialización · Maestría · Doctorado), `Semestre`, `Modalidad`, `ProgramaAcademico`, `FechaGrado`, `ProgramaGrado`, `SedeGrado`, `NumeroActaDiploma`.
+  - Docente: `AreaConocimiento`, `HorasAsesoriaSemana`, `EmprendimientosAsignados`.
+  - Administrativo: `Cargo`, `ZonaHoraria`.
+  - Seguridad y estado: `Password` (hash bcrypt, nunca se devuelve), `Verificado` (0/1), **`Estado`** (`Limitado` · `Activo` · `Inactivo`), `UltimaActividad` (base de los 90 días), `FechaCreacion`, `FechaActualizacion`.
+- **FKs:** `Roles_idRoles`, `TipoDocumentos_idTipoDocumento`, `ProgramaAcademico_idProgramaAcademico`, `CentroUniversitarios_idCentroUniversitarios`, `Municipios_idMunicipio`, `TipoPoblacion_idTipoPoblacion`, `TipoUsuarios_idTipoUsuarios`.
+- **Reglas:** el programa académico y el cargo los modifica el Administrador; el correo institucional no es editable por el usuario; el `Estado` solo lo cambia el Administrador (BR-003).
+- **Relaciones:** 1→N emprendimientos (propietario), 1→N asignaciones (como mentor y como estudiante), 1→N seguimientos (autor), 1→N tareas, 1→N asesorías, 1→N notificaciones, 1→N habilitaciones, 1→N comentarios, 1→N adjuntos.
 
 #### `emprendimiento`
 
-- **Propósito:** representa el emprendimiento del estudiante. El **Tipo de Emprendimiento** se maneja a través de un catálogo ya creado en BD.
-- **Campos importantes:** idEmprendimiento, Nombre, Descripcion, TipoEmprendimiento, SectorProductivo, RedesSociales, Acompanamiento, ActaCompromiso, FechaCreacion, FechaActualizacion.
-- **Fks:** EtapaEmprendimiento_idEtapaEmprendimiento → etapaemprendimiento; Usuarios_idUsuarios → usuarios (**propietario** estudiante).
-- **Relaciones/cardinalidades:** Propietario (usuarios) **1 → N** emprendimiento; Etapa **1 → N** emprendimiento; Emprendimiento **1 → N** seguimientos; Emprendimiento **1 → N** tareas; Emprendimiento **1 → N** diagnósticos; Emprendimiento **0..1 → N** asignaciones.
+- **Propósito:** emprendimiento estudiantil, con su estado de aprobación y su avance.
+- **Campos:** `idEmprendimiento`, `Codigo` (`EMP-###`), `Nombre`, `Descripcion`, `TipoEmprendimiento`, `SectorProductivo`, `RedesSociales` (Instagram · WhatsApp · tienda), `Acompanamiento`, **`EstadoAprobacion`** (`Pendiente` · `Aprobado` · `Rechazado`), `MotivoRechazo`, `EsParalelo` (0/1), `Avance` (0–100, derivado de tareas), `ActaCompromiso` (campo heredado; el histórico vive en `actas`), `FechaCreacion`, `FechaActualizacion`.
+- **FKs:** `EtapaEmprendimiento_idEtapaEmprendimiento`, `CentroUniversitarios_idCentroUniversitarios` (sede), `Usuarios_idUsuarios` (propietario).
+- **Edición (BR-003):** el estudiante solo edita `Nombre`, `Descripcion` y `RedesSociales`; tipo, sector, etapa, acta y estado los administra el Administrador.
+- **Relaciones:** Propietario 1→N; Etapa 1→N; Emprendimiento 1→N seguimientos, tareas, diagnósticos, actas, comentarios, recomendaciones; 0..1→N asignaciones; 1→N solicitudes.
 
 #### `asignaciones`
 
-- **Propósito:** vincula un docente (mentor) con un estudiante y opcionalmente un emprendimiento.
-- **Campos importantes:** idAsignacion, FechaAsignacion, Estado (activa/inactiva).
-- **Fks:** Usuarios_idMentor → usuarios; Usuarios_idEstudiante → usuarios; Emprendimiento_idEmprendimiento (opcional) → emprendimiento.
-- **Relaciones/cardinalidades:** Docente **1 → N** asignaciones; Estudiante **1 → N** asignaciones; Emprendimiento **0..1 → N** asignaciones. Aplica el modelo correcto de relación docente↔emprendimiento (no duplicar con columnas en emprendimiento).
+- **Propósito:** vínculo docente ↔ estudiante ↔ emprendimiento.
+- **Campos:** `idAsignacion`, `FechaAsignacion`, `Estado` (`activa` · `inactiva`), **`HorasSemanales`** (campo del modal "Horas semanales").
+- **FKs:** `Usuarios_idMentor`, `Usuarios_idEstudiante`, `Emprendimiento_idEmprendimiento`.
+- **Reglas:** solo el Admin crea, reasigna o desactiva. El docente no puede repetirse en la misma asignación ni superar los topes configurados (**12 h/semana** y **12 emprendimientos**, ambos configurables).
+- **Relaciones:** Docente 1→N; Estudiante 1→N; Emprendimiento 0..1→N. Máximo una asignación activa por emprendimiento (R11).
 
 #### `seguimientos`
 
-- **Propósito:** nota/anotación de acompañamiento sobre un emprendimiento. No se deben incluir los campos vestigiales `histproal` ni `SeguimientoCol`.
-- **Campos importantes:** idSeguimientos, Descripcion, TipoSeguimiento, FechaCreacion, FechaActualizacion.
-- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento (**obligatorio**); Usuarios_idUsuarios → usuarios (**autor**).
-- **Relaciones/cardinalidades:** Emprendimiento **1 → N** seguimientos; Usuario (autor) **1 → N** seguimientos.
+- **Propósito:** registro de avance o comentario de acompañamiento del docente/admin.
+- **Campos:** `idSeguimientos`, `Descripcion`, `TipoSeguimiento` (`Avance de fase` · `Comentario`), **`Fase`** (`faseplan`), **`Puntaje`** (0–100), **`EstadoRevision`** (`Pendiente` · `En revisión` · `Calificada` · `Devuelta`), `FechaCreacion`, `FechaActualizacion`.
+- **FKs:** `Emprendimiento_idEmprendimiento` (obligatorio), `Usuarios_idUsuarios` (**autor**), `FasePlan_idFasePlan`.
+- **Relaciones:** Emprendimiento 1→N; Autor 1→N; Seguimiento 0..N→N `adjuntos` (evidencia).
 
 #### `tareas`
 
-- **Propósito:** tarea/plan de trabajo asociado a un emprendimiento y a un estudiante.
-- **Campos importantes:** idTareas, Titulo, Descripcion, FechaLimite, Estado (pendiente/completada/vencida), FechaCreacion, FechaActualizacion.
-- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; Usuario_idUsuarios → usuarios (estudiante asignado); Docentes_idDocentes (opcional) → usuarios.
-- **Relaciones/cardinalidades:** Emprendimiento **1 → N** tareas; Estudiante **1 → N** tareas; Docente **1 → N** tareas.
+- **Propósito:** tarea del plan de trabajo, con prioridad, puntos y calificación.
+- **Campos:** `idTareas`, `Titulo`, `Descripcion`, `FechaLimite`, **`Prioridad`** (`Alta` · `Media` · `Baja`), **`Puntos`** (máximo), `Estado` (`Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta`), **`PuntajeObtenido`**, **`Retroalimentacion`**, **`EstadoRevision`** (`Pendiente` · `En revisión` · `Calificada` · `Devuelta`), `EvidenciaRequerida` (0/1), **`MotivoDevolucion`**, `ObservacionesDevolucion`, `FechaCompletado`, `FechaCreacion`, `FechaActualizacion`.
+- **FKs:** `Emprendimiento_idEmprendimiento`, `Usuarios_idUsuarios` (estudiante asignado), `Usuarios_idDocentes` (docente creador, opcional).
+- **Reglas:** solo pasa a `Completada` con al menos una evidencia (BR-007); `Vencida` se deriva de `FechaLimite`; el docente puede calificar o devolver con motivo.
+- **Relaciones:** Emprendimiento 1→N; Estudiante 1→N; Docente 1→N; Tarea 0..N→N `adjuntos`.
 
 #### `asesorias`
 
-- **Propósito:** sesión de acompañamiento entre estudiante y docente.
-- **Campos importantes:** idAsesorias, Nombre_de_asesoria, Descripcion, Fecha_asesoria, Comentarios, confirmacion (pendiente/confirmada), Fecha_creacion, Fecha_actualizacion.
-- **Fks:** Usuarios_idUsuarios → usuarios (estudiante solicitante); Docentes_idDocentes (opcional) → usuarios; Modalidad_idModalidad → modalidad; Fecha_y_Horarios_idFecha_y_Horarios → fecha_y_Horarios.
-- **Relaciones/cardinalidades:** Estudiante **1 → N** asesorías; Docente **1 → N** asesorías; Modalidad **1 → N** asesorías.
+- **Propósito:** sesión de acompañamiento, solicitada por el estudiante o creada por el Admin.
+- **Campos:** `idAsesorias`, **`Tema`**, `Descripcion`, `Fecha_asesoria`, `Comentarios`, **`Estado`** (`Por agendar` · `Programada` · `Confirmada` · `En curso` · `Completada` · `Cancelada`), **`LugarEnlace`**, `Fecha_creacion`, `Fecha_actualizacion`.
+- **FKs:** `Emprendimiento_idEmprendimiento` (**obligatoria**, para el expediente), `Usuarios_idUsuarios` (estudiante), `Usuarios_idDocentes` (docente), `Modalidad_idModalidad`, `Fecha_y_Horarios_idFecha_y_Horarios`.
+- **Reglas:** el estudiante **solicita** y propone fecha; el Admin **crea y asigna**; el docente **acepta, rechaza o reprograma** (BR-002). El estudiante no agenda por su cuenta.
+- **Relaciones:** Emprendimiento 1→N; Estudiante 1→N; Docente 1→N; Modalidad 1→N; Asesoría 0..N→N `adjuntos`.
 
-#### `diagnosticos` (encabezado), `preguntas_diagnostico` y `respuestas_diagnostico`
+#### `diagnosticos`
 
-- **Propósito:** el diagnóstico deja de ser una única tabla "en desarrollo" con campos sueltos y pasa a ser **data-driven**:
-  - `diagnosticos`: **encabezado** del diagnóstico (emprendimiento, sector, fecha, estado, url del informe generado).
-  - `preguntas_diagnostico`: **banco de preguntas** cargado desde un archivo **Excel** (sección, orden, enunciado, tipo, opciones, activa).
-  - `respuestas_diagnostico`: **respuestas** del emprendedor, con FK a la pregunta y al encabezado.
-- **Campos importantes:** `diagnosticos` (idDiagnosticos, FechaDiagnostico, Estado, UrlInforme); `preguntas_diagnostico` (idPregunta, Seccion, Orden, Enunciado, Tipo, Opciones, Activa); `respuestas_diagnostico` (idRespuesta, Valor, FechaRespuesta).
-- **Fks:** `diagnosticos.Emprendimiento_idEmprendimiento` → emprendimiento; `diagnosticos.SectorEconomico_idSectorEconomico` → sectoreconomico; `respuestas_diagnostico.Preguntas_idPregunta` → preguntas_diagnostico; `respuestas_diagnostico.Diagnosticos_idDiagnosticos` → diagnosticos.
-- **Relaciones:** Emprendimiento **1 → N** diagnósticos (encabezados); Diagnóstico **1 → N** respuestas; Pregunta **1 → N** respuestas.
+- **Propósito:** encabezado del diagnóstico de un emprendimiento.
+- **Campos:** `idDiagnosticos`, `FechaDiagnostico`, `Estado` (`En progreso` · `Enviado` · `Revisado`), **`PuntajeTotal`**, **`UrlInforme`**.
+- **FKs:** `Emprendimiento_idEmprendimiento`, `SectorEconomico_idSectorEconomico`.
+- **Relaciones:** Emprendimiento 1→N; Diagnóstico 1→N respuestas; Diagnóstico 0..1→N caracterización/valoración.
 
-> Esto resuelve el hallazgo del equipo: *"la definición actual del diagnóstico no está bien estructurada ni relacionada con los demás componentes"*. La matriz de indicadores se sustituye por **preguntas + respuestas** ([§6](#6-reglas-de-negocio), [§16](#16-fuentes-y-trazabilidad-del-alcance-ampliado)).
+#### `preguntas_diagnostico`
 
-#### `eventos` y `usuarios_has_Eventos`
+- **Propósito:** banco de 22 preguntas en 5 secciones (ver §3, Diagnóstico).
+- **Campos:** `idPregunta`, `Seccion` (1–5), `Orden`, `Enunciado`, `Tipo` (`Texto` · `Selección` · `Número`), `Opciones`, `Activa`, `Origen` (`Excel` · `Prototipo`).
+- **Estado:** el prototipo trae las 22 preguntas fijas; la carga desde Excel sigue pendiente (AQ-12).
 
-- **Propósito:** eventos académicos/culturales y registro de participación.
-- **`eventos` campos:** idEventos, Nombre_evento, Descripcion_evento, Capacidad_maxima, Estado, Requiere_registro, Fecha_creacion, Fecha_actualizacion. **Fks:** Tipo_evento_idTipo_evento → tipo_evento; Modalidad_idModalidad → modalidad; Fecha_y_Horarios_idFecha_y_Horarios → fecha_y_Horarios.
-- **`usuarios_has_Eventos`:** tabla pivote con PK compuesta (Usuarios_idUsuarios, Eventos_idEventos), campo Estado_asistencia, FKs a usuarios y eventos. Cardinalidad Usuario **N : N** Evento.
+#### `respuestas_diagnostico`
+
+- **Campos:** `idRespuesta`, `Valor`, `FechaRespuesta`.
+- **FKs:** `Preguntas_idPregunta`, `Diagnosticos_idDiagnosticos`.
+- **Relaciones:** Pregunta 1→N; Diagnóstico 1→N.
+
+#### `caracterizacion`
+
+- **Propósito:** resultado estructurado por secciones (insumo del informe).
+- **Campos:** `id`, `Seccion`, `Resultado`, `Puntaje`, `Fortalezas`, `Oportunidades`, `Fecha`, `UrlInforme`.
+- **FKs:** `Emprendimiento_idEmprendimiento`, `Diagnosticos_idDiagnosticos` (opcional).
+
+#### `valoracion`
+
+- **Propósito:** resultado por dimensión de comportamiento emprendedor.
+- **Campos:** `id`, `Dimension` (`Visión` · `Creatividad` · `Resiliencia` · `Liderazgo` · `Trabajo en equipo` · `Capacidad de decisión`), `Puntaje`, `Banda` (`90-100` · `70-89` · `50-69` · `<50`), `Recomendacion`, `Fecha`.
+- **FKs:** `Emprendimiento_idEmprendimiento`, `Diagnosticos_idDiagnosticos` (opcional).
+- **Estado:** la fórmula que convierte respuestas en puntajes sigue abierta (AQ-09).
+
+#### `actas`
+
+- **Propósito:** acta de compromiso y confidencialidad firmada y su revisión.
+- **Campos:** `idActa`, `UrlArchivo`, **`Estado`** (`Pendiente` · `En revisión` · `Aprobada` · `Rechazada`), `Observaciones`, `FechaCarga`, `FechaRevision`.
+- **FKs:** `Emprendimiento_idEmprendimiento`, `Usuarios_idRevisor` (opcional).
+- **Reglas:** aprobada es precondición de asignación (BR-001); el rechazo exige motivo (BR-009). **No existe vista de acta en el prototipo** (§17.4).
+
+#### `eventos`
+
+- **Propósito:** eventos del programa y su publicación.
+- **Campos:** `idEventos`, `Nombre_evento`, `Descripcion_evento`, **`DirigidoA`**, `Capacidad_maxima`, **`Cupo`**, **`Estado`** (`Pendiente` · `Aprobado` · `Rechazado` · `Publicado`), `Requiere_registro`, **`Lugar`**, **`Enlace`**, **`Organizador`**, `Fecha_creacion`, `Fecha_actualizacion`.
+- **FKs:** `Tipo_evento_idTipo_evento`, `Modalidad_idModalidad`, `Fecha_y_Horarios_idFecha_y_Horarios`.
+- **Relaciones:** Usuario N:N Evento (pivote); Evento 1→N recomendaciones.
+
+#### `usuarios_has_Eventos`
+
+- **Propósito:** inscripción y asistencia.
+- **Campos:** `Usuarios_idUsuarios`, `Eventos_idEventos` (PK compuesta), `Estado_asistencia`, `FechaInscripcion`.
 
 #### `codigosverificacion`
 
-- **Propósito:** almacenar los códigos de verificación de correo para validarlos de forma segura.
-- **Campos:** idCodigo, CorreoInstitucional, Codigo, Expiracion, Usado (0/1).
-- **Relaciones:** varios códigos pueden corresponder a un usuario (por correo). Es la base del flujo REAL de verificación.
-
-#### `caracterizacion` / `valoracion` (resultado del formulario)
-
-- **Propósito:** almacenar el **resultado estructurado por secciones** generado a partir de las respuestas del formulario (caracterización + valoración), con soporte para el **informe descargable**.
-- **Campos:** id, Seccion, Resultado, Puntaje, Fortalezas, Oportunidades, Fecha, UrlInforme.
-- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; Diagnosticos_idDiagnosticos (opcional) → diagnosticos.
-- **Relaciones:** Emprendimiento **1 → N** caracterizaciones/valoraciones; Diagnóstico **0..1 → N** resultados.
-
-#### `actas` (acta de compromiso y confidencialidad)
-
-- **Propósito:** almacenar el acta firmada y su **estado de revisión**. Complementa el campo `emprendimiento.ActaCompromiso`.
-- **Campos:** idActa, UrlArchivo, Estado (pendiente/en revisión/aprobada/rechazada), Observaciones, FechaCarga, FechaRevision.
-- **Fks:** Emprendimiento_idEmprendimiento → emprendimiento; Usuarios_idRevisor (opcional) → usuarios.
-- **Relaciones:** Emprendimiento **1 → N** actas (histórico); Usuario (revisor) **1 → N** actas revisadas.
+- **Propósito:** OTP de verificación de correo.
+- **Campos:** `idCodigo`, `CorreoInstitucional`, `Codigo` (8 dígitos), `Expiracion` (5 minutos), `Usado` (0/1), `FechaCreacion`.
+- **FKs:** `Usuarios_idUsuarios` (nullable hasta completar la verificación).
+- **Nota:** AQ-11 exige el vínculo por `usuario_id`; se conserva el correo para el caso previo a la verificación.
 
 #### `notificaciones`
 
-- **Propósito:** avisos dirigidos a usuarios/admin (registro, diagnóstico, asesoría, validación, tareas).
-- **Campos:** idNotificaciones, Tipo, Mensaje, Leida (0/1), FechaCreacion.
-- **Fks:** Usuarios_idUsuarios → usuarios (**destinatario**).
-- **Relaciones:** Usuario **1 → N** notificaciones.
+- **Propósito:** aviso accionable dirigido a un usuario.
+- **Campos:** `idNotificaciones`, `Tipo` (`Tarea` · `Asesoría` · `Seguimiento` · `Solicitud` · `Diagnóstico` · `Evento` · `Sistema`), `Mensaje`, **`Url`**, **`TipoObjeto`**, **`ObjetoId`**, `Leida` (0/1), `FechaCreacion`.
+- **FKs:** `Usuarios_idUsuarios` (**destinatario**).
+- **Reglas:** el contador de no leídas debe reflejar el estado real; marcar como leída no elimina el aviso (FR-019).
 
-#### `habilitaciones` (desbloqueo de módulos por persona)
+#### `habilitaciones`
 
-- **Propósito:** controlar **qué partes de la plataforma** están habilitadas para cada usuario; es la base del "desbloqueo" tras la validación. (Ya referenciado en la nota del [§5](#5-modelo-de-datos): los módulos se modelan como `habilitaciones` por persona.)
-- **Campos:** idHabilitacion, Estado (habilitado/no), Fecha.
-- **Fks:** Usuarios_idUsuarios → usuarios; Modulos_idModulos → modulos.
-- **Relaciones:** Usuario **1 → N** habilitaciones; Módulo **1 → N** habilitaciones.
+- **Propósito:** desbloqueo de módulos por persona tras la validación.
+- **Campos:** `idHabilitacion`, `Estado` (`habilitado` · `no habilitado`), `Fecha`.
+- **FKs:** `Usuarios_idUsuarios`, `Modulos_idModulos`.
+- **Estado:** el prototipo no tiene pantalla de habilitaciones; la bandeja de desbloqueo y el estado `Limitado` son la evidencia disponible.
+
+#### `comentarios`
+
+- **Propósito:** bitácora de comentarios del expediente (visible en la pestaña *Comentarios*).
+- **Campos:** `idComentario`, `Texto`, `Fecha`.
+- **FKs:** `Emprendimiento_idEmprendimiento`, `Usuarios_idUsuarios` (autor).
+- **Relaciones:** Emprendimiento 1→N; Autor 1→N.
+
+#### `recomendaciones_evento`
+
+- **Propósito:** recomendación de un evento a un emprendimiento completo o a estudiantes concretos.
+- **Campos:** `idRecomendacion`, `Mensaje`, `Estado` (`Enviada` · `Leída`), `Fecha`.
+- **FKs:** `Eventos_idEventos`, `Emprendimiento_idEmprendimiento`, `Usuarios_idEstudiante` (opcional si va a todo el grupo), `Usuarios_idDocente` (autor).
+- **Reglas:** el docente solo recomienda a sus asignados; la recomendación notifica al estudiante (FR-021).
+
+#### `solicitudes`
+
+- **Propósito:** bandeja única del Administrador (desbloqueos, paralelos y citas).
+- **Campos:** `idSolicitud`, `Tipo` (`Desbloqueo` · `Paralelo` · `Cita`), `Detalle`, `Estado` (`Pendiente` · `Aprobada` · `Rechazada`), `MotivoRechazo`, `FechaSolicitud`, `FechaResolucion`.
+- **FKs:** `Usuarios_idUsuarios` (solicitante), `Emprendimiento_idEmprendimiento` (opcional), `Usuarios_idResueltoPor` (opcional).
+- **Reglas:** toda resolución notifica al solicitante; el rechazo exige motivo y no se confirma con el campo vacío (FR-014).
+
+#### `configuracion_programa`
+
+- **Propósito:** parámetros centralizados del programa (FR-020).
+- **Campos:** `idConfiguracion`, `Clave`, `Valor`, `TipoDato`, `Descripcion`, `FechaActualizacion`.
+- **FKs:** `Usuarios_idUsuarios` (actualizado por).
+- **Claves observadas:** `carga_max_horas` (12), `max_emprendimientos_docente` (12), `sede_por_defecto`, `etapa_inicial`, `fecha_cierre_admisiones`, `cupos_por_sede` (40), `notif_desbloqueo`, `notif_paralelo`, `notif_tarea_vencida`, `notif_resumen_semanal`.
+
+#### `respaldos`
+
+- **Propósito:** historial y estado de las copias de seguridad (FR-018).
+- **Campos:** `idRespaldo`, **`Codigo`** (`BKP-YYYYMMDD-HHMM`), **`Tipo`** (`Completo` · `Parcial`), `FechaHora`, **`TamanoMB`**, **`Estado`** (`Exitosa` · `Fallida`), **`Destino`**, `RetencionDias`.
+- **FKs:** `Usuarios_idUsuarios` (generado por).
+- **Reglas:** la restauración es operación técnica, fuera de la interfaz (AQ-04). Frecuencia observada: diaria 09:00, retención 30 días.
+
+#### `adjuntos` y sus tres pivotes
+
+- **`adjuntos`:** `idAdjunto`, `NombreArchivo`, `RutaArchivo`, `TamanoBytes`, `TipoMime`, `FechaSubida`.
+- **FKs:** `Usuarios_idUsuarios` (subido por).
+- **Pivotes:** `adjuntos_tareas`, `adjuntos_seguimientos`, `adjuntos_asesorias` (PK compuesta con el adjunto y la entidad).
+- **Reglas:** borrado lógico y reversible del registro; **borrado físico en cascada** del archivo (BR-006); el límite de 500 MB es un requisito de backend, no está representado en el prototipo.
+
+#### `auditoria_eventos`
+
+- **Propósito:** trazabilidad de operaciones sensibles (NFR-007).
+- **Campos:** `idAuditoria`, `Accion` (`crear` · `editar` · `eliminar` · `aprobar` · `rechazar` · `exportar` · `consultar`), `Entidad`, `EntidadId`, `ValorAnterior` (jsonb), `ValorNuevo` (jsonb), `Fecha`, `Ip`.
+- **FKs:** `Usuarios_idUsuarios` (autor).
+- **Reglas:** la bitácora visible en `admin/configuracion.html` es su representación de interfaz.
+
+### Cobertura: datos del prototipo que ahora sí tienen tabla o columna
+
+| Elemento visible en el prototipo | Dónde queda modelado |
+|---|---|
+| Códigos `EMP-###`, `DOC-###`, `912646`, `BKP-…` | `emprendimiento.Codigo`, `usuarios.Codigo`, `respaldos.Codigo` |
+| Estado de aprobación del emprendimiento y paralelo | `emprendimiento.EstadoAprobacion`, `EsParalelo`, `solicitudes` |
+| Prioridad, puntos, puntaje, retroalimentación y devolución de tareas | `tareas` |
+| Puntaje y estado de revisión de avances | `seguimientos` |
+| Bitácora de comentarios del expediente | `comentarios` |
+| Recomendación de eventos por grupo o estudiante | `recomendaciones_evento` |
+| Bandeja de desbloqueos, paralelos y citas | `solicitudes` |
+| Parámetros del programa y su bitácora | `configuracion_programa` + `auditoria_eventos` |
+| Historial y estado de respaldos | `respaldos` |
+| Notificación que abre el objeto referido | `notificaciones.Url`, `TipoObjeto`, `ObjetoId` |
+| 6 dimensiones y 4 bandas del diagnóstico | `valoracion` |
+| 5 secciones y 22 preguntas del instrumento | `preguntas_diagnostico` + `respuestas_diagnostico` |
+| Sedes, cupos y etapa inicial | catálogos + `configuracion_programa` |
 
 ### Tablas del proyecto anterior consideradas **obsoletas / no necesarias para el MVP**
 
 - `evaluacioneshabilidades` — evaluación de habilidades no implementada en el flujo principal del MVP.
-- `solicitudestutoria` — duplica la funcionalidad de asesorías.
+- `solicitudestutoria` — duplica la funcionalidad de asesorías (la bandeja vigente es `solicitudes`).
 - Tablas no relacionadas con el flujo principal deben descartarse en la reconstrucción.
 
 ---
@@ -481,7 +592,7 @@ SGEMD/
 **Registros / usuarios**
 
 - R1: la contraseña siempre se almacena con bcrypt; nunca se devuelve ni se muestra.
-- R2: un usuario no verificado (`Verificado=0`) y desactivado (`Estado=0`) no debe operar.
+- R2: un usuario no verificado (`Verificado=0`) o con `Estado` distinto de `Activo` (es decir, `Limitado` o `Inactivo`) no debe operar los módulos que requieren validación.
 - R3: solo el propio usuario o un admin puede ver/editar los datos personales.
 
 **Emprendimientos**
@@ -506,19 +617,18 @@ SGEMD/
 - R15: el estudiante puede consultar (lectura) el seguimiento de su emprendimiento.
 - R16: editar/eliminar un seguimiento solo el autor o admin.
 
-**Etapas**
+**Etapas y fases**
 
-- R17: las etapas del emprendimiento son un catálogo cerrado:
-  1. Análisis y Definición de Requerimientos
-  2. Planeación y Diseño Arquitectónico
-  3. Desarrollo e Implementación Funcional
-  4. Evaluación y Validación de Impacto
-     El emprendimiento apunta a una etapa. La etapa **no** es un tipo de seguimiento.
+- R17: el sistema maneja **dos catálogos de fase distintos** y no deben confundirse:
+  1. **Etapa del emprendimiento** (`etapaemprendimiento`): `FASE 1 - Ideación` · `FASE 2 - Prototipo` · `FASE 3 - Validación` · `FASE 4 - Formalización`. Es un catálogo cerrado; el emprendimiento apunta a una etapa y la etapa **no** es un tipo de seguimiento.
+  2. **Fase del plan** (`faseplan`): `FASE 1` Ideación y priorización de ideas · `FASE 2` Estructuración y ejecución · `FASE 3` Consolidación del proceso · `FASE 4` Escalamiento. Agrupa tareas y avances.
+  - El detalle del emprendimiento usa alias cortos (*Ideación · Ejecución · Crecimiento · Consolidación*) que deben normalizarse a `faseplan`; se registran como deuda del prototipo ([§17.4](#173-vacíos-del-prototipo-que-no-se-inventan)).
 
 **Tareas**
 
 - R18: crea tareas el docente/admin; las completa el estudiante asignado.
-- R19: estados `pendiente/completada/vencida`; se auto-marca vencida por fecha límite.
+- R19: estados de tarea `Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta`; la tarea se auto-marca **Vencida** por fecha límite y pasa a **En revisión** cuando el estudiante la entrega.
+- R19b: la tarea tiene **prioridad** (`Alta` · `Media` · `Baja`) y **puntos**; el docente registra **puntaje obtenido** y **retroalimentación**, y el **estado de revisión** es `Pendiente` · `En revisión` · `Calificada` · `Devuelta`.
 - R20: estudiante ve sus tareas; docente las de sus asignados; admin todas.
 - R21: el avance (% de completadas) es un dato **derivado de BD**, no sintético.
 
@@ -552,13 +662,13 @@ SGEMD/
 
 - R33: el **Administrador** es el único que puede **crear, editar y dar de baja lógica** cuentas de estudiante y docente; el alta asigna el rol y el estado inicial.
 - R34: los estados de cuenta son **Limitado → Activo → Inactivo**. Solo el Administrador desbloquea (Limitado → Activo) y reactiva (Inactivo → Activo).
-- R35: toda alta o edición valida **campos obligatorios**, **documento y correo únicos** y el **tope de carga docente (12 h)**.
+- R35: toda alta o edición valida **campos obligatorios**, **documento y correo únicos** y **ambos topes de carga docente**: **12 h de asesoría por semana** y **12 emprendimientos**. Los dos son parámetros del programa (`configuracion_programa`) y pueden cambiarse desde `admin/configuracion.html`; un valor no sustituye al otro.
 - R36: la **baja es lógica y reversible**; al eliminar un emprendimiento o usuario, sus **archivos adjuntos se eliminan en cascada**.
 
 **Emprendimientos y solicitudes**
 
-- R37: el **estudiante registra** el emprendimiento y este nace en **Pendiente de aprobación**; solo el Administrador lo pasa a **Aprobado**. El **segundo emprendimiento paralelo** requiere autorización expresa.
-- R38: la **bandeja de solicitudes** concentra desbloqueos, aprobaciones/paralelos y citas; toda resolución notifica al solicitante y el rechazo de emprendimiento exige motivo.
+- R37: el emprendimiento nace en **Pendiente** y solo el Administrador lo pasa a **Aprobado** o **Rechazado** (con motivo). El **segundo emprendimiento paralelo** requiere autorización expresa. El **alta la realiza el Administrador**: el prototipo no incluye un formulario de registro de emprendimiento para el estudiante ([§17.4](#173-vacíos-del-prototipo-que-no-se-inventan)).
+- R38: la **bandeja de solicitudes** concentra desbloqueos, aprobaciones/paralelos y citas; toda resolución notifica al solicitante y el rechazo exige motivo. **El prototipo no valida que el motivo esté diligenciado** al confirmar un rechazo: es un defecto conocido del prototipo ([§17.3](#172-contradicciones-que-el-prototipo-introduce-y-cómo-se-resuelven)).
 
 **Seguimiento y evidencia**
 
@@ -568,6 +678,17 @@ SGEMD/
 **Respaldos y configuración**
 
 - R41: solo el Administrador puede **exportar la base**, **crear respaldos**, consultar su **estado/integridad** y modificar la **configuración del programa**; todo cambio de configuración queda en la **bitácora**.
+
+**Avances, comentarios y recomendaciones**
+
+- R42: el **avance** (`seguimientos`) se registra con **fase del plan**, **puntaje 0–100**, **estado de revisión** y **evidencia**; el docente puede dejarlo en `Pendiente`, `En revisión`, `Calificada` o `Devuelta`.
+- R43: el **expediente** tiene una **bitácora de comentarios** visible para admin y docente asignado; el autor se registra automáticamente y el estudiante la consulta en solo lectura.
+- R44: el **docente recomienda eventos** solo a estudiantes o emprendimientos que tenga asignados; cada recomendación genera una notificación accionable.
+- R45: la **prioridad** de una tarea (`Alta` · `Media` · `Baja`) es un campo obligatorio y se usa para ordenar la bandeja del estudiante.
+
+**Bitácora y auditoría**
+
+- R46: toda operación sensible (alta, edición, baja, aprobación, rechazo, exportación) registra **autor, fecha, entidad, valor anterior y valor nuevo** en `auditoria_eventos`. La "bitácora de decisiones" de `admin/configuracion.html` es su representación de interfaz, no una tabla independiente.
 
 ---
 
@@ -687,6 +808,44 @@ SGEMD/
 | PUT    | `/notifications/:id/read`   | auth | Marcar como leída          |
 | PUT    | `/notifications/read-all`   | auth | Marcar todas como leídas   |
 
+### solicitudes (bandeja única)
+
+> Reemplaza la práctica de resolver desbloqueos, paralelos y citas por rutas sueltas. La UI existe en `admin/solicitudes.html`; el backend no.
+
+| Método | Ruta | Rol | Propósito |
+| ------ | ---- | --- | --------- |
+| GET | `/requests` | admin | Listar por tipo y estado, con contador de pendientes |
+| GET | `/requests/:id` | admin | Detalle de la solicitud |
+| POST | `/requests` | auth | Crear solicitud (desbloqueo, paralelo o cita) |
+| PUT | `/requests/:id/approve` | admin | Aprobar y aplicar el efecto |
+| PUT | `/requests/:id/reject` | admin | Rechazar con **motivo obligatorio** |
+
+### configuración del programa
+
+| Método | Ruta | Rol | Propósito |
+| ------ | ---- | --- | --------- |
+| GET | `/settings` | admin | Leer parámetros (`carga_max_horas`, `max_emprendimientos_docente`, `cupos_por_sede`, sedes, etapa inicial) |
+| PUT | `/settings` | admin | Actualizar parámetros; registra autor, valor anterior y valor nuevo |
+| GET | `/settings/audit` | admin | Bitácora de cambios de configuración |
+
+### respaldos
+
+| Método | Ruta | Rol | Propósito |
+| ------ | ---- | --- | --------- |
+| GET | `/backups` | admin | Historial (código, tipo, fecha, tamaño, estado) |
+| POST | `/backups` | admin | Solicitar un respaldo |
+| GET | `/backups/:id/download` | admin | Descargar la copia |
+| GET | `/backups/:id` | admin | Detalle e integridad |
+
+### comentarios y recomendaciones
+
+| Método | Ruta | Rol | Propósito |
+| ------ | ---- | --- | --------- |
+| GET | `/entrepreneurship/:id/comments` | auth (alcance) | Bitácora de comentarios del expediente |
+| POST | `/entrepreneurship/:id/comments` | teacher/admin | Registrar comentario (autor = `req.user`) |
+| GET | `/events/:id/recommendations` | auth (alcance) | Recomendaciones del evento |
+| POST | `/events/:id/recommendations` | teacher/admin | Recomendar a un estudiante o a todo el emprendimiento |
+
 ### dashboard
 
 | Método | Ruta                 | Rol        | Propósito               |
@@ -699,7 +858,7 @@ SGEMD/
 
 | Método | Ruta                                                                                                                                                                                | Propósito        |
 | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| GET    | `/roles`, `/type-doc`, `/type-users`, `/uni-centers`, `/type-pop`, `/municipalities`, `/academic-programs`, `/entrep-stage`, `/econo-sector`, `/mode`, `/type-event`, `/date-times` | Listar catálogos |
+| GET    | `/roles`, `/type-doc`, `/type-users`, `/uni-centers`, `/type-pop`, `/municipalities`, `/academic-programs`, `/entrep-stage`, `/plan-phase`, `/econo-sector`, `/mode`, `/type-event`, `/date-times`, `/modules` | Listar los 14 catálogos |
 
 ### event (si aplica)
 
@@ -863,7 +1022,7 @@ Las acciones del docente son **vistas completas**, no ventanas emergentes (solo 
 - **Estados de revisión del docente** (Pendiente · En revisión · Calificada · Devuelta) sobre seguimiento/avances y tareas, con calificación por **puntaje (0–100) + retroalimentación** y posibilidad de **devolver** la tarea al estudiante.
 - Dashboards con métricas reales (no mock).
 - **El Administrador crea y gestiona usuarios** (alta de estudiante/docente, edición y baja lógica); el autorregistro público sigue existiendo para estudiantes.
-- **El estudiante registra el emprendimiento y el Administrador lo aprueba**; el segundo emprendimiento requiere autorización de **paralelo**.
+- **El Administrador crea el emprendimiento y lo aprueba**; el segundo emprendimiento requiere autorización de **paralelo**. *(El prototipo no incluye el alta por el estudiante: §17.4.)*
 - **Estados de cuenta:** Limitado → Activo → Inactivo, con desbloqueo y reactivación **exclusivos del Administrador**.
 - **Asesorías:** el Admin crea y asigna directamente; el Docente acepta o reprograma; el estudiante solo solicita (reemplaza el enunciado anterior de R22).
 - **Borrado lógico y reversible** con cascada de archivos adjuntos.
@@ -891,7 +1050,7 @@ Las acciones del docente son **vistas completas**, no ventanas emergentes (solo 
 - **Diagnóstico (AQ-09):** rúbrica respuestas → fortalezas/oportunidades; formato y contenido del **informe descargable**; filtros necesarios. **Pendiente** (dossier §5).
 - **Acta de compromiso (AQ-10):** el **rechazo exige motivo obligatorio** y notifica al estudiante (BR-009, AQ-05). Queda pendiente el **tiempo de revisión** y el efecto completo del rechazo (dossier §6).
 - **Restauración de respaldos:** es una **operación técnica**, no una función del Administrador; la UI solo exporta y consulta estado/integridad (`Fuera de alcance / Post-MVP`, AQ-04).
-- **Estructura de datos (AQ-11):** **cerrada** con el modelo textual de [§5](#5-modelo-de-datos) (29 tablas, 42 relaciones). Los diagramas están desactualizados y no se usan como fuente.
+- **Estructura de datos (AQ-11):** **cerrada** con el modelo textual de [§5](#5-modelo-de-datos) (**41 tablas = 27 de negocio + 14 catálogos**). No se declara un total de relaciones. Los diagramas se regeneraron el 2026-10-25 y su fuente es el archivo Mermaid/Markdown, no los binarios.
 - **`.py` de correcciones de `context_admin`:** **resuelto (AQ-03)**. El archivo es `Config-admin/correcciones-adiciones-requisitos.md`; la copia usada es idéntica por SHA-256 (`EDCDE30F…836B5872`) y sus 28 ítems están mapeados.
 - **Documentos de referencia no disponibles (AQ-12):** `control.pdf` y el **Excel de preguntas** (§16.3). Si no llegan, no se bloquea el cierre ni se inventa su contenido.
 
@@ -903,10 +1062,10 @@ Las acciones del docente son **vistas completas**, no ventanas emergentes (solo 
 
 - Autenticación: registro, login, logout, verificación de correo real en backend (OTP 8 dígitos/5 min), JWT, cierre de rutas por rol.
 - Usuarios y roles (admin gestiona usuarios; edición de perfil).
-- **Alta, edición y baja lógica de estudiantes y docentes por el Administrador**, con validación de unicidad y tope de carga docente.
+- **Alta, edición y baja lógica de estudiantes y docentes por el Administrador**, con validación de unicidad y **ambos topes de carga docente** (12 h/semana y 12 emprendimientos, configurables).
 - **Aprobación de emprendimientos por el Administrador**, incluido el **paralelo**; bandeja única de solicitudes (desbloqueos, paralelos y citas).
 - **Ciclo de estados de cuenta** Limitado → Activo → Inactivo, con desbloqueo y reactivación exclusivos del Administrador.
-- Emprendimientos: el estudiante registra, el admin aprueba, consulta con alcance, ver detalle y etapa. Historial de emprendimientos.
+- Emprendimientos: el admin crea y aprueba/rechaza, consulta con alcance, ver detalle y etapa. Historial de emprendimientos. *(El alta por el estudiante no está representada en el prototipo: [§17.4](#173-vacíos-del-prototipo-que-no-se-inventan).)*
 - Asignaciones: admin asigna docente a estudiante (+ emprendimiento); docente consulta sus asignados; estudiante su/s mentor/es.
 - Seguimiento: docente registra notas sobre un emprendimiento; estudiante consulta historial. Adjuntos (hasta 500MB).
 - Tareas: docente crea, estudiante completa **con evidencia obligatoria**, estados y avance derivados de BD. Adjuntos (hasta 500MB).
@@ -962,8 +1121,8 @@ Pruebas funcionales para considerar el MVP terminado:
 14. El emprendedor puede **diligenciar el formulario de diagnóstico** (cargado desde Excel), y el sistema **genera** la caracterización/valoración con **feedback inmediato** e **informe descargable**.
 15. El emprendedor puede **subir el acta de compromiso** firmada y el administrativo puede **aprobarla/rechazarla**.
 16. Se generan **notificaciones** al administrativo (registro, diagnóstico, emprendimiento, asesoría) y al estudiante (validación, acta, tareas/asesorías, evento). Cada notificación abre el objeto referido.
-17. El administrador puede **crear, editar y dar de baja lógica** estudiantes y docentes, con validación de documento/correo únicos y tope de carga docente.
-18. Un emprendimiento registrado por el estudiante queda en **Pendiente de aprobación** y solo pasa a **Aprobado** por decisión del Administrador; el **paralelo** requiere autorización.
+17. El administrador puede **crear, editar y dar de baja lógica** estudiantes y docentes, con validación de documento/correo únicos y **ambos topes de carga docente** (12 h/semana y 12 emprendimientos, configurables).
+18. Un emprendimiento queda en **Pendiente** y solo pasa a **Aprobado** por decisión del Administrador; el **paralelo** requiere autorización. *(El alta por el estudiante está pendiente de definición: [§17.4](#173-vacíos-del-prototipo-que-no-se-inventan).)*
 19. El estado de la cuenta cambia **solo** por el Administrador: Limitado → Activo (desbloqueo) e Inactivo → Activo (reactivación); a los **90 días** sin actividad se marca Inactivo.
 20. El estudiante **no puede completar una tarea sin evidencia** adjunta; el botón permanece deshabilitado hasta que suba al menos un archivo.
 21. El administrador puede **exportar la base** y consultar el **estado, historial e integridad** del respaldo; los cambios de **configuración** quedan en la bitácora.
@@ -1036,14 +1195,15 @@ Cuando el MVP esté terminado, el proyecto debe verse así:
 
 ### 16.2 Puntos por cerrar (bloquean implementación)
 
-> **Estado al 2026-10-25:** AQ-01 … AQ-05 y **AQ-08** están cerradas; **AQ-11** queda cerrada con el modelo textual de [§5](#5-modelo-de-datos). Las preguntas que siguen se tratan en el dossier [`docs/dossier-decisiones-pendientes-2026-10.md`](./docs/dossier-decisiones-pendientes-2026-10.md) y **no se deciden por defecto**.
+> **Estado al 2026-10-25:** AQ-01 … AQ-05 y **AQ-08** están cerradas; **AQ-11** queda cerrada con el modelo textual de [§5](#5-modelo-de-datos) (41 tablas = 27 de negocio + 14 catálogos). Las preguntas que siguen se tratan en el dossier [`docs/dossier-decisiones-pendientes-2026-10.md`](./docs/dossier-decisiones-pendientes-2026-10.md) y **no se deciden por defecto**.
 
 - **AQ-06 — Campos obligatorios y criterios de validación:** 7 campos + casilla en `registro.html`, sin atributos `name`; no hay lista de criterios en el prototipo.
 - **AQ-07 — Acceso previo:** contradicción entre `estado-seguimiento.html` (diagnóstico bloqueado) y `emprendimiento-detalle.html` (botón activo).
 - **AQ-09 — Rúbrica e informe:** 5 secciones, 22 preguntas, 6 dimensiones y 4 bandas visibles, sin fórmula ni plantilla de informe.
 - **AQ-10 — Plazo y efecto del rechazo del acta:** BR-009 fija el motivo obligatorio; falta el plazo y el efecto completo.
 - **AQ-12 — Insumos ausentes:** `control.pdf` y el **Excel de preguntas** (§16.3).
-- **Diagramas desactualizados:** `docs/diagrama-clases.*`, `docs/diagrama-componentes.*` y `docs/context-diagram.png` no son fuente de verdad ni evidencia. Su actualización queda **fuera de este cierre**.
+- **Diagramas:** regenerados el 2026-10-25 (`docs/diagrama-clases.md`, `docs/diagrama-componentes.md`, `docs/context-diagram.mmd`). Los binarios `.drawio`/`.png` anteriores pueden seguir siendo obsoletos; la fuente es el archivo Mermaid/Markdown.
+- **Vacíos del prototipo (no son decisiones, son ausencias):** alta de emprendimiento por el estudiante, vista del acta, rol auditor, validación de motivo obligatorio en rechazos y emisión de notificaciones en tiempo real. Ver [§17.4](#173-vacíos-del-prototipo-que-no-se-inventan).
 
 ### 16.3 Documentos de referencia
 
@@ -1061,7 +1221,7 @@ Cuando el MVP esté terminado, el proyecto debe verse así:
 > **Importante:** esta actualización se hizo **solo en local**. No se creó rama, no se hizo commit y no se publicó en GitHub.
 
 - **Material local del área (no versionado):** inventario de insumos, flujo real de atención y pendientes del estudiante — se mantienen fuera del repositorio por contener datos personales.
-- `docs/orquestacion-actualizacion-requisitos-2026-10.md` — orquestación, jerarquía de verdad, protocolo de verificación y criterios de aceptación.
+- `docs/orquestacion-actualizacion-requisitos-2026-10.md` — orquestación, protocolo de verificación y criterios de aceptación.
 - `docs/registro-actualizacion-requisitos-2026-10.md` — ledger de evidencia, bitácora de vistas, matriz de vacíos, decisiones y preguntas abiertas.
 - `docs/dossier-decisiones-pendientes-2026-10.md` — hojas de decisión AQ-06, AQ-07, AQ-09, AQ-10 y AQ-12; anexos de AQ-08 y AQ-11; nota de diagramas.
 - `docs/fr_nfr_sgemd.md` — SRS actualizado (24 FR, 9 NFR, 6 BP, 9 BR; AQ-01 … AQ-12).
@@ -1089,8 +1249,72 @@ Cuando el MVP esté terminado, el proyecto debe verse así:
 | Requisitos | **24 FR · 9 NFR · 6 BP · 9 BR** |
 | Historias nuevas | **16** (`US-011` … `US-026`) |
 | Preguntas abiertas | **5** (AQ-06, AQ-07, AQ-09, AQ-10, AQ-12) |
+| Modelo de datos | **41 tablas = 27 de negocio + 14 catálogos** (sin total de relaciones) |
+| Diagramas | **Regenerados el 2026-10-25** (Mermaid/Markdown como fuente) |
 | Backend / API / PostgreSQL | **No existen en este repositorio** |
 | Guardar / descargar / exportar / notificar | **Simulado en el navegador** |
+
+---
+
+## 17. Reconciliación con el prototipo (2026-10-25)
+
+> **Propósito:** dejar constancia de qué se cambió al alinear la documentación con el prototipo, qué se tomó de él, qué contradicciones se resolvieron y qué vacíos **no** se rellenaron por invención. Este registro evita que un lector nuevo vuelva a leer la documentación anterior como si fuera la vigente.
+
+### 17.1 Qué se tomó del prototipo
+
+- **Estados de cuenta:** `Limitado` · `Activo` · `Inactivo` (antes `Estado 1/0`).
+- **Estados de tarea:** `Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta`.
+- **Estados de revisión:** `Pendiente` · `En revisión` · `Calificada` · `Devuelta`.
+- **Estados de asesoría:** `Por agendar` · `Programada` · `Confirmada` · `En curso` · `Completada` · `Cancelada`.
+- **Estados de evento:** `Pendiente` · `Aprobado` · `Rechazado` · `Publicado`.
+- **Respaldos:** tipo `Completo` · `Parcial`; estado `Exitosa` · `Fallida`; frecuencia diaria 09:00; retención 30 días.
+- **Prioridad:** `Alta` · `Media` · `Baja`.
+- **Fases del plan:** Ideación y priorización · Estructuración y ejecución · Consolidación · Escalamiento.
+- **Etapas del emprendimiento:** Ideación · Prototipo · Validación · Formalización.
+- **Diagnóstico:** 5 secciones, 22 preguntas, 6 dimensiones y 4 bandas.
+- **Parámetros:** `carga_max_horas=12`, `max_emprendimientos_docente=12`, `cupos_por_sede=40`, tres sedes (Norte, Centro, Sur).
+- **Campos nuevos que el modelo no tenía:** prioridad, puntos, puntaje obtenido, retroalimentación, motivo de devolución, estado de revisión, comentarios, recomendaciones, configuración, respaldos, solicitudes, auditoría y enlace accionable de la notificación.
+
+### 17.2 Contradicciones que el prototipo introduce y cómo se resuelven
+
+| # | Contradicción | Resolución documentada |
+|---|---|---|
+| 1 | **12 horas** (FR-016) vs **12 emprendimientos** (prototipo) | **No son excluyentes:** el prototipo aplica **ambos** topes y los expone como parámetros. Se modelan `asignaciones.HorasSemanales` + `configuracion_programa.max_emprendimientos_docente`. |
+| 2 | **Tres juegos de fases** (R17 anterior, `estado-seguimiento`, detalle del emprendimiento) | Se separan dos conceptos: `etapaemprendimiento` (avance global) y `faseplan` (plan de trabajo). Los alias cortos del detalle quedan como **deuda de normalización** del prototipo. |
+| 3 | **Cuenta `Limitado`**: `estado-seguimiento` bloquea el diagnóstico, `emprendimiento-detalle` lo ofrece activo | Se mantiene **AQ-07 abierta**; el modelo soporta ambos comportamientos vía `habilitaciones`. No se decide por defecto. |
+| 4 | **Acta**: `admin/asignaciones.html` la exige, pero no hay vista para cargarla | Se mantiene FR-003/BR-001 como **pendientes**; `actas` se modela, pero el flujo no está representado. |
+| 5 | **Motivo de rechazo obligatorio** (BR-009) vs confirmación con campo vacío | Se documenta como **defecto del prototipo**; la regla queda vigente en [§6](#6-reglas-de-negocio) (R38). |
+| 6 | **Alta de emprendimiento por el estudiante** (FR-012) vs prototipo que no la tiene | Se corrige el rol del estudiante: el alta la hace el Administrador; FR-012 queda como **parcial** hasta que se decida. |
+| 7 | **Rol auditor** (R-04, AQ-08) vs catálogo `roles` 1–3 y cero pantallas | Se conserva como `Post-MVP`; el catálogo ya contempla el valor 4 y los diagramas lo incluyen. |
+| 8 | **Notificaciones en tiempo real** (NFR, README) vs prototipo sin emisión | Se degrada la expectativa: bandeja simulada; la emisión en tiempo real queda como requisito de backend. |
+
+### 17.3 Vacíos del prototipo que no se inventan
+
+Estos elementos **no existen** en las 73 pantallas. Se documentan como pendientes y no se les asigna comportamiento supuesto:
+
+1. **Alta de emprendimiento por el estudiante** (FR-012): no hay formulario ni vista del estado *Pendiente*.
+2. **Vista del acta de compromiso** (FR-003): no hay pantalla de descarga, carga ni revisión.
+3. **Rol auditor** (rol 4): definido en requisitos, sin ninguna pantalla.
+4. **Validación del motivo obligatorio** en rechazos (FR-014, BR-009): el prototipo confirma con el campo vacío.
+5. **Notificaciones en tiempo real** (FR-005): solo bandeja, sin emisión ni WebSocket.
+6. **Limpieza en cascada de adjuntos** (BR-006 / NFR): no hay evidencia visual del borrado físico.
+7. **Cálculo automático del diagnóstico** (FR-002): 22 preguntas y resultados visibles, sin fórmula ni derivación.
+8. **Inactividad automática a 90 días** (FR-007): el estado existe y se filtra, pero no hay proceso que lo calcule.
+9. **Restauración de respaldos** (AQ-04): solo creación y descarga simuladas.
+10. **Normalización de los alias de fase** en el detalle del emprendimiento.
+
+### 17.4 Documentos sincronizados en este cambio
+
+- `README.md` — §2, §3, §4, §5, §6, §7, §11, §16 y este §17.
+- `docs/fr_nfr_sgemd.md` — estados de implementación, FR-012, FR-016, FR-024, conteos y AQ-11.
+- `docs/diagrama-clases.md`, `docs/diagrama-componentes.md`, `docs/context-diagram.mmd` — regenerados.
+- `docs/estructura_de_vistas_sgemd.md` — §3.2 corregida (se elimina el flujo donde el estudiante agenda asesorías y el dashboard con métricas inventadas).
+- `docs/VALIDACION-ALCANCE.md` — 73 pantallas (4 + 27 + 23 + 19).
+- `docs/dossier-decisiones-pendientes-2026-10.md` — AQ-11 y evidencia de AQ-06/07/09/10/12.
+- `docs/historias_usuario.md` — topes de 12 h y 12 emprendimientos.
+- `PROTOTIPO-STITCH.md` — 73 pantallas y reparto 4/27/23/19.
+- `prototype/README.md` — nota sobre los scripts de auditoría ausentes.
+- `docs/sincronizacion-prototipo-2026-10.md` — registro completo del cambio.
 
 ---
 

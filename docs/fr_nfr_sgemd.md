@@ -3,6 +3,8 @@
 > **Actualización:** 25 de octubre de 2026 · **trabajo local** (sin rama nueva, sin commit y sin push a GitHub).
 > **Motivo:** sincronizar el SRS con las vistas realmente implementadas en el prototipo, con las correcciones C-1…C-7 y adiciones A-1…A-21 de `Config-admin/correcciones-adiciones-requisitos.md`, y con el refactor de los roles administrador, estudiante y docente.
 > **Método y evidencia:** [`orquestacion-actualizacion-requisitos-2026-10.md`](./orquestacion-actualizacion-requisitos-2026-10.md) y [`registro-actualizacion-requisitos-2026-10.md`](./registro-actualizacion-requisitos-2026-10.md).
+> **Alineación (2026-10-25):** este SRS se contrastó con las **73 pantallas** del prototipo. Cuando un requisito y el prototipo difieren, se corrige el requisito salvo que exista una decisión escrita en contra. Los vacíos del prototipo se registran como pendientes y no se rellenan por invención (ver [`sincronizacion-prototipo-2026-10.md`](./sincronizacion-prototipo-2026-10.md)).
+>
 > **Nota de alcance:** el prototipo es **estático**. Las operaciones de guardado, descarga, exportación y notificación están **simuladas** en el navegador; no existe backend, API ni base de datos PostgreSQL en este repositorio.
 
 ### Leyenda de estado de implementación
@@ -10,6 +12,7 @@
 | Estado | Significado |
 |---|---|
 | `Implementado en prototipo (UI)` | La pantalla, el control o el flujo existe y es navegable en `prototype/**` |
+| `Parcial en prototipo (UI)` | Parte del requisito existe en la interfaz; falta un flujo, una vista o una validación (se indica cuál) |
 | `Simulado en prototipo` | El comportamiento se representa en el navegador (p. ej. `localStorage`), sin persistencia real |
 | `Pendiente de backend` | Requisito acordado, sin implementación funcional en este repositorio |
 | `Fuera de alcance / Post-MVP` | Reconocido, pero no forma parte del MVP actual |
@@ -79,10 +82,10 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 
 ### BP-004: Aprobación de Emprendimientos
 * **Propósito:** Autorizar la creación de un emprendimiento y controlar los emprendimientos paralelos de un mismo estudiante.
-* **Desencadenante:** El estudiante registra un emprendimiento.
-* **Actores:** Estudiante, Administrador.
+* **Desencadenante:** El Administrador crea un emprendimiento para un estudiante.
+* **Actores:** Administrador, Estudiante.
 * **Flujo Actual:** El alta dependía del Administrador; no existía una bandeja única de aprobación.
-* **Experiencia del Usuario:** El estudiante registra el emprendimiento; queda en **Pendiente de aprobación**. El Administrador lo revisa en la bandeja de solicitudes y lo **aprueba o rechaza** con motivo. Si el estudiante ya tiene un emprendimiento activo, la aprobación del segundo se registra como **paralelo autorizado**.
+* **Experiencia del Usuario:** El Administrador registra el emprendimiento; queda en **Pendiente** y lo revisa en la bandeja de solicitudes para **aprobarlo o rechazarlo** con motivo. Si el estudiante ya tiene un emprendimiento activo, la aprobación del segundo se registra como **paralelo autorizado**. *(El prototipo no incluye el alta por el estudiante.)*
 * **Puntos de Dolor:** Duplicidad de proyectos y pérdida de control sobre el segundo emprendimiento.
 * **Resultado Deseado:** Todo emprendimiento nace con estado y responsable de aprobación trazables.
 * **Reglas de Negocio:** Sin aprobación del Administrador el emprendimiento no pasa a **Aprobado**; el rechazo exige motivo y notifica al estudiante.
@@ -152,7 +155,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 * **Declaración:** El sistema deberá enviar notificaciones en tiempo real a los usuarios cuando se les asigne una tarea o asesoría, cuando cambie el estado de una solicitud o cuando se apruebe/rechace un emprendimiento[cite: 7].
 * **Descripción:** Mejora la comunicación y los tiempos de respuesta; cada aviso debe ser **accionable** (abre el objeto referido) y puede marcarse como leído[cite: 7].
 * **Rol Relacionado:** Estudiante, Docente, Administrador[cite: 7].
-* **Estado de implementación:** `Implementado en prototipo (UI)` en las bandejas de notificaciones de los tres roles; el envío real es `Pendiente de backend`.
+* **Estado de implementación:** `Parcial en prototipo (UI)`. Existen las bandejas de los tres roles con filtros y "marcar como leída", pero **no hay emisión ni canal en tiempo real**: el prototipo no usa WebSocket ni `Socket.io`. La emisión es `Pendiente de backend`.
 * **Prioridad:** Media[cite: 7].
 * **Referencia:**[cite: 7]; `Config-admin/correcciones-adiciones-requisitos.md` A-8.
 
@@ -205,11 +208,11 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 * **Referencia:** `Config-admin/correcciones-adiciones-requisitos.md` A-1, A-4, A-5, D1.
 
 ### FR-012: Aprobación de Emprendimientos y Emprendimiento Paralelo
-* **Declaración:** El sistema deberá permitir que el **estudiante registre** un emprendimiento y que el **Administrador lo apruebe o rechace**; el estado inicial será **Pendiente de aprobación**. El Administrador autorizará el **segundo emprendimiento paralelo** de un mismo estudiante[cite: 8, 9].
+* **Declaración:** El sistema deberá permitir que el **Administrador cree un emprendimiento** y lo **apruebe o rechace**; el estado inicial será **Pendiente**. El Administrador autorizará el **segundo emprendimiento paralelo** de un mismo estudiante[cite: 8, 9]. *(El prototipo no incluye el alta por el estudiante; ver nota de estado.)*
 * **Descripción:** Formaliza el alta de emprendimientos y evita la duplicidad no controlada.
 * **Rol Relacionado:** Estudiante, Administrador.
 * **Reglas de Negocio:** Sin aprobación no hay paso a **Aprobado**. El rechazo exige motivo y notifica al estudiante. Un segundo emprendimiento requiere autorización expresa de paralelo.
-* **Estado de implementación:** `Implementado en prototipo (UI)` en `admin/solicitudes.html` (pestaña Paralelos, aprobar/rechazar con motivo) y `estudiante/emprendimientos.html`; `Simulado en prototipo`. El **campo de motivo existe**, pero la **obligatoriedad no está validada** en la interfaz: `Pendiente de backend`.
+* **Estado de implementación:** `Parcial en prototipo (UI)`. Existe `admin/solicitudes.html` (pestaña Paralelos, aprobar/rechazar) y la lista de emprendimientos del estudiante, pero **no hay formulario de alta ni vista del estado Pendiente**: el prototipo asigna el emprendimiento desde el panel del Administrador. Los estados observados son `Pendiente` · `Aprobado` · `Rechazado`. El **campo de motivo existe**, pero la **obligatoriedad no está validada** en la interfaz: `Pendiente de backend`.
 * **Prioridad:** Alta.
 * **Referencia:** `Config-admin/correcciones-adiciones-requisitos.md` A-2, A-10, D2.
 
@@ -241,11 +244,11 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 * **Referencia:** `Config-admin/correcciones-adiciones-requisitos.md` C-1, C-2, A-12.
 
 ### FR-016: Validación de Formularios y Unicidad
-* **Declaración:** El sistema deberá validar en toda alta y edición los **campos obligatorios**, el **formato** y la **unicidad** de documento y correo, además del tope de carga docente de **12 horas**[cite: 9].
+* **Declaración:** El sistema deberá validar en toda alta y edición los **campos obligatorios**, el **formato** y la **unicidad** de documento y correo, además de **los dos topes de carga docente**: **12 horas de asesoría por semana** y **12 emprendimientos** (ambos configurables)[cite: 9].
 * **Descripción:** Evita duplicados y datos incompletos antes de persistir.
 * **Rol Relacionado:** Todos.
-* **Reglas de Negocio:** Un docente no puede repetirse en la misma asignación ni superar el tope de carga configurado. Los mensajes de error indican el campo afectado.
-* **Estado de implementación:** `Implementado en prototipo (UI)` como validación de formulario y mensajes; la unicidad real es `Pendiente de backend`.
+* **Reglas de Negocio:** Un docente no puede repetirse en la misma asignación ni superar los topes configurados. **Los dos topes son independientes y ambos aplican**: el de horas (`carga_max_horas=12`) y el de emprendimientos (`max_emprendimientos_docente=12`). Los mensajes de error indican el campo afectado.
+* **Estado de implementación:** `Implementado en prototipo (UI)` como validación de formulario y mensajes, y como regla de asignación visible en `admin/asignaciones.html` («Un docente puede tener hasta 12 emprendimientos») y en `admin/configuracion.html` (carga máxima y emprendimientos máximos). La unicidad real y el cálculo de los topes son `Pendiente de backend`.
 * **Prioridad:** Alta.
 * **Referencia:** `Config-admin/correcciones-adiciones-requisitos.md` A-5.
 
@@ -317,7 +320,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 * **Descripción:** Evita campos irrelevantes y mejora la calidad del dato académico.
 * **Rol Relacionado:** Estudiante, Administrador.
 * **Reglas de Negocio:** El programa académico solo lo modifica el Administrador. El semestre depende del tipo de posgrado; para egresado desaparece.
-* **Estado de implementación:** `Implementado en prototipo (UI)` en `estudiante/configuracion.html` (campos condicionales por nivel); `Simulado en prototipo`.
+* **Estado de implementación:** `Parcial en prototipo (UI)`. Los campos condicionales por nivel académico existen **solo en `estudiante/configuracion.html`**; el formulario equivalente del Administrador (`admin/usuarios.html`) no los replica. `Simulado en prototipo`.
 * **Prioridad:** Media.
 * **Referencia:** `prototype/README.md` §12; `estudiante/configuracion.html`.
 
@@ -366,7 +369,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 
 ### NFR-006: Consistencia Visual y de Datos
 * **Categoría:** Usabilidad / Consistencia
-* **Declaración:** El sistema deberá mantener una **paleta y tipografía únicas**, componentes reutilizables y **estados normalizados** (`Limitado`, `Activo`, `Inactivo`, `Pendiente de aprobación`, `Aprobado`, `Rechazado`) en todas las vistas y roles.
+* **Declaración:** El sistema deberá mantener una **paleta y tipografía únicas**, componentes reutilizables y **estados normalizados** (`Limitado`, `Activo`, `Inactivo`, `Pendiente`, `Aprobado`, `Rechazado`) en todas las vistas y roles.
 * **Descripción:** Evita que el mismo concepto se muestre con nombres o colores distintos según la pantalla.
 * **Condición de Aceptación:** Revisión de badges y filtros en los tres roles; un mismo estado tiene el mismo nombre y tratamiento visual.
 * **Estado de implementación:** `Implementado en prototipo (UI)` mediante `lib_css.py` y las convenciones de `README.md` §5.
@@ -421,7 +424,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 * **Referencia:** `Config-admin/correcciones-adiciones-requisitos.md` A-3, D4.
 
 ### BR-004: Aprobación Previa del Emprendimiento
-* **Regla:** Todo emprendimiento registrado por el estudiante nace en **Pendiente de aprobación** y solo pasa a **Aprobado** por decisión del Administrador. Un segundo emprendimiento requiere autorización de **paralelo**. El rechazo exige motivo.
+* **Regla:** Todo emprendimiento nace en **Pendiente** y solo pasa a **Aprobado** por decisión del Administrador. Un segundo emprendimiento requiere autorización de **paralelo**. El rechazo exige motivo.
 * **Descripción:** Controla la duplicidad y deja rastro de la decisión.
 * **Procesos Afectados:** BP-004.
 * **Referencia:** `Config-admin/correcciones-adiciones-requisitos.md` A-2, D2.
@@ -493,7 +496,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 | A-8 | Notificaciones accionables | BP-002, BP-004 | FR-019 | FR | Confirmado |
 | AQ-05 | Acta: motivo obligatorio de rechazo | BP-001 | FR-003, BR-009 | FR, BR | Confirmado |
 | AQ-08 | Auditor: solo lectura y exportación, sin edición ni datos sensibles completos | N/A | NFR-002, NFR-007, FR-010, FR-017 | NFR, FR | Confirmado (Post-MVP) |
-| AQ-11 | Estructura definitiva según el modelo textual (29 tablas, 42 relaciones) | N/A | FR-017, NFR-007 | FR, NFR | Confirmado |
+| AQ-11 | Estructura definitiva según el modelo textual (41 tablas = 27 de negocio + 14 catálogos) | N/A | FR-017, NFR-007 | FR, NFR | Confirmado |
 | Config. del programa | Parámetros centralizados y bitácora | BP-006 | FR-020 | FR | Confirmado |
 | Docente | Eventos y recomendación | BP-003 | FR-021 | FR | Confirmado |
 | Estudiante | Progreso por fases y descarga del plan | BP-003 | FR-022 | FR | Confirmado |
@@ -518,7 +521,7 @@ Los usuarios principales son Estudiantes (emprendedores), Docentes/Mentores (ase
 | AQ-08 | **Cerrada** | **Rol auditor:** solo lectura y exportación de reportes; sin edición ni datos sensibles completos. Se cubre con NFR-002, NFR-007, FR-010 y FR-017; **sin FR nuevo**. | NFR-002, NFR-007, FR-010, FR-017 | Medio | Cerrada el 2026-10-25. Implementación `Fuera de alcance / Post-MVP`; US-026. |
 | AQ-09 | **Abierta** | **Rúbrica e informe:** 5 secciones, 22 preguntas, 6 dimensiones y 4 bandas visibles, sin fórmula ni plantilla del informe. | FR-002 | Alto | Dossier §5. Decidir en reunión. |
 | AQ-10 | **Abierta** | **Plazo y efecto del rechazo del acta:** BR-009 fija el motivo obligatorio; faltan el plazo de revisión y el efecto completo. | FR-003, BR-009 | Medio | Dossier §6. Decidir en reunión. |
-| AQ-11 | **Cerrada** | **Estructura definitiva:** se toma solo del **modelo textual** de `README.md` §5: **29 tablas y 42 relaciones**; `adjuntos` y sus pivotes sin ficha individual; `auditoria_eventos` no modelada. | FR-017, NFR-007 | Medio | Cerrada el 2026-10-25. Los diagramas no se usan como fuente. |
+| AQ-11 | **Cerrada** | **Estructura definitiva:** se toma del **modelo textual** de `README.md` §5, reconciliado con el prototipo: **41 tablas = 27 de negocio + 14 catálogos**. No se declara total de relaciones (el "42" anterior no era trazable). `adjuntos` y sus pivotes ya tienen ficha; `auditoria_eventos`, `solicitudes`, `configuracion_programa`, `respaldos`, `comentarios` y `recomendaciones_evento` quedan modeladas. | FR-017, NFR-007 | Medio | Cerrada el 2026-10-25. Diagramas regenerados el 2026-10-25. |
 | AQ-12 | **Abierta** | **Insumos ausentes:** `control.pdf` y el Excel de preguntas fueron solicitados; no están en el repositorio. | FR-002, FR-016 | Medio | Dossier §8. Si no llegan, no se bloquea ni se inventa contenido. |
 
 ## 10. Revisión de Calidad de Requisitos
@@ -537,7 +540,7 @@ Los requisitos de mayor prioridad se enfocan en la seguridad del control de dato
 
 El prototipo actual cubre **73 pantallas** (4 globales, 27 de estudiante, 23 de docente y 19 de administrador) y permite validar la mayor parte de los flujos de interfaz. No sustituye la implementación: guardar, descargar, exportar y notificar son simulaciones.
 
-**Estado de las preguntas abiertas:** cerradas **AQ-01 … AQ-05**, **AQ-08** (rol auditor: solo lectura y exportación, sin FR nuevo) y **AQ-11** (modelo textual de 29 tablas y 42 relaciones). Abiertas: **AQ-06** (campos y criterios), **AQ-07** (acceso previo), **AQ-09** (rúbrica e informe), **AQ-10** (plazo y efecto del acta) y **AQ-12** (insumos). El detalle está en el dossier de decisiones; los diagramas no se usan como evidencia.
+**Estado de las preguntas abiertas:** cerradas **AQ-01 … AQ-05**, **AQ-08** (rol auditor: solo lectura y exportación, sin FR nuevo) y **AQ-11** (modelo textual de 41 tablas = 27 de negocio + 14 catálogos, sin total de relaciones). Abiertas: **AQ-06** (campos y criterios), **AQ-07** (acceso previo), **AQ-09** (rúbrica e informe), **AQ-10** (plazo y efecto del acta) y **AQ-12** (insumos). El detalle está en el dossier de decisiones. Los diagramas se regeneraron el 2026-10-25 y su fuente es el archivo Mermaid/Markdown (`docs/diagrama-clases.md`, `docs/diagrama-componentes.md`, `docs/context-diagram.mmd`).
 
 ## 12. Control de Cambios
 
@@ -558,7 +561,7 @@ El prototipo actual cubre **73 pantallas** (4 globales, 27 de estudiante, 23 de 
 | 2026-10-25 | Cierre de AQ-04: restauración fuera de la UI (operación técnica) | FR-018, AQ-04 | `admin/respaldos.html`; decisión del usuario |
 | 2026-10-25 | Cierre de AQ-05: motivo obligatorio en el rechazo del acta | BR-009, FR-003, FR-014, AQ-05 | `admin/solicitudes.html` (modal de motivo); decisión del usuario |
 | 2026-10-25 | Cierre de AQ-08: rol auditor de solo lectura y exportación, sin FR nuevo | R-04, NFR-002, NFR-007, FR-010, FR-017, AQ-08 | Decisión del usuario; `docs/dossier-decisiones-pendientes-2026-10.md` §9 |
-| 2026-10-25 | Cierre de AQ-11: estructura definitiva según el modelo textual | AQ-11, FR-017, NFR-007 | `README.md` §5 (29 tablas, 42 relaciones); dossier §7 |
+| 2026-10-25 | Cierre de AQ-11: estructura definitiva según el modelo textual | AQ-11, FR-017, NFR-007 | `README.md` §5 (41 tablas = 27 + 14); dossier §7 |
 | 2026-10-25 | Apertura registrada de los pendientes de reunión | AQ-06, AQ-07, AQ-09, AQ-10, AQ-12 | `docs/dossier-decisiones-pendientes-2026-10.md` |
 
 **Requisitos reemplazados (no eliminados):** el enunciado anterior de FR-004 (“el Administrador aprueba/gestiona los cruces”) se conserva en el historial de este control y queda **reemplazado** por la redacción vigente. El enunciado anterior de FR-007 (“periodo de tiempo definido”) queda **reemplazado** por 90 días. Ningún ID se renumeró.

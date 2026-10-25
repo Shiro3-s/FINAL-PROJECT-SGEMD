@@ -1,5 +1,7 @@
 # Auditoría UI/UX — Rol ADMINISTRADOR (Coordinadora)
 
+> **Nota de vigencia (2026-10-25):** documento **histórico**. La auditoría se hizo sobre una versión del prototipo de **50 pantallas**; hoy tiene **73** (4 + 27 + 23 + 19). Sus hallazgos de UX siguen siendo útiles, pero los conteos y algunos flujos están desactualizados. La referencia vigente es `README.md` §17 y `docs/sincronizacion-prototipo-2026-10.md`.
+
 > **Alcance:** exclusivamente el rol **Administrador (Coordinadora, R-01)** del prototipo SGEMD.
 > **Base:** `FINAL-PROJECT-SGEMD/README.md`, `docs/historias_usuario.md`, `docs/fr_nfr_sgemd.md`, estructura de vistas y código del prototipo (`prototype/paginas_admin.py`, `prototype/lib_ui.py`, `prototype/index.html`).
 > **Ubicación de este informe:** `SGEMD-JOEL/auditoria-ui-ux-admin.md` (fuera de `FINAL-PROJECT-SGEMD/`).

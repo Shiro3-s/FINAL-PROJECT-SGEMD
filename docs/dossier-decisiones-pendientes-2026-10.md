@@ -12,14 +12,14 @@ Reunir en un solo documento las preguntas que aún bloquean la implementación d
 
 El dossier complementa —no sustituye— al SRS ([`fr_nfr_sgemd.md`](./fr_nfr_sgemd.md)), a las historias ([`historias_usuario.md`](./historias_usuario.md)) y al registro de ejecución ([`registro-actualizacion-requisitos-2026-10.md`](./registro-actualizacion-requisitos-2026-10.md)). Las preguntas se identifican con los mismos códigos `AQ-xx` del SRS §9.
 
-### 1.1 Jerarquía de verdad aplicada
+### 1.1 Orden de contraste aplicado
 
 1. La **decisión escrita** del responsable del programa.
-2. El **modelo textual** de `README.md` §5.
-3. La **evidencia verificada** en el HTML generado de `prototype/**`.
+2. El **prototipo verificado** (`prototype/**`, 73 pantallas).
+3. El **modelo textual** de `README.md` §5, reconciliado con el prototipo.
 4. La documentación previa (SRS, historias, anotaciones), cuando no contradiga lo anterior.
 
-> **Los diagramas no se usan como evidencia, fuente ni entregable.** Están desactualizados respecto del modelo textual y su actualización queda fuera de este cierre (ver §10).
+> **Los diagramas se regeneraron el 2026-10-25** y su fuente es el archivo Mermaid/Markdown. Los binarios `.drawio`/`.png` anteriores pueden seguir siendo obsoletos (ver §10).
 
 ---
 
@@ -32,7 +32,7 @@ El dossier complementa —no sustituye— al SRS ([`fr_nfr_sgemd.md`](./fr_nfr_s
 | AQ-08 | Permisos del rol auditor (rol 4) | **Cerrada** | Usuario (decisión registrada) |
 | AQ-09 | Rúbrica del diagnóstico y formato del informe descargable | **Abierta** | Coordinadora + equipo |
 | AQ-10 | Plazo de revisión del acta y efecto completo del rechazo | **Abierta** | Coordinadora |
-| AQ-11 | Estructura definitiva de tablas y relaciones | **Cerrada** (modelo textual) | Equipo |
+| AQ-11 | Estructura definitiva de tablas y relaciones | **Cerrada** (modelo textual de 41 tablas) | Equipo |
 | AQ-12 | Insumos ausentes: `control.pdf` y Excel de preguntas | **Abierta** (insumo solicitado) | Coordinadora |
 
 **Cierre ya registrado — AQ-08:** el rol auditor (rol 4) tendrá **solo lectura y exportación de reportes**; **no edita** datos ni accede a información sensible completa. Se documenta con NFR-002, NFR-007, FR-010, FR-017 y la historia **US-026**, sin crear un FR nuevo.
@@ -248,33 +248,44 @@ El acta puede quedar indefinidamente en revisión, el estudiante no sabe cuándo
 
 ---
 
-## 7. AQ-11 — Estructura definitiva (cerrada por modelo textual)
+## 7. AQ-11 — Estructura definitiva (cerrada)
 
-**Decisión registrada:** la estructura definitiva se toma **solo** del modelo textual de `README.md` §5. **Ningún diagrama se usa como fuente ni se corrige en este cierre.**
+**Decisión registrada:** la estructura definitiva se toma del **modelo textual de `README.md` §5**, reconciliado contra el prototipo el 2026-10-25. El prototipo es la fuente principal de verdad; los diagramas se regeneraron a partir de ese modelo.
 
 ### 7.1 Estado del modelo textual
 
 | Elemento | Valor |
 |---|---|
-| Tablas declaradas por el modelo | **29** |
-| Relaciones declaradas | **42** (16 de negocio con comportamiento + 13 catálogos, según la clasificación del modelo) |
-| Fichas de sección en `README.md` §5 | **13** (agrupan varias tablas cada una) |
-| Catálogos listados en tabla | **12** |
-| `adjuntos` y sus tres pivotes | Anunciados en las convenciones, **sin ficha individual** |
-| Tabla técnica de auditoría | `auditoria_eventos`: **no modelada**, `Pendiente de backend` |
+| Tablas declaradas por el modelo | **41** |
+| Tablas de negocio | **27** |
+| Catálogos de solo lectura | **14** |
+| Relaciones declaradas | **No se declara un total**: el "42" anterior no era trazable |
+| `adjuntos` y sus tres pivotes | Modelados con ficha propia |
+| Tabla técnica de auditoría | `auditoria_eventos`: **modelada** |
 
-> **Precaución de lectura:** el total de **29 tablas y 42 relaciones** es el que declara el modelo, no el que se obtiene contando encabezados de ficha: varias fichas agrupan dos o más tablas (por ejemplo, diagnóstico con preguntas y respuestas, o eventos con su pivote de asistencia). No se recalcula ni se corrige el total en este cierre.
+### 7.2 Corrección del conteo anterior
 
-### 7.2 Observaciones de consistencia
+El cierre previo declaraba **29 tablas y 42 relaciones**. La verificación mostró que esa cifra no se sostenía:
 
-- `adjuntos` y sus **tres tablas pivote** se anuncian en las convenciones del modelo, pero **no tienen ficha individual** en §5. Quedan como parte del modelo textual, sin ficha propia, y así deben implementarse hasta que se amplíe la sección.
-- Las **13 fichas** de §5 agrupan tablas; no equivalen a 13 tablas ni permiten recalcular el total. El conteo vigente es el declarado: **29 tablas y 42 relaciones**.
-- `auditoria_eventos` **no está modelada**. NFR-007 exige registrar autor, fecha, valor anterior y valor nuevo; la tabla correspondiente se implementará en backend.
-- El conteo de 29 tablas y 42 relaciones **no** se deduce de los diagramas: se toma del modelo textual.
+- El desglose *"16 de negocio + 13 catálogos"* **suma 29 tablas**, no 42 relaciones.
+- El número de relaciones **no era derivable de ningún listado** del documento.
+- La tabla de catálogos tenía **13 filas**, no 12.
+- `caracterizacion / valoracion` aparecía como una sola ficha con dos nombres.
+- `adjuntos` y sus 3 pivotes no tenían ficha; sumados, el mínimo real era **33**.
+- Faltaban las tablas de configuración, bitácora, respaldos, solicitudes, comentarios, recomendaciones y auditoría, todas exigidas por el SRS y visibles en el prototipo.
 
-### 7.3 Consecuencia
+El modelo se reescribió completo: **41 tablas = 27 de negocio + 14 catálogos**. Cada columna y cada estado del prototipo tiene ahora su lugar.
 
-La implementación de la base de datos puede comenzar con el modelo textual. Cualquier cambio posterior exige actualizar §5 y, por separado, los diagramas (fuera de este cierre).
+### 7.3 Observaciones de consistencia
+
+- `adjuntos` y sus tres tablas pivote (`adjuntos_tareas`, `adjuntos_seguimientos`, `adjuntos_asesorias`) tienen ficha y claves compuestas.
+- `auditoria_eventos` está modelada y es la contraparte de la "bitácora de decisiones" de `admin/configuracion.html`.
+- `codigosverificacion` conserva el correo institucional para el caso previo a la verificación y admite `Usuarios_idUsuarios` después de ella.
+- Los **catálogos son 14**, entre ellos `etapaemprendimiento` y `faseplan`, que son distintos y no deben fusionarse.
+
+### 7.4 Consecuencia
+
+La implementación de la base de datos puede comenzar con el modelo textual. Cualquier cambio posterior exige actualizar §5 **y** el Mermaid de los diagramas, que ya son fuente versionada.
 
 ---
 
@@ -322,35 +333,14 @@ Si los insumos no llegan antes de la reunión:
 
 ## 10. Nota sobre los diagramas
 
-Los diagramas del repositorio **no son fuente de verdad** y **no se actualizan** en este ciclo:
+Los diagramas se **regeneraron el 2026-10-25** a partir del modelo de 41 tablas y del prototipo. Su fuente es el archivo Mermaid/Markdown, que se versiona y se revisa con `diff`.
 
-| Archivo | Motivo |
+| Archivo | Estado |
 |---|---|
-| `docs/diagrama-clases.md` / `.drawio` / `.png` | Declara 20 clases y 31 relaciones; el modelo textual vigente declara 29 tablas y 42 relaciones |
-| `docs/diagrama-componentes.md` / `.drawio` / `.png` | No refleja los roles ni los módulos añadidos en esta actualización |
-| `docs/context-diagram.png` | No cubre el alcance ampliado |
+| `docs/diagrama-clases.md` | **Regenerado en 3 bloques**: 27 clases de negocio + 14 catálogos + enumeraciones |
+| `docs/diagrama-componentes.md` | **Regenerado**: servicios de solicitudes, configuración, respaldos, auditoría y notificaciones; rol auditor; procesos programados; borrado en cascada |
+| `docs/context-diagram.mmd` | **Regenerado**: cuarto actor (auditor), correo de bienvenida, almacenamiento de archivos y respaldos |
+| `.png` | **Regenerados** desde el Mermaid (clases, componentes y contexto) |
+| `.drawio` | **Obsoleto**: regenerar desde el Mermaid |
 
-**Regla:** ninguna decisión, requisito o evidencia de este dossier se apoya en un diagrama. Su actualización se planifica como trabajo aparte.
-
----
-
-## 11. Acta de la reunión
-
-| Campo | Registro |
-|---|---|
-| Fecha | _(pendiente)_ |
-| Participantes | _(pendiente)_ |
-| AQ tratadas | AQ-06, AQ-07, AQ-09, AQ-10, AQ-12 |
-| Decisiones tomadas | _(pendiente)_ |
-| Compromisos y fechas | _(pendiente)_ |
-
----
-
-## 12. Lista de verificación posterior
-
-- [ ] Cada AQ tratada tiene decisión, fecha y responsable.
-- [ ] Las decisiones se trasladaron al SRS, a las historias y al `README.md`.
-- [ ] AQ-06, AQ-07, AQ-09, AQ-10 y AQ-12 cambiaron de estado solo si hubo decisión escrita.
-- [ ] No se creó ningún `FR-025` para el auditor.
-- [ ] Los diagramas siguen sin modificarse y sin usarse como evidencia.
-- [ ] No se versionó ni publicó nada: el trabajo permanece local.
+**Regla:** ninguna decisión de este dossier se apoya en un binario. Cuando el binario y el Mermaid difieran, prevalece el Mermaid.

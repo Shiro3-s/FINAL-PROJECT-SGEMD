@@ -1,20 +1,39 @@
-C4Context
-  title Diagrama de Contexto del Sistema SGEMD
+---
+title: Diagrama de Contexto — SGEMD
+---
+%% Diagrama de contexto (nivel 1 de C4) dibujado como flowchart para controlar
+%% el trazado: los actores quedan siempre arriba, el sistema al centro y los
+%% sistemas externos abajo. Al no haber conexiones entre actores ni entre
+%% externos, ninguna línea se cruza; las etiquetas se dibujan sobre fondo
+%% blanco para que el trazo no las atraviese.
+%%{init: {'themeVariables': {'edgeLabelBackground': '#FFFFFF'}}}%%
+flowchart TB
+    admin["<b>Administrador</b><br/><small>Coordinador del Centro Progresa</small>"]
+    docente["<b>Docente / Mentor</b><br/><small>Asesor de los emprendimientos asignados</small>"]
+    estudiante["<b>Estudiante</b><br/><small>Emprendedor</small>"]
+    auditor["<b>Auditor (Post-MVP)</b><br/><small>Consulta y exporta, solo lectura</small>"]
 
-  Person(admin, "Administrador", "Coordinador/a del Centro Progresa que gestiona usuarios, asignaciones, eventos y reportes.")
-  Person(teacher, "Docente / Mentor", "Asesor que registra seguimiento, tareas y asesorías de los emprendimientos asignados.")
-  Person(student, "Estudiante", "Emprendedor que se registra, solicita asesorías, completa tareas y consulta su avance.")
+    sgemd["<b>SGEMD</b><br/>Plataforma web React + Node.js<br/><small>Usuarios · Emprendimientos · Seguimiento<br/>Tareas · Asesorías · Diagnóstico · Eventos</small>"]
 
-  System(sgemd, "SGEMD", "Sistema de Gestión de Emprendimiento Minuto de Dios. Plataforma web (React + Node.js) con los módulos de autenticación, emprendimientos, asignaciones, seguimiento, tareas, asesorías, eventos, diagnóstico y dashboards.")
+    smtp["<b>Servicio SMTP</b>"]
+    db["<b>PostgreSQL 17</b><br/><small>41 tablas</small>"]
+    files["<b>Almacenamiento</b><br/>de archivos"]
+    backup["<b>Respaldos</b><br/>institucionales"]
 
-  System_Ext(smtp, "Servicio SMTP", "Envía por correo el código OTP de 8 dígitos para verificar la cuenta del estudiante.")
-  System_Ext(db, "PostgreSQL 17", "Base de datos relacional que almacena todo el expediente central del sistema.")
+    admin -->|"Gestiona usuarios,<br/>aprobaciones y configuración"| sgemd
+    docente -->|"Registra avances<br/>y califica"| sgemd
+    estudiante -->|"Diligencia diagnóstico<br/>y completa tareas"| sgemd
+    auditor -.->|"Consulta reportes"| sgemd
 
-  Rel(admin, sgemd, "Gestiona usuarios, emprendimientos, asignaciones, agenda, eventos y descarga respaldos (CSV/Excel)")
-  Rel(teacher, sgemd, "Consulta sus asignados, registra seguimiento/tareas/asesorías y confirma citas")
-  Rel(student, sgemd, "Se registra, verifica correo, solicita asesorías, completa tareas y consulta su progreso")
-  Rel(sgemd, smtp, "Envía correos con OTP de verificación")
-  Rel(sgemd, db, "Lee y escribe datos (consultas parametrizadas)")
-  Rel(student, smtp, "Recibe el código OTP en su correo institucional")
+    sgemd -->|"Envía OTP y<br/>correo de bienvenida"| smtp
+    sgemd -->|"Lee y escribe<br/>consultas parametrizadas"| db
+    sgemd -->|"Guarda adjuntos<br/>y evidencias"| files
+    sgemd -->|"Escribe copias<br/>programadas"| backup
 
-  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+    classDef actor fill:#EAF2FB,stroke:#2F5597,stroke-width:1.5px,color:#1F3864
+    classDef system fill:#1F3864,stroke:#1F3864,stroke-width:2px,color:#FFFFFF
+    classDef external fill:#F2F2F2,stroke:#7F7F7F,stroke-width:1px,stroke-dasharray:5 4,color:#333333
+
+    class admin,docente,estudiante,auditor actor
+    class sgemd system
+    class smtp,db,files,backup external

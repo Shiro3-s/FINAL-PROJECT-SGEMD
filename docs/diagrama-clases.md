@@ -1,11 +1,16 @@
 # Diagrama de Clases - SGEMD
 
-Sistema de Gestión de Emprendimiento Minuto de Dios. Diagrama de clases del
-**núcleo de dominio** del MVP: entidades con sus atributos, visibilidad,
-métodos y multiplicidades.
+Sistema de Gestión de Emprendimiento Minuto de Dios. Diagrama del **modelo de
+datos** del MVP: las **27 entidades de negocio** con sus atributos y claves
+foráneas, más los **14 catálogos** de solo lectura.
 
+> **Versión 2.** Alineada con `MASTER_IMPLEMENTATION_PROMPT.md` v1.3 (§7.2, §13.2,
+> §15, §20). Si este documento y el master discrepan, **manda el master** y este
+> archivo se corrige. La lista de cambios respecto a la versión anterior está en
+> la sección *Cambios de la versión 2*.
+>
 > **Complementa a `diagrama-componentes.md`**, no lo reemplaza. El diagrama de
-> componentes muestra *dónde vive cada pieza* (frontend, backend, middleware,
+> componentes muestra *dónde vive cada pieza* (frontend, Caddy, backend,
 > PostgreSQL). Las clases muestran *cómo se estructura el negocio por dentro*.
 > Junto con `context-diagram.mmd` completan la familia de diagramas del MVP.
 
@@ -13,427 +18,655 @@ métodos y multiplicidades.
 
 | Aspecto | Detalle |
 | ------- | ------- |
-| **Fuente de verdad** | `README.md` §5 *Modelo de datos*, §6 *Decisiones*, §7 *API* (versión `origin/main`, motor PostgreSQL 17) |
-| **Contraste con** | `docs/fr_nfr_sgemd.md`, `docs/historias_usuario.md`, `docs/diagrama-componentes.md` |
-| **Herramienta** | Mermaid (`classDiagram`) + draw.io |
-| **Validación** | 20 clases, 31 relaciones, renderizado en `mermaid-cli` y verificado sin cajas superpuestas |
+| **Fuente** | `README.md` §5 *Modelo de datos*, contrastado con las 73 pantallas de `prototype/` y con el master v1.3 |
+| **Contraste con** | `docs/fr_nfr_sgemd.md`, `docs/historias_usuario.md`, `docs/diagrama-componentes.md`, master §13.2 |
+| **Herramienta** | Mermaid (`classDiagram`) |
+| **Validación** | 27 clases + 14 catálogos, en **tres bloques** para que cada uno sea legible y renderizable. No se añadió ninguna tabla: el total de 41 se mantiene |
 
-**Decisión de diseño:** los nombres de los atributos son **idénticos a las
-columnas del modelo físico**. No se renombraron a nombres "limpios" porque
-cualquier divergencia entre el diagrama y la tabla terminaría siendo un bug de
-mapeo (el `README.md` §10 ya registra como error histórico del proyecto anterior
-justo eso: *"joins que usaban columnas inexistentes"*).
+**Decisión de diseño (nombres).** Los atributos del diagrama son **nombres
+lógicos en PascalCase**. Las columnas físicas son `snake_case` (por ejemplo
+`CorreoInstitucional` → `correo_institucional`) y el mapeo entre ambos se hace de
+forma explícita en los serializadores del backend, nunca por convención
+implícita. Lo que se conserva de la decisión anterior es la razón de fondo: toda
+divergencia entre diagrama y tabla termina siendo un bug de mapeo (el
+`README.md` §10 registra como error histórico "joins que usaban columnas
+inexistentes"). Por eso, en la Etapa 2 del master se verifica con un script que
+`schema.sql` contiene cada atributo de este documento y que las listas CHECK
+coinciden con `shared/src/enums.ts`. Las claves foráneas conservan el nombre
+lógico que ven aquí; su nombre físico se fija una sola vez en `schema.sql`.
+
+**Decisión de alcance.** Los **catálogos** no se dibujan como clases para no
+saturar el diagrama; se listan en una tabla. Las claves foráneas a catálogo
+aparecen como atributo `Catalogo_idCatalogo` en la entidad que las usa. Las
+relaciones se leen por ficha y se garantizan con claves foráneas; **no se declara
+un total de relaciones**.
+
+**Borrado lógico (BR-006).** Las entidades que se pueden "eliminar" desde la
+aplicación llevan `FechaEliminacion: datetime` (nulo = vigente). Una fila con
+fecha queda oculta de listas y bloquea el acceso, pero conserva su historia. El
+borrado confirmado de un emprendimiento o un usuario además elimina **físicamente**
+sus archivos adjuntos; eso no es reversible y el diálogo lo advierte (master
+§7.1, §20.5 #13 y #17).
+
+**Tres bloques:**
+
+| Bloque | Contenido | Clases |
+|---|---|---|
+| 1. Expediente | Usuario, emprendimiento, asignación, avance, tareas, asesorías, actas, comentarios y adjuntos | 12 |
+| 2. Diagnóstico y eventos | Diagnóstico, preguntas/respuestas, valoración, eventos y recomendaciones | 8 |
+| 3. Soporte del sistema | Verificación y recuperación, notificaciones, habilitaciones, solicitudes, configuración, respaldos y auditoría | 7 |
 
 ---
 
-## Diagrama (Mermaid)
+## Bloque 1 — Expediente del emprendimiento
 
 ```mermaid
 classDiagram
     direction TB
 
-    class Usuario {
+    class Usuarios {
         -idUsuarios: int
-        -nombre: string
-        -correoInstitucional: string
-        -correoPersonal: string
-        -password: string
-        -verificado: boolean
-        -estado: boolean
-        -celular: string
-        -telefono: string
-        -direccion: string
-        -genero: string
-        -estadoCivil: string
-        -fechaNacimiento: date
-        -semestre: int
-        -imgPerfil: string
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +registrar(): Usuario
-        +verificarCorreo(codigo: string): boolean
-        +iniciarSesion(): Token
-        +cerrarSesion(): void
-        +consultarPerfil(): Usuario
-        +editarPerfil(): Usuario
-        +subirAvatar(archivo: Adjunto): void
-        +desactivar(): void
-        +reactivar(): void
-        +esAdministrador(): boolean
-        +esDocente(): boolean
-        +esEstudiante(): boolean
+        -Codigo: string
+        -Nombres: string
+        -Apellidos: string
+        -NumeroDocumento: string
+        -CorreoInstitucional: string
+        -Password: string
+        -NivelAcademico: enum
+        -Verificado: boolean
+        -Estado: enum
+        -UltimaActividad: datetime
+        -FechaEliminacion: datetime
+        -Roles_idRoles: int
+        -TipoDocumentos_idTipoDocumentos: int
+        -ProgramaAcademico_idProgramaAcademico: int
+        -CentroUniversitarios_idCentroUniversitarios: int
+        -Municipios_idMunicipios: int
+        -TipoPoblacion_idTipoPoblacion: int
+        -TipoUsuarios_idTipoUsuarios: int
     }
 
     class Emprendimiento {
         -idEmprendimiento: int
-        -nombre: string
-        -descripcion: string
-        -tipoEmprendimiento: string
-        -sectorProductivo: string
-        -redesSociales: string
-        -acompanamiento: string
-        -actaCompromiso: string
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +crear(): Emprendimiento
-        +editar(): Emprendimiento
-        +eliminar(): void
-        +consultarPorAlcance(usuario: Usuario): Emprendimiento[]
-        +cambiarEtapa(etapa: EtapaEmprendimiento): void
-        +esParalelo(): boolean
-        +registrarActa(archivo: Adjunto): void
+        -Codigo: string
+        -Nombre: string
+        -Descripcion: string
+        -RedesSociales: string
+        -EstadoAprobacion: enum
+        -MotivoRechazo: string
+        -EsParalelo: boolean
+        -Avance: int
+        -FechaEliminacion: datetime
+        -EtapaEmprendimiento_idEtapaEmprendimiento: int
+        -SectorEconomico_idSectorEconomico: int
+        -CentroUniversitarios_idCentroUniversitarios: int
+        -Usuarios_idUsuarios: int
     }
 
-    class Asignacion {
+    class Asignaciones {
         -idAsignacion: int
-        -fechaAsignacion: date
-        -estado: boolean
-        +crear(): Asignacion
-        +reasignar(mentor: Usuario): Asignacion
-        +desactivar(): void
-        +consultarPorMentor(): Asignacion[]
-        +consultarPorEstudiante(): Asignacion[]
-        +estaActiva(): boolean
-        +validarUnicaActivaPorEmprendimiento(): boolean
+        -FechaAsignacion: datetime
+        -Estado: enum
+        -HorasSemanales: int
+        -Usuarios_idMentor: int
+        -Usuarios_idEstudiante: int
+        -Emprendimiento_idEmprendimiento: int
     }
 
-    class Seguimiento {
+    class Seguimientos {
         -idSeguimientos: int
-        -descripcion: string
-        -tipoSeguimiento: string
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +registrar(autor: Usuario): Seguimiento
-        +editar(autor: Usuario): Seguimiento
-        +eliminar(autor: Usuario): void
-        +consultarHistorialPorEmprendimiento(): Seguimiento[]
-        +adjuntarEvidencia(archivo: Adjunto): void
+        -Descripcion: string
+        -TipoSeguimiento: enum
+        -Puntaje: int
+        -EstadoRevision: enum
+        -FechaSeguimiento: datetime
+        -Retroalimentacion: string
+        -FechaEliminacion: datetime
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idUsuarios: int
+        -FasePlan_idFasePlan: int
     }
 
-    class Tarea {
+    class Tareas {
         -idTareas: int
-        -titulo: string
-        -descripcion: string
-        -fechaLimite: date
-        -estado: string
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +crear(): Tarea
-        +editar(): Tarea
-        +eliminar(): void
-        +completar(): void
-        +marcarVencida(): void
-        +consultarMisTareas(): Tarea[]
-        +calcularAvance(): decimal
-        +adjuntarEvidencia(archivo: Adjunto): void
+        -Titulo: string
+        -Descripcion: string
+        -FechaLimite: date
+        -Prioridad: enum
+        -Puntos: int
+        -Estado: enum
+        -PuntajeObtenido: int
+        -Retroalimentacion: string
+        -EstadoRevision: enum
+        -EvidenciaRequerida: boolean
+        -MotivoDevolucion: string
+        -ObservacionesDevolucion: string
+        -FechaEliminacion: datetime
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idUsuarios: int
+        -Usuarios_idCreador: int
+        -FasePlan_idFasePlan: int
     }
 
-    class Asesoria {
+    class Asesorias {
         -idAsesorias: int
-        -nombreDeAsesoria: string
-        -descripcion: string
-        -fechaAsesoria: date
-        -comentarios: string
-        -confirmacion: string
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +solicitar(estudiante: Usuario): Asesoria
-        +confirmar(docente: Usuario): Asesoria
-        +editar(autor: Usuario): Asesoria
-        +eliminar(autor: Usuario): void
-        +consultarPorAlcance(usuario: Usuario): Asesoria[]
-        +estaPendiente(): boolean
-        +adjuntarEvidencia(archivo: Adjunto): void
+        -Tema: string
+        -Fecha_asesoria: datetime
+        -Estado: enum
+        -LugarEnlace: string
+        -FechaEliminacion: datetime
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idUsuarios: int
+        -Usuarios_idDocentes: int
+        -Modalidad_idModalidad: int
+        -Fecha_y_Horarios_idFecha_y_Horarios: int
     }
 
-    class Diagnostico {
-        -idDiagnosticos: int
-        -fechaEmprendimiento: date
-        -indicadores: json
-        -fortalezas: string
-        -oportunidadesMejora: string
-        +generar(): Diagnostico
-        +editar(): Diagnostico
-        +eliminar(): void
-        +consultarPorEmprendimiento(): Diagnostico[]
-        +calcularMetricas(): Diagnostico
+    class Actas {
+        -idActa: int
+        -Estado: enum
+        -Observaciones: string
+        -FechaCarga: datetime
+        -FechaRevision: datetime
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idEstudiante: int
+        -Usuarios_idRevisor: int
+        -Adjuntos_idAdjunto: int
     }
 
-    class Caracterizacion {
-        -idCaracterizacion: int
-        -modeloNegocio: json
-        -marketing: json
-        -producto: json
-        -administrativoFinanciero: json
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +diligenciar(): Caracterizacion
-        +editarRespuestas(): Caracterizacion
-        +consultarPorEmprendimiento(): Caracterizacion[]
-        +recalcular(): Diagnostico
+    class Comentarios {
+        -idComentario: int
+        -Texto: string
+        -Fecha: datetime
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idUsuarios: int
     }
 
-    class Evento {
-        -idEventos: int
-        -nombreEvento: string
-        -descripcionEvento: string
-        -capacidadMaxima: int
-        -estado: boolean
-        -requiereRegistro: boolean
-        -fechaCreacion: datetime
-        -fechaActualizacion: datetime
-        +crear(): Evento
-        +editar(): Evento
-        +listar(): Evento[]
-        +registrarAsistencia(usuario: Usuario, estado: string): void
-        +desregistrar(usuario: Usuario): void
-        +hayCupo(): boolean
-    }
-
-    class InscripcionEvento {
-        -estadoAsistencia: string
-        +marcarAsistencia(estado: string): void
-    }
-
-    class CodigoVerificacion {
-        -idCodigo: int
-        -correoInstitucional: string
-        -codigo: string
-        -expiracion: datetime
-        -usado: boolean
-        +generar(correo: string): CodigoVerificacion
-        +estaVencido(): boolean
-        +marcarUsado(): void
-    }
-
-    class Adjunto {
-        <<propuesta>>
+    class Adjuntos {
         -idAdjunto: int
-        -nombreArchivo: string
-        -rutaArchivo: string
-        -tamanioBytes: long
-        -tipoMime: string
-        -fechaSubida: datetime
-        +subir(archivo): Adjunto
-        +descargar(): Archivo
-        +eliminarDelServidor(): void
+        -NombreArchivo: string
+        -RutaArchivo: string
+        -TamanoBytes: bigint
+        -TipoMime: string
+        -FechaSubida: datetime
+        -FechaEliminacion: datetime
+        -Usuarios_idUsuarios: int
     }
 
-    class Rol {
-        <<catalogo>>
-        -idRoles: int
-        -nombre: string
+    class AdjuntosTareas {
+        -Adjuntos_idAdjunto: int
+        -Tareas_idTareas: int
     }
 
-    class EtapaEmprendimiento {
-        <<catalogo>>
-        -idEtapaEmprendimiento: int
-        -tipoEtapa: string
+    class AdjuntosSeguimientos {
+        -Adjuntos_idAdjunto: int
+        -Seguimientos_idSeguimientos: int
     }
 
-    class Modalidad {
-        <<catalogo>>
-        -idModalidad: int
-        -nombre: string
+    class AdjuntosAsesorias {
+        -Adjuntos_idAdjunto: int
+        -Asesorias_idAsesorias: int
     }
 
-    class FechaHorario {
-        <<bloque>>
-        -idFecha_y_Horarios: int
-        -fecha: date
-        -horaInicio: time
-        -horaFin: time
-        +estaDisponible(): boolean
-    }
+    Usuarios "1" --> "0..*" Emprendimiento : propietario
+    Usuarios "1" --> "0..*" Asignaciones : mentor
+    Usuarios "1" --> "0..*" Asignaciones : estudiante
+    Emprendimiento "1" <-- "0..*" Asignaciones : vincula
 
-    class SectorEconomico {
-        <<catalogo>>
-        -idSectorEconomico: int
-        -nombre: string
-    }
+    Emprendimiento "1" --> "0..*" Seguimientos
+    Emprendimiento "1" --> "0..*" Tareas
+    Emprendimiento "1" --> "0..*" Asesorias
+    Emprendimiento "1" --> "0..*" Actas
+    Emprendimiento "1" --> "0..*" Comentarios
 
-    class TipoEvento {
-        <<catalogo>>
-        -idTipo_evento: int
-        -nombre: string
-    }
+    Usuarios "1" --> "0..*" Seguimientos : autor
+    Usuarios "1" --> "0..*" Tareas : asignado
+    Usuarios "1" --> "0..*" Tareas : creador
+    Usuarios "1" --> "0..*" Asesorias : solicitante
+    Usuarios "0..1" --> "0..*" Asesorias : docente
+    Usuarios "1" --> "0..*" Actas : estudiante
+    Usuarios "0..1" --> "0..*" Actas : revisor
+    Usuarios "1" --> "0..*" Comentarios : autor
+    Usuarios "1" --> "0..*" Adjuntos : sube
 
-    class Modulo {
-        <<catalogo>>
-        -idModulos: int
-        -nombre: string
-        +estaHabilitadoPara(usuario: Usuario): boolean
-    }
-
-    class Habilitacion {
-        -idHabilitacion: int
-        -fechaHabilitacion: datetime
-        -estado: boolean
-        +habilitar(): Habilitacion
-        +deshabilitar(): void
-        +consultarPorUsuario(): Habilitacion[]
-        +consultarPorModulo(): Habilitacion[]
-    }
-
-    Usuario "0..*" --> "1" Rol : tiene
-    Usuario "1" --> "0..*" Habilitacion : posee
-    Modulo "1" --> "0..*" Habilitacion : habilita
-
-    Usuario "1" --> "0..*" Emprendimiento : es propietario de
-    EtapaEmprendimiento "1" --> "0..*" Emprendimiento : clasifica
-    Emprendimiento "1" --> "0..*" Caracterizacion : caracteriza
-
-    Usuario "1" --> "0..*" Asignacion : mentor
-    Usuario "1" --> "0..*" Asignacion : estudiante
-    Emprendimiento "0..1" --> "0..*" Asignacion : vincula
-
-    Emprendimiento "1" --> "0..*" Seguimiento : registra
-    Usuario "1" --> "0..*" Seguimiento : es autor de
-
-    Emprendimiento "1" --> "0..*" Tarea : planifica
-    Usuario "1" --> "0..*" Tarea : estudiante asignado
-    Usuario "0..1" --> "0..*" Tarea : docente creador
-
-    Emprendimiento "1" --> "0..*" Asesoria : incluye en su expediente
-    Usuario "1" --> "0..*" Asesoria : estudiante solicita
-    Usuario "0..1" --> "0..*" Asesoria : docente confirma
-    Modalidad "1" --> "0..*" Asesoria : modalidad
-    FechaHorario "0..1" --> "0..*" Asesoria : ocupa
-
-    Emprendimiento "1" --> "0..*" Diagnostico : evalua
-    SectorEconomico "1" --> "0..*" Diagnostico : sector
-    Caracterizacion "1" --> "0..1" Diagnostico : origina
-
-    TipoEvento "1" --> "0..*" Evento : tipifica
-    Modalidad "1" --> "0..*" Evento : modalidad
-    FechaHorario "1" --> "0..*" Evento : programa
-    Evento "1" --> "0..*" InscripcionEvento : convoca
-    Usuario "0..*" --> "0..*" InscripcionEvento : participa
-
-    Usuario "1" --> "0..*" CodigoVerificacion : solicita por correo
-
-    Seguimiento "0..*" --> "0..*" Adjunto : evidencia
-    Tarea "0..*" --> "0..*" Adjunto : evidencia
-    Asesoria "0..*" --> "0..*" Adjunto : evidencia
+    Adjuntos "1" --> "0..1" Actas : archivo firmado
+    Adjuntos "1" --> "0..*" AdjuntosTareas
+    Tareas "1" --> "0..*" AdjuntosTareas
+    Adjuntos "1" --> "0..*" AdjuntosSeguimientos
+    Seguimientos "1" --> "0..*" AdjuntosSeguimientos
+    Adjuntos "1" --> "0..*" AdjuntosAsesorias
+    Asesorias "1" --> "0..*" AdjuntosAsesorias
 ```
 
 ---
 
-## Catálogos de perfil
+## Bloque 2 — Diagnóstico y eventos
 
-Se listan aparte porque **no tienen comportamiento**: son tablas de lectura que
-solo aportan una clave foránea a `Usuario`. Modelarlas como clases sin métodos
-añadiría cajas vacías al diagrama sin aportar información.
+```mermaid
+classDiagram
+    direction TB
 
-| Catálogo | PK | Se usa en |
-| -------- | -- | --------- |
-| `roles` | `idRoles` | `Usuario` (1→N) — 1=Admin, 2=Estudiante, 3=Docente |
-| `tipodocumentos` | `idTipoDocumento` | `Usuario` (tipo de documento) |
-| `tipousuarios` | `idTipoUsuarios` | `Usuario` (Estudiante/Egresado/Docente/Administrativo) |
-| `programaacademico` | `idProgramaAcademico` | `Usuario` (semestre/carrera) |
-| `centrouniversitarios` | `idCentroUniversitarios` | `Usuario` (campus) |
-| `municipios` | `idMunicipio` | `Usuario` (municipio de residencia) |
-| `tipopoblacion` | `idTipoPoblacion` | `Usuario` (población vulnerable) |
-| `modulos` | `idModulos` | `Habilitacion` (1→N) — aparece en el diagrama por tener método. La habilitación por **usuario** vive en `Habilitacion`, no en `Usuario` |
+    class Usuarios {
+        <<referencia al bloque 1>>
+    }
+
+    class Emprendimiento {
+        <<referencia al bloque 1>>
+    }
+
+    class Diagnosticos {
+        -idDiagnosticos: int
+        -FechaDiagnostico: datetime
+        -Estado: enum
+        -PuntajeTotal: int
+        -UrlInforme: string
+        -Emprendimiento_idEmprendimiento: int
+        -SectorEconomico_idSectorEconomico: int
+    }
+
+    class PreguntasDiagnostico {
+        -idPregunta: int
+        -Seccion: int
+        -Orden: int
+        -Enunciado: string
+        -Tipo: enum
+        -Opciones: string
+        -Activa: boolean
+        -Origen: enum
+    }
+
+    class RespuestasDiagnostico {
+        -idRespuesta: int
+        -Valor: string
+        -FechaRespuesta: datetime
+        -Preguntas_idPregunta: int
+        -Diagnosticos_idDiagnosticos: int
+    }
+
+    class Caracterizacion {
+        -id: int
+        -Seccion: string
+        -Resultado: string
+        -Puntaje: int
+        -Fortalezas: string
+        -Oportunidades: string
+        -Emprendimiento_idEmprendimiento: int
+        -Diagnosticos_idDiagnosticos: int
+    }
+
+    class Valoracion {
+        -id: int
+        -Dimension: enum
+        -Puntaje: int
+        -Banda: enum
+        -Recomendacion: string
+        -Emprendimiento_idEmprendimiento: int
+        -Diagnosticos_idDiagnosticos: int
+    }
+
+    class Eventos {
+        -idEventos: int
+        -Nombre_evento: string
+        -Descripcion: string
+        -DirigidoA: string
+        -Capacidad_maxima: int
+        -Cupo: int
+        -Estado: enum
+        -Requiere_registro: boolean
+        -Lugar: string
+        -Enlace: string
+        -FechaEliminacion: datetime
+        -Usuarios_idOrganizador: int
+        -Tipo_evento_idTipo_evento: int
+        -Modalidad_idModalidad: int
+        -Fecha_y_Horarios_idFecha_y_Horarios: int
+    }
+
+    class UsuariosHasEventos {
+        -Usuarios_idUsuarios: int
+        -Eventos_idEventos: int
+        -Estado_asistencia: enum
+        -FechaInscripcion: datetime
+    }
+
+    class RecomendacionesEvento {
+        -idRecomendacion: int
+        -Mensaje: string
+        -Estado: enum
+        -Fecha: datetime
+        -Eventos_idEventos: int
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idEstudiante: int
+        -Usuarios_idDocente: int
+    }
+
+    Emprendimiento "1" --> "0..*" Diagnosticos
+    Emprendimiento "1" --> "0..*" Caracterizacion
+    Emprendimiento "1" --> "0..*" Valoracion
+
+    Diagnosticos "1" --> "0..*" RespuestasDiagnostico
+    PreguntasDiagnostico "1" --> "0..*" RespuestasDiagnostico
+    Diagnosticos "1" --> "0..*" Caracterizacion
+    Diagnosticos "1" --> "0..*" Valoracion
+
+    Usuarios "1" --> "0..*" Eventos : organizador
+    Usuarios "1" --> "0..*" UsuariosHasEventos
+    Eventos "1" --> "0..*" UsuariosHasEventos
+    Eventos "1" --> "0..*" RecomendacionesEvento
+    Emprendimiento "1" --> "0..*" RecomendacionesEvento
+    Usuarios "0..1" --> "0..*" RecomendacionesEvento : estudiante
+    Usuarios "1" --> "0..*" RecomendacionesEvento : docente
+```
 
 ---
 
-## Capa de servicios: qué clase responde por qué requisito
+## Bloque 3 — Soporte del sistema
 
-Cada clase del diagrama se materializa en el backend como un servicio
-(`routes → controllers → services → BD`, según `diagrama-componentes.md`).
+```mermaid
+classDiagram
+    direction TB
 
-| Servicio | Clases del diagrama que opera | Requisito / regla que obliga |
-| -------- | ----------------------------- | ----------------------------- |
-| `AuthService` | `Usuario`, `CodigoVerificacion` | FR-001, R1, R2 · OTP 8 dígitos / 5 min |
-| `UserService` | `Usuario`, `Rol`, `Modulo`, `Habilitacion` | FR-002 (usuarios y roles) · R3 · AQ-02 (habilitación individual por usuario) |
-| `EmprendimientoService` | `Emprendimiento`, `EtapaEmprendimiento` | FR-004, FR-010 · R4–R8 · R17 (4 etapas) |
-| `AsignacionService` | `Asignacion`, `Usuario`, `Emprendimiento` | FR-004 · R9–R11 (una activa por emprendimiento) |
-| `SeguimientoService` | `Seguimiento`, `Emprendimiento`, `Usuario` | FR-006 · R12–R16 (autor obligatorio) |
-| `TareaService` | `Tarea`, `Emprendimiento`, `Usuario` | FR-007 · R18–R21 (avance derivado de BD) |
-| `AsesoriaService` | `Asesoria`, `FechaHorario`, `Modalidad` | FR-004, FR-005 · R22–R23 · BR-002 |
-| `DiagnosticoService` | `Diagnostico`, `Caracterizacion`, `SectorEconomico` | FR-002 (diagnóstico automático) · BP-001 |
-| `EventoService` | `Evento`, `InscripcionEvento`, `TipoEvento` | FR-005 (notificaciones de eventos) · CRUD de eventos y registro manual de asistencia |
-| `DashboardService` | `Usuario`, `Emprendimiento`, `Tarea` | FR-010 (métricas reales, no mock) |
-| `AdjuntoService` | `Adjunto` (propuesta) | FR-008 (500 MB, se borra con el registro) |
+    class Usuarios {
+        <<referencia al bloque 1>>
+    }
+    class Emprendimiento {
+        <<referencia al bloque 1>>
+    }
+
+    class CodigosVerificacion {
+        -idCodigo: int
+        -CorreoInstitucional: string
+        -Proposito: enum
+        -Codigo: string
+        -Expiracion: datetime
+        -Usado: boolean
+        -Intentos: int
+        -Usuarios_idUsuarios: int
+    }
+
+    class Notificaciones {
+        -idNotificaciones: int
+        -Tipo: enum
+        -Mensaje: string
+        -Url: string
+        -TipoObjeto: string
+        -ObjetoId: int
+        -Leida: boolean
+        -Fecha: datetime
+        -Usuarios_idUsuarios: int
+    }
+
+    class Habilitaciones {
+        -idHabilitacion: int
+        -Estado: enum
+        -Fecha: datetime
+        -Usuarios_idUsuarios: int
+        -Modulos_idModulos: int
+    }
+
+    class Solicitudes {
+        -idSolicitud: int
+        -Tipo: enum
+        -Detalle: string
+        -Estado: enum
+        -MotivoRechazo: string
+        -FechaSolicitud: datetime
+        -FechaResolucion: datetime
+        -Usuarios_idUsuarios: int
+        -Emprendimiento_idEmprendimiento: int
+        -Usuarios_idResueltoPor: int
+    }
+
+    class ConfiguracionPrograma {
+        -idConfiguracion: int
+        -Clave: string
+        -Valor: string
+        -TipoDato: string
+        -Descripcion: string
+        -Usuarios_idUsuarios: int
+    }
+
+    class Respaldos {
+        -idRespaldo: int
+        -Codigo: string
+        -Tipo: enum
+        -FechaHora: datetime
+        -TamanoLogicoMB: int
+        -TamanoAnadidoMB: int
+        -Estado: enum
+        -Destino: string
+        -RetencionDias: int
+        -ChecksumManifiesto: string
+        -Usuarios_idUsuarios: int
+    }
+
+    class AuditoriaEventos {
+        -idAuditoria: int
+        -Accion: enum
+        -Entidad: string
+        -EntidadId: int
+        -ValorAnterior: json
+        -ValorNuevo: json
+        -Fecha: datetime
+        -Ip: string
+        -Usuarios_idUsuarios: int
+    }
+
+    Usuarios "1" --> "0..*" CodigosVerificacion
+    Usuarios "1" --> "0..*" Notificaciones : destinatario
+    Usuarios "1" --> "0..*" Habilitaciones
+    Usuarios "1" --> "0..*" ConfiguracionPrograma : actualiza
+    Usuarios "0..1" --> "0..*" Respaldos : genera
+    Usuarios "0..1" --> "0..*" AuditoriaEventos : autor
+    Usuarios "1" --> "0..*" Solicitudes : solicitante
+    Usuarios "0..1" --> "0..*" Solicitudes : resuelve
+    Emprendimiento "0..1" <-- "0..*" Solicitudes
+```
 
 ---
 
-## Revisión crítica: 5 problemas detectados al contrastar con los requisitos
+## Catálogos (14, solo lectura)
 
-Este es el resultado de validar el modelo contra las historias y las reglas de
-negocio, **no** de aceptar el primer borrador. La IA no detecta estos problemas:
-solo aparecen al cotejar el diagrama contra el documento de requisitos.
+Los valores son los **canónicos** del master §7.2 y §13.1; el seed debe usar
+exactamente estas cadenas.
 
-| # | Problema | Corrección propuesta | Justificación (regla / requisito afectado) | Estado |
-| - | -------- | -------------------- | ------------------------------------------ | ------- |
-| 1 | **`asesorias` no tiene relación con `emprendimiento`.** El expediente central del proyecto no puede incluir las asesorías. | Agregar `Emprendimiento_idEmprendimiento` a `asesorias` y la relación `Emprendimiento "1" --> "0..*" Asesoria`. | FR-006: *"anclar todo el historial de diagnósticos, notas de seguimiento, tareas **y asesorías** directamente a la entidad Emprendimiento"*. La coordinadora lo pidió explícito para que el asesor nuevo vea el contexto. | ✅ **Aplicada** 2026-10-06 |
-| 2 | **No existe entidad para las respuestas del formulario de caracterización**, solo el resultado. Sin las respuestas no se puede recalcular ni auditar el diagnóstico. | Nueva clase `Caracterizacion` (1..N por emprendimiento) que guarda las respuestas por sección, ligada a `Diagnostico`. | FR-002 y BP-001: el estudiante diligencia el formulario (modelo de negocio, marketing, producto, administrativo-financiero) y el sistema calcula métricas. Hoy solo se modela el resultado, no el insumo. | ✅ **Aplicada** 2026-10-06 |
-| 3 | **`FechaHorario` es `0..1` en `asesorias` pero la tabla de catálogos lo declara `1 → N`.** Además, sin esa relación la *"prevención de duplicidad"* no se puede garantizar. | Fijar `FechaHorario "0..1" --> "0..*" Asesoria` (lo hace el administrador al confirmar) y añadir restricción `UNIQUE` por `Fecha_y_Horarios_idFecha_y_Horarios` en las asesorías confirmadas. | BR-002 y la *"prevención de duplicidad mediante propiedades ACID"* de `historias_usuario.md`. | ✅ **Ya correcta** en el modelo (no hizo falta tocarla) |
-| 4 | **`modulos` no puede modelar el desbloqueo progresivo por estudiante.** Está declarado como catálogo `1 → N usuarios`, o sea control por *rol*, no por *persona*. | Separar en dos: `Modulo` (catálogo por rol, se queda) y `Habilitacion` (par clave usuario/módulo, «recién habilitado tras la reunión de socialización»). | AQ-02 de `fr_nfr_sgemd.md`, marcada **prioridad alta**: el estudiante se registra pero el administrador debe habilitarle el resto de la plataforma *individualmente*. Un catálogo por rol no puede expresar eso. | ✅ **Aplicada** 2026-10-06 |
-| 5 | **Adjuntos: el requisito existe pero la entidad no.** `FR-008` exige subir, descargar y **borrar el archivo del servidor** cuando se elimina el registro asociado. | Clase `Adjunto` con borrado en cascada controlado por el servicio (se marca `<<propuesta>>` en el diagrama porque todavía no está aprobada). | FR-008 + criterio de aceptación 7: *"Los adjuntos se eliminan del servidor si se borra la tarea"*. Sin entidad no hay forma de garantizarlo. | ⏳ **Pendiente de aprobación** del equipo |
+| Tabla | Valores | Usada por |
+| --- | --- | --- |
+| `roles` | 1 Admin · 2 Estudiante · 3 Docente · 4 Auditor *(Post-MVP)* | `Usuarios` |
+| `tipodocumentos` | CC · TI · CE | `Usuarios` |
+| `programaacademico` | Programa del estudiante | `Usuarios` |
+| `centrouniversitarios` | Sede Norte · Sede Centro · Sede Sur | `Usuarios`, `Emprendimiento` |
+| `municipios` | Departamento + ciudad | `Usuarios` |
+| `tipopoblacion` | Población vulnerable | `Usuarios` |
+| `tipousuarios` | Estudiante · Egresado · Docente · Administrativo | `Usuarios` |
+| `etapaemprendimiento` | FASE 1 - Ideación · FASE 2 - Prototipo · FASE 3 - Validación · FASE 4 - Formalización | `Emprendimiento` |
+| `faseplan` | FASE 1 Ideación y priorización de ideas · FASE 2 Estructuración y ejecución · FASE 3 Consolidación del proceso · FASE 4 Escalamiento | `Seguimientos`, `Tareas` |
+| `sectoreconomico` | Alimentos · Moda · Ambiental · Muebles · Tecnología · Comercio | `Emprendimiento`, `Diagnosticos` |
+| `modalidad` | Presencial · Virtual · Mixta | `Asesorias`, `Eventos` |
+| `tipo_evento` | Startup · Capacitación · Asesoría grupal · Showroom · Taller | `Eventos` |
+| `fecha_y_horarios` | Bloque de agenda (fecha, hora inicio, hora fin) | `Asesorias`, `Eventos` |
+| `modulos` | Perfil · Emprendimiento · Diagnóstico · Tareas · Asesorías · Seguimiento · Eventos · Reportes | `Habilitaciones` |
 
-### Inconsistencias documentales detectadas (no son del modelo, hay que corregirlas en los documentos)
+> **Nota sobre fases:** `etapaemprendimiento` (avance global del emprendimiento) y
+> `faseplan` (agrupación de tareas y avances) son **catálogos distintos**. No
+> deben confundirse ni fusionarse (README §6, R17). Los alias del prototipo
+> ("Ideación · Ejecución · Crecimiento · Consolidación") **no** son valores de
+> `faseplan`.
 
-| # | Hallazgo | Dónde | Acción |
-| - | -------- | ----- | ------ |
-| D1 | *(Resuelto en `origin/main`)* El motor de base de datos estaba dividido: **PostgreSQL** en `fr_nfr_sgemd.md`, **MySQL** en `README.md` e `historias_usuario.md`. | Ya unificado a **PostgreSQL 17** con pool `pg`. Este diagrama no modela el motor: el `classDiagram` describe estructura, no tecnología. | Ya cerrado |
-| D2 | Umbral de inactividad: **`X` días** (sin resolver, AQ-01) en `fr_nfr_sgemd.md` frente a **90 días** en `historias_usuario.md`. | 2 documentos | Validar con la coordinadora y dejarlo en un solo lugar. |
-| D3 | El modelo incumple la convención que el propio `README.md` §10 exige: dice *"usar una convención de nombres consistente (snake_case)"*, pero mezcla `idUsuarios` (camelCase), `Fecha_asesoria` (snake_case) y `idFecha_y_Horarios` (con `y` en minúscula). | `README.md` §5 vs §10 | O se aplica `snake_case` a las columnas, o se cambia la regla a la convención real. **Hoy el diagrama replica los nombres tal cual** (ver *Decisión de diseño* en *Procedencia y método*), de modo que el conflicto queda documentado y no escondido. |
-| D4 | `codigosverificacion` se une a `usuarios` por `correoInstitucional` en vez de clave foránea. | `README.md` §5 | Agregar `Usuarios_idUsuarios` tras la verificación, o documentar por qué se acepta la referencia por correo. |
+---
 
-### Supuestos declarados
+## Enumeraciones
 
-- `Diagnostico "0..*"` por `Emprendimiento`: el `README.md` §5 dice *"1 → 1 (o 1 → N)"*. Se eligió **1 → N** porque el historial de re-diagnósticos es el valor de la plataforma; queda por confirmar.
-- `Caracterizacion "1" --> "0..1" Diagnostico`: el `0..1` permite que el formulario esté enviado pero el diagnóstico aún no calculado. Si cada re-diagnóstico exige diligenciar un **nuevo** formulario, cambiar a `1..1`; si basta con recalcular sobre las mismas respuestas, se mantiene `0..1`. **Queda por confirmar.**
-- `Caracterizacion` y `Habilitacion` son **entidades nuevas** (no existían en el modelo anterior): se agregan porque la matriz de correcciones las señala como faltantes. `Adjunto` sigue marcada `<<propuesta>>` porque el propio requisito la deja pendiente de aprobación; a esas dos no se les puso ese estereotipo porque son correcciones del modelo, no propuestas abiertas.
-- `FechaHorario "0..1"` en `Asesoria`: se asume que el bloque se asigna **después** de que la coordinadora confirme la cita, no al solicitarla.
-- La clase `Adjunto` está marcada `<<propuesta>>` a propósito: **no existe** en el modelo actual, se agrega para poder discutirla.
+Cadenas exactas, con tildes; se implementan como restricciones CHECK y se
+declaran una sola vez en `shared/src/enums.ts` (master §7.2).
+
+| Campo | Valores |
+| --- | --- |
+| `Usuarios.Estado` | `Limitado` · `Activo` · `Inactivo` |
+| `Usuarios.NivelAcademico` | `Pregrado` · `Posgrado` · `Egresado` (FR-024) |
+| `Emprendimiento.EstadoAprobacion` | `Pendiente` · `Aprobado` · `Rechazado` |
+| `Asignaciones.Estado` | `activa` · `inactiva` |
+| `Seguimientos.TipoSeguimiento` | `Avance de fase` · `Comentario` |
+| `Tareas.Estado` | `Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta` |
+| `Tareas.Prioridad` | `Alta` · `Media` · `Baja` |
+| `*.EstadoRevision` | `Pendiente` · `En revisión` · `Calificada` · `Devuelta` |
+| `Asesorias.Estado` | `Por agendar` · `Programada` · `Confirmada` · `En curso` · `Completada` · `Cancelada` |
+| `Actas.Estado` | `Pendiente` · `En revisión` · `Aprobada` · `Rechazada` |
+| `Diagnosticos.Estado` | `En progreso` · `Enviado` · `Revisado` |
+| `Valoracion.Banda` | `90-100` · `70-89` · `50-69` · `<50` |
+| `Eventos.Estado` | `Pendiente` · `Aprobado` · `Rechazado` · `Publicado` |
+| `Solicitudes.Tipo` | `Desbloqueo` · `Paralelo` · `Cita` |
+| `Solicitudes.Estado` | `Pendiente` · `Aprobada` · `Rechazada` |
+| `Respaldos.Tipo` | `Completo` · `Parcial` |
+| `Respaldos.Estado` | `Exitosa` · `Fallida` |
+| `Notificaciones.Tipo` | `Tarea` · `Asesoría` · `Seguimiento` · `Solicitud` · `Diagnóstico` · `Evento` · `Sistema` *(heredada de la versión anterior; no figura en el master §7.2, ver pendientes)* |
+| `CodigosVerificacion.Proposito` | `Verificación` · `Recuperación` *(nuevo, ver pendientes)* |
+
+`Asesorias`: la etiqueta de filtro `Agendada` del docente agrupa `Programada` +
+`Confirmada` + `En curso`; **no** es un estado almacenado.
+`Valoracion.Dimension` tiene 6 valores que dependen de la rúbrica (AQ-09) y no se
+listan hasta que se apruebe. `AuditoriaEventos.Accion` debe cubrir como mínimo
+altas, cambios, borrados, cambios de estado, lecturas y exportaciones del
+auditor, descargas y exportaciones de respaldos, y las acciones de los jobs.
+
+---
+
+## Nulabilidad y restricciones que el diagrama no dibuja
+
+**Claves que admiten nulo (a propósito):**
+
+| Campo | Por qué |
+| --- | --- |
+| `Respaldos.Usuarios_idUsuarios` | El respaldo diario lo crea un job, sin usuario |
+| `AuditoriaEventos.Usuarios_idUsuarios` | Los jobs (inactividad de 90 días, tareas vencidas) también escriben auditoría |
+| `Asesorias.Usuarios_idDocentes` | Una solicitud del estudiante (`Por agendar`) todavía no tiene docente |
+| `Actas.Usuarios_idRevisor`, `Actas.FechaRevision` | Hasta que el admin la revisa |
+| `Actas.Adjuntos_idAdjunto` | Solo mientras el estudiante no ha subido el archivo |
+| `Solicitudes.Emprendimiento_idEmprendimiento` | Un desbloqueo no está ligado a un emprendimiento |
+| `Solicitudes.Usuarios_idResueltoPor`, `FechaResolucion` | Hasta que se resuelve |
+| `RecomendacionesEvento.Usuarios_idEstudiante` | La recomendación puede ser a todo el emprendimiento |
+| `*.FechaEliminacion` | Nulo = vigente |
+
+**Restricciones que se implementan fuera del dibujo** (índices, CHECK y claves
+compuestas en `schema.sql`; las multiplicidades por sí solas **no** las
+garantizan):
+
+- Un solo `Asignaciones.Estado = 'activa'` por emprendimiento: **índice único
+  parcial** (R11). Las multiplicidades no lo expresan. Los topes de 12 h/semana y
+  12 emprendimientos por docente se validan en el servicio, dentro de una
+  transacción.
+- Únicos: `Usuarios.CorreoInstitucional`, `Usuarios.NumeroDocumento`,
+  `Emprendimiento.Codigo`, `Respaldos.Codigo`.
+- Una respuesta por pregunta y diagnóstico: único (`Preguntas_idPregunta`,
+  `Diagnosticos_idDiagnosticos`).
+- Claves primarias compuestas: `UsuariosHasEventos` y las tres tablas
+  `Adjuntos*`.
+- `Tareas.Estado = 'Completada'` exige al menos un adjunto (BR-007);
+  `EvidenciaRequerida` es siempre verdadero. Se valida en el servicio, no solo en
+  la interfaz.
+- Rechazo sin motivo prohibido: `Emprendimiento.MotivoRechazo`,
+  `Solicitudes.MotivoRechazo` y `Actas.Observaciones` (motivo del rechazo del
+  acta, BR-009) son obligatorios cuando el estado es rechazado. La
+  `Tareas.MotivoDevolucion` es obligatoria al devolver (R19b).
+- `Avance` (0–100) se deriva de las tareas; el cliente nunca lo envía.
+- `PuntajeTotal` y `Valoracion` solo se escriben cuando la rúbrica está aprobada
+  (AQ-09); mientras tanto la tabla permanece vacía.
 
 ---
 
 ## Trazabilidad: requisito → clase
 
-Cada clase del diagrama existe porque al menos un requisito la necesita
-(regla anti-lluvia: *si un atributo no lo necesita ninguna historia, no entra*).
+Cada clase existe porque al menos un requisito la necesita (regla anti-lluvia:
+*si un atributo no lo necesita ninguna historia, no entra*).
 
 | Requisito / Regla | Clases del diagrama que lo soportan |
 | ----------------- | ------------------------------------ |
-| FR-001 Registro + OTP | `Usuario`, `CodigoVerificacion` |
-| FR-002 Diagnóstico automático | `Diagnostico`, `Caracterizacion`, `Emprendimiento`, `SectorEconomico` |
-| FR-003 Acta de confidencialidad | `Emprendimiento.actaCompromiso`, `Adjunto` |
-| FR-004 Asignación y agenda manual | `Asignacion`, `Asesoria`, `FechaHorario`, `Modalidad` |
-| FR-005 Notificaciones en tiempo real | `Asesoria`, `Tarea`, `Evento`, `InscripcionEvento`, `TipoEvento` |
-| FR-006 Expediente central | `Emprendimiento`, `Seguimiento`, `Tarea`, `Asesoria`, `Caracterizacion` |
-| FR-007 Semaforización inactividad | `Usuario.estado`, `Tarea.calcularAvance()` |
-| FR-008 Archivos adjuntos | `Adjunto` |
-| FR-009 Exportar datos | `DashboardService` → sin entidad propia (lectura agregada) |
-| FR-010 Dashboards | `Usuario`, `Emprendimiento`, `Tarea`, `Rol` |
-| AQ-02 Habilitación de plataforma | `Modulo`, `Habilitacion` |
-| R17 Etapas (catálogo cerrado de 4) | `EtapaEmprendimiento` |
-| NFR-002 Autorización por alcance | Multiplicidades de `Asignacion` y `Emprendimiento` |
+| FR-001 Registro + OTP | `Usuarios`, `CodigosVerificacion` (`Proposito = Verificación`) |
+| Recuperación de contraseña (T39) | `CodigosVerificacion` (`Proposito = Recuperación`) |
+| FR-002 Diagnóstico automático | `Diagnosticos`, `PreguntasDiagnostico`, `RespuestasDiagnostico`, `Caracterizacion`, `Valoracion` |
+| FR-003 / BR-001 / BR-009 Acta | `Actas`, `Adjuntos`, `Asignaciones` (la asignación exige un acta `Aprobada`) |
+| FR-004 / FR-015 Asignación y agenda | `Asignaciones`, `Asesorias`, `Habilitaciones`, catálogo `fecha_y_horarios` |
+| FR-005 / FR-019 Notificaciones | `Notificaciones`, `RecomendacionesEvento` |
+| FR-006 / FR-017 Expediente | `Emprendimiento`, `Seguimientos`, `Tareas`, `Asesorias`, `Comentarios`, `AuditoriaEventos` |
+| FR-007 / BR-005 Inactividad 90 días | `Usuarios.UltimaActividad`, `AuditoriaEventos` (autor nulo) |
+| FR-008 Adjuntos | `Adjuntos`, `AdjuntosTareas`, `AdjuntosSeguimientos`, `AdjuntosAsesorias`, `Actas` |
+| BR-006 Borrado lógico y cascada de archivos | `FechaEliminacion` en `Usuarios`, `Emprendimiento`, `Seguimientos`, `Tareas`, `Asesorias`, `Eventos`, `Adjuntos` |
+| FR-009 / FR-018 / NFR-004 Exportar y respaldos | `Respaldos` |
+| FR-010 Dashboards | Sin clase propia: son agregados SQL sobre las demás |
+| FR-012 / BR-004 Aprobación y paralelo | `Emprendimiento`, `Solicitudes` |
+| FR-011 / FR-013 Usuarios y estados | `Usuarios` |
+| FR-014 Bandeja única | `Solicitudes` |
+| FR-016 Topes docentes | `Asignaciones.HorasSemanales`, `ConfiguracionPrograma` |
+| FR-020 Configuración | `ConfiguracionPrograma`, `AuditoriaEventos` (valor anterior y nuevo) |
+| FR-021 Eventos y recomendación | `Eventos`, `UsuariosHasEventos`, `RecomendacionesEvento` |
+| FR-022 Progreso por fase | `Seguimientos`, `Tareas`, catálogo `faseplan` (ambas llevan `FasePlan`) |
+| FR-023 / BR-007 Evidencia obligatoria | `Tareas.EvidenciaRequerida`, `AdjuntosTareas` |
+| FR-024 Datos académicos condicionales | `Usuarios.NivelAcademico` y los catálogos académicos |
+| NFR-002 Autorización por alcance | `Asignaciones` (índice único parcial de la asignación activa) y las consultas del servicio; **no** las multiplicidades |
+| NFR-007 Auditabilidad | `AuditoriaEventos` |
+
+---
+
+## Cambios de la versión 2
+
+Estado: **Master** = lo exige el master v1.3; **Inferido** = lo exige un
+requisito pero el master no lo lista, o lo propongo yo, y requiere confirmación.
+
+| # | Cambio | Estado |
+|---|---|---|
+| 1 | La frase "nombres idénticos a las columnas físicas" pasa a "nombres lógicos con mapeo explícito a `snake_case`" | Master |
+| 2 | `Respaldos`: `TamanoMB` se reemplaza por `TamanoLogicoMB` y `TamanoAnadidoMB`; se añade `ChecksumManifiesto`; autor nulo | Master (D13, D22) |
+| 3 | `CodigosVerificacion`: se añade `Intentos`; `Codigo` guarda un HMAC | Master (§15, D20) |
+| 4 | `CodigosVerificacion.Proposito` para el token de recuperación de contraseña | Inferido (el master tiene T39 pero ninguna tabla de tokens) |
+| 5 | Catálogos con los valores canónicos; `fecha_y_horarios` en minúsculas | Master |
+| 6 | `Usuarios`: `NivelAcademico` y claves a los seis catálogos académicos | Master (§13.2 "academic fields", FR-024) |
+| 7 | `FechaEliminacion` en siete entidades | Inferido (BR-006 exige borrado lógico; el master no nombra la columna) |
+| 8 | `Emprendimiento`: `Descripcion`, `RedesSociales`, claves a sector y sede | Master |
+| 9 | `Tareas`: `Descripcion`, `Retroalimentacion`, `MotivoDevolucion`, `ObservacionesDevolucion` | Master |
+| 10 | `Tareas.FasePlan_idFasePlan` y `Usuarios_idCreador` | Inferido (FR-022 necesita la fase de cada tarea; el docente crea la tarea) |
+| 11 | `Actas`: se elimina `UrlArchivo` y se enlaza `Adjuntos`; se añaden `FechaCarga`, `FechaRevision` y `Usuarios_idEstudiante` | Master para las fechas; el resto inferido (un solo camino de archivos para MIME, borrado y respaldo) |
+| 12 | `Adjuntos`: `FechaSubida`; `TamanoBytes` pasa a 64 bits | Master (fecha); 64 bits inferido (el límite es configurable) |
+| 13 | `Eventos`: `Descripcion`, `Lugar`, `Enlace`, `Usuarios_idOrganizador` | Master |
+| 14 | `Asesorias`: clave a `fecha_y_horarios` (el catálogo ya decía que la usaba) | Master |
+| 15 | `Asignaciones` → `Emprendimiento` pasa de `0..1` a `1`; la unicidad de la asignación activa se documenta como índice parcial | Master (R11) |
+| 16 | `Diagnosticos` → `RespuestasDiagnostico` pasa de `1..*` a `0..*` (guardar y retomar) | Master (T25) |
+| 17 | `Seguimientos`: `FechaSeguimiento` y `Retroalimentacion` | Inferido (la vista del estudiante muestra fecha y retroalimentación) |
+| 18 | `Notificaciones.Fecha` | Inferido (ordenar el cajón de notificaciones) |
+| 19 | Se corrige la trazabilidad: FR-010 son dashboards derivados (no `Solicitudes`) y NFR-002 no lo dan las multiplicidades | Corrección del documento |
+| 20 | Se amplía la tabla de enumeraciones y se añade la sección de nulabilidad y restricciones | Master (§7.2) |
+| 21 | Se eliminan las referencias a PNG y `.drawio` borrados | Corrección del documento |
+
+## Pendientes de confirmar
+
+- **Cambios 4, 7, 10, 11 (parte), 17 y 18** son inferidos. Confirmar contra
+  `README.md` §5 antes de pasarlos al master §13.2.
+- **Dónde se guarda la fecha reprogramada** cuando el docente propone otra
+  fecha en una asesoría: el master no lo especifica.
+- **Revisor y recomendaciones del docente en el diagnóstico**
+  (`Diagnosticos.Estado = Revisado`): no hay columna para quién lo revisó ni para
+  su recomendación.
+- **`Diagnosticos.UrlInforme`**: si el informe se genera al vuelo, la columna
+  sobra; si se guarda, debería enlazar `Adjuntos`.
+- **`Notificaciones.Tipo`**: la lista no aparece en el master §7.2; verificar su
+  origen en `README.md`.
+- **`Valoracion.Dimension`** y los valores de `AuditoriaEventos.Accion`
+  dependen de AQ-09 y de la implementación de la auditoría.
 
 ---
 
 ## Cómo llevarlo a draw.io (visual)
 
-1. **Opción A — Abrir el `.drawio` editable:** abre `diagrama-clases.drawio` en
-   draw.io desktop o en app.diagrams.net. Ya viene con las 20 clases en tres
-   compartimentos (nombre / atributos / métodos) y las 31 relaciones.
-2. **Opción B — Importar el PNG:** arrastra `diagrama-clases.png` al lienzo, o
-   *File → Insert from… → Image*.
-3. **Opción C — Mermaid → draw.io:** copia el bloque Mermaid de este documento a
-   mermaid.live, exporta la imagen y arrástrala.
+Copia cada bloque Mermaid a mermaid.live o a
+*draw.io → Arrange → Insert → Advanced → Mermaid* y exporta la imagen.
 
-> El bloque Mermaid de este `.md` **es la fuente de verdad**: es texto, se
-> versiona en Git, se revisa con `diff` y lo puede regenerar cualquier
-> herramienta de IA. El PNG y el `.drawio` son derivados. Por eso el PNG nunca
-> se sube sin el `.md` que lo explica.
+> Los bloques Mermaid de este `.md` **son la fuente de verdad**: son texto, se
+> versionan en Git, se revisan con `diff` y los puede regenerar cualquier
+> herramienta. Los PNG y el `.drawio` de la versión anterior se borraron del
+> repositorio porque describían un modelo obsoleto; si hacen falta, se regeneran
+> desde estos bloques.
 
-## Archivos generados
+## Archivos
 
-| Archivo                       | Formato     | Uso                                  |
-| ----------------------------- | ----------- | ------------------------------------ |
-| `diagrama-clases.md`          | Markdown    | Diagrama en Mermaid + trazabilidad (este documento) |
-| `diagrama-clases.png`         | Imagen      | Vista visual para el informe y el repositorio |
-| `diagrama-clases.drawio`      | XML/mxGraph | Editable directamente en draw.io     |
+| Archivo | Formato | Uso |
+| ------- | ------- | --- |
+| `diagrama-clases.md` | Markdown | Diagramas Mermaid, catálogos, enumeraciones, restricciones y trazabilidad (este documento) |
