@@ -40,12 +40,12 @@ Se actualizaron los tres documentos fuente (`docs/fr_nfr_sgemd.md`, `docs/histor
 
 | Documento | Líneas | Estado |
 |---|---:|---|
-| `docs/fr_nfr_sgemd.md` | 565 | 24 FR / 9 NFR / 6 BP / 9 BR; AQ-01 … AQ-12 registradas; control de cambios |
-| `docs/historias_usuario.md` | 550 | SGEMD; 16 historias nuevas (US-011 … US-026); cobertura y control de cambios |
-| `README.md` | 1098 | 73 pantallas / 19 admin; R22 corregida; §8 completo; §16 con alcance local |
-| `docs/orquestacion-actualizacion-requisitos-2026-10.md` | 320 | Nuevo: método y criterios |
-| `docs/registro-actualizacion-requisitos-2026-10.md` | 376 | Nuevo: este documento |
-| `docs/dossier-decisiones-pendientes-2026-10.md` | 357 | Nuevo: hojas de decisión AQ-06/07/09/10/12 y anexos |
+| `docs/fr_nfr_sgemd.md` | 564 | 24 FR / 9 NFR / 6 BP / 9 BR; AQ-01 … AQ-12 registradas; control de cambios |
+| `docs/historias_usuario.md` | 549 | SGEMD; 16 historias nuevas (US-011 … US-026); cobertura y control de cambios |
+| `README.md` | 1097 | 73 pantallas / 19 admin; R22 corregida; §8 completo; §16 con alcance local |
+| `docs/orquestacion-actualizacion-requisitos-2026-10.md` | 319 | Nuevo: método y criterios |
+| `docs/registro-actualizacion-requisitos-2026-10.md` | 375 | Nuevo: este documento |
+| `docs/dossier-decisiones-pendientes-2026-10.md` | 356 | Nuevo: hojas de decisión AQ-06/07/09/10/12 y anexos |
 
 ### 2.3 Archivos efectivamente tocados
 
