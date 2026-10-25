@@ -240,3 +240,82 @@ detectó. Ahora `consumeOtp` devuelve el resultado y el error se lanza **despué
 **Puerta:** superada (T01–T05 y T39 en verde; el OTP no aparece en ninguna respuesta; el
 código vencido se rechaza; la cookie se emite con las cuatro banderas y el cuerpo no lleva
 token).
+
+---
+
+## Etapa 4 — Usuarios, roles y ciclo de vida
+
+- **Fecha:** 2026-10-25
+- **Commit:** _pendiente de commitear al cerrar la entrada_
+
+### Hecho
+
+- `modules/users`: alta administrativa de estudiantes y docentes, lectura de fichas,
+  edición por el administrador, edición del propio perfil, baja lógica, listados
+  paginados con filtros y las cuatro rutas del ciclo de vida (`validate`, `reactivate`,
+  `state`, `reject`).
+- `modules/users/repository.ts`: una sola consulta de la fila de `usuarios` (con los ids de
+  catálogo) compartida por el middleware de sesión, el login y los casos de uso. El login
+  ya no duplica el `SELECT`.
+- `services/codes.ts`: `DOC-###` y `ADM-###` secuenciales con `pg_advisory_xact_lock`
+  (serializa altas simultáneas del mismo prefijo, porque `usuarios.codigo` no es único) y
+  el código estudiantil de 6 dígitos.
+- `services/otpCodes.ts`: emisión, cooldown y consumo del código extraídos de
+  `auth/service.ts` para reutilizarlos en la invitación de una cuenta nueva.
+- `services/email.ts`: transporte, dominio institucional y las cuatro plantillas
+  (verificación, recuperación, invitación, bienvenida). `sendMailBestEffort` para los
+  correos cuyo hecho de negocio ya está confirmado.
+- `services/notify.ts`: escritura de `notificaciones` en la misma transacción que el
+  cambio (los endpoints de lectura llegan en la Etapa 8).
+- `policy/accountTransitions.ts`: tabla única de transiciones (`Limitado → Activo`,
+  `Inactivo → Activo`, `Activo → Inactivo`); el resto, `422 INVALID_STATE_TRANSITION`.
+- `middleware/validate.ts`: `validateQuery` + `queryOf`, con `z.coerce` y `.strict()`, para
+  que un nombre de columna arbitrario nunca llegue al `ORDER BY`.
+- Acciones de auditoría nuevas: `Alta de usuario`, `Edición de usuario`, `Baja lógica de
+  usuario`, `Cambio de estado de cuenta`, `Rechazo de activación`.
+- `docs/api.md`: sección de usuarios completa (13 rutas, paginación, códigos nuevos).
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 3 archivos) | **65 pruebas en verde** (36 de la Etapa 3 + 29 de la Etapa 4) |
+| T06 · alta | Estudiante con código de 6 dígitos, `verificado = true`, `Activo` por defecto, rol 2, contraseña aleatoria `$2b$10$` que no viaja en la respuesta, auditoría con el actor e invitación con OTP de 8 dígitos; docente con `DOC-003` y `DOC-004` (el seed trae `DOC-001`/`DOC-002`) |
+| T06 · unicidad y validación | `409 EMAIL_TAKEN`, `409 DOCUMENT_TAKEN`, `400` para rol fuera de 2/3, dominio no institucional, catálogo inexistente y campos del servidor (`codigo`, `password`, `verificado`) |
+| T06 · autorización | Docente y estudiante: `403 ROLE_NOT_ALLOWED` en alta y listado; una cuenta de coordinación `Limitado`: `403 ACCOUNT_NOT_ACTIVE` |
+| T13 · transiciones | `Limitado → Activo` por `validate` con auditoría `{estado: "Limitado"} → {estado: "Activo"}`, notificación `Sistema` y correo de bienvenida; `Activo → Inactivo` y `Inactivo → Activo`; `Activo → Limitado`, `Limitado → Inactivo` y repetir el estado dan `422`; `validate`/`reactivate` solo sobre su estado de origen |
+| T13 · autoprotección | Un estudiante no cambia su estado ni se valida (`403`); el administrador no cambia el estado de su propia cuenta (`422 SELF_STATE_CHANGE_NOT_ALLOWED`) |
+| Rechazo de activación | Sin motivo `400`; con motivo `200`, la cuenta sigue `Limitado`, auditoría con el motivo y notificación al titular; sobre una cuenta ya `Activo`, `422` |
+| Baja lógica | `fecha_eliminacion` marcada, `total = 0` en el listado, detalle `404`, login `401 INVALID_CREDENTIALS`, auditoría con el actor; auto-baja `422`; id inexistente `404` |
+| Perfil | Un estudiante lee su ficha y la ajena da `404`; `PUT /users/me` cambia nombres y datos académicos y audita solo lo que cambió; correo, documento, tipo de documento, rol, estado y código se rechazan con `400`; el administrador edita a otro y la unicidad da `409` |
+| Listados | `pageSize = 2` devuelve 2 elementos, `total` real y páginas sin solaparse; filtros `rol`, `estado` y `q`; `/students` y `/teachers` ignoran el `rol` del cliente; `sort` fuera de la lista blanca, `pageSize = 500` y parámetros desconocidos dan `400` |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Alta de estudiante `201` (`Limitado`, código de 6 dígitos) con la invitación en `storage/mail`; alta de docente con `DOC-003`; correo duplicado `409 EMAIL_TAKEN`; listado paginado `200`; `Limitado → Activo` `200`, `Activo → Limitado` `422`, `Activo → Inactivo` `200`, `reactivate` `200`; rechazo sin motivo `400`; un estudiante recibe `403` al intentar cambiar su estado y `400` al enviar `correoInstitucional` en `PUT /users/me`; la auditoría y la notificación quedan escritas; la baja lógica deja el login en `401` |
+
+### Decisiones y huecos registrados
+
+- P-15: el rechazo de activación deja la cuenta en `Limitado` (no existe estado
+  «Rechazado» en el diagrama).
+- P-16: la restauración de una cuenta dada de baja no tiene endpoint en el master.
+- P-17: el alcance de lectura del Auditor queda para el módulo de auditoría.
+- P-18: el rol es inmutable en la edición.
+- Discrepancias #27 (`Activo → Limitado` del prototipo se rechaza), #28 (campos del alta
+  del prototipo que no existen en `usuarios`), #29 (rechazo sin estado de destino) y #30
+  (carga y emprendimientos no viven en `usuarios`).
+- §5.5: alta verificada con invitación, estado inicial, correo de bienvenida sin reversión,
+  notificación transaccional, auto-gestión prohibida y baja lógica sin cascada de archivos
+  todavía.
+
+### Sin verificar / pendiente
+
+- El borrado físico de adjuntos al dar de baja un usuario (BR-006) se implementará con el
+  módulo de adjuntos: hoy no existen archivos asociados a una cuenta.
+- Restaurar una cuenta dada de baja (P-16) y cambiar el rol (P-18) no tienen endpoint.
+- Las preferencias `notif_*` no se aplican al escribir; se respetan al construir la bandeja
+  (Etapa 8).
+- Los criterios de validación del emprendedor siguen abiertos (AQ-06): `reject` solo exige
+  el motivo.
+
+**Puerta:** superada (T06 y T13 en verde; un estudiante no puede cambiar su propio estado
+ni su rol; la auditoría guarda el valor anterior y el nuevo).

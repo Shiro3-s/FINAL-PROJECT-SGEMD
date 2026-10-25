@@ -16,12 +16,22 @@ export interface AuditEntry {
   ip?: string | null;
 }
 
-/** Acciones auditadas. La lista crecerá con cada módulo (P-4). */
+/**
+ * Acciones auditadas. La lista crecerá con cada módulo (P-4).
+ *
+ * No hay `CHECK` en `auditoria_eventos.accion`: el vocabulario se controla aquí y no en
+ * el esquema, para no migrar la tabla cada vez que un módulo añade una acción.
+ */
 export const AUDIT_ACTIONS = {
   REGISTER: 'Registro',
   VERIFY_EMAIL: 'Verificación de correo',
   LOGIN: 'Inicio de sesión',
   PASSWORD_RESET: 'Cambio de contraseña',
+  CREATE_USER: 'Alta de usuario',
+  UPDATE_USER: 'Edición de usuario',
+  DELETE_USER: 'Baja lógica de usuario',
+  STATE_CHANGE: 'Cambio de estado de cuenta',
+  REJECT_ACTIVATION: 'Rechazo de activación',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {

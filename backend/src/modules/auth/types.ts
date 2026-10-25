@@ -8,7 +8,14 @@ export interface SessionUser {
   apellidos: string;
   correoInstitucional: string;
   numeroDocumento: string;
+  /** Catálogos del diagrama de clases: se devuelven como ids, no como objetos. */
+  tipoDocumentoId: number;
   nivelAcademico: string | null;
+  programaAcademicoId: number | null;
+  centroUniversitarioId: number | null;
+  municipioId: number | null;
+  tipoPoblacionId: number | null;
+  tipoUsuarioId: number | null;
   verificado: boolean;
   estado: CuentaEstado;
   rolId: number;
@@ -24,7 +31,13 @@ export interface PublicUser {
   apellidos: string;
   correoInstitucional: string;
   numeroDocumento: string;
+  tipoDocumentoId: number;
   nivelAcademico: string | null;
+  programaAcademicoId: number | null;
+  centroUniversitarioId: number | null;
+  municipioId: number | null;
+  tipoPoblacionId: number | null;
+  tipoUsuarioId: number | null;
   verificado: boolean;
   estado: CuentaEstado;
   rol: { id: number; nombre: string };
@@ -39,7 +52,13 @@ export function toPublicUser(user: SessionUser): PublicUser {
     apellidos: user.apellidos,
     correoInstitucional: user.correoInstitucional,
     numeroDocumento: user.numeroDocumento,
+    tipoDocumentoId: user.tipoDocumentoId,
     nivelAcademico: user.nivelAcademico,
+    programaAcademicoId: user.programaAcademicoId,
+    centroUniversitarioId: user.centroUniversitarioId,
+    municipioId: user.municipioId,
+    tipoPoblacionId: user.tipoPoblacionId,
+    tipoUsuarioId: user.tipoUsuarioId,
     verificado: user.verificado,
     estado: user.estado,
     rol: { id: user.rolId, nombre: user.rolNombre },

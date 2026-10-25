@@ -125,6 +125,10 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | P-13 | `CodigosVerificacion` no tiene columna de **fecha de creación**, así que no se puede medir el cooldown directamente | Se deriva de `expiracion - vigencia` (5 min): `creado ≈ expiracion - 5 min`. Si se confirma el hueco, se añade `fecha_creacion` en la Etapa 12 | Nada |
 | P-14 | El prototipo exige la casilla de **autorización de tratamiento de datos**, pero el diagrama no tiene columna para el consentimiento ni su fecha | Se valida como obligatoria (`aceptaTratamiento: true`) y **no se persiste**. Se propone `usuarios.fecha_consentimiento` para la Etapa 12, previa confirmación | Nada (cumplimiento Ley 1581 a revisar) |
 
+| P-15 | `POST /users/:id/reject` está en el master §13.3, pero el diagrama **no tiene un estado «Rechazado»** para la cuenta y AQ-06 (criterios de validación) sigue abierta | El rechazo **deja la cuenta en `Limitado`**, exige motivo, lo guarda en la auditoría y notifica al titular. No se inventa un estado ni se borra la cuenta | Nada (AQ-06 para los criterios) |
+| P-16 | R36 dice que la baja es «lógica y **reversible**», pero el master §13.3 no declara ningún endpoint para restaurar una cuenta dada de baja | La baja solo marca `fecha_eliminacion`; la fila y sus datos siguen ahí. La restauración se hará con un endpoint propio cuando se confirme (Etapa 12) | Nada |
+| P-17 | NFR-002 describe al **Auditor** como «solo lectura», pero §13.3 no le asigna ningún endpoint de usuarios y AQ-08 sigue pendiente | Se deniega por defecto: los listados y la gestión de cuentas son solo del Admin. El alcance del Auditor se fija con el módulo de auditoría | Nada (Etapa 11) |
+| P-18 | «CRUD de usuarios» podría incluir cambiar el **rol**, pero ninguna regla lo pide y el cambio afecta asignaciones, topes docentes y auditoría | El rol es **inmutable** en `PUT /users/:id` (`.strict()` → `400`). Cambiar el rol exigirá una operación dedicada con su propia validación | Nada |
 ### 5.4 Inferencias de esta etapa que no son huecos del diagrama
 
 | Elemento | Qué se infirió | Dónde queda |
@@ -132,6 +136,19 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | `ConfiguracionPrograma.TipoDato` | El diagrama lo declara `string`; se fijan cuatro valores (`int`, `bool`, `text`, `date`) para tipar el valor en la interfaz | `TIPOS_DATO_CONFIGURACION` en `shared/src/enums.ts`; `CHECK` en el esquema |
 | `Adjuntos.TipoMime` | Lista blanca de MIME del master §15 (JPG/JPEG, PNG, PDF); `jpg` y `jpeg` comparten `image/jpeg` | `TIPOS_MIME_ADJUNTO` en `shared/src/enums.ts` |
 | Motivo obligatorio | `CHECK` en `emprendimiento` (BR-004), `actas` (BR-009), `solicitudes` (bandeja única) y `tareas` (R19b), además de la validación del servicio | `database/schema.sql` |
+
+### 5.5 Decisiones tomadas en la Etapa 4
+
+| Tema | Decisión | Motivo |
+|---|---|---|
+| Alta administrativa | La cuenta nace **`verificado = true`**, con una contraseña aleatoria inservible y una invitación por correo con un código de `Recuperación` para que el titular fije su contraseña | La coordinación ya conoce el correo institucional y la invitación va a esa misma dirección; exigir el OTP de registro dejaría la cuenta inutilizable |
+| Estado inicial | `Activo` por defecto; `Limitado` es optativo en el alta; `Inactivo` no se ofrece al crear | Es lo que hace el prototipo (`form-nuevo-docente` / `form-nuevo-estudiante`) y el ciclo de vida no empieza en `Inactivo` |
+| Correo de bienvenida | Se envía al pasar a `Activo`; si el transporte falla, se registra y **no** se revierte el cambio | El hecho de negocio es el cambio de estado, no el correo |
+| Notificación de estado | Se escribe en la **misma transacción** que el cambio y la auditoría | Nunca hay un cambio sin rastro ni un aviso de algo que no ocurrió |
+| Auto-gestión | Nadie cambia el estado ni da de baja su propia cuenta | Con un único administrador activo, el autodesplazamiento dejaría el sistema sin quien lo revierta |
+| Rol | Inmutable en la edición (P-18) | Cambiarlo altera asignaciones, topes y semántica de la auditoría |
+| Baja lógica | Solo marca `fecha_eliminacion`; no borra adjuntos porque todavía no existen (Etapa 6/7) | BR-006 pide el borrado físico de adjuntos; se implementará con el módulo de adjuntos |
+
 
 ---
 
@@ -186,6 +203,10 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | 25 | `docs/diagrama-clases.md` v2 dice "si este documento y el master discrepan, manda el master"; la instrucción del propietario para este build es lo contrario en tablas | Se aplica la instrucción del propietario (tablas = diagrama) y se registra aquí. Toda diferencia restante se resuelve caso por caso en las tablas #18–#19 |
 | 26 | El prototipo (`compartido/registro.html`) y AQ-06 hablan de **7 campos + casilla**: nombres, apellidos, tipo y número de documento, **correo personal**, correo institucional, **celular** (obligatorios) y **teléfono fijo** (opcional). El diagrama v2 no tiene columnas para correo personal, celular ni teléfono fijo | **Manda el diagrama**: `POST /auth/register` acepta 6 campos (los cinco primeros más la contraseña) + la casilla. Los tres datos de contacto que no existen no se inventan ni se piden; si la Coordinadora los necesita, se añaden columnas en una etapa posterior y se actualiza AQ-06 |
 
+| 27 | El selector de estado de `admin/usuarios.html` ofrece **`Activo → Limitado`** (y `Limitado → Inactivo`), pero FR-013 y BR-003 solo definen `Limitado → Activo`, `Inactivo → Activo` y `Activo → Inactivo` | **Mandan los requisitos**: la tabla de `policy/accountTransitions.ts` rechaza esas transiciones con `422 INVALID_STATE_TRANSITION`; el selector de la SPA solo ofrecerá las válidas |
+| 28 | Los formularios de alta de `admin/usuarios.html` piden **teléfono**, **área de conocimiento**, **horas de asesoría por semana** (docente) y **sector, emprendimiento y etapa** (estudiante). `usuarios` no tiene esas columnas; los topes docentes son claves de `configuracion_programa` y el emprendimiento es otra entidad | **Manda el diagrama**: `POST /users` crea la cuenta con los campos de `usuarios`. El emprendimiento se crea en la Etapa 5; teléfono, área y horas no se inventan (ver #18 y #26) |
+| 29 | `POST /users/:id/reject` (master §13.3) no tiene estado de destino en el diagrama: no existe «Rechazado» para la cuenta | Se mantiene `Limitado`, con motivo obligatorio auditado y notificación (P-15). El alta rechazada no se borra |
+| 30 | El prototipo muestra el estado del docente en la tabla de usuarios junto a «Carga semanal» y «Emprendimientos», pero esas dos columnas no existen en `usuarios` | El listado devuelve la cuenta; los topes y el conteo de emprendimientos se calculan en la Etapa 6 (asignaciones), no se guardan en la fila |
 ---
 
 ## 7. Versiones fijadas

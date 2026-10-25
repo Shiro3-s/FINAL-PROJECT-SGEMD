@@ -56,14 +56,18 @@ stack, una ruta interna ni un valor de configuración.
 | 403 | `ACCOUNT_NOT_ACTIVE` | Cuenta `Limitado` o `Inactivo` en un módulo de trabajo (AQ-07) |
 | 403 | `ROLE_NOT_ALLOWED` | El rol de la fila no está autorizado para la ruta |
 | 403 | `ORIGIN_NOT_ALLOWED` | Mutación con `Origin` ajeno o ausente |
-| 404 | `NOT_FOUND` | Ruta inexistente |
+| 404 | `NOT_FOUND` | Recurso inexistente **o fuera de alcance** (un estudiante pidiendo el id de otro) |
 | 409 | `EMAIL_TAKEN` | Correo institucional ya registrado |
 | 409 | `DOCUMENT_TAKEN` | Número de documento ya registrado |
 | 422 | `OTP_INVALID` | Código incorrecto, vencido, ya usado o inexistente |
+| 422 | `INVALID_STATE_TRANSITION` | Transición de cuenta no permitida (BR-003, R34) |
+| 422 | `SELF_STATE_CHANGE_NOT_ALLOWED` | El administrador intenta cambiar el estado de su propia cuenta |
+| 422 | `SELF_DELETE_NOT_ALLOWED` | Intento de baja lógica de la propia cuenta |
 | 429 | `OTP_COOLDOWN` | Reenvío antes del cooldown (60 s); incluye `Retry-After` |
 | 429 | `OTP_ATTEMPTS_EXCEEDED` | Se agotaron los 5 intentos del código; incluye `Retry-After` |
 | 429 | `RATE_LIMITED` | Se superó el límite de peticiones del endpoint; incluye `Retry-After` |
 | 500 | `INTERNAL_ERROR` | Fallo no controlado (sin detalles internos) |
+| 500 | `CODE_GENERATION_FAILED` | No se pudo generar un código único tras varios intentos |
 | 502 | `MAIL_SEND_FAILED` | El transporte de correo falló |
 
 ## Autenticación
@@ -196,10 +200,17 @@ registrar ninguna contraseña. Un código vencido, usado o incorrecto:
 
 ## Usuarios
 
+Todas las rutas de gestión exigen sesión, rol **Admin** (1) y cuenta **`Activo`**. Un
+estudiante o un docente reciben `403 ROLE_NOT_ALLOWED`; una cuenta de coordinación
+`Limitado` o `Inactivo`, `403 ACCOUNT_NOT_ACTIVE`.
+
+El **estado** y el **rol** no se editan con `PUT`: el estado tiene sus propios endpoints y
+el rol es inmutable (P-18). `codigo`, `password` y `verificado` los decide el servidor.
+
 ### `GET /api/users/me`
 
-Requiere sesión. Devuelve el usuario de la fila actual, sin contraseña ni hash.
-Es la única forma en que la SPA sabe quién es: no lee la cookie.
+Requiere sesión. Devuelve el usuario de la fila actual, sin contraseña ni hash. Es la
+única forma en que la SPA sabe quién es: no lee la cookie.
 
 `200`:
 
@@ -213,7 +224,13 @@ Es la única forma en que la SPA sabe quién es: no lee la cookie.
     "apellidos": "Demo Uno",
     "correoInstitucional": "estudiante.demo1@uniminuto.edu.co",
     "numeroDocumento": "900000004",
+    "tipoDocumentoId": 1,
     "nivelAcademico": "Pregrado",
+    "programaAcademicoId": 1,
+    "centroUniversitarioId": 1,
+    "municipioId": 1,
+    "tipoPoblacionId": 1,
+    "tipoUsuarioId": 2,
     "verificado": true,
     "estado": "Activo",
     "rol": { "id": 2, "nombre": "Estudiante" },
@@ -221,6 +238,173 @@ Es la única forma en que la SPA sabe quién es: no lee la cookie.
   }
 }
 ```
+
+Los catálogos se devuelven como **ids** (las columnas del diagrama); los nombres llegan
+por los endpoints de catálogos de la Etapa 5.
+
+### `PUT /api/users/me`
+
+Edita el propio perfil. Campos admitidos: `nombres`, `apellidos`, `nivelAcademico`,
+`programaAcademicoId`, `centroUniversitarioId`, `municipioId`, `tipoPoblacionId`,
+`tipoUsuarioId`. Cualquier otro campo (`correoInstitucional`, `numeroDocumento`,
+`tipoDocumentoId`, `rolId`, `estado`, `codigo`) produce `400 VALIDATION_ERROR`. Un objeto
+vacío también.
+
+Disponible para cuentas `Limitado`: el perfil está en la matriz de AQ-07 opción A.
+
+`200` con el usuario actualizado (misma forma que `GET /users/me`).
+
+### `GET /api/users`
+
+Listado paginado de todas las cuentas vigentes (las dadas de baja no aparecen).
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 20 | |
+| `q` | texto ≤ 100 | — | Busca en nombres, apellidos, correo, código y documento (`ILIKE`) |
+| `rol` | 1–4 | — | 1 Admin · 2 Estudiante · 3 Docente · 4 Auditor |
+| `estado` | `Limitado` · `Activo` · `Inactivo` | — | |
+| `sort` | `codigo` · `nombres` · `apellidos` · `correo` · `estado` · `ultimaActividad` | `apellidos` | Lista blanca: otra columna da `400` |
+| `order` | `asc` · `desc` | `asc` | |
+
+Cualquier otro parámetro produce `400 VALIDATION_ERROR` (`.strict()`).
+
+`200`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [ { "id": 4, "codigo": "100001", "nombres": "…", "estado": "Activo" } ],
+    "total": 42,
+    "page": 1,
+    "pageSize": 20
+  }
+}
+```
+
+Cada elemento tiene la misma forma que `GET /users/me`.
+
+### `GET /api/users/students` · `GET /api/users/teachers`
+
+Igual que `GET /api/users` pero con el rol fijado en 2 o 3. Si el cliente envía `rol`, se
+ignora: el endpoint manda.
+
+### `GET /api/users/:id`
+
+Admin: cualquier cuenta vigente. Cualquier otro rol: **solo su propia fila**; un id ajeno
+responde `404 NOT_FOUND` (no 403) para no revelar que existe (NFR-002). `:id` no numérico:
+`400 VALIDATION_ERROR`.
+
+### `POST /api/users`
+
+Alta de estudiante o docente por el administrador (FR-011, R33, T06).
+
+```json
+{
+  "nombres": "Ana María",
+  "apellidos": "Prueba",
+  "numeroDocumento": "1020304050",
+  "correoInstitucional": "ana@uniminuto.edu.co",
+  "rolId": 2,
+  "tipoDocumentoId": 1,
+  "nivelAcademico": "Pregrado",
+  "programaAcademicoId": 1,
+  "centroUniversitarioId": 1,
+  "municipioId": 1,
+  "tipoPoblacionId": 1,
+  "tipoUsuarioId": 2,
+  "estado": "Activo"
+}
+```
+
+- Obligatorios: `nombres`, `apellidos`, `numeroDocumento`, `correoInstitucional`,
+  `rolId`, `tipoDocumentoId`. El resto es opcional (`null` o ausente).
+- `rolId` solo admite **2** (Estudiante) o **3** (Docente). Un administrador no se crea
+  desde la API.
+- `estado` admite `Activo` (default, como el prototipo) o `Limitado`. `Inactivo` solo se
+  alcanza después, por transición.
+- El **código** lo genera el servidor: `DOC-###` para docentes, 6 dígitos para
+  estudiantes. `ADM-###` existe para la coordinación sembrada por seed/operación.
+- La cuenta nace `verificado = true` y con una **contraseña aleatoria inservible**. Se
+  envía al correo una invitación con un código de 8 dígitos (`proposito =
+  'Recuperación'`) para que el titular establezca su contraseña. El código **no** aparece
+  en la respuesta.
+- Si el transporte de correo falla, el alta **no se revierte**: la cuenta queda creada y
+  el titular puede pedir un código en `POST /auth/forgot-password`.
+- El prototipo pide además teléfono, área de conocimiento, sector, emprendimiento y
+  etapa; esas columnas no existen en `usuarios` (el emprendimiento es otra entidad,
+  Etapa 5). Ver discrepancia #28.
+
+`201` con el usuario creado. `409 EMAIL_TAKEN` / `409 DOCUMENT_TAKEN` si correo o
+documento ya existen. `400` si el rol no es 2/3, el dominio no es institucional o un id de
+catálogo no existe.
+
+### `PUT /api/users/:id`
+
+Edición por el administrador. Campos admitidos: `nombres`, `apellidos`,
+`numeroDocumento`, `correoInstitucional`, `tipoDocumentoId`, `nivelAcademico`,
+`programaAcademicoId`, `centroUniversitarioId`, `municipioId`, `tipoPoblacionId`,
+`tipoUsuarioId`. Al menos uno. `409` si el correo o el documento chocan con otra cuenta.
+
+`200` con el usuario actualizado. La auditoría guarda solo los campos que cambiaron.
+
+### `DELETE /api/users/:id`
+
+Baja **lógica** (R36, BR-006): marca `fecha_eliminacion`, no borra la fila. La cuenta sale
+de todos los listados, `GET /users/:id` pasa a `404` y el login responde
+`401 INVALID_CREDENTIALS`. No se puede dar de baja la propia cuenta
+(`422 SELF_DELETE_NOT_ALLOWED`).
+
+`200`: `{ "success": true, "message": "Cuenta dada de baja." }`
+
+> Restaurar una cuenta dada de baja no tiene endpoint en el master §13.3 (P-16).
+
+### `POST /api/users/:id/validate`
+
+Activación `Limitado → Activo` (UC-1, BR-003). Solo sobre una cuenta `Limitado`; en
+cualquier otro estado, `422 INVALID_STATE_TRANSITION`.
+
+Efectos en una sola transacción: `UPDATE` condicionado al estado leído, fila de auditoría
+`Cambio de estado de cuenta` con `{estado}` anterior y nuevo, y notificación `Sistema` al
+titular. Después del `COMMIT` se envía el correo de bienvenida (si el transporte falla, se
+registra y el cambio se mantiene).
+
+`200` con el usuario en `Activo`.
+
+### `POST /api/users/:id/reactivate`
+
+`Inactivo → Activo` (BR-005). Mismos efectos y misma respuesta que `validate`. Solo sobre
+una cuenta `Inactivo`.
+
+### `PATCH /api/users/:id/state`
+
+Selector genérico de `admin/usuarios`.
+
+```json
+{ "estado": "Inactivo" }
+```
+
+Aplica la misma tabla de transiciones: `Limitado → Activo`, `Inactivo → Activo`,
+`Activo → Inactivo`. Todo lo demás, incluido `Activo → Limitado` (que el prototipo ofrece)
+y repetir el estado actual, responde `422 INVALID_STATE_TRANSITION`. El administrador no
+puede cambiar el estado de su propia cuenta (`422 SELF_STATE_CHANGE_NOT_ALLOWED`).
+
+### `POST /api/users/:id/reject`
+
+Rechazo de la activación (UC-1).
+
+```json
+{ "motivo": "La asesoría inicial no se realizó" }
+```
+
+El motivo es obligatorio (sin longitud mínima: ningún requisito la fija, AQ-06 sigue
+abierta). El diagrama no tiene un estado «Rechazado» para la cuenta, así que **la cuenta
+sigue en `Limitado`**; se audita `Rechazo de activación` con el motivo y se notifica al
+titular. Solo sobre una cuenta `Limitado`.
+
+`200`: `{ "success": true, "message": "Activación rechazada. Se notificó al titular." }`
 
 ## Diagnóstico
 

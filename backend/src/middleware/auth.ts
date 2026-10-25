@@ -1,57 +1,9 @@
 import type { RequestHandler } from 'express';
-import { query } from '../db/pool.js';
 import { SESSION_COOKIE, verifySession } from '../modules/auth/session.js';
 import type { SessionUser } from '../modules/auth/types.js';
+import { findUserById } from '../modules/users/repository.js';
 import { AppError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-
-type UserRow = {
-  id_usuarios: number;
-  codigo: string;
-  nombres: string;
-  apellidos: string;
-  correo_institucional: string;
-  numero_documento: string;
-  nivel_academico: string | null;
-  verificado: boolean;
-  estado: string;
-  ultima_actividad: Date | null;
-  roles_id_roles: number;
-  rol_nombre: string;
-}
-
-const USER_SELECT = `
-  SELECT u.id_usuarios, u.codigo, u.nombres, u.apellidos, u.correo_institucional,
-         u.numero_documento, u.nivel_academico, u.verificado, u.estado,
-         u.ultima_actividad, u.roles_id_roles, r.nombre AS rol_nombre
-    FROM usuarios u
-    JOIN roles r ON r.id_roles = u.roles_id_roles
-`;
-
-export function mapUser(row: UserRow): SessionUser {
-  return {
-    id: row.id_usuarios,
-    codigo: row.codigo,
-    nombres: row.nombres,
-    apellidos: row.apellidos,
-    correoInstitucional: row.correo_institucional,
-    numeroDocumento: row.numero_documento,
-    nivelAcademico: row.nivel_academico,
-    verificado: row.verificado,
-    estado: row.estado as SessionUser['estado'],
-    rolId: row.roles_id_roles,
-    rolNombre: row.rol_nombre,
-    ultimaActividad: row.ultima_actividad,
-  };
-}
-
-export async function findUserById(id: number): Promise<SessionUser | null> {
-  const { rows } = await query<UserRow>(
-    `${USER_SELECT} WHERE u.id_usuarios = $1 AND u.fecha_eliminacion IS NULL`,
-    [id],
-  );
-  return rows[0] ? mapUser(rows[0]) : null;
-}
 
 /**
  * Autenticación por cookie `sgemd_session`.
