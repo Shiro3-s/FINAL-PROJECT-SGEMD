@@ -173,7 +173,7 @@ comprobadas sobre una base recreada desde cero).
 ## Etapa 3 — Autenticación
 
 - **Fecha:** 2026-10-25
-- **Commit:** _pendiente de commitear al cerrar la entrada_
+- **Commit:** `705d818`
 
 ### Hecho
 
