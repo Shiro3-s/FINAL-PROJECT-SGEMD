@@ -387,3 +387,252 @@ del rol: ver algo ahora es un **enlace**.
   sigue aplicando el filtro.
 - `admin/`, `estudiante/` y `compartido/` **no cambian** (`git status` solo lista
   `paginas_docente.py`, `lib_ui.py` y los `docente/*.html`).
+
+---
+
+## 14. Cuarto ajuste (2026) — corrección de los 4 fallos reportados + auditoría
+
+> Solo rol Docente. Todo se aplicó en `prototype/paginas_docente.py` y se regeneró con
+> `python generar.py --rol docente`; `prototype/index.html`, `lib_*`, `admin/`,
+> `estudiante/` y `compartido/` quedan **byte-idénticos**.
+
+**Fallos reportados y su causa raíz**
+
+1. **Pestañas con altura excesiva.** El contenedor `.pest` era hijo de un `.grid` y se
+   estiraba a la altura de la columna vecina. Se añadió
+   `.grid > .tabs, .grid > .pest { align-self: start; margin-bottom: 0 }`; medido a
+   1442/1282/1026/914 px: `.pest` 39 px y botones 38 px.
+2. **Pestañas anidadas en blanco.** El kit JS conmuta *todos* los `[data-panel-nombre]`
+   de la página, así que las pestañas internas (selector de estudiante y expediente)
+   ocultaban también los paneles externos. Las pestañas internas usan ahora un contrato
+   propio (`data-tabs-local`, `data-tab-local`, `data-tab-panel`, clase `.pest`) que solo
+   conmuta los paneles hermanos de su barra. El panel externo *Tabla* permanece visible y
+   el contenido interno se renderiza (666 px).
+3. **Paginación falsa.** `paginas()` solo movía la etiqueta *Mostrando X a Y*; las tablas
+   tenían 6 filas y prometían 24 registros. Se extendieron los datos a sus totales reales
+   (`TAREAS_DOC` 23, `ASESORIAS` 24, `DIAGNOSTICOS` 15) y se añadió un controlador de
+   tablas propio del rol (`[data-pag-doc]`, `[data-filtro='1']`, `[data-diag-emp]`,
+   `[data-resultados]`, `[data-vacio]`) que corta filas de verdad, recalcula páginas,
+   vuelve a la página 1 al filtrar o buscar y convive con el filtro del kit. El paginador
+   se movió dentro de la tarjeta de la tabla (parámetro `pag` de `_tabla_con_titulo`).
+   Resultado: Tareas 23 filas/5 páginas, Asesorías 24/4, Diagnóstico 15/3.
+4. **Diagnóstico y expediente estáticos.** Ambos mostraban siempre *Sabor y Sabe*.
+
+**Diagnóstico (reestructurado, no clonado de Tareas).** Una sola zona con buscador y
+filtros *Emprendimiento · Estudiante · Proyecto / grupo · Origen · Estado* + contador
+(conserva los cuatro datos previos). Debajo, un bloque de contexto por emprendimiento
+(`data-diag-contexto`, solo uno visible): KPIs, *Avance por fases*, *Comportamiento
+entrepreneurial*, *Historial de diagnósticos* y *Datos del emprendimiento*; más un bloque
+agregado *Todos* con promedios y la cartera completa. Al cambiar de emprendimiento se
+actualizan KPIs, gráficas, historial, datos y la tabla; el filtro *Proyecto / grupo* se
+reconstruye con el grupo del emprendimiento elegido (o los 5 en *Todos*).
+
+**Expediente por emprendimiento.** `emprendimiento-expediente.html` pre-renderiza cinco
+`<section data-exp-perfil>` y muestra la que indica `?emp=<slug>` (título de pestaña,
+`h1` y miga incluidos); un slug inválido cae en el primero. Los 19 enlaces de
+*Emprendimientos asignados* y de la tabla llevan ya su `?emp=`. Limitación conocida del
+prototipo: las vistas de detalle por fila (avance, tarea, asesoría, diagnóstico) siguen
+siendo genéricas y no reciben el emprendimiento.
+
+**Notificaciones.** *Marcar como leída* tiene estado real: `.leida` en el aviso, botón
+deshabilitado con texto *Leída*, descuento del contador y un solo toast. *Marcar todo*
+pide confirmación y deja los 6 avisos leídos y el contador en 0.
+
+**Doble toast.** El manejador del rol corre en fase de captura y el kit volvía a procesar
+el mismo clic. Ahora cada acción resuelta por el docente hace `stopPropagation()` (también
+los botones del diálogo); `descargar-pdf` y `actualizar-contrasena` se dejan al kit a
+propósito para conservar la descarga real y la validación de contraseña.
+
+**Verificación.** 23 pantallas regeneradas, consola limpia (0 errores y 0 avisos), sin IDs
+duplicados, enlaces internos correctos salvo el `evento-form.html` preexistente que emite
+`lib_js`. Comprobado en navegador: paginación y filtros de las tres tablas, los 5
+emprendimientos + *Todos* en Diagnóstico, los 5 `?emp=` (y el fallback), notificaciones y
+un único toast por acción. `git diff --exit-code -- prototype/index.html` pasa.
+
+**Deuda preexistente no tocada:** el dashboard anuncia 8 emprendimientos (la cartera tiene
+5) y 9 tareas por revisar (la tabla lista 23).
+
+
+## 15. Quinto ajuste (2026) — Inicio del docente con vista previa y datos reales
+
+**Alcance.** Solo el rol docente. No se tocó `lib_ui.py`, `lib_css.py`, `lib_js.py`,
+`lib_charts.py`, ni las carpetas `admin/`, `estudiante/` o `compartido/`. Sin push ni
+cambios de rama.
+
+**Tarjetas de Inicio como enlaces con vista previa.** Las cuatro tarjetas de
+`dashboard()` dejaron de ser `metricas()` estáticas y ahora se construyen con un helper
+local `_metrica_enlace()`, apoyado en las clases que ya traía el kit
+(`.card.metrica.metrica-enlace` y `.mini-prev`). Al pasar el cursor —o al enfocar con el
+teclado— aparece una mini vista previa con el contenido de la vista de destino y, al hacer
+clic, se abre esa vista:
+
+| Tarjeta | Valor | Destino | Vista previa |
+|---|---|---|---|
+| Emprendimientos asignados | 5 | `emprendimientos.html` | Avance de los tres primeros + cartera + con evidencia |
+| Asesorías del mes | 13 | `asesorias.html` | 6 agendadas · 4 por agendar · 3 completadas · próxima asesoría |
+| Tareas por revisar | 6 | `tareas.html?f=En+revision` | 5 alta · 1 media · primera tarea en revisión |
+| Avances registrados | 15 | `emprendimientos.html` | 10 con evidencia · 5 sin · último avance |
+
+Las cifras y las barras se calculan desde `ASIGNADOS`, `ASESORIAS`, `TAREAS_DOC` y
+`AVANCES_EMP` (antes eran `8 / 14 / 9 / 23` escritas a mano). Se agregó un chevron visible
+`.metrica-flecha` que se rellena y se desplaza 2 px en hover/foco, y una nota inferior
+`.metrica-nota`; ambos son CSS local del rol (`DOCENTE_CSS`). El enlace conserva un
+`aria-label` fijo y la preview va con `aria-hidden="true"`, de modo que el nombre accesible
+no cambia al mostrarse. `prefers-reduced-motion` desactiva la transición del chevron.
+
+**Coherencia del resto de Inicio.**
+
+- *Carga semanal*: 7 alta + 11 media + 5 baja = 23 (antes 9 + 14 + 5 = 28). De paso se
+  corrigió la etiqueta duplicada que generaba `stacked_tareas` («Prioridad prioridad alta»)
+  pasando las prioridades en minúscula.
+- *Próximas asesorías*: Hoy (Sabor y Sabe, 10:00) + las dos siguientes de `ASESORIAS`
+  (14 nov Krea 15:30 y 18 nov Krea 09:00). Antes la tercera fila decía 22 nov con los
+  datos de Krea, que en realidad es el 14.
+- *Calendario*: las asesorías del mes ya no se escriben a mano. `dashboard()` completa el
+  calendario desde `ASESORIAS` (desde el 12, el «hoy» del prototipo, sin duplicar las que
+  ya estaban): aparecen 14, 18, 19, 20, 21, 22, 25 y 26; el 22 quedó como Sabor y Sabe
+  10:00, modalidad mixta y por confirmar; el 26 suma la asesoría de EcoPack a las 08:00
+  junto al evento de empleabilidad. Los eventos y tareas propios siguen en
+  `COMPROMISOS_DIA` (se quitó de allí el 22, que era el dato equivocado).
+- *Actividad reciente*: la calificación de 92 pasa a Sabor y Sabe (es su avance del 12 nov;
+  Krea no tiene 92) y EcoPack pasa a «Confirmaste la asesoría del 26 de noviembre», porque
+  la del 20 sigue pendiente.
+
+**Verificación.** `python generar.py --rol docente` (23 pantallas) y
+`git diff --exit-code -- prototype/index.html` sin cambios. En navegador, a 1440, 1280,
+1024, 768 y 375 px: 4/4/2/2/1 columnas, preview visible en hover y en foco de teclado,
+`z-index:40`, sin recortes ni scroll horizontal, chevron en azul al pasar el cursor y
+consola limpia. Clic en *Tareas por revisar* abre `tareas.html?f=En+revision` con el filtro
+aplicado y «6 resultados»; *Emprendimientos* muestra 5; sin IDs duplicados.
+
+## 16. Sexto ajuste (2026) — Emprendimientos y Diagnóstico con el sistema de Inicio
+
+**Alcance.** Solo el rol docente. Se reutilizó el patrón de las tarjetas de Inicio
+(`_metrica_enlace`: vista previa al pasar el cursor o enfocar con Tab, chevron visible y
+clic que navega). No se tocó `lib_ui.py`, `lib_css.py`, `lib_js.py`, `lib_charts.py` ni
+las carpetas `admin/`, `estudiante/` o `compartido/`. Sin push, sin commits, sin cambios
+de rama.
+
+### 16.1 Emprendimientos asignados · las 3 tarjetas filtran la tabla
+
+Antes eran `metricas()` estáticas con barras escritas a mano (62 % y 25 %). Ahora se
+calculan desde `ASIGNADOS` y `REVISION` y cada una abre la pestaña **Tabla** con el
+filtro ya aplicado:
+
+| Tarjeta | Valor · barra · nota | Destino | Resultado |
+|---|---|---|---|
+| Asignados | 5 · 100 % · 5 expedientes | `?vista=tabla` | 5 filas |
+| Con evidencia | 3 · 60 % · 3 de 5 | `?vista=tabla&f=Con+evidencia` | 3 filas |
+| Requieren atención | 2 · 40 % · 1 en revisión · 1 devuelta | `?vista=tabla&f=Requieren+atención` | 2 filas |
+
+Las previews muestran los nombres reales: los tres primeros emprendimientos con su % de
+avance, «Sabor y Sabe, EcoPack, Muebles Origen» y «Sabor y Sabe en revisión · Muebles
+Origen devuelta». Se envuelven en `g-3` para que las tres queden parejas (3 columnas en
+escritorio, 1 en móvil).
+
+**Filtro nuevo «Estado de revisión»** (columna 5) con las opciones *En revisión*,
+*Devuelta* y *Requieren atención*. Esta última declara `data-valores="En revision|Devuelta"`
+y el motor acepta la fila cuando coincide **cualquiera** de los dos estados, algo que el
+filtro anterior no podía hacer porque comparaba un solo valor.
+
+### 16.2 Diagnóstico · 4 tarjetas por contexto (24 en total)
+
+`_diag_kpis()` ya no devuelve `metricas()` suelto: entrega un `g-4` con cuatro enlaces.
+En los 5 contextos por emprendimiento:
+
+| Tarjeta | Destino | Vista previa |
+|---|---|---|
+| Fases completadas | `emprendimiento-expediente.html?emp=<slug>` | F1 a F4 con su % |
+| Diagnósticos | `diagnostico-revision.html` | 3 registrados · último con fecha · puntaje |
+| Tareas clave | `tareas.html?emp=<emprendimiento>` | «2 de 5 completadas · 3 pendientes» |
+| Puntaje heurístico | `diagnostico-revision.html` | «7.8 de 10 · recomendación del docente» |
+
+En el contexto agregado **Todos**: Emprendimientos y Fases · `emprendimientos.html`;
+Diagnósticos · `diagnostico-revision.html`; Tareas clave · `tareas.html`. La barra de
+*Diagnósticos* dejó de ser 60 fijo y ahora es 100 % («3 de 3 registrados»), coherente con
+el dato real. Se corrigió además el singular («1 pendiente», antes «1 pendientes»).
+
+### 16.3 Soporte local (todo dentro de `paginas_docente.py`)
+
+- `?vista=tabla` activa la pestaña Tabla de Emprendimientos al cargar, para que el
+  resultado filtrado sea visible (antes `?f=Con+evidencia` filtraba pero la página seguía
+  en Tarjetas).
+- `?emp=<emprendimiento>` preselecciona el filtro del mismo nombre. Se añadió *Filtrar
+  por emprendimiento* a Tareas (columna 1) para dar destino real a «Tareas clave».
+  El `?emp=` del expediente sigue funcionando: allí no hay filtros de tabla que coincidan
+  con un slug.
+- `_filtro()` acepta `valores={etiqueta: "A|B"}` y emite `data-valores`; `coincide()` en
+  el JS del rol resuelve la coincidencia múltiple.
+- `_metrica_enlace()` acepta `aria_val` opcional para que el lector de pantalla anuncie el
+  dato completo («1 de 4», «7.8 de 10») cuando en pantalla número y unidad van separados.
+
+**Fuera de alcance (sin cambios).** Los cuadros de las páginas de detalle (asesoría,
+avance, tarea, revisión) siguen informativos porque describen el registro abierto, no un
+resumen navegable. Eventos y Notificaciones conservan sus tarjetas estáticas.
+
+### 16.4 Verificación
+
+`python generar.py --rol docente` (23 pantallas) y `git diff --exit-code --
+prototype/index.html` sin cambios. En navegador:
+
+- Emprendimientos: 3/3 tarjetas con preview y foco de teclado; clic en cada una lleva a la
+  pestaña Tabla con **5 / 3 / 2** resultados y los estados correctos (En revision y
+  Devuelta en el caso de atención).
+- Diagnóstico: 24 enlaces (6 contextos · 4), `g-4` en los 6; los 4 destinos por
+  emprendimiento y los 4 de «Todos» responden.
+- Clic real en «Tareas clave» de Sabor y Sabe → `tareas.html?emp=Sabor+y+Sabe` con el
+  filtro aplicado y 5 filas; el expediente con `?emp=ecopack` sigue abriendo su sección.
+- `?f=En+revision` (Tareas) y `?f=Agendada` (Asesorías) siguen funcionando igual.
+- 1440 / 1280 / 1024 / 768 / 375 px: sin recortes, sin scroll horizontal, previews dentro
+  del viewport; sin IDs duplicados y consola limpia.
+
+## 17. Séptimo ajuste (2026) — Ortografía y textos del rol docente
+
+**Alcance.** Solo el rol docente. Todos los cambios están en `paginas_docente.py` y en las
+23 pantallas que genera; no se tocaron `lib_ui.py`, `lib_css.py`, `lib_js.py`,
+`lib_charts.py` ni las carpetas `admin/`, `estudiante/` o `compartido/`. Sin push, sin
+commits y sin cambios de rama.
+
+### 17.1 Diagnóstico — título y datos
+
+- La tarjeta que decía **«Comportamiento entrepreneurial»** ahora dice solo
+  **«Comportamiento»** en los 6 contextos (Todos y los 5 emprendimientos).
+- **«Puntaje heuristics» → «Puntaje heurístico»**, también en la tarjeta del expediente.
+- Las filas sin fecha muestran **«Sin fecha»** en la columna Fecha en lugar de repetir
+  «Pendiente» (Krea Textil, EcoPack y Aromas del Sur).
+
+### 17.2 Tildes y nombres propios
+
+Se acentuaron los textos visibles de las 23 pantallas: `En revisión`, `Última revisión`,
+`Última actividad`, `Estado de revisión`, `Descripción del avance`, `Calificación`,
+`Código`, `Observación`, `Cotización`, `Diagnóstico`, `Catálogo`, `Colección`,
+`Medición`, `Duración`, `Sesión`, `Asesoría`, `Acción`, `Próximas asesorías`,
+`Acciones rápidas`, `Marcar todo como leído`, `30 días después`, entre otros. También se
+acentuaron los nombres **Lucía Fernández**, **Sofía Ramírez**, **Mariana López** y
+**Andrés Felipe**.
+
+**Lo que no cambió (a propósito).**
+
+- Los valores internos siguen sin tilde: `En revision` es el dato y el contrato de
+  `?f=En+revision`. La insignia y la opción del filtro muestran «En revisión» mediante
+  `ESTADO_VIS` / `_estado_vis()` y `_filtro(..., etiquetas=...)`; el `value` de la opción
+  queda intacto.
+- Los nombres de archivo (`ficha-tecnica.docx`) y los slugs de URL
+  (`capacitacion-modelado`) siguen sin tilde.
+- `data-valores="En revision|Devuelta"` del filtro «Requieren atención» no se tocó.
+
+### 17.3 Verificación
+
+- `python -m py_compile prototype/paginas_docente.py` sin errores.
+- `python generar.py --rol docente` (23 pantallas) y
+  `git diff --exit-code -- prototype/index.html` sin cambios.
+- Auditoría de texto visible en las 23 páginas: 0 palabras sin tilde de la lista de
+  control, 0 palabras corruptas y 0 formas que convivan con y sin tilde. La única
+  excepción es `capacitacion` dentro de la URL visible `…/capacitacion-modelado`.
+- Navegador: `tareas.html?f=En+revision` muestra «En revisión» en la opción y 6
+  resultados; `emprendimientos.html?vista=tabla&f=Con+evidencia` da 3 filas y
+  `?f=Requieren+atención` da 2 filas; Diagnóstico conserva 4 enlaces por contexto y las
+  6 tarjetas «Comportamiento»; el expediente muestra «Última revisión», «Descripción del
+  avance», «Calificación» y «Código».
+- 1440 / 1280 / 1024 / 768 / 375 px en Diagnóstico, Emprendimientos, Tareas y
+  Expediente: sin scroll horizontal, sin recortes de las previews y consola limpia.
