@@ -399,3 +399,86 @@ ni su rol; la auditoría guarda el valor anterior y el nuevo).
 **Puerta:** superada (T11, T12 y T36 en verde; un emprendimiento solo se aprueba desde
 `Pendiente`; el paralelo exige autorización y respeta el tope; una solicitud se resuelve
 una sola vez y siempre notifica).
+
+---
+
+## Etapa 6 — Asignaciones docentes
+
+- **Fecha:** 2026-10-25
+- **Commit:** `3b5adfc`
+
+### Hecho
+
+- `modules/assignments`: siete rutas. `POST`, `PUT` y `DELETE` son exclusivos del
+  administrador (R9); `GET` se filtra por rol en el servicio (R10), y un detalle fuera de
+  alcance responde `404` para no revelar expedientes ajenos.
+- El estudiante **no** se envía: se deriva del propietario del emprendimiento. El modal del
+  prototipo muestra «Estudiante» y «Emprendimiento» como campos de solo lectura, así que
+  aceptar un `estudianteId` permitiría un vínculo incoherente; `.strict()` lo rechaza.
+- R11 con doble respaldo: comprobación dentro de la transacción **y** el índice único
+  parcial `asignaciones_una_activa_por_emprendimiento`; la violación `23505` se traduce a
+  `409 ASSIGNMENT_ALREADY_ACTIVE`.
+- Los dos topes de FR-016/R35 se leen de `configuracion_programa` y se comprueban sobre las
+  asignaciones **activas** del mentor, dentro de la transacción y bajo
+  `pg_advisory_xact_lock` por mentor (en orden ascendente de id para no interbloquear una
+  reasignación A→B con otra B→A). Cada tope tiene su código y su campo:
+  `422 TEACHER_HOURS_LIMIT_REACHED` (`fields.horasSemanales`) y
+  `422 TEACHER_ENTREPRENEURSHIP_LIMIT_REACHED` (`fields.mentorId`).
+- BR-001 aplicado desde el primer momento contra `actas`, sin bandera de omisión (§20.5
+  #12): se exige al menos un acta `Aprobada` del emprendimiento
+  (`422 ACTA_NOT_APPROVED`). Las actas se cargan y revisan en la Etapa 9; hasta entonces se
+  usan fixtures.
+- El mentor debe existir, estar vigente y tener rol Docente (`400`) y estar `Activo`
+  (`422 MENTOR_NOT_ACTIVE`, derivado de AQ-07 opción A).
+- La reasignación revalida los topes y el acta del docente **destino**; el anterior libera
+  su carga en la misma transacción. La baja es `estado = 'inactiva'` (la tabla no tiene
+  `fecha_eliminacion`): libera el cupo del emprendimiento y la carga del docente.
+- Acciones de auditoría nuevas: `Alta de asignación`, `Edición de asignación` y `Baja de
+  asignación`, con el actor y el antes/después; notificaciones `Sistema` al docente y al
+  estudiante en la misma transacción.
+- `tests/assignments.test.ts`: 21 pruebas de integración. Se ajustó una aserción frágil de
+  `users.test.ts` que esperaba `DOC-003`/`DOC-004` literales: ahora comprueba el formato
+  `DOC-\d{3}` y el incremento, porque la suite nueva crea más docentes.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 7 archivos) | **116 pruebas en verde** (95 de las etapas 3–5 + 21 de asignaciones) |
+| T15 · acta (BR-001) | Sin acta → `422 ACTA_NOT_APPROVED`; con un acta `Pendiente` → igual; un acta `Rechazada` tampoco habilita; tras aprobarla → `201` con `estado: 'activa'` |
+| T07 · topes | Doce asignaciones de 1 h → `201`; la decimotercera → `422 TEACHER_HOURS_LIMIT_REACHED`, y la base queda en 12 filas y 12 h; `carga_max_horas = 4` con 4 h ya asignadas rechaza 1 h más con el campo `horasSemanales`; `max_emprendimientos_docente = 2` rechaza el tercer emprendimiento con `fields.mentorId` |
+| R11 · unicidad | Una segunda asignación activa del mismo emprendimiento → `409 ASSIGNMENT_ALREADY_ACTIVE`; tras la baja, otra alta → `201` y la fila anterior queda `inactiva`; la baja libera el cupo del docente |
+| R9/R10 · autorización | Docente y estudiante reciben `403 ROLE_NOT_ALLOWED` en `POST`, `PUT` y `DELETE`; el docente solo ve sus filas y el estudiante las suyas; el detalle ajeno responde `404`; `/assignments/mentor/:id` da `404` a otro docente y `403` a un estudiante; `/assignments/student/:id` da `404` a un docente sin vínculo con ese estudiante |
+| Alta · validaciones | `estudianteId` → `400`; mentor estudiante → `400` con `fields.mentorId`; mentor `Inactivo` → `422 MENTOR_NOT_ACTIVE`; emprendimiento inexistente → `400` con `fields.emprendimientoId`; sin horas y con 0 h → `400` |
+| Edición y baja | Reasignar cambia mentor y horas con auditoría del antes/después; el destino en el tope → `422` y la asignación original queda intacta; `estado` en el `PUT` → `400`; una asignación inactiva no se edita ni se vuelve a dar de baja (`422 ASSIGNMENT_NOT_ACTIVE` en ambos casos) |
+| Efectos | Auditoría `Alta`, `Edición` y `Baja de asignación` con el actor; dos notificaciones `Sistema` por alta (docente y estudiante) con `tipoObjeto = 'asignaciones'` y URL; la baja avisa a ambos |
+| Listado | Filtros por `estado`, `mentorId`, `estudianteId` y `emprendimientoId`; `q` encuentra por correo, código y nombre del emprendimiento; `:id` no numérico `400`; inexistente `404`; `pageSize = 101`, `sort` fuera de la lista blanca y parámetros desconocidos `400` |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Pila recreada desde cero (`down -v` + `up --build`): **52 comprobaciones, 52 en el estado esperado**. Incluye las 3 sesiones del seed, la asignación sembrada, `ACTA_NOT_APPROVED` → `201` tras insertar el acta, `409` duplicada, `400` con `estudianteId`, reasignación `200`, `TEACHER_HOURS_LIMIT_REACHED` con el tope bajado a 5, baja `200` → `422`, nueva vinculación `201`, alcance `403`/`404`, filtros, y las filas de auditoría (`Alta`/`Edición`/`Baja`) y las 2 notificaciones |
+
+### Decisiones y huecos registrados
+
+- §5.7: escritura solo del admin, estudiante derivado, unicidad activa, ambos topes, lock
+  por mentor, BR-001 sin omisión, mentor `Activo`, edición acotada, reasignación, baja,
+  alcance de lectura, rango 1–20 h del formulario, auditoría/avisos y `pageSize` 25.
+- P-21: nada exige que el emprendimiento esté `Aprobado` para asignar docente; solo se
+  comprueba el acta (BR-001). Se confirma con la Coordinadora si debe ser una segunda
+  compuerta.
+- P-22: la baja lógica de un emprendimiento o de un usuario no desactiva sus asignaciones:
+  la fila sigue `activa`, ocupa el índice y consume el tope del docente. R36 solo menciona
+  la cascada de adjuntos; el tratamiento se decide con la Etapa 7.
+- P-23: no hay endpoint de reactivación; una fila `inactiva` es histórica y volver a
+  vincular exige una asignación nueva.
+
+### Sin verificar / pendiente
+
+- El alta y la revisión de actas (la compuerta de BR-001) llegan con el módulo de actas de
+  la Etapa 9; hoy la suite y el recorrido insertan la fila directamente.
+- El aviso «Docente asignado» de las vistas de estudiante y docente se pinta en la
+  Etapa 11; el contrato ya expone `mentor` en cada asignación.
+- La cascada de la baja lógica (P-22) queda abierta hasta la Etapa 7.
+
+**Puerta:** superada (T07 y T15 en verde; ambos topes se aplican bajo transacción y lock;
+una sola asignación activa por emprendimiento; la lectura respeta el rol y la escritura es
+solo del administrador).
