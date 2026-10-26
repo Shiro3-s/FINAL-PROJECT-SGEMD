@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Doble de `pg_dump` para la suite de integración.
+#
+# El host de pruebas no tiene `postgresql-client` (P-45), pero el contrato del volcado sí
+# se puede ejercitar: se escribe un archivo determinista en la ruta que pide `--file`.
+# Con `PG_DUMP_STUB_FAIL=1` falla, para probar que un respaldo fallido queda `Fallida`.
+set -euo pipefail
+
+if [ "${PG_DUMP_STUB_FAIL:-0}" = "1" ]; then
+  echo "pg_dump: error simulado para la suite" >&2
+  exit 1
+fi
+
+out=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --file)
+      out="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$out" ]; then
+  echo "pg_dump: falta --file" >&2
+  exit 2
+fi
+
+# Contenido estable: el tamaño del volcado no cambia entre respaldos, así que cualquier
+# diferencia de «tamaño añadido» proviene de las evidencias.
+{
+  printf 'PGDUMP-STUB v1\n'
+  head -c 65536 /dev/zero | tr '\0' 'x'
+  printf '\n'
+} > "$out"

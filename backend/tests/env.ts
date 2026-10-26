@@ -22,6 +22,10 @@ export function setTestEnv(): void {
     MAIL_FILE_DIR: resolve(process.cwd(), '..', 'storage', 'mail-test'),
     STORAGE_DIR: resolve(process.cwd(), '..', 'storage'),
     BACKUPS_DIR: resolve(process.cwd(), '..', 'backups'),
+    // El host de pruebas no tiene los binarios del sistema: el volcado usa un doble y la
+    // instantánea cae al copiador con enlaces duros (P-45).
+    PG_DUMP_BIN: resolve(process.cwd(), 'tests', 'fixtures', 'pg_dump'),
+    RSYNC_BIN: resolve(process.cwd(), 'tests', 'fixtures', 'rsync-no-instalado'),
   };
 
   for (const [key, value] of Object.entries(defaults)) {

@@ -39,6 +39,10 @@ const envSchema = z.object({
 
   STORAGE_DIR: z.string().default('/app/storage'),
   BACKUPS_DIR: z.string().default('/app/backups'),
+  // Binarios del respaldo. En la imagen Docker son los del sistema; la suite los apunta a
+  // un doble porque el host de pruebas no tiene `pg_dump` ni `rsync` (P-45).
+  PG_DUMP_BIN: z.string().default('pg_dump'),
+  RSYNC_BIN: z.string().default('rsync'),
 });
 
 const parsed = envSchema.safeParse(process.env);

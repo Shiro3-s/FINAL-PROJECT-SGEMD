@@ -75,6 +75,18 @@ export const AUDIT_ACTIONS = {
   REGISTER_EVENT: 'Inscripción a evento',
   UNREGISTER_EVENT: 'Cancelación de inscripción a evento',
   RECOMMEND_EVENT: 'Recomendación de evento',
+  UPDATE_SETTING: 'Cambio de configuración',
+  CREATE_BACKUP: 'Alta de respaldo',
+  VERIFY_BACKUP: 'Verificación de respaldo',
+  DOWNLOAD_BACKUP: 'Descarga de respaldo',
+  EXPORT_DATABASE: 'Exportación de base de datos',
+  EXPORT_REPORT: 'Exportación de reporte',
+  AUDIT_READ: 'Consulta de auditoría',
+  AUDIT_EXPORT: 'Exportación de auditoría',
+  RUN_INACTIVITY_JOB: 'Ejecución del job de inactividad',
+  RUN_OVERDUE_JOB: 'Ejecución del job de tareas vencidas',
+  AUTOMATIC_INACTIVITY: 'Inactividad automática',
+  OVERDUE_TASK_NOTICE: 'Aviso de tarea vencida',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {
