@@ -12,6 +12,10 @@ import { openStoredFile, receiveUpload, removeStoredFile } from '../../services/
 import { AppError } from '../../utils/AppError.js';
 import type { SessionUser } from '../auth/types.js';
 import {
+  loadAdviceEvidenceTarget,
+  type AdviceEvidenceTarget,
+} from '../advice/service.js';
+import {
   loadTaskEvidenceTarget,
   type TaskEvidenceTarget,
 } from '../tasks/service.js';
@@ -27,9 +31,17 @@ import {
  * se resuelve **quién** puede subir, descargar y borrar cada archivo; las reglas de disco
  * (MIME por contenido, nombre aleatorio, `*.part`, tamaño) viven en `services/storage.ts`.
  *
- * Las asesorías llegan en la Etapa 8: su pivote existe en el esquema, pero todavía no hay
- * servicio que autorice el acceso, así que la entidad se rechaza con `400` (P-27).
+ * Cada entidad resuelve su alcance con el servicio dueño del registro, de modo que la
+ * regla de acceso nunca se duplica ni queda más laxa que en su módulo.
  */
+
+type EvidenceTarget = TaskEvidenceTarget | TracingEvidenceTarget | AdviceEvidenceTarget;
+
+const ENTITY_LABEL: Readonly<Record<EvidenceEntity, string>> = {
+  task: 'tarea',
+  tracing: 'seguimiento',
+  advice: 'asesoría',
+};
 
 export interface Attachment {
   id: number;
@@ -101,14 +113,24 @@ function mapRow(row: AttachmentRow): Attachment {
   };
 }
 
-/** Entidad de la ruta: solo las que ya tienen servicio de autorización. */
+/** Entidad de la ruta: las tres que tienen servicio de autorización. */
 export function parseEntity(raw: string): EvidenceEntity {
-  if (!isEvidenceEntity(raw) || raw === 'advice') {
+  if (!isEvidenceEntity(raw)) {
     throw new AppError(400, 'VALIDATION_ERROR', 'La entidad de la evidencia no es válida.', {
-      entity: 'Valores admitidos: task, tracing',
+      entity: 'Valores admitidos: task, tracing, advice',
     });
   }
   return raw;
+}
+
+async function loadTarget(
+  entity: EvidenceEntity,
+  parentId: number,
+  actor: SessionUser,
+): Promise<EvidenceTarget> {
+  if (entity === 'task') return loadTaskEvidenceTarget(parentId, actor);
+  if (entity === 'tracing') return loadTracingEvidenceTarget(parentId, actor);
+  return loadAdviceEvidenceTarget(parentId, actor);
 }
 
 async function loadRow(id: number): Promise<AttachmentRow> {
@@ -128,11 +150,7 @@ async function authorizeRead(
   actor: SessionUser,
 ): Promise<{ entity: EvidenceEntity; parentId: number }> {
   const { entity, parentId } = entityOf(row);
-
-  if (entity === 'task') await loadTaskEvidenceTarget(parentId, actor);
-  else if (entity === 'tracing') await loadTracingEvidenceTarget(parentId, actor);
-  else throw new AppError(404, 'NOT_FOUND', 'La evidencia no existe.');
-
+  await loadTarget(entity, parentId, actor);
   return { entity, parentId };
 }
 
@@ -142,13 +160,15 @@ async function authorizeRead(
  * - Tarea: el estudiante destinatario (sube su evidencia) o el administrador. El docente
  *   califica, no sube evidencia.
  * - Seguimiento: el autor del registro o el administrador.
+ * - Asesoría: el estudiante dueño, el docente asignado o el administrador.
  *
  * Una tarea en revisión o completada tiene la evidencia congelada
- * (`422 TASK_EVIDENCE_LOCKED`): lo entregado ya no se modifica.
+ * (`422 TASK_EVIDENCE_LOCKED`); una asesoría completada o cancelada, también
+ * (`422 ADVICE_EVIDENCE_LOCKED`). El administrador puede borrar en ambos casos.
  */
 function authorizeWrite(
   entity: EvidenceEntity,
-  target: TaskEvidenceTarget | TracingEvidenceTarget,
+  target: EvidenceTarget,
   actor: SessionUser,
   mode: 'upload' | 'delete',
 ): void {
@@ -175,9 +195,34 @@ function authorizeWrite(
     return;
   }
 
-  const tracing = target as TracingEvidenceTarget;
-  if (actor.rolId !== ROLES.ADMIN && actor.id !== tracing.autorId) {
-    throw new AppError(403, 'ROLE_NOT_ALLOWED', 'Solo el autor del seguimiento puede adjuntar.');
+  if (entity === 'tracing') {
+    const tracing = target as TracingEvidenceTarget;
+    if (actor.rolId !== ROLES.ADMIN && actor.id !== tracing.autorId) {
+      throw new AppError(403, 'ROLE_NOT_ALLOWED', 'Solo el autor del seguimiento puede adjuntar.');
+    }
+    return;
+  }
+
+  const advice = target as AdviceEvidenceTarget;
+  const isAdmin = actor.rolId === ROLES.ADMIN;
+  const isStudent = actor.id === advice.estudianteId;
+  const isTeacher = advice.docenteId !== null && actor.id === advice.docenteId;
+
+  if (!isAdmin && !isStudent && !isTeacher) {
+    throw new AppError(
+      403,
+      'ROLE_NOT_ALLOWED',
+      'Solo el estudiante, el docente asignado o el administrador adjuntan evidencias a la asesoría.',
+    );
+  }
+
+  const locked = advice.estado === 'Completada' || advice.estado === 'Cancelada';
+  if (locked && (mode === 'upload' || !isAdmin)) {
+    throw new AppError(
+      422,
+      'ADVICE_EVIDENCE_LOCKED',
+      'La asesoría ya terminó: su evidencia no se puede modificar.',
+    );
   }
 }
 
@@ -195,10 +240,7 @@ export async function uploadAttachment(
   req: Request,
   ip: string | null,
 ): Promise<Attachment> {
-  const target =
-    entity === 'task'
-      ? await loadTaskEvidenceTarget(parentId, actor)
-      : await loadTracingEvidenceTarget(parentId, actor);
+  const target = await loadTarget(entity, parentId, actor);
 
   authorizeWrite(entity, target, actor, 'upload');
 
@@ -212,7 +254,7 @@ export async function uploadAttachment(
     throw new AppError(
       422,
       'ATTACHMENT_LIMIT_REACHED',
-      `Una ${entity === 'task' ? 'tarea' : 'seguimiento'} admite como máximo ${maxFiles} archivos de evidencia.`,
+      `Una ${ENTITY_LABEL[entity]} admite como máximo ${maxFiles} archivos de evidencia.`,
       { file: `Ya hay ${current} archivo(s) adjunto(s)` },
     );
   }
@@ -236,7 +278,7 @@ export async function uploadAttachment(
         throw new AppError(
           422,
           'ATTACHMENT_LIMIT_REACHED',
-          `Una ${entity === 'task' ? 'tarea' : 'seguimiento'} admite como máximo ${maxFiles} archivos de evidencia.`,
+          `Una ${ENTITY_LABEL[entity]} admite como máximo ${maxFiles} archivos de evidencia.`,
           { file: `Ya hay ${total} archivo(s) adjunto(s)` },
         );
       }
@@ -254,7 +296,9 @@ export async function uploadAttachment(
       const pivot =
         entity === 'task'
           ? { table: 'adjuntos_tareas', column: 'tareas_id_tareas' }
-          : { table: 'adjuntos_seguimientos', column: 'seguimientos_id_seguimientos' };
+          : entity === 'tracing'
+            ? { table: 'adjuntos_seguimientos', column: 'seguimientos_id_seguimientos' }
+            : { table: 'adjuntos_asesorias', column: 'asesorias_id_asesorias' };
 
       await db.query(
         `INSERT INTO ${pivot.table} (adjuntos_id_adjunto, ${pivot.column}) VALUES ($1, $2)`,
@@ -348,10 +392,7 @@ export async function deleteAttachment(
   const row = await loadRow(id);
   const { entity, parentId } = await authorizeRead(row, actor);
 
-  const target =
-    entity === 'task'
-      ? await loadTaskEvidenceTarget(parentId, actor)
-      : await loadTracingEvidenceTarget(parentId, actor);
+  const target = await loadTarget(entity, parentId, actor);
 
   authorizeWrite(entity, target, actor, 'delete');
 

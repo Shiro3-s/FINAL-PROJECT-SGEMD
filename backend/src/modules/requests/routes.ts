@@ -8,6 +8,7 @@ import { asyncHandler } from '../../utils/asyncHandler.js';
 import { parseId } from '../../utils/params.js';
 import { sendData } from '../../utils/respond.js';
 import {
+  approveRequestSchema,
   createRequestSchema,
   listRequestsQuerySchema,
   rejectRequestSchema,
@@ -56,8 +57,17 @@ requestsRouter.get(
 requestsRouter.put(
   '/requests/:id/approve',
   ...admin,
+  validateBody(approveRequestSchema),
   asyncHandler(async (req, res) => {
-    sendData(res, await approveRequest(parseId(req, 'solicitud'), requireUser(req), req.ip ?? null));
+    sendData(
+      res,
+      await approveRequest(
+        parseId(req, 'solicitud'),
+        req.body,
+        requireUser(req),
+        req.ip ?? null,
+      ),
+    );
   }),
 );
 

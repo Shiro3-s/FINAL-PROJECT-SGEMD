@@ -1,9 +1,14 @@
+import type { QueryResult, QueryResultRow } from 'pg';
+
 /**
  * Escritura de auditoría (NFR-007). Se llama **dentro** de la misma transacción que el
  * cambio que describe, para que nunca exista un efecto sin su rastro ni al revés.
  */
 export interface Queryable {
-  query(text: string, params?: unknown[]): Promise<unknown>;
+  query<R extends QueryResultRow = QueryResultRow>(
+    text: string,
+    params?: unknown[],
+  ): Promise<QueryResult<R>>;
 }
 
 export interface AuditEntry {
@@ -54,6 +59,12 @@ export const AUDIT_ACTIONS = {
   DELETE_TRACING: 'Baja lógica de seguimiento',
   UPLOAD_ATTACHMENT: 'Carga de evidencia',
   DELETE_ATTACHMENT: 'Baja lógica de evidencia',
+  CREATE_ADVICE: 'Alta de asesoría',
+  UPDATE_ADVICE: 'Edición de asesoría',
+  ACCEPT_ADVICE: 'Confirmación de asesoría',
+  REPROPOSE_ADVICE: 'Reprogramación de asesoría',
+  REJECT_ADVICE: 'Cancelación de asesoría',
+  DELETE_ADVICE: 'Baja lógica de asesoría',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {

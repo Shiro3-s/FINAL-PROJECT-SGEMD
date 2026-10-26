@@ -4,12 +4,14 @@ import helmet from 'helmet';
 import { errorHandler, notFound } from './middleware/error.js';
 import { originCheck } from './middleware/originCheck.js';
 import { authRouter } from './modules/auth/routes.js';
+import { adviceRouter } from './modules/advice/routes.js';
 import { assignmentsRouter } from './modules/assignments/routes.js';
 import { attachmentsRouter } from './modules/attachments/routes.js';
 import { catalogsRouter } from './modules/catalogs/routes.js';
 import { diagnosisRouter } from './modules/diagnosis/routes.js';
 import { entrepreneurshipRouter } from './modules/entrepreneurship/routes.js';
 import { healthRouter } from './modules/health/routes.js';
+import { notificationsRouter } from './modules/notifications/routes.js';
 import { requestsRouter } from './modules/requests/routes.js';
 import { tasksRouter } from './modules/tasks/routes.js';
 import { tracingRouter } from './modules/tracing/routes.js';
@@ -42,7 +44,9 @@ export function createApp(): express.Express {
   app.use('/api', diagnosisRouter);
   app.use('/api', tasksRouter);
   app.use('/api', tracingRouter);
+  app.use('/api', adviceRouter);
   app.use('/api', attachmentsRouter);
+  app.use('/api', notificationsRouter);
 
   app.use(notFound);
   app.use(errorHandler);

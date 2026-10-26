@@ -81,6 +81,26 @@ INSERT INTO modulos (id_modulos, nombre) VALUES
   (1, 'Perfil'), (2, 'Emprendimiento'), (3, 'Diagnóstico'), (4, 'Tareas'),
   (5, 'Asesorías'), (6, 'Seguimiento'), (7, 'Eventos'), (8, 'Reportes');
 
+-- Sincronización de secuencias ----------------------------------------------------------
+-- Los catálogos se siembran con id explícito para que los datos demo sean estables entre
+-- ejecuciones. Eso **no** avanza el `SERIAL`: sin este bloque, el primer alta real choca
+-- con la clave primaria (pasaba con `fecha_y_horarios` al agendar la primera asesoría).
+
+SELECT setval(pg_get_serial_sequence('roles', 'id_roles'), (SELECT MAX(id_roles) FROM roles));
+SELECT setval(pg_get_serial_sequence('tipodocumentos', 'id_tipodocumentos'), (SELECT MAX(id_tipodocumentos) FROM tipodocumentos));
+SELECT setval(pg_get_serial_sequence('programaacademico', 'id_programaacademico'), (SELECT MAX(id_programaacademico) FROM programaacademico));
+SELECT setval(pg_get_serial_sequence('centrouniversitarios', 'id_centrouniversitarios'), (SELECT MAX(id_centrouniversitarios) FROM centrouniversitarios));
+SELECT setval(pg_get_serial_sequence('municipios', 'id_municipios'), (SELECT MAX(id_municipios) FROM municipios));
+SELECT setval(pg_get_serial_sequence('tipopoblacion', 'id_tipopoblacion'), (SELECT MAX(id_tipopoblacion) FROM tipopoblacion));
+SELECT setval(pg_get_serial_sequence('tipousuarios', 'id_tipousuarios'), (SELECT MAX(id_tipousuarios) FROM tipousuarios));
+SELECT setval(pg_get_serial_sequence('etapaemprendimiento', 'id_etapaemprendimiento'), (SELECT MAX(id_etapaemprendimiento) FROM etapaemprendimiento));
+SELECT setval(pg_get_serial_sequence('faseplan', 'id_faseplan'), (SELECT MAX(id_faseplan) FROM faseplan));
+SELECT setval(pg_get_serial_sequence('sectoreconomico', 'id_sectoreconomico'), (SELECT MAX(id_sectoreconomico) FROM sectoreconomico));
+SELECT setval(pg_get_serial_sequence('modalidad', 'id_modalidad'), (SELECT MAX(id_modalidad) FROM modalidad));
+SELECT setval(pg_get_serial_sequence('tipo_evento', 'id_tipo_evento'), (SELECT MAX(id_tipo_evento) FROM tipo_evento));
+SELECT setval(pg_get_serial_sequence('fecha_y_horarios', 'id_fecha_y_horarios'), (SELECT MAX(id_fecha_y_horarios) FROM fecha_y_horarios));
+SELECT setval(pg_get_serial_sequence('modulos', 'id_modulos'), (SELECT MAX(id_modulos) FROM modulos));
+
 -- Configuración del programa -----------------------------------------------------------
 -- Una sola fuente por dato: los topes, límites y banderas viven aquí, no en el código.
 

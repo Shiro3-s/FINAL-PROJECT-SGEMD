@@ -24,6 +24,58 @@ export const rejectRequestSchema = z
   })
   .strict();
 
+/**
+ * Aprobación. Solo una `Cita` usa los datos de programación: al aprobarla se crea la
+ * asesoría en `Programada` (P-19), así que exige docente, tema y horario. Los demás tipos
+ * se aprueban con un cuerpo vacío.
+ */
+const fecha = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Usa el formato AAAA-MM-DD')
+  .refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)), 'La fecha no es válida');
+
+const hora = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Usa el formato HH:MM (24 horas)');
+
+export const approveRequestSchema = z
+  .object({
+    docenteId: z.number().int().positive().optional(),
+    tema: z.string().trim().min(1).max(200).optional(),
+    fecha: fecha.optional(),
+    horaInicio: hora.optional(),
+    horaFin: hora.optional(),
+    modalidadId: z.number().int().positive().nullable().optional(),
+    lugarEnlace: z.string().trim().max(500).nullable().optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    const given = [value.fecha, value.horaInicio, value.horaFin].filter(
+      (item) => item !== undefined,
+    ).length;
+
+    if (given !== 0 && given !== 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['fecha'],
+        message: 'Envía fecha, hora de inicio y hora de fin juntas',
+      });
+      return;
+    }
+
+    if (
+      value.horaInicio !== undefined &&
+      value.horaFin !== undefined &&
+      value.horaFin <= value.horaInicio
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['horaFin'],
+        message: 'La hora de fin debe ser posterior a la de inicio',
+      });
+    }
+  });
+
 /** Filtros y paginación de la bandeja. `.strict()` cierra el `ORDER BY`. */
 export const listRequestsQuerySchema = z
   .object({
@@ -42,5 +94,6 @@ export const listRequestsQuerySchema = z
   .strict();
 
 export type CreateRequestInput = z.infer<typeof createRequestSchema>;
+export type ApproveRequestInput = z.infer<typeof approveRequestSchema>;
 export type RejectRequestInput = z.infer<typeof rejectRequestSchema>;
 export type ListRequestsQuery = z.infer<typeof listRequestsQuerySchema>;

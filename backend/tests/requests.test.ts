@@ -402,9 +402,10 @@ describe('T36 · emprendimiento paralelo', () => {
  * =================================================================================== */
 
 describe('T36 · cita de asesoría', () => {
-  it('se resuelve sin efecto de dominio todavía (P-19)', async () => {
+  it('la aprobación crea la asesoría programada con docente y horario (P-19)', async () => {
     const admin = await adminSession();
     const { student, emprendimientoId } = await studentWithApprovedEntrepreneurship(admin);
+    const docente = await newUser(admin, { rolId: 3 });
 
     const alta = await student.session.post('/api/requests').send({
       tipo: 'Cita',
@@ -415,19 +416,116 @@ describe('T36 · cita de asesoría', () => {
     expect(alta.body.data).toMatchObject({ tipo: 'Cita', estado: 'Pendiente' });
 
     const id = alta.body.data.id as number;
-    const aprobada = await admin.put(`/api/requests/${id}/approve`).send({});
-    expect(aprobada.status).toBe(200);
-    expect(aprobada.body.data.estado).toBe('Aprobada');
 
-    // Nada cambia en la cuenta ni en el emprendimiento: la asesoría se crea en su módulo.
-    expect((await userRow(student.id)).estado).toBe('Activo');
-    expect(await entrepreneurshipRow(emprendimientoId)).toMatchObject({
-      es_paralelo: false,
-      estado_aprobacion: 'Aprobado',
+    // Aprobar una cita sin docente ni horario no es posible: la asesoría nacería sin datos.
+    const sinDatos = await admin.put(`/api/requests/${id}/approve`).send({});
+    expect(sinDatos.status).toBe(400);
+    expect(sinDatos.body.error.code).toBe('VALIDATION_ERROR');
+    expect(sinDatos.body.error.fields).toHaveProperty('docenteId');
+    expect((await requestRow(id)).estado).toBe('Pendiente');
+
+    const aprobada = await admin.put(`/api/requests/${id}/approve`).send({
+      docenteId: docente.id,
+      tema: 'Validación de la propuesta de valor',
+      fecha: '2026-12-03',
+      horaInicio: '09:00',
+      horaFin: '10:00',
+      modalidadId: 2,
+      lugarEnlace: 'https://meet.example.com/asesoria',
     });
 
+    expect(aprobada.status).toBe(200);
+    expect(aprobada.body.data).toMatchObject({
+      id,
+      estado: 'Aprobada',
+      resueltoPor: { id: admin.id },
+    });
+
+    const { rows } = await query<{
+      id_asesorias: number;
+      estado: string;
+      tema: string;
+      usuarios_id_docentes: number;
+      usuarios_id_usuarios: number;
+      emprendimiento_id_emprendimiento: number;
+      fecha: string;
+      hora_inicio: string;
+      hora_fin: string;
+    }>(
+      `SELECT a.id_asesorias, a.estado, a.tema, a.usuarios_id_docentes,
+              a.usuarios_id_usuarios, a.emprendimiento_id_emprendimiento,
+              to_char(fyh.fecha, 'YYYY-MM-DD') AS fecha,
+              to_char(fyh.hora_inicio, 'HH24:MI') AS hora_inicio,
+              to_char(fyh.hora_fin, 'HH24:MI') AS hora_fin
+         FROM asesorias a
+         JOIN fecha_y_horarios fyh
+           ON fyh.id_fecha_y_horarios = a.fecha_y_horarios_id_fecha_y_horarios
+        WHERE a.emprendimiento_id_emprendimiento = $1`,
+      [emprendimientoId],
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      estado: 'Programada',
+      tema: 'Validación de la propuesta de valor',
+      usuarios_id_docentes: docente.id,
+      usuarios_id_usuarios: student.id,
+      emprendimiento_id_emprendimiento: emprendimientoId,
+      fecha: '2026-12-03',
+      hora_inicio: '09:00',
+      hora_fin: '10:00',
+    });
+
+    // La resolución deja su rastro y la creación de la asesoría, el suyo.
     const resolucion = await auditRows(id, 'Solicitud aprobada');
-    expect(resolucion[0]!.valor_nuevo).toMatchObject({ estado: 'Aprobada', efecto: null });
+    expect(resolucion[0]!.valor_nuevo).toMatchObject({ estado: 'Aprobada' });
+    expect(resolucion[0]!.valor_nuevo!.efecto).toMatch(/asesoría #\d+ creada \(Programada\)/);
+
+    const altaAsesoria = await query<{ total: string }>(
+      `SELECT COUNT(*)::text AS total FROM auditoria_eventos
+        WHERE entidad = 'asesorias' AND accion = 'Alta de asesoría' AND entidad_id = $1`,
+      [rows[0]!.id_asesorias],
+    );
+    expect(Number(altaAsesoria.rows[0]!.total)).toBe(1);
+
+    // Doble aprobación: no se crea una segunda asesoría.
+    const repetida = await admin.put(`/api/requests/${id}/approve`).send({
+      docenteId: docente.id,
+      tema: 'Otra vez',
+      fecha: '2026-12-04',
+      horaInicio: '09:00',
+      horaFin: '10:00',
+    });
+    expect(repetida.status).toBe(422);
+    expect(repetida.body.error.code).toBe('REQUEST_ALREADY_RESOLVED');
+
+    const total = await query<{ total: string }>(
+      'SELECT COUNT(*)::text AS total FROM asesorias WHERE emprendimiento_id_emprendimiento = $1',
+      [emprendimientoId],
+    );
+    expect(Number(total.rows[0]!.total)).toBe(1);
+  });
+
+  it('los datos de programación solo se aceptan en una cita', async () => {
+    const admin = await adminSession();
+    const student = await newUser(admin, { estado: 'Limitado' });
+
+    const alta = await student.session
+      .post('/api/requests')
+      .send({ tipo: 'Desbloqueo', detalle: 'Solicito activación' });
+    const id = alta.body.data.id as number;
+
+    const response = await admin.put(`/api/requests/${id}/approve`).send({
+      docenteId: 2,
+      tema: 'No aplica',
+      fecha: '2026-12-03',
+      horaInicio: '09:00',
+      horaFin: '10:00',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    expect((await requestRow(id)).estado).toBe('Pendiente');
   });
 });
 

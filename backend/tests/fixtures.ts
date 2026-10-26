@@ -153,7 +153,7 @@ export function pdfBuffer(size = 256): Buffer {
 
 export function uploadEvidence(
   session: Session,
-  entity: 'task' | 'tracing',
+  entity: 'task' | 'tracing' | 'advice',
   parentId: number,
   buffer: Buffer,
   filename = 'evidencia.jpg',

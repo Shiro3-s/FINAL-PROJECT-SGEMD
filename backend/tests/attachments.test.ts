@@ -211,9 +211,16 @@ describe('T19 · validación de la subida', () => {
     expect(empty.status).toBe(400);
     expect(empty.body.error.code).toBe('VALIDATION_ERROR');
 
-    const advice = await uploadEvidence(scenario.mentor.session, 'advice' as never, 1, jpegBuffer());
-    expect(advice.status).toBe(400);
-    expect(advice.body.error.code).toBe('VALIDATION_ERROR');
+    // `advice` ya es una entidad admitida: un padre inexistente responde 404 (fuera de
+    // alcance), no 400.
+    const advice = await uploadEvidence(
+      scenario.mentor.session,
+      'advice',
+      999_999,
+      jpegBuffer(),
+    );
+    expect(advice.status).toBe(404);
+    expect(advice.body.error.code).toBe('NOT_FOUND');
 
     const unknown = await uploadEvidence(
       scenario.student.session,

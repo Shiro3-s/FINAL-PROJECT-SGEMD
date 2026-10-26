@@ -9,8 +9,13 @@ import { sendMailBestEffort, welcomeMail } from '../../services/email.js';
 import { notify } from '../../services/notify.js';
 import { settingInt } from '../../services/programSettings.js';
 import { AppError } from '../../utils/AppError.js';
+import { insertAdvice } from '../advice/service.js';
 import type { SessionUser } from '../auth/types.js';
-import type { CreateRequestInput, ListRequestsQuery } from './schemas.js';
+import type {
+  ApproveRequestInput,
+  CreateRequestInput,
+  ListRequestsQuery,
+} from './schemas.js';
 
 /**
  * Bandeja única de solicitudes (FR-014, R38, T36).
@@ -392,13 +397,14 @@ async function lockPendingRequest(db: PoolClient, id: number): Promise<LockedReq
  * |---|---|
  * | `Desbloqueo` | `Limitado`/`Inactivo → Activo`. Si ya estaba `Activo`, solo se resuelve |
  * | `Paralelo` | `es_paralelo = TRUE` en el emprendimiento (con el tope `paralelos_maximos`) |
- * | `Cita` | Ninguno todavía: la asesoría se crea en el módulo de asesorías (P-19) |
+ * | `Cita` | Crea la asesoría en `Programada` con el docente y el horario elegidos (P-19) |
  *
  * La solicitud se bloquea con `FOR UPDATE` y el `UPDATE` vuelve a condicionar por
  * `Pendiente`: dos aprobaciones simultáneas no pueden aplicar el efecto dos veces.
  */
 export async function approveRequest(
   id: number,
+  input: ApproveRequestInput,
   actor: SessionUser,
   ip: string | null,
 ): Promise<RequestDetail> {
@@ -406,9 +412,29 @@ export async function approveRequest(
   // variable asignada dentro del callback de la transacción.
   const activated: { correoInstitucional: string; nombres: string }[] = [];
 
+  const schedulingKeys = [
+    'docenteId',
+    'tema',
+    'fecha',
+    'horaInicio',
+    'horaFin',
+    'modalidadId',
+    'lugarEnlace',
+  ] as const;
+  const hasScheduling = schedulingKeys.some((key) => input[key] !== undefined);
+
   await withTransaction(async (db) => {
     const request = await lockPendingRequest(db, id);
     let efecto: string | null = null;
+
+    if (request.tipo !== 'Cita' && hasScheduling) {
+      throw new AppError(
+        400,
+        'VALIDATION_ERROR',
+        'Solo una cita de asesoría usa los datos de programación.',
+        { tipo: 'Esta solicitud no es una cita de asesoría' },
+      );
+    }
 
     if (request.tipo === 'Desbloqueo') {
       const { rows } = await db.query<{ estado: string }>(
@@ -497,8 +523,71 @@ export async function approveRequest(
       }
     }
 
-    // `Cita`: sin efecto de dominio todavía (P-19). La solicitud queda resuelta para que
-    // la coordinación registre la asesoría en su módulo.
+    // `Cita`: la aprobación es el momento en que la coordinación asigna docente y horario
+    // (P-19). La asesoría nace `Programada`; el docente la confirma después con `accept`.
+    if (request.tipo === 'Cita') {
+      if (!request.emprendimiento_id_emprendimiento) {
+        throw new AppError(
+          422,
+          'REQUEST_TARGET_MISSING',
+          'La solicitud no tiene un emprendimiento asociado.',
+        );
+      }
+
+      const missing: Record<string, string> = {};
+      if (input.docenteId === undefined) missing.docenteId = 'Selecciona el docente';
+      if (input.tema === undefined) missing.tema = 'Escribe el tema de la asesoría';
+      if (input.fecha === undefined) missing.fecha = 'Selecciona la fecha';
+
+      if (Object.keys(missing).length > 0) {
+        throw new AppError(
+          400,
+          'VALIDATION_ERROR',
+          'Para aprobar una cita indica el docente, el tema y el horario.',
+          missing,
+        );
+      }
+
+      const { rows } = await db.query<{ nombre: string }>(
+        `SELECT nombre
+           FROM emprendimiento
+          WHERE id_emprendimiento = $1 AND fecha_eliminacion IS NULL`,
+        [request.emprendimiento_id_emprendimiento],
+      );
+
+      const target = rows[0];
+      if (!target) {
+        throw new AppError(
+          422,
+          'REQUEST_TARGET_MISSING',
+          'El emprendimiento de la solicitud ya no existe.',
+        );
+      }
+
+      const created = await insertAdvice(
+        db,
+        {
+          emprendimiento: {
+            id: request.emprendimiento_id_emprendimiento,
+            nombre: target.nombre,
+            estudianteId: request.usuarios_id_usuarios,
+          },
+          docenteId: input.docenteId!,
+          tema: input.tema!,
+          modalidadId: input.modalidadId,
+          lugarEnlace: input.lugarEnlace,
+          schedule: {
+            fecha: input.fecha!,
+            horaInicio: input.horaInicio!,
+            horaFin: input.horaFin!,
+          },
+        },
+        actor,
+        ip,
+      );
+
+      efecto = `asesoría #${created.id} creada (${created.estado})`;
+    }
 
     const { rowCount } = await db.query(
       `UPDATE solicitudes
