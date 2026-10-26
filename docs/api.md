@@ -1744,6 +1744,181 @@ rechazarla ni marcar asistencia (P-40). Forma de una recomendación:
 }
 ```
 
+## Tableros
+
+Tres rutas, una por rol, y una sola consulta agregada por tablero: cada cifra que muestra la
+pantalla sale del mismo `json_build_object` que devuelve el endpoint, así que no puede
+divergir de la base. El rol se exige en la ruta y el alcance se aplica en el SQL.
+
+| Ruta | Rol | Alcance |
+|---|---|---|
+| `GET /api/dashboard/admin` | Administrador | Todo el programa |
+| `GET /api/dashboard/teacher` | Docente | Emprendimientos con asignación **activa** del docente |
+| `GET /api/dashboard/student` | Estudiante | Su emprendimiento más reciente no eliminado |
+
+Las tres exigen cuenta `Activo` (`403 ACCOUNT_NOT_ACTIVE` en una cuenta `Limitado`) y
+responden `403 ROLE_NOT_ALLOWED` al rol equivocado.
+
+`GET /api/dashboard/admin`:
+
+```json
+{
+  "usuariosActivos": 12,
+  "emprendimientos": 8,
+  "tareas": 34,
+  "avancePromedio": 47,
+  "solicitudesPendientes": 3,
+  "alertas": {
+    "sinDocente": 1,
+    "diagnosticosSinRevisar": 2,
+    "tareasVencidas": 4,
+    "eventosPendientes": 1,
+    "actasEnRevision": 1
+  },
+  "avancePorMes": [{ "mes": "2026-05", "avances": 3, "promedio": 80 }],
+  "porSede": [{ "nombre": "Sede Norte", "total": 5 }],
+  "porSector": [{ "nombre": "Alimentos", "total": 3 }],
+  "agenda": [{ "tipo": "Asesoría", "titulo": "Costos", "fecha": "2026-11-02", "hora": "10:00", "detalle": "Sabor y Sabe" }],
+  "actividadReciente": [{ "id": 91, "accion": "Alta de emprendimiento", "entidad": "emprendimiento", "entidadId": 8, "detalle": "EcoPack", "fecha": "2026-10-25T18:00:00.000Z", "actor": "Cuenta Administradora Demo" }]
+}
+```
+
+`avancePorMes` trae **seis** meses (del más viejo al actual) aunque no haya datos: la gráfica
+necesita el eje completo. La etiqueta corta en español la pone la SPA, no el servidor. `agenda`
+mezcla asesorías próximas y eventos publicados (máximo 6) y `actividadReciente` son los
+últimos 6 eventos de auditoría.
+
+`GET /api/dashboard/teacher` devuelve `{ emprendimientos, avancePromedio, tareasPorRevisar,
+tareasAltaPrioridad, avancesRegistrados, avancesConEvidencia, asesorias: { agendadas,
+porAgendar, completadas }, avancePorEmprendimiento: [{ id, codigo, nombre, avance }], agenda,
+actividadReciente }`, siempre limitado a las asignaciones activas del docente. Un docente sin
+asignaciones recibe ceros y listas vacías, nunca el panorama de otro.
+
+`GET /api/dashboard/student` devuelve `{ emprendimiento: { id, codigo, nombre, estadoAprobacion,
+avance } | null, diagnostico, acta, tareas: { total, completadas, pendientes }, asesorias:
+{ realizadas, proximas }, fases: [{ faseId, nombre, total, completadas, porcentaje }],
+proximasAsesorias, tareasPorCompletar, eventos, notificacionesSinLeer }`. Sin emprendimiento,
+`emprendimiento` es `null`, `fases` es `[]` y las cifras quedan en cero: no es un error.
+
+## Reportes
+
+`GET /api/reports` (administrador) devuelve el catálogo: `{ items: [{ id, nombre, descripcion,
+formatos, periodo, filtroDocente, columnas: [{ key, header }], ultimaGeneracion }] }`. Cuatro
+reportes, todos con `formatos: ["csv", "xlsx", "pdf"]`:
+
+| `id` | Nombre | Periodo | Filtro de docente |
+|---|---|---|---|
+| `seguimiento` | Seguimiento | Sí (`fecha_seguimiento`) | Sí |
+| `asesorias` | Asesorías | Sí (`fecha_asesoria`) | Sí |
+| `emprendimientos` | Emprendimientos | **No** (la tabla no tiene fecha de creación, P-44) | Sí |
+| `diagnosticos` | Diagnósticos | Sí (`fecha_envio`) | Sí |
+
+`GET /api/reports/:id/export?format=csv|xlsx|pdf&desde=&hasta=&docenteId=` descarga el
+archivo. `format` es **obligatorio** (`400` sin él) y `emprendimientos` rechaza `desde`/`hasta`
+con `400` en vez de ignorarlos. Un `docenteId` que no corresponde a un docente vigente responde
+`400` con `fields.docenteId`. Un `id` fuera del catálogo responde `404 REPORT_NOT_FOUND`.
+
+El archivo se genera con las **mismas filas** de la consulta del reporte; no hay cálculos en el
+exportador. CSV lleva BOM y separador `,`; XLSX es un libro con una hoja; el PDF lleva el título,
+el periodo y la tabla. Los metadatos del filtro viajan en XLSX y PDF, no en CSV (el CSV es para
+volver a procesar los datos). Cada exportación se audita como `Exportación de reporte` con el
+reporte, el formato y el número de filas.
+
+## Configuración
+
+`GET /api/settings` (administrador) devuelve `{ items: [{ clave, valor, tipoDato, descripcion,
+actualizadoPor, fechaActualizacion }] }` con las 18 claves de `configuracion_programa`. `valor`
+es siempre texto o `null`; el tipo lo declara la fila (`int`, `bool`, `text`, `date`) y la SPA
+elige el control con él. La tabla no tiene `updated_at`, así que `actualizadoPor` y
+`fechaActualizacion` salen del último evento de auditoría de esa clave.
+
+`PUT /api/settings` guarda **por lote**:
+
+```json
+{ "items": [{ "clave": "cupos_por_sede", "valor": "45" }, { "clave": "fecha_cierre_admisiones", "valor": null }] }
+```
+
+Un solo `PUT` es una sola transacción y deja una fila de auditoría **por clave que cambió**
+(`Cambio de configuración`, con valor anterior y nuevo). Un guardado sin diferencias no audita
+nada y devuelve `cambios: 0`. Validación por `tipo_dato`: `int` exige entero positivo
+(`cupos_por_sede`, `carga_max_horas`, …); `bool` acepta `true`/`false`; `date` exige una fecha
+real del calendario (un 31 de febrero se rechaza); `text` se recorta. Una clave desconocida o
+repetida en el lote responde `400` con el índice (`items.0.clave`). `.strict()` rechaza
+`tipoDato`, `descripcion` y autor.
+
+`GET /api/settings/audit?accion=&entidad=&q=&desde=&hasta=&page=&pageSize=` es la bitácora del
+administrador: `{ items: [{ id, accion, entidad, entidadId, valorAnterior, valorNuevo, fecha,
+ip, actor }], total, page, pageSize }`, `pageSize` 25 por defecto. Aquí los valores van
+completos (es configuración, no datos personales); el auditor tiene su propio listado
+enmascarado.
+
+## Auditoría
+
+Módulo del **auditor** (rol 4). Solo cuatro `GET`: no hay `POST`, `PUT`, `PATCH` ni `DELETE` en
+`/api/audit/*` (`404`). Cada lectura y cada exportación se registran (`Consulta de auditoría`,
+`Exportación de auditoría`) con el usuario, la IP y los filtros. Los nombres, documentos y
+correos viajan **enmascarados** (Ley 1581 de 2012, NFR-007); las cifras son completas.
+
+| Ruta | Devuelve |
+|---|---|
+| `GET /api/audit/dashboard` | Agregados por rol, estado, tareas, asesorías, diagnósticos, actas, eventos y auditoría |
+| `GET /api/audit/expedientes` | Expedientes con avance y cifras, con PII enmascarada |
+| `GET /api/audit/reports` | Catálogo de reportes con `enmascarado: true` |
+| `GET /api/audit/reports/:id/export` | Exportación con nombres parciales |
+
+`GET /api/audit/expedientes?estado=&docenteId=&q=&page=&pageSize=` devuelve `{ items, total,
+page, pageSize }`; cada item trae `{ id, codigo, nombre, estado, avance, sede, sector,
+estudiante: { nombres, apellidos, documento, correo }, docente, tareas: { total, completadas } }`.
+El enmascarado es: `Ana Maria` → `Ana M.`, `Restrepo Gomez` → `Restrepo G.`, documento
+`900000004` → `******004`, correo `ana@…` → `a***@…`. En las exportaciones la columna de nombre
+completo se reduce a `Ana G.`.
+
+El módulo exige cuenta `Activo`: una cuenta `Limitado` recibe `403 ACCOUNT_NOT_ACTIVE`. El
+administrador **no** puede usar estas rutas (`403 ROLE_NOT_ALLOWED`); sus equivalentes son
+`/api/reports` y `/api/dashboard/admin`.
+
+## Respaldos
+
+Todo el módulo es del administrador (FR-018, FR-009).
+
+`GET /api/backups?estado=&tipo=&q=&desde=&hasta=&page=&pageSize=` lista el historial:
+`{ items: [{ id, codigo, tipo, fechaHora, tamanoLogicoMb, tamanoAnadidoMb, estado, destino,
+retencionDias, checksumManifiesto, ejecutadoPor, artefactos: { dump, snapshot } }], total, page,
+pageSize }`. `tamanoLogicoMb` es lo que ocupa la instantánea completa y `tamanoAnadidoMb` lo que
+añadió respecto del respaldo anterior: el panel muestra los dos para que se vea la tendencia. Los
+MB se redondean hacia arriba.
+
+`GET /api/backups/panel` devuelve `{ motor: "rsync"|"link", retencionDias, respaldosEnDisco }`.
+`motor` es el que realmente se usó (`rsync --link-dest` en Docker; copiador con `fs.link` cuando
+no hay `rsync`, P-45).
+
+`POST /api/backups` con `{ "tipo": "Completo" }` (por defecto `Completo`) ejecuta el respaldo y
+responde `201` con el detalle. Orden obligatorio: **volcado** (`pg_dump`), después
+**instantánea** incremental de evidencias con enlaces duros, después **manifiesto** con el hash
+de cada archivo. Si cualquiera de los dos pasos falla, el respaldo entero queda `Fallida` y no se
+usa como base del siguiente. `Completo` = volcado + instantánea; `Parcial` = solo volcado (sin
+manifiesto, no se puede verificar ni descargar la instantánea).
+
+- Código `BKP-YYYYMMDD-HHMM`; dos respaldos en el mismo minuto llevan sufijo `-2`, `-3`… y el
+  código no puede existir ya en disco.
+- Un respaldo simultáneo responde `409 BACKUP_IN_PROGRESS` (lock de sesión `respaldos:ejecutar`).
+- Un volcado fallido responde `500 BACKUP_DUMP_FAILED` y deja la fila `Fallida` sin tamaños.
+- La retención borra cada fila según **su** `retencion_dias`, nunca la recién creada.
+
+`GET /api/backups/:id` devuelve el detalle con `manifiesto: { codigo, tipo, motor, base, totalBytes,
+archivos }`. `POST /api/backups/:id/verify` re-calcula los hashes y devuelve `{ estado, archivos,
+corruptos: [{ ruta, motivo }] }`; si algo no coincide, la fila pasa a `Fallida` (nunca al revés).
+Un `Parcial` responde `422 BACKUP_MANIFEST_MISSING`.
+
+`GET /api/backups/:id/download?part=dump|storage` descarga el volcado (`application/octet-stream`)
+o la instantánea (`application/gzip`, un `tar.gz`). Solo un respaldo `Exitosa` se descarga
+(`409 BACKUP_NOT_DOWNLOADABLE`); una parte ausente responde `404 BACKUP_PART_MISSING`. Cada
+descarga se audita.
+
+`GET /api/backups/export?format=csv|xlsx` exporta la base completa: `csv` es un ZIP con un CSV
+por tabla y `xlsx` un libro con una hoja por tabla. `pdf` responde `400`. Se audita como
+`Exportación de base de datos` con el número de tablas.
+
 ## Límites de peticiones
 
 Los umbrales no están fijados por los requisitos (P-12); son valores iniciales

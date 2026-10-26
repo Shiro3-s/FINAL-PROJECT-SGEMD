@@ -748,3 +748,98 @@ conexión de B; el evento se publica después del commit).
 **Puerta:** superada (T25, T26 y T27 en verde; sin rúbrica no se inventa puntaje; el acta
 solo la revisa el administrador y el rechazo exige motivo; el docente solo recomienda a
 sus emprendimientos y el estudiante solo ve eventos publicados).
+
+---
+
+## Etapa 10 — Tableros, reportes, respaldos, configuración y auditoría
+
+- **Fecha:** 2026-10-25
+- **Commit:** pendiente de esta etapa
+
+### Hecho
+
+- `modules/settings`: `GET /settings` con las 18 claves de `configuracion_programa`,
+  `PUT /settings` por lote y en una transacción, validado por el `tipo_dato` de la fila, y
+  `GET /settings/audit` como listado de auditoría del administrador. Solo se auditan las
+  claves que cambiaron, con valor anterior y nuevo.
+- `modules/reports`: cuatro reportes con una fila por hecho (`seguimiento`, `asesorias`,
+  `emprendimientos`, `diagnosticos`). El mismo conjunto de filas alimenta CSV, XLSX
+  (`exceljs`) y PDF (`pdfkit`), sin cálculos en el exportador. El periodo se aplica a la
+  fecha propia del reporte; `emprendimientos` no lo admite porque la tabla no tiene fecha
+  de creación (P-44). Cada exportación se audita.
+- `modules/dashboard`: tres tableros, cada uno con **una** consulta agregada
+  (`json_build_object`). El alcance se aplica en el SQL: el docente ve sus asignaciones
+  activas y el estudiante su emprendimiento más reciente.
+- `modules/audit`: módulo del auditor (rol 4) con cuatro `GET` y ninguna escritura. Nombres,
+  documentos y correos salen enmascarados en el servidor; cada lectura y cada exportación
+  se registran.
+- `modules/backups` + `services/backupFiles.ts`: respaldo `Completo` (volcado `pg_dump`
+  custom + instantánea incremental + manifiesto con hashes) y `Parcial` (solo volcado). La
+  instantánea usa `rsync -a --link-dest` cuando existe y un copiador con `fs.link` cuando
+  no (P-45). Código `BKP-YYYYMMDD-HHMM` con sufijo en el mismo minuto y comprobación en
+  disco, lock de sesión para el respaldo simultáneo, retención por la `retencion_dias` de
+  cada fila, verificación que re-calcula hashes, descarga en streaming del volcado y de la
+  instantánea (`tar.gz`) y exportación de la base a ZIP de CSV o a XLSX con una hoja por
+  tabla.
+- `jobs/`: inactividad a las 06:00, tareas vencidas a las 06:10 y respaldo a las 09:00
+  (hora de Bogotá). El planificador revisa cada 30 s, corre cada job una vez al día y no
+  recupera corridas perdidas. La inactividad solo toca estudiantes `Activo` con actividad
+  medible (P-46) y el aviso de tarea vencida se deduplica por tarea y destinatario.
+- `services/masking.ts`, `utils/dates.ts` y `sendDownload()` (nombre ASCII + `filename*`).
+- `tests/fixtures/pg_dump`: doble del binario para la suite (P-45); `tests/env.ts` apunta
+  `PG_DUMP_BIN` al doble y `RSYNC_BIN` a una ruta inexistente para forzar el copiador.
+- 12 acciones de auditoría nuevas: `Cambio de configuración`, `Exportación de reporte`,
+  `Consulta de auditoría`, `Exportación de auditoría`, `Alta de respaldo`,
+  `Descarga de respaldo`, `Verificación de respaldo`, `Retención de respaldos`,
+  `Exportación de base de datos`, `Inactividad automática`,
+  `Ejecución del job de inactividad` y `Ejecución del job de tareas vencidas`.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 21 archivos) | **285 pruebas en verde** (201 de las etapas 3–9 + 84 nuevas) |
+| T23 · configuración | 18 claves con tipo y descripción; el entero no numérico, el menor que uno, el booleano `sí` y el 31 de febrero se rechazan con el índice exacto (`items.0.valor`); la clave desconocida y la repetida responden `400`; un campo de más (`.strict()`) también; el texto se recorta; un guardado sin diferencias devuelve `cambios: 0` y no escribe auditoría; el cambio real deja valor anterior y nuevo; el estudiante y el docente reciben `403` en `/settings` y `/settings/audit` |
+| T22 · tableros | Las cifras del administrador coinciden con `COUNT(*)` de la base (usuarios activos, emprendimientos, tareas, alertas sin docente); `avancePorMes` trae seis meses ordenados; el docente solo ve su emprendimiento y un docente sin asignaciones ve ceros; el estudiante sin emprendimiento recibe `null` y `fases: []`; cada rol recibe `403` en el tablero de otro y la cuenta `Limitado`, `403 ACCOUNT_NOT_ACTIVE` |
+| T22 · reportes | Catálogo de cuatro con `formatos: [csv, xlsx, pdf]`; CSV con BOM y cabecera en español; XLSX con firma `PK`; PDF con `%PDF-`; el periodo filtra las filas del seguimiento y un rango fuera deja el reporte vacío; `format` ausente o no soportado, reporte inexistente, periodo en `emprendimientos`, rango invertido y `docenteId` que no es docente se rechazan; cada exportación deja su fila de auditoría y el catálogo muestra `ultimaGeneracion` |
+| T24 · respaldos | Un `Completo` produce volcado, instantánea y manifiesto, con dos artefactos y tamaños ≥ 1 MB; el segundo se apoya en el primero (`base`), comparte inodo con el archivo sin cambios y su tamaño añadido no supera el lógico; borrar la instantánea anterior no rompe la nueva; un archivo eliminado desaparece del siguiente y sigue en el anterior; `verify` re-calcula hashes y pasa la fila a `Fallida` al corromper un archivo, y un `Fallida` nunca es base del siguiente; un `Parcial` no tiene manifiesto, no se verifica (`422`) ni se descarga su instantánea (`404`); el volcado fallido deja la fila `Fallida` sin tamaños (`500 BACKUP_DUMP_FAILED`); el respaldo simultáneo responde `409 BACKUP_IN_PROGRESS`; la retención borra solo el vencido y nunca el recién creado; la descarga del volcado y del `tar.gz` funciona y se audita; la exportación de base sale como ZIP (`csv`) y como XLSX; ninguna ruta es del estudiante |
+| T14 · jobs | La inactividad pasa a `Inactivo` al estudiante con 100 días sin actividad y deja auditoría y aviso; la segunda corrida no afecta a nadie; no toca cuentas recientes, ni `ultima_actividad` nula, ni docentes; respeta el umbral configurado; deja el registro de la corrida. El job de tareas vencidas avisa al estudiante y al mentor una sola vez (la segunda corrida avisa 0) y no toca tareas futuras; el planificador arranca y se detiene de forma idempotente |
+| T38 · auditor | El tablero no contiene correos y las cifras son completas; los expedientes muestran `Ana M.` / `Restrepo G.`, documento `******004` y correo `a***@dominio`; la exportación reduce el nombre completo a `Ana G.`; cada lectura y cada exportación deja su fila; el administrador recibe `403` en `/audit/*` y no existe ningún `POST`; la cuenta `Limitado`, `403 ACCOUNT_NOT_ACTIVE` |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Pila recreada desde cero: **112 comprobaciones, 112 en el estado esperado**, con `pg_dump` y `rsync` **reales** dentro del contenedor. Incluye los tres tableros contra la base, la configuración con sus validaciones y su bitácora, los tres formatos de reporte, dos respaldos completos con su incremental y su verificación, el parcial, la descarga del volcado (`PGDMP`) y de la instantánea (`1f8b`), la exportación de la base y el auditor con datos enmascarados |
+| D19 · espigueo de gráficos | Barras, líneas y dona construidos con `recharts` y con SVG a mano: 585.17 kB / 173.17 kB gzip frente a 223.38 kB / 69.98 kB gzip; decisión y comparación en `docs/decisions.md` §3.1 |
+
+### Decisiones y huecos registrados
+
+- §5.11: configuración por lote y su auditoría, bitácora del administrador, catálogo y
+  periodo de los reportes, metadatos por formato, tableros y sus meses, alcance y
+  enmascarado del auditor, composición, tamaños, código, integridad, retención y motor de
+  los respaldos, exportación de la base, horario y alcance de los jobs y elección de
+  gráficos.
+- D19: SVG a mano detrás de `components/charts/`, con la comparación de §3.1.
+- P-41: la retención de respaldos borra fila y directorio (no hay `fecha_eliminacion`).
+- P-42: no hay tabla de ejecuciones de jobs; cada corrida queda en `auditoria_eventos`.
+- P-43: los indicadores de cada tablero son los del prototipo; el master no fija la lista.
+- P-44: `emprendimientos` rechaza el periodo porque la tabla no tiene fecha de creación.
+- P-45: `pg_dump` y `rsync` se configuran por entorno; sin `rsync` la instantánea usa
+  `fs.link`.
+- P-46: el job de inactividad no marca cuentas con `ultima_actividad` nula.
+
+### Sin verificar / pendiente
+
+- El PDF del informe de diagnóstico sigue sin generarse (P-3, P-35).
+- La restauración de un respaldo es un procedimiento manual que se documenta y se ensaya en
+  la Etapa 12 (D22); no hay endpoint de restauración.
+- La retención por tamaño y la alerta de espacio no están en los requisitos: se proponen a
+  la Coordinadora (D22).
+- El auditor no existe en la semilla: se habilita por SQL, como lo haría la coordinación.
+- Los tableros, reportes, respaldos, configuración y auditoría se pintan en la Etapa 11; el
+  contrato ya devuelve todas sus cifras.
+- Las gráficas de la SPA se implementan en la Etapa 11 con la decisión D19; esta etapa solo
+  fija el motor.
+
+**Puerta:** superada (T22, T23, T24 y T14 en verde; cada cifra de tablero y de reporte traza
+a un agregado SQL; un respaldo `Completo` lista sus dos artefactos con tamaños reales y el
+segundo se apoya en el primero; el auditor no escribe y ve los datos personales
+enmascarados; D19 queda decidida antes de la Etapa 11).

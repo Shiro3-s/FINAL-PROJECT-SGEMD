@@ -59,10 +59,37 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | D16 | `schema.sql` único, sin migraciones | La BD se recrea mientras no haya datos reales | Reevaluar antes del primer despliegue con datos |
 | D17 | TypeScript `strict` en backend y frontend; tipos derivados de `zod` en `shared/` | Enums una sola vez en `shared/src/enums.ts`; script los contrasta con los `CHECK` | — |
 | D18 | TanStack Query para todo dato de servidor | Redux/Zustand quedan descartados para estado de servidor | — |
-| D19 | `recharts` vs SVG a mano: se decide en la Etapa 10 tras construir los tres gráficos de las dos formas | Los gráficos viven detrás de una interfaz única hasta entonces | Elección final en Etapa 10 |
+| D19 | **SVG a mano** (no `recharts`). El espigueo de la Etapa 10 construyó barras, líneas y dona de las dos formas; ver la comparación abajo | `components/charts/` es una interfaz única con tres componentes (`BarChart`, `LineChart`, `DonutChart`) más `ChartTable` para la alternativa textual. Sin dependencia de gráficos en `package.json` | — |
 | D20 | **No decidida por el propietario.** Default: OTP como HMAC-SHA256 con `OTP_HMAC_SECRET` | Cambiar el esquema es un cambio local en el servicio `auth` | Confirmar D20 |
 | D21 | Inter autoalojada; sin Google Fonts en ejecución | Verificado por T30 | — |
 | D22 | Evidencias en instantáneas incrementales; `backups/` en disco distinto de `storage/`; procedimiento manual de restauración y simulacro en Etapa 12 | Reemplaza el tar completo de v1.2 | Disco separado y copia fuera del servidor (TI; preservar enlaces con `rsync -aH`). Retención por tamaño y alerta de espacio: no están en requisitos, se proponen a la Coordinadora |
+
+---
+
+## 3.1 Espigueo de gráficos (D19, Etapa 10)
+
+Se construyeron los mismos tres gráficos —barras verticales, líneas con área y dona con
+total al centro— dos veces, con el mismo `react`/`vite` y la misma paleta, y se midió el
+paquete de producción. El código del espigueo vive fuera del repositorio
+(`/tmp/opencode/chart-spike`); lo que queda es la comparación y la decisión.
+
+| Criterio | `recharts` 3.10.1 | SVG a mano |
+|---|---|---|
+| Paquete de producción (React incluido) | 585.17 kB / **173.17 kB gzip** | 223.38 kB / **69.98 kB gzip** |
+| Coste de la librería | +361.79 kB / **+103.19 kB gzip** | 0 |
+| Exactitud de paleta | Exacta: `fill`/`stroke` son los tokens que se pasan | Exacta: los tokens van en el atributo |
+| Geometría del prototipo | Hay que reproducirla: `CartesianGrid` no dibuja las 5 líneas fijas de 0 a `max*1.2`, y el dominio del eje Y es automático | Es la del prototipo, línea por línea (`prototype/lib_charts.py`) |
+| Valores siempre visibles | `LabelList` por serie: funciona, pero hay que añadirlo a cada serie y a la dona no se le puede poner el total al centro sin una capa propia | Es parte del componente (`<text>` junto a cada barra, punto y segmento) |
+| Alternativa textual / accesibilidad | El `<svg>` de `Surface` no trae `role` ni `aria-label`; hay que envolverlo y escribir la tabla aparte | El componente emite `role="img"`, `aria-label`, `<title>` y la tabla de respaldo |
+| Leyenda y tabla del prototipo | No las genera: son marcado propio de todos modos | Se generan con el gráfico |
+| Esfuerzo | Envolver 3 gráficos, ajustar dominio/ejes/etiquetas y aun así escribir la tabla | Traducir `lib_charts.py` a componentes: geometría ya resuelta y probada en el prototipo |
+| Dependencia nueva | Sí (y su árbol de dependencias) | Ninguna |
+
+Decisión: **SVG a mano**. Los tres argumentos que la cierran son la exactitud de la
+geometría del prototipo (el eje fijo y el total al centro no son configuración de
+`recharts`), la alternativa textual accesible —que hay que escribir igual— y 103 kB gzip
+menos en una aplicación que ya carga React. `components/charts/` expone una interfaz única,
+de modo que cambiar de motor más adelante toca tres archivos y ningún consumidor.
 
 ---
 
@@ -151,6 +178,12 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | P-38 | El diagrama solo tiene `eventos.cupo` y `capacidad_maxima`; no dice si `cupo` es el total o los puestos disponibles | `cupo` es el número de puestos **disponibles**: nace igual a `capacidad_maxima`, baja al inscribirse y sube al cancelar. Sin capacidad, `cupo = NULL` y no hay tope. No hay lista de espera | Nada (la SPA muestra «disponibles de total») |
 | P-39 | `Diagnosticos.Estado` incluye `Revisado`, pero el diagrama no tiene columnas de revisor/recomendación y `valoracion` depende de AQ-09 | El envío deja el diagnóstico en `Enviado`; no hay endpoint que lo mueva a `Revisado`. El docente lee el informe en solo lectura. Las recomendaciones docentes se escribirán cuando exista la rúbrica | Nada (AQ-09 para la revisión) |
 | P-40 | `RecomendacionesEvento.Estado` no tiene valores canónicos y el diagrama no describe quién acepta o rechaza una recomendación; `usuarios_has_eventos` no guarda asistencia | La recomendación nace `Pendiente` y no hay endpoint para moverla. El estudiante la ve como aviso del docente. La asistencia (`Estado_asistencia`) no se escribe (P-9) | Nada (decisión de producto) |
+| P-41 | `respaldos` es la única tabla de historial sin `fecha_eliminacion`, pero la retención tiene que liberar disco | La retención **borra la fila y el directorio** del respaldo vencido (nunca el recién creado). El historial no conserva el rastro del respaldo purgado; el evento de retención queda en `auditoria_eventos` | Nada (si la Coordinadora exige historial completo, se añade `fecha_eliminacion` y se filtra) |
+| P-42 | El diagrama no tiene tabla de ejecuciones de jobs; T14 exige que la corrida quede registrada | Cada corrida escribe un evento de auditoría (`Ejecución del job de inactividad`, `Ejecución del job de tareas vencidas`) con umbral, afectados e ids. No se crea una tabla `jobs_ejecuciones` | Nada (el panel de jobs llegaría con una tabla propia) |
+| P-43 | El master pide «agregados por rol» pero no fija la lista de indicadores de cada tablero | Los indicadores son las tarjetas y gráficas de `admin/dashboard.html`, `docente/dashboard.html` y `estudiante/dashboard.html`; cada uno es una subconsulta del mismo agregado. No se añaden indicadores que el prototipo no muestre | Nada (la Coordinadora puede pedir otro indicador) |
+| P-44 | El reporte de emprendimientos no tiene fecha propia: `emprendimiento` no guarda fecha de creación en el diagrama v2 | `GET /reports/emprendimientos/export` **rechaza** `desde`/`hasta` con `400` en vez de ignorarlos; el catálogo lo declara `periodo: false` y la SPA oculta el filtro. No se inventa una fecha | Nada (si se añade `fecha_creacion` al modelo, el reporte gana periodo) |
+| P-45 | El host de desarrollo no tiene `pg_dump` ni `rsync`; la imagen de Docker sí | Los binarios se configuran por entorno (`PG_DUMP_BIN`, `RSYNC_BIN`). Sin `rsync`, la instantánea usa un copiador con `fs.link` de semántica idéntica (comparte inodo, reutiliza hashes del manifiesto anterior). El panel informa qué motor se usó | Nada (Docker es el entorno real) |
+| P-46 | `usuarios` no guarda fecha de creación y `ultima_actividad` puede ser `NULL` | El job de inactividad **no** marca a quien tiene `ultima_actividad` nula: no hay forma honesta de medir «90 días sin actividad» sin fecha de alta. Solo toca estudiantes `Activo` con actividad registrada | Nada (se resuelve con `fecha_creacion` o con un valor inicial en el alta) |
 ### 5.4 Inferencias de esta etapa que no son huecos del diagrama
 
 | Elemento | Qué se infirió | Dónde queda |
@@ -271,6 +304,33 @@ LTS/estable al instalar, con lockfile commiteado, y se anota abajo (§7).
 | Recomendaciones | Solo el docente, solo para un emprendimiento con asignación activa (`404`) y un evento publicado (`404` si es borrador). Nace `Pendiente`, avisa al estudiante con tipo `Evento` y se audita. No hay endpoint para aceptar/rechazar ni para marcar asistencia | FR-021; `RecomendacionesEvento.Estado` y `Estado_asistencia` no tienen valores canónicos (P-9, P-40) |
 | Auditoría | Se añaden `Guardado de diagnóstico`, `Envío de diagnóstico`, `Carga de acta`, `Revisión de acta`, `Alta/Edición/Baja lógica de evento`, `Inscripción/Cancelación de inscripción a evento` y `Recomendación de evento` | T31 y §7.2: toda mutación deja rastro |
 | Seed de eventos | Se siembran dos eventos publicados y un borrador con id explícito y `setval` para `eventos`; una inscripción mantiene coherente el `cupo` del evento virtual | Sin el `setval`, el primer alta real chocaría con la clave primaria |
+
+### 5.11 Decisiones tomadas en la Etapa 10
+
+| Tema | Decisión | Motivo |
+|---|---|---|
+| Configuración: escritura | `PUT /settings` es **por lote** y una sola transacción. El valor viaja como texto y lo valida el `tipo_dato` de la fila (`int` > 0, `bool` `true`/`false`, `date` real del calendario, `text` recortado). Clave desconocida o repetida: `400` con el índice; `.strict()` rechaza `tipoDato` y autor | El formulario del prototipo guarda una tarjeta a la vez, pero un lote deja una auditoría por clave sin abrir varias transacciones |
+| Configuración: auditoría | Solo se auditan las claves que **cambiaron**, con valor anterior y nuevo (`Cambio de configuración`). Un guardado idéntico devuelve `cambios: 0` y no escribe nada | T31: la bitácora registra cambios, no guardados |
+| Configuración: «último cambio» | `configuracion_programa` no tiene `updated_at`; `actualizadoPor` y `fechaActualizacion` salen del último evento de auditoría de esa clave | Diagrama v2: no se añade una columna que el modelo no tiene |
+| Bitácora del administrador | `GET /settings/audit` es el listado de auditoría del administrador: lee `auditoria_eventos` con filtros de acción, entidad, texto y fechas. Aquí los valores van completos porque son configuración, no datos personales | El master pide «audit listing» y el diagrama solo tiene `auditoria_eventos`; el auditor tiene su listado enmascarado en `/audit/*` |
+| Reportes: catálogo | Cuatro reportes con **una fila por hecho**: `seguimiento`, `asesorias`, `emprendimientos`, `diagnosticos`. Todos ofrecen `csv`, `xlsx`, `pdf`; el mismo conjunto de filas alimenta los tres formatos | No hay cálculos en el exportador: el archivo y la pantalla no pueden divergir |
+| Reportes: periodo | El periodo se aplica a la **fecha propia** del reporte. `emprendimientos` no lo admite (`400`) porque la tabla no tiene fecha de creación (P-44). Un `docenteId` que no es docente vigente: `400` | No se inventa una fecha ni se ignora un filtro en silencio |
+| Reportes: metadatos | CSV lleva BOM y no lleva la línea de filtros; XLSX y PDF sí la llevan. Cada exportación se audita con reporte, formato y filas, y el catálogo muestra `ultimaGeneracion` | El CSV es para reprocesar; el PDF y el XLSX se archivan y necesitan decir con qué filtro se generaron |
+| Tableros | Un `GET` por rol, **una** consulta `json_build_object` por tablero. Docente: solo asignaciones activas. Estudiante: su emprendimiento más reciente; sin emprendimiento devuelve `null` y `fases: []`, no un error | Cada cifra traza a un agregado SQL; el alcance se aplica en la consulta, no en la SPA |
+| Tableros: meses | `avancePorMes` devuelve **seis** meses siempre (con ceros) y la etiqueta corta en español la construye la SPA | El eje necesita estar completo; el idioma de la interfaz es de la SPA |
+| Auditor (rol 4) | Solo cuatro `GET`. Cada lectura y cada exportación se registran (`Consulta de auditoría`, `Exportación de auditoría`). Nombres `Ana M.` / `Restrepo G.`, documento `******004`, correo `a***@dominio`; en exportaciones, nombre completo `Ana G.`. Las cifras no se enmascaran | NFR-007 y Ley 1581/2012: el auditor audita el programa, no a las personas |
+| Auditor: alcance | Exige cuenta `Activo` y el rol 4 exacto. El administrador recibe `403` en `/audit/*`; sus equivalentes son `/reports` y `/dashboard/admin` | Cada rol tiene su módulo; no hay dos puertas a los mismos datos |
+| Respaldos: composición | `Completo` = volcado + instantánea incremental + manifiesto; `Parcial` = solo volcado. Orden fijo: volcado, instantánea, manifiesto. Si un paso falla, el respaldo entero queda `Fallida` y nunca es base del siguiente | D22 y T24: un respaldo a medias no es un respaldo |
+| Respaldos: tamaños | `tamano_logico_mb` = lo que ocupa la instantánea completa; `tamano_anadido_mb` = lo que añadió sobre el anterior. MB enteros redondeados hacia arriba | El panel muestra la tendencia de crecimiento; redondear a la baja mostraría `0` cuando hubo bytes |
+| Respaldos: código y concurrencia | `BKP-YYYYMMDD-HHMM` con sufijo `-N` en el mismo minuto, y el código **no puede existir ya en disco**. Un respaldo simultáneo: `409 BACKUP_IN_PROGRESS` (lock de sesión) | Un directorio residual de una corrida anterior mezclaría instantáneas |
+| Respaldos: integridad | `verify` re-calcula los hashes contra el manifiesto y pasa la fila a `Fallida` si algo no coincide; nunca la resucita. Un `Parcial` no se verifica (`422 BACKUP_MANIFEST_MISSING`) | T24: la verificación detecta corrupción, no la repara |
+| Respaldos: retención | Cada fila se borra según **su** `retencion_dias`, nunca la recién creada, y con ella su directorio (P-41) | D7/D22: la retención es por respaldo, no global |
+| Respaldos: motor | `rsync -a --link-dest` cuando existe; si no, copiador con `fs.link` de la misma semántica. `storage/mail*` y `*.part` quedan fuera. El manifiesto reutiliza hashes de archivos ya enlazados | P-45: el host no tiene `rsync`; la instantánea no puede depender de un binario ausente |
+| Respaldos: exportación de base | `csv` = ZIP con un CSV por tabla; `xlsx` = un libro con una hoja por tabla; `pdf` no se ofrece (`400`) | FR-009: la base completa en un formato reutilizable |
+| Jobs: horario | Inactividad a las 06:00, tareas vencidas a las 06:10 y respaldo a las 09:00, hora de Bogotá. El planificador revisa cada 30 s y corre cada job una vez al día; **no** recupera corridas perdidas | Un `pg_dump` sorpresa en un reinicio es peor que un respaldo manual desde el panel |
+| Jobs: inactividad | Solo estudiantes `Activo` con `ultima_actividad` no nula y anterior al umbral. Es idempotente, audita y avisa. La reactivación es manual del administrador | BR-005 y P-46 |
+| Jobs: tareas vencidas | Avisa una sola vez por tarea y destinatario (deduplicación por `tipo_objeto = 'tarea_vencida'` y `objeto_id`), al estudiante y al mentor activo | T14: sin la marca, el job repetiría el aviso cada día |
+| Gráficos (D19) | SVG a mano detrás de `components/charts/`; ver §3.1 | Geometría exacta del prototipo, valores y tabla accesible sin capas extra y 103 kB gzip menos |
 
 ---
 
