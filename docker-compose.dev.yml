@@ -1,0 +1,20 @@
+# Pila de desarrollo local (D23).
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres backend
+#
+# Deliberadamente no se levanta Caddy: en desarrollo la SPA la sirve Vite en
+# :5173 y su proxy reenvía `/api` al backend. El backend se publica SOLO en
+# loopback para que no quede expuesto en la red local.
+#
+# `COOKIE_SECURE=false` es obligatorio porque el navegador habla HTTP con Vite;
+# en producción sigue siendo `true` detrás de Caddy. `APP_ORIGIN` es el origen
+# que ve el navegador y con el que se firman los enlaces de correo.
+services:
+  backend:
+    environment:
+      NODE_ENV: development
+      COOKIE_SECURE: "false"
+      APP_ORIGIN: http://localhost:5173
+    ports:
+      - "127.0.0.1:3000:3000"

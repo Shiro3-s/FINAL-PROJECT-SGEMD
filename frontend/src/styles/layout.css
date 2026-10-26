@@ -1,50 +1,113 @@
-/* Layout mínimo de la Etapa 1. Los componentes del producto llegan en la Etapa 11. */
-.app-shell {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: var(--s-4);
-  background: var(--noche-02);
+/* Shell: sidebar, topbar, contenido y responsive. Fuente: SHELL_CSS de prototype/lib_css.py. */
+.shell{display:flex;min-height:100vh;background:var(--blanco)}
+.sidebar{
+  width:264px;flex:0 0 264px;background:var(--azul-noche);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
 }
+.brand{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:22px 20px 20px;border-bottom:1px solid var(--blanco-08);
+}
+/* El lockup ya viene recortado a su proporcion real (2.0979:1) y con el fondo
+   transparente, asi que la caja solo dimensiona: sin fondo, sin borde y sin
+   padding. object-fit:contain evita que un recorte futuro Cutting-edge del PNG
+   vuelva a cortar la marca. */
+.brand-tile{
+  width:180px;flex:0 0 auto;display:block;
+}
+.brand-tile img{width:100%;height:auto;display:block;object-fit:contain}
+.brand-text{text-align:center}
+.brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
+.brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
+.nav{padding:10px 10px 8px;flex:1 0 auto;overflow:visible}
+.nav-group{margin-bottom:6px}
+.nav-label{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;
+  background:transparent;border:0;cursor:pointer;text-align:left;font-family:inherit;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blanco);opacity:.55;padding:4px 10px 4px;transition:opacity .15s ease;
+}
+.nav-label:hover{opacity:1;text-decoration:none}
+.nav-label:focus-visible{outline:2px solid var(--azul-real);outline-offset:2px;border-radius:var(--r-sm)}
+.nav-label span{flex:1}
+.nav-label svg{flex:0 0 12px;transition:transform .2s ease}
+.nav-group.abierto .nav-label svg{transform:rotate(180deg)}
+/* Acordeon: los hijos se despliegan con max-height animado; el chevron usa el
+   icono "abajo" del kit y rota al abrir. Se respeta prefers-reduced-motion.
+   El max-height se ajusta al grupo mas largo (4 hijos) para que la animacion
+   no quede con una cola muerta antes de terminar de abrir. */
+.nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.nav-group.abierto .nav-hijos{max-height:400px}
+@media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
+.nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
+.nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
+.nav a svg{flex:0 0 16px}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:13px;font-weight:700;line-height:1.4;padding:3px 7px;border-radius:var(--r-full)}
+.side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
+.side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
+.side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
+.side-card span{color:var(--blanco);opacity:.8;font-size:13px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  height:72px;flex:0 0 72px;background:var(--azul-noche);color:var(--blanco);
+  display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:30;
+}
+.burger{display:none;background:transparent;border:1px solid var(--blanco-08);border-radius:var(--r-sm);color:var(--blanco);width:38px;height:38px;align-items:center;justify-content:center;cursor:pointer}
+/* Respaldo decorativo para <=1023px, donde la sidebar sale de pantalla.
+   Se pinta con background (no con un segundo <img>) para que el DOM solo
+   tenga una instancia del logo: una sola peticion y un solo ALT. */
+.topbar-mark{
+  display:none;width:104px;height:50px;flex:0 0 104px;
+  background-image:var(--logo-blanco-url);background-repeat:no-repeat;
+  background-position:left center;background-size:contain;
+}
+.search{position:relative;flex:1;max-width:420px}
+.search input{width:100%;height:38px;border-radius:var(--r-full);border:1px solid var(--blanco-08);background:var(--blanco-08);color:var(--blanco);padding:0 14px 0 38px;font-family:var(--sans);font-size:14px}
+.search input::placeholder{color:var(--blanco);opacity:.7}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.85}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.icon-btn{position:relative;width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--blanco-08);background:var(--blanco-08);color:var(--blanco);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.count{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:var(--r-full);background:var(--amarillo);color:var(--tinta);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--azul-noche)}
+.who{display:flex;align-items:center;gap:10px;padding-left:14px;border-left:1px solid var(--blanco-08)}
+.avatar{width:36px;height:36px;border-radius:var(--r-full);background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:0 0 36px}
+.who-name{font-size:14px;font-weight:600;line-height:1.2;color:var(--blanco)}
+.who-role{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--tinta);background:var(--amarillo);border-radius:var(--r-full);padding:1px 8px;display:inline-block;margin-top:2px}
+.content{padding:28px 32px 48px;max-width:1440px;width:100%}
+.page-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
+.page-head .sub{color:var(--tinta-2);font-size:14px;margin-top:4px}
+.page-head .acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.crumbs{font-size:13px;color:var(--tinta-2);margin-bottom:10px}
+.crumbs a{color:var(--tinta-2)}
+@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}.nav-group{margin-bottom:8px}.nav-hijos{max-height:none;overflow:visible}}
+@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.side-foot{display:block}.nav a{justify-content:flex-start}.nav-label{display:flex}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
+/* Con el drawer abierto el logo del drawer tiene el protagonismo: se oculta el
+   del topbar para que nunca haya dos logos visibles a la vez. */
+.shell:has(.sidebar.abierto) .topbar-mark{display:none}
+/* En movil el bloque de identidad (nombre + badge de rol) no cabe junto al
+   buscador y los tres botones, y empujaba la barra 102px fuera de pantalla.
+   Se conserva el avatar, que ya identifica al usuario, y se retiran los textos. */
+@media (max-width:767px){.content{padding:16px 12px 36px}.page-head{flex-direction:column}.page-head .acciones{margin-left:0}.topbar{padding:0 12px;gap:10px}.topbar-right{gap:8px}.who{padding-left:10px;border-left:0}.who-name,.who-role{display:none}.search input{font-size:13px}}
+@media (max-width:479px){.search{display:none}}
+.overlay{display:none;position:fixed;inset:0;background:var(--noche-55);z-index:55}
+.overlay.visible{display:block}
 
-.card {
-  width: min(520px, 100%);
-  background: var(--blanco);
-  border: 1px solid var(--gris);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-1);
-  padding: var(--s-3);
-}
-
-.app-sub {
-  margin: var(--s-1) 0 var(--s-3);
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
-.app-status {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--s-1) var(--s-2);
-  margin: 0;
-}
-
-.app-status dt {
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
-.app-status dd {
-  margin: 0;
-  font-weight: 600;
-}
-
-.app-error {
-  margin: 0;
-  padding: var(--s-2);
-  border: 1px solid var(--gris);
-  border-radius: var(--r-sm);
-  background: var(--noche-03);
-  color: var(--tinta);
-  font-size: 13px;
-}
+/* --- Ajustes de la Etapa 11 -------------------------------------------------
+   El menú se construye con <details> nativos para que funcione sin JavaScript en
+   el acordeón; el CSS del prototipo usaba la clase `.abierto` que ahora pone el
+   navegador con el atributo `open`. */
+.nav-group>summary{list-style:none;cursor:pointer}
+.nav-group>summary::-webkit-details-marker{display:none}
+.nav-group[open] .nav-hijos{max-height:400px}
+.nav-group[open] .nav-label svg{transform:rotate(180deg)}
+.nav a svg{flex:0 0 16px}
+.who{position:relative}
+.who-btn{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;
+  padding:0;cursor:pointer;font-family:inherit;text-align:left}
+.who-btn:focus-visible{outline:2px solid var(--amarillo);outline-offset:4px;border-radius:var(--r-sm)}
+.who-text{display:flex;flex-direction:column;align-items:flex-start}
+.who-menu a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--tinta);
+  padding:9px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:500}
+.who-menu a:hover{background:var(--azul-06);color:var(--azul-real)}
+.who-menu button{display:flex;align-items:center;gap:9px}
+.overlay{border:0;padding:0;cursor:pointer}

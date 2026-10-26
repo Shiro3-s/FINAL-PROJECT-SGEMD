@@ -1,0 +1,63 @@
+/* Pantallas de acceso (login, registro, verificación, recuperación).
+   Fuente: bloque `.auth` de prototype/compartido/login.html, con los mismos
+   valores y los hex sustituidos por los tokens. */
+.auth{display:flex;min-height:100vh}
+.auth-izq{flex:1;background:var(--azul-noche);color:var(--blanco);padding:56px 60px;
+  display:flex;flex-direction:column;justify-content:space-between}
+.accede-logo{display:block;width:260px}
+.accede-logo img{width:100%;height:auto;display:block}
+.auth-panel{flex:0 0 560px;background:var(--blanco);padding:56px 60px;
+  display:flex;align-items:center;justify-content:center}
+.auth-panel>div{width:100%;max-width:460px}
+.auth-marca{display:none}
+.auth-titulo{color:var(--blanco);font-size:28px;line-height:1.2;max-width:420px}
+.auth-sub{color:var(--blanco);opacity:.78;font-size:14px;margin-top:14px;max-width:420px}
+.auth-lista{display:flex;flex-direction:column;gap:12px;margin-top:32px;padding:0;list-style:none}
+.auth-lista li{display:flex;align-items:flex-start;gap:10px;font-size:13px;
+  color:var(--blanco);opacity:.85}
+.auth-lista svg{color:var(--amarillo);flex:0 0 18px;margin-top:1px}
+.auth-pie{color:var(--blanco);opacity:.6;font-size:13px}
+
+.acceso-error{margin:14px 0 0;padding:12px 14px;border-radius:var(--r-sm);font-size:13px;
+  font-weight:600;color:var(--tinta);background:var(--noche-04);
+  border-left:4px solid var(--azul-real)}
+.acceso-ok{margin:14px 0 0;padding:12px 14px;border-radius:var(--r-sm);font-size:13px;
+  font-weight:600;color:var(--tinta);background:var(--amarillo-14);
+  border-left:4px solid var(--amarillo)}
+.acceso-nota{margin-top:20px;font-size:13px;line-height:1.6;color:var(--tinta-2)}
+.acceso-nota b{color:var(--tinta)}
+.acceso-nota-centro{text-align:center}
+.acceso-inicial{margin:8px 0 20px}
+.otp-nota{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 14px;
+  background:var(--noche-04);border:1px solid var(--gris);border-radius:var(--r-sm);
+  font-size:13px;line-height:1.5;color:var(--tinta-2)}
+.otp-nota b{color:var(--tinta)}
+.fila-recordar{display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;margin:4px 0 22px}
+.fila-recordar .chk{margin:0}
+.fila-recordar a{font-size:13px;font-weight:600}
+.ancho{width:100%}
+.mt-24{margin-top:24px}
+.fila-botones{display:flex;gap:10px;flex-wrap:wrap}
+.fila-botones .btn{flex:1 1 auto}
+
+@media (max-width:1023px){
+  .auth-izq{display:none}
+  .auth-panel{flex:1 1 auto;padding:32px 20px;min-width:0}
+  .auth-marca{display:block;width:170px;height:81px;margin:0 auto 22px;
+    background-image:var(--logo-color-url);background-repeat:no-repeat;
+    background-position:center;background-size:contain}
+}
+
+/* Estado de sesión y guardas. */
+.auth-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:32px 20px;background:var(--blanco)}
+.auth-card{width:100%;max-width:520px;background:var(--blanco);border:1px solid var(--gris);
+  border-radius:var(--r-md);box-shadow:var(--shadow-2);padding:32px}
+.auth-card .auth-logo{display:block;width:220px;height:auto;margin:0 auto 8px}
+.enlace-texto{display:block;background:none;border:0;padding:0;margin-top:6px;text-align:left;
+  font-family:inherit;font-size:13px;line-height:1.6;color:var(--tinta);cursor:pointer}
+.enlace-texto:hover{color:var(--azul-real);text-decoration:underline}
+.punto-no-leido{flex:0 0 8px;width:8px;height:8px;margin-top:6px;border-radius:var(--r-full);
+  background:var(--azul-real)}
+@media (max-width:767px){.who-text{display:none}}

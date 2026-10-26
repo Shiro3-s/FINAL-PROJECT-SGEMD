@@ -38,4 +38,7 @@
   --shadow-2: 0 8px 24px rgba(5, 21, 51, 0.04);
   --shadow-3: 0 24px 64px rgba(5, 21, 51, 0.28);
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  /* Logo real, copiado de `prototype/_marca/logo-blanco-600.png`. No se redibuja. */
+  --logo-blanco-url: url('/brand/logo-blanco.png');
+  --logo-color-url: url('/brand/logo-color.png');
 }
