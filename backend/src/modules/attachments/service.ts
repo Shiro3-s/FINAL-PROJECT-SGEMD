@@ -11,6 +11,7 @@ import { settingInt } from '../../services/programSettings.js';
 import { openStoredFile, receiveUpload, removeStoredFile } from '../../services/storage.js';
 import { AppError } from '../../utils/AppError.js';
 import type { SessionUser } from '../auth/types.js';
+import { getActa } from '../acta/service.js';
 import {
   loadAdviceEvidenceTarget,
   type AdviceEvidenceTarget,
@@ -37,6 +38,13 @@ import {
 
 type EvidenceTarget = TaskEvidenceTarget | TracingEvidenceTarget | AdviceEvidenceTarget;
 
+/**
+ * Entidades que puede devolver un adjunto. `acta` solo se **lee** por esta ruta: el
+ * archivo del acta se sube y se reemplaza desde su propio módulo, así que no es una
+ * entidad de `POST /attachments/:entity/:id` (ver `parseEntity`).
+ */
+type AttachmentEntity = EvidenceEntity | 'acta';
+
 const ENTITY_LABEL: Readonly<Record<EvidenceEntity, string>> = {
   task: 'tarea',
   tracing: 'seguimiento',
@@ -50,7 +58,7 @@ export interface Attachment {
   tipoMime: string;
   fechaSubida: string;
   subidoPor: { id: number; nombres: string; apellidos: string } | null;
-  entidad: EvidenceEntity;
+  entidad: AttachmentEntity;
   entidadId: number;
 }
 
@@ -67,6 +75,7 @@ type AttachmentRow = {
   tarea_id: number | null;
   seguimiento_id: number | null;
   asesoria_id: number | null;
+  acta_id: number | null;
 };
 
 const SELECT_ATTACHMENT = `
@@ -78,7 +87,9 @@ const SELECT_ATTACHMENT = `
          (SELECT p.seguimientos_id_seguimientos FROM adjuntos_seguimientos p
            WHERE p.adjuntos_id_adjunto = a.id_adjunto) AS seguimiento_id,
          (SELECT p.asesorias_id_asesorias FROM adjuntos_asesorias p
-           WHERE p.adjuntos_id_adjunto = a.id_adjunto) AS asesoria_id
+           WHERE p.adjuntos_id_adjunto = a.id_adjunto) AS asesoria_id,
+         (SELECT ac.id_acta FROM actas ac
+           WHERE ac.adjuntos_id_adjunto = a.id_adjunto) AS acta_id
     FROM adjuntos a
     LEFT JOIN usuarios u ON u.id_usuarios = a.usuarios_id_usuarios
 `;
@@ -87,10 +98,11 @@ function notFound(): AppError {
   return new AppError(404, 'NOT_FOUND', 'La evidencia no existe.');
 }
 
-function entityOf(row: AttachmentRow): { entity: EvidenceEntity; parentId: number } {
+function entityOf(row: AttachmentRow): { entity: AttachmentEntity; parentId: number } {
   if (row.tarea_id !== null) return { entity: 'task', parentId: row.tarea_id };
   if (row.seguimiento_id !== null) return { entity: 'tracing', parentId: row.seguimiento_id };
   if (row.asesoria_id !== null) return { entity: 'advice', parentId: row.asesoria_id };
+  if (row.acta_id !== null) return { entity: 'acta', parentId: row.acta_id };
   throw notFound();
 }
 
@@ -148,8 +160,16 @@ async function loadRow(id: number): Promise<AttachmentRow> {
 async function authorizeRead(
   row: AttachmentRow,
   actor: SessionUser,
-): Promise<{ entity: EvidenceEntity; parentId: number }> {
+): Promise<{ entity: AttachmentEntity; parentId: number }> {
   const { entity, parentId } = entityOf(row);
+
+  // El archivo del acta se lee con la regla del acta: administrador o estudiante dueño.
+  // Un docente recibe `404`, igual que en el módulo de actas.
+  if (entity === 'acta') {
+    await getActa(parentId, actor);
+    return { entity, parentId };
+  }
+
   await loadTarget(entity, parentId, actor);
   return { entity, parentId };
 }
@@ -167,11 +187,21 @@ async function authorizeRead(
  * (`422 ADVICE_EVIDENCE_LOCKED`). El administrador puede borrar en ambos casos.
  */
 function authorizeWrite(
-  entity: EvidenceEntity,
+  entity: AttachmentEntity,
   target: EvidenceTarget,
   actor: SessionUser,
   mode: 'upload' | 'delete',
 ): void {
+  // El archivo del acta no se administra por la ruta de evidencias: se reemplaza subiendo
+  // una nueva versión en `POST /acta`. Su borrado independiente queda fuera del contrato.
+  if (entity === 'acta') {
+    throw new AppError(
+      403,
+      'ROLE_NOT_ALLOWED',
+      'El archivo del acta se administra desde el módulo de actas.',
+    );
+  }
+
   if (entity === 'task') {
     const task = target as TaskEvidenceTarget;
     const isAdmin = actor.rolId === ROLES.ADMIN;
@@ -391,6 +421,14 @@ export async function deleteAttachment(
 ): Promise<void> {
   const row = await loadRow(id);
   const { entity, parentId } = await authorizeRead(row, actor);
+
+  if (entity === 'acta') {
+    throw new AppError(
+      403,
+      'ROLE_NOT_ALLOWED',
+      'El archivo del acta se administra desde el módulo de actas.',
+    );
+  }
 
   const target = await loadTarget(entity, parentId, actor);
 

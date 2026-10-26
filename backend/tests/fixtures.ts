@@ -38,7 +38,11 @@ function label(prefix: string): string {
   return `${prefix}-${Date.now()}-${sequence}`;
 }
 
-export async function createAccount(admin: Session, rolId: 2 | 3): Promise<Account> {
+export async function createAccount(
+  admin: Session,
+  rolId: 2 | 3,
+  estado: 'Activo' | 'Limitado' = 'Activo',
+): Promise<Account> {
   const correo = uniqueEmail(rolId === 3 ? 'doc' : 'est');
   const response = await admin.post('/api/users').send({
     nombres: rolId === 3 ? 'Docente' : 'Estudiante',
@@ -47,6 +51,7 @@ export async function createAccount(admin: Session, rolId: 2 | 3): Promise<Accou
     correoInstitucional: correo,
     rolId,
     tipoDocumentoId: 1,
+    estado,
   });
   expect(response.status).toBe(201);
 

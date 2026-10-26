@@ -65,6 +65,16 @@ export const AUDIT_ACTIONS = {
   REPROPOSE_ADVICE: 'Reprogramación de asesoría',
   REJECT_ADVICE: 'Cancelación de asesoría',
   DELETE_ADVICE: 'Baja lógica de asesoría',
+  SAVE_DIAGNOSIS: 'Guardado de diagnóstico',
+  SUBMIT_DIAGNOSIS: 'Envío de diagnóstico',
+  UPLOAD_ACTA: 'Carga de acta',
+  REVIEW_ACTA: 'Revisión de acta',
+  CREATE_EVENT: 'Alta de evento',
+  UPDATE_EVENT: 'Edición de evento',
+  DELETE_EVENT: 'Baja lógica de evento',
+  REGISTER_EVENT: 'Inscripción a evento',
+  UNREGISTER_EVENT: 'Cancelación de inscripción a evento',
+  RECOMMEND_EVENT: 'Recomendación de evento',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {

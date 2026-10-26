@@ -9,6 +9,7 @@ import {
 } from '../../services/entrepreneurshipAccess.js';
 import { softDeleteEvidence } from '../../services/evidence.js';
 import { notify } from '../../services/notify.js';
+import { resolveSchedule, type Schedule } from '../../services/schedule.js';
 import { removeStoredFile } from '../../services/storage.js';
 import { AppError } from '../../utils/AppError.js';
 import type { SessionUser } from '../auth/types.js';
@@ -308,12 +309,6 @@ export async function getAdvice(id: number, actor: SessionUser): Promise<Advice>
  * Horario y conflictos (T35)
  * ----------------------------------------------------------------------------------- */
 
-export interface Schedule {
-  fecha: string;
-  horaInicio: string;
-  horaFin: string;
-}
-
 function scheduleOf(input: {
   fecha?: string;
   horaInicio?: string;
@@ -325,38 +320,6 @@ function scheduleOf(input: {
     horaInicio: input.horaInicio!,
     horaFin: input.horaFin!,
   };
-}
-
-/**
- * Reutiliza el bloque `(fecha, hora_inicio, hora_fin)` o lo crea.
- *
- * `fecha_y_horarios` no tiene índice único, así que el lock por tripleta evita que dos
- * altas simultáneas inserten el mismo bloque dos veces.
- */
-async function resolveSchedule(db: PoolClient, schedule: Schedule): Promise<number> {
-  await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
-    `fecha_y_horarios:${schedule.fecha}:${schedule.horaInicio}:${schedule.horaFin}`,
-  ]);
-
-  const { rows } = await db.query<{ id: number }>(
-    `SELECT id_fecha_y_horarios AS id
-       FROM fecha_y_horarios
-      WHERE fecha = $1::date AND hora_inicio = $2::time AND hora_fin = $3::time
-      ORDER BY id_fecha_y_horarios
-      LIMIT 1`,
-    [schedule.fecha, schedule.horaInicio, schedule.horaFin],
-  );
-
-  if (rows[0]) return rows[0].id;
-
-  const inserted = await db.query<{ id: number }>(
-    `INSERT INTO fecha_y_horarios (fecha, hora_inicio, hora_fin)
-     VALUES ($1::date, $2::time, $3::time)
-     RETURNING id_fecha_y_horarios AS id`,
-    [schedule.fecha, schedule.horaInicio, schedule.horaFin],
-  );
-
-  return inserted.rows[0]!.id;
 }
 
 /**

@@ -325,8 +325,11 @@ describe('alcance por rol', () => {
     expect(vacio.body.data.total).toBe(0);
     expect((await otroDocente.get('/api/entrepreneurship/1')).status).toBe(404);
 
-    // El administrador ve todo, incluido el recién creado.
-    const todos = await admin.get('/api/entrepreneurship').query({ pageSize: 100 });
+    // El administrador ve todo, incluido el recién creado. Se filtra por estudiante para
+    // que el caso no dependa de que el catálogo quepa en la primera página.
+    const todos = await admin
+      .get('/api/entrepreneurship')
+      .query({ estudianteId: student.id, pageSize: 100 });
     expect(todos.body.data.items.some((item: { id: number }) => item.id === id)).toBe(true);
   });
 

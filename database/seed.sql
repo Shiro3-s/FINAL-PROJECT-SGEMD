@@ -243,3 +243,32 @@ INSERT INTO preguntas_diagnostico (seccion, orden, enunciado, tipo, opciones, ac
    'No|Básico (cuaderno)|Completo (planilla)', TRUE, 'Prototipo'),
   (5, 4, '¿Qué inversión necesitas para crecer?', 'Texto', NULL, TRUE, 'Prototipo'),
   (5, 5, '¿Cuál es tu meta de ventas del próximo mes?', 'Texto', NULL, TRUE, 'Prototipo');
+
+-- Eventos institucionales ---------------------------------------------------------------
+-- Dos publicados (uno virtual y uno presencial) y un borrador, para que las tres vistas
+-- de eventos tengan contenido real que provenga de la API.
+
+INSERT INTO eventos
+  (id_eventos, nombre_evento, descripcion, dirigido_a, capacidad_maxima, cupo, estado,
+   requiere_registro, lugar, enlace, usuarios_id_organizador,
+   tipo_evento_id_tipo_evento, modalidad_id_modalidad,
+   fecha_y_horarios_id_fecha_y_horarios)
+VALUES
+  (1, 'Startup Minuto de Dios',
+   'Jornada de presentación de emprendimientos y encuentro con mentores.',
+   'Todos los estudiantes', 40, 40, 'Publicado', TRUE,
+   'Auditorio principal', NULL, 1, 1, 1, 1),
+  (2, 'Capacitación en modelado de negocios',
+   'Taller práctico para construir el modelo de negocio con el lienzo Canvas.',
+   'Todos los estudiantes', 30, 29, 'Publicado', TRUE,
+   NULL, 'https://meet.google.com/sgemd-demo', 1, 2, 2, 2),
+  (3, 'Showroom de emprendimientos',
+   'Muestra de productos de los emprendimientos aprobados del programa.',
+   'Emprendimientos aprobados', 50, 50, 'Pendiente', FALSE,
+   'Plazoleta central', NULL, 1, 4, 1, NULL);
+
+-- Una inscripción coherente con el cupo del evento 2 (30 - 1 = 29).
+INSERT INTO usuarios_has_eventos (usuarios_id_usuarios, eventos_id_eventos) VALUES (4, 2);
+
+SELECT setval(pg_get_serial_sequence('eventos', 'id_eventos'),
+              (SELECT MAX(id_eventos) FROM eventos));
