@@ -49,7 +49,7 @@ small{font-size:13px}
 .shell{display:flex;min-height:100vh;background:var(--blanco)}
 .sidebar{
   width:264px;flex:0 0 264px;background:var(--azul-noche);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 .brand{
   display:flex;flex-direction:column;align-items:center;gap:12px;
@@ -66,7 +66,7 @@ small{font-size:13px}
 .brand-text{text-align:center}
 .brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
-.nav{padding:10px 10px 8px;overflow-y:auto;flex:1}
+.nav{padding:10px 10px 8px;flex:1 0 auto;overflow:visible}
 .nav-group{margin-bottom:6px}
 .nav-label{
   display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;
@@ -84,7 +84,7 @@ small{font-size:13px}
    El max-height se ajusta al grupo mas largo (4 hijos) para que la animacion
    no quede con una cola muerta antes de terminar de abrir. */
 .nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
-.nav-group.abierto .nav-hijos{max-height:190px}
+.nav-group.abierto .nav-hijos{max-height:400px}
 @media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
 .nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
@@ -474,7 +474,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 @media (max-width:767px){.fila-simple{flex-wrap:wrap}}
 
 @media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
-.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}.cal-envoltura{background:#ffffff}.cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}.cal-btn:hover{border-color:#004a93}.cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}.cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;color:#ffffff;font-weight:700}.cal-btn.activo .cal-punto{background:#ffd300}.cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}.cal-resumen b{font-size:16px;color:#051533}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}
+.cal{display:grid;grid-template-columns:repeat(7,1fr)}.cal-cab{background:#162644}.cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:.04em}.cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}.cal-celda{position:relative;background:#ffffff;color:#051533;text-align:center;font-size:13px;font-weight:400}.cal-celda.hoy{background:#ffd300;font-weight:700}.cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:999px;background:#004a93}.cal-celda.cal-dia-btn{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:13px;font-weight:400;padding:8px;text-align:center;cursor:pointer;color:#051533;background:#ffffff;border:1px solid #bbbbbb}.cal-celda.cal-dia-btn:hover{background:rgba(0,74,147,.06);border-color:#004a93}.cal-celda.cal-dia-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}.cal-envoltura{background:#ffffff}.cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}.cal-btn:hover{border-color:#004a93}.cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}.cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;color:#ffffff;font-weight:700}.cal-btn.activo .cal-punto{background:#ffd300}.cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}.cal-resumen b{font-size:16px;color:#051533}body.sin-scroll{overflow:hidden}.toast-pila{position:fixed;right:16px;bottom:16px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:calc(100vw - 32px)}.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--azul-noche);color:var(--blanco);font-size:13px;font-weight:500;box-shadow:var(--shadow-3);animation:toast-in .22s ease-out}.toast svg{flex:0 0 16px;margin-top:1px}.toast.t-ok{background:var(--azul-real);box-shadow:var(--shadow-3),inset 4px 0 0 var(--amarillo)}.toast.t-error{background:var(--azul-noche);box-shadow:var(--shadow-3),inset 4px 0 0 var(--gris)}.toast.va-fuera{opacity:0;transform:translateY(8px);transition:.4s}@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}.modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}.modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}.modal-cuerpo{padding:20px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--gris)}.confirm-texto{font-size:14px;line-height:1.6;color:var(--tinta)}.modal-aviso{margin-top:12px;font-size:13px;color:var(--tinta-2);line-height:1.6}.sg-drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:115;background:var(--blanco);box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:drawer-in .22s ease-out}@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}.sg-drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--azul-noche);color:var(--blanco)}.sg-drawer-head h2{flex:1;font-size:16px;font-weight:700}.sg-drawer-lista{list-style:none;padding:8px;overflow-y:auto}.sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}.sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}.sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}.sg-drawer-pie .btn{width:100%}.who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-3);padding:6px;display:none}.who-menu.visible{display:block}.who-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--tinta);cursor:pointer}.who-menu button:hover{background:var(--azul-06);color:var(--azul-real)}.topbar-right{position:relative}.campo-error{display:block;margin-top:4px;font-size:13px;color:var(--tinta);font-weight:700}[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}tr.seleccionada{background:var(--azul-06)}.kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}.kan-card.arrastrando{opacity:.45}@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}@media (max-width:767px){.toast-pila{left:12px;right:12px;bottom:12px;max-width:none}.modal-foot{flex-direction:column-reverse}.modal-foot .btn{width:100%}}
 /* El atributo [hidden] lo sobreescribia cualquier regla con display (por
    ejemplo .notif{display:flex}), asi que los filtros de la bandeja ocultaban
    filas que seguian visibles. Con !important [hidden] vuelve a mandar. */
@@ -600,8 +600,26 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
 .fase-link{color:inherit;text-decoration:none}
 .fase-link:hover{color:var(--azul-real);text-decoration:underline}
+
+/* --- Avance por fase del estudiante --------------------------------------- */
+/* Cada fase con su propia pista y su porcentaje: la barra apilada ocultaba las
+   fases posteriores cuando la primera estaba al 100%. */
+.fase-avance{margin-top:12px}
+.fase-avance:first-child{margin-top:0}
+.fase-avance-top{display:flex;align-items:baseline;gap:10px}
+.fase-avance-nombre{flex:1;font-size:13px;color:var(--tinta-2)}
+.fase-avance-pct{font-size:13px;color:var(--azul-noche);font-variant-numeric:tabular-nums}
+.fase-avance .barra{margin-top:6px}
+
+/* --- Tarjeta "sin docente asignado" -------------------------------------- */
+.estado-vacio-mini{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.estado-vacio-mini>svg{flex:0 0 22px;color:var(--azul-real);margin-top:2px}
+.estado-vacio-mini b{display:block;color:var(--tinta)}
+
+/* --- Ayuda bajo un select en formularios --------------------------------- */
+.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
 </style>
-<style>.sep{height:20px}.sep-lg{height:22px}.acciones-col{display:flex;flex-direction:column;gap:10px}.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.acciones-rapidas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.acciones-rapidas .btn{width:100%}.resultados-contador{font-size:13px;color:var(--tinta-2);margin-left:auto}.prog{min-width:110px}.prog-num{font-size:13px;color:var(--tinta-2)}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.chip.activo{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}.aviso[hidden]{display:none}.comentarios{display:flex;flex-direction:column;gap:14px}.comentario{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;background:var(--blanco)}.comentario-cab{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.comentario-autor{font-size:13px;font-weight:700;color:var(--tinta)}.comentario-fecha{font-size:13px;color:var(--tinta-2)}.comentario-texto{font-size:14px;color:var(--tinta-2);line-height:1.6}.comentario-form{margin-top:16px}.campo input[type=number]{width:100%;height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}.texto-ayuda{font-size:14px;line-height:1.6;color:var(--tinta-2)}.medida{min-width:110px}@media (max-width:479px){.acciones-rapidas{grid-template-columns:minmax(0,1fr)}}</style>
+<style>.sep{height:20px}.sep-lg{height:22px}.acciones-col{display:flex;flex-direction:column;gap:10px}.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.acciones-rapidas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.acciones-rapidas .btn{width:100%}.resultados-contador{font-size:13px;color:var(--tinta-2);margin-left:auto}.prog{min-width:110px}.prog-num{font-size:13px;color:var(--tinta-2)}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.chip.activo{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}.aviso[hidden]{display:none}.comentarios{display:flex;flex-direction:column;gap:14px}.comentario{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;background:var(--blanco)}.comentario-cab{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.comentario-autor{font-size:13px;font-weight:700;color:var(--tinta)}.comentario-fecha{font-size:13px;color:var(--tinta-2)}.comentario-texto{font-size:14px;color:var(--tinta-2);line-height:1.6}.comentario-form{margin-top:16px}.campo input[type=number]{width:100%;height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}.texto-ayuda{font-size:14px;line-height:1.6;color:var(--tinta-2)}.medida{min-width:110px}.grid > .tabs,.grid > .pest{align-self:start;margin-bottom:0}.pila-exp{display:flex;flex-direction:column;gap:20px;min-width:0}.pest{display:flex;gap:4px;border-bottom:1px solid var(--gris);margin-bottom:20px;overflow-x:auto}.pest button{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--tinta-2);cursor:pointer;white-space:nowrap}.pest button.activo{color:var(--azul-real);border-bottom-color:var(--azul-real)}.celda-sub{font-size:12px;color:var(--tinta-2);margin-top:2px}.diag-contexto{display:block}.aviso.leida{opacity:.6}.aviso.leida .aviso-titulo{font-weight:600}.metrica-flecha{margin-left:auto;flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--azul-real);background:var(--azul-08);transition:background .15s ease,color .15s ease,transform .15s ease}.metrica-enlace:hover .metrica-flecha,.metrica-enlace:focus-visible .metrica-flecha{background:var(--azul-real);color:var(--blanco);transform:translateX(2px)}.metrica-nota{margin-top:10px;font-size:13px;font-weight:600;color:var(--tinta-2)}@media (prefers-reduced-motion:reduce){.metrica-flecha{transition:none}}@media (max-width:479px){.acciones-rapidas{grid-template-columns:minmax(0,1fr)}}</style>
 </head>
 <body>
 <div class="shell">
@@ -630,7 +648,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
         </div>
       </div>
     </header>
-    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <a href="emprendimientos.html">Emprendimientos asignados</a> &rsaquo; <a href="emprendimiento-expediente.html">Sabor y Sabe</a> &rsaquo; <b>Detalle del avance</b></div><div class="page-head"><h1>Detalle del avance</h1><p class="sub">Visualiza el avance registrado y edítalo si hace falta.</p><div class="acciones"><a class="btn btn-secundario" href="emprendimiento-expediente.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver</a></div></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div><div class="metrica-lbl">Fase</div><div class="metrica-val">FASE 2<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> Prototipo</span></div><div class="barra"><span style="width:62%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m15.5 13.5 1.5 8.5-5-3-5 3 1.5-8.5"/></svg></span><div><div class="metrica-lbl">Calificación</div><div class="metrica-val">92<span class="u">/ 100</span></div></div></div><div class="barra"><span style="width:92%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span><div><div class="metrica-lbl">Evidencia</div><div class="metrica-val">3<span class="u">archivos</span></div></div></div><div class="barra"><span style="width:100%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><div class="metrica-lbl">Estado</div><div class="metrica-val">En rev.<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> Por calificar</span></div><div class="barra"><span style="width:50%"></span></div></div></div><div class="sep"></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>El avance aplica a <b>todo el grupo</b> del emprendimiento. Editar el puntaje recalifica a todos sus estudiantes.</div></div><div class="sep"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Descripción del avance</h3><span class="hint"></span></div><div class="card-body"><p class="texto-ayuda">Se completó el prototipo de empaque para 20 unidades, con ficha técnica y costos unitarios. Falta validar el punto de equilibrio.</p></div></div><div class="card"><div class="card-head"><h3>Evidencia adjunta</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>prototipo-empaque.pdf</dt><dd>Subido el 12 nov 2024</dd></div><div class="def-row"><dt>costos-unitarios.xlsx</dt><dd>Subido el 12 nov 2024</dd></div><div class="def-row"><dt>ficha-tecnica.docx</dt><dd>Subido el 12 nov 2024</dd></div></dl></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Datos del avance</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Emprendimiento</dt><dd>Sabor y Sabe</dd></div><div class="def-row"><dt>Estudiante</dt><dd>Mariana Lopez</dd></div><div class="def-row"><dt>Fase</dt><dd>FASE 2 - Prototipo</dd></div><div class="def-row"><dt>Fecha</dt><dd>12 nov 2024</dd></div><div class="def-row"><dt>Estado de revision</dt><dd><span class="badge b-amarillo">En revision</span></dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="acciones-col"><a class="btn btn-primario" href="avance-form.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg> Editar avance</a><a class="btn btn-secundario" href="tarea-detalle.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Ver tarea asociada</a><a class="btn btn-secundario" href="emprendimiento-expediente.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver al expediente</a></div></div></div></div></div><div class="sep"></div><div class="card"><div class="card-head"><h3>Historial del avance</h3><span class="hint"></span></div><div class="card-body"><ol class="linea"><li class="ln-item"><div class="ln-fecha"><b>12</b><span>nov</span></div><div class="ln-cuerpo"><div class="ln-titulo">Avance registrado</div><div class="ln-meta">Puntaje 92 de 100</div></div></li><li class="ln-item"><div class="ln-fecha"><b>13</b><span>nov</span></div><div class="ln-cuerpo"><div class="ln-titulo">Evidencia revisada</div><div class="ln-meta">3 archivos validados</div></div></li><li class="ln-item"><div class="ln-fecha"><b>14</b><span>nov</span></div><div class="ln-cuerpo"><div class="ln-titulo">Comentario del docente</div><div class="ln-meta">Falta el punto de equilibrio</div></div></li></ol></div></div></main>
+    <main class="content"><div class="crumbs"><a href="dashboard.html">Inicio</a> &rsaquo; <a href="emprendimientos.html">Emprendimientos asignados</a> &rsaquo; <a href="emprendimiento-expediente.html">Sabor y Sabe</a> &rsaquo; <b>Detalle del avance</b></div><div class="page-head"><h1>Detalle del avance</h1><p class="sub">Visualiza el avance registrado y edítalo si hace falta.</p><div class="acciones"><a class="btn btn-secundario" href="emprendimiento-expediente.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver</a></div></div><div class="grid g-4"><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg></span><div><div class="metrica-lbl">Fase</div><div class="metrica-val">FASE 2<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> Prototipo</span></div><div class="barra"><span style="width:62%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m15.5 13.5 1.5 8.5-5-3-5 3 1.5-8.5"/></svg></span><div><div class="metrica-lbl">Calificación</div><div class="metrica-val">92<span class="u">/ 100</span></div></div></div><div class="barra"><span style="width:92%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span><div><div class="metrica-lbl">Evidencia</div><div class="metrica-val">3<span class="u">archivos</span></div></div></div><div class="barra"><span style="width:100%"></span></div></div><div class="card metrica"><div class="metrica-top"><span class="metrica-ico"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><div class="metrica-lbl">Estado</div><div class="metrica-val">En rev.<span class="u"></span></div></div><span class="metrica-delta"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="m17 6 6 0 0 6"/></svg> Por calificar</span></div><div class="barra"><span style="width:50%"></span></div></div></div><div class="sep"></div><div class="callout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><div>El avance aplica a <b>todo el grupo</b> del emprendimiento. Editar el puntaje recalifica a todos sus estudiantes.</div></div><div class="sep"></div><div class="grid g-2-1"><div class="grid"><div class="card"><div class="card-head"><h3>Descripción del avance</h3><span class="hint"></span></div><div class="card-body"><p class="texto-ayuda">Se completó el prototipo de empaque para 20 unidades, con ficha técnica y costos unitarios. Falta validar el punto de equilibrio.</p></div></div><div class="card"><div class="card-head"><h3>Evidencia adjunta</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>prototipo-empaque.pdf</dt><dd>Subido el 12 nov 2024</dd></div><div class="def-row"><dt>costos-unitarios.xlsx</dt><dd>Subido el 12 nov 2024</dd></div><div class="def-row"><dt>ficha-tecnica.docx</dt><dd>Subido el 12 nov 2024</dd></div></dl></div></div></div><div class="grid"><div class="card"><div class="card-head"><h3>Datos del avance</h3><span class="hint"></span></div><div class="card-body"><dl class="lista-def"><div class="def-row"><dt>Emprendimiento</dt><dd>Sabor y Sabe</dd></div><div class="def-row"><dt>Estudiante</dt><dd>Mariana López</dd></div><div class="def-row"><dt>Fase</dt><dd>FASE 2 - Prototipo</dd></div><div class="def-row"><dt>Fecha</dt><dd>12 nov 2024</dd></div><div class="def-row"><dt>Estado de revisión</dt><dd><span class="badge b-amarillo">En revisión</span></dd></div></dl></div></div><div class="card"><div class="card-head"><h3>Acciones</h3><span class="hint"></span></div><div class="card-body"><div class="acciones-col"><a class="btn btn-primario" href="avance-form.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg> Editar avance</a><a class="btn btn-secundario" href="tarea-detalle.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Ver tarea asociada</a><a class="btn btn-secundario" href="emprendimiento-expediente.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg> Volver al expediente</a></div></div></div></div></div><div class="sep"></div><div class="card"><div class="card-head"><h3>Historial del avance</h3><span class="hint"></span></div><div class="card-body"><ol class="linea"><li class="ln-item"><div class="ln-fecha"><b>12</b><span>nov</span></div><div class="ln-cuerpo"><div class="ln-titulo">Avance registrado</div><div class="ln-meta">Puntaje 92 de 100</div></div></li><li class="ln-item"><div class="ln-fecha"><b>13</b><span>nov</span></div><div class="ln-cuerpo"><div class="ln-titulo">Evidencia revisada</div><div class="ln-meta">3 archivos validados</div></div></li><li class="ln-item"><div class="ln-fecha"><b>14</b><span>nov</span></div><div class="ln-cuerpo"><div class="ln-titulo">Comentario del docente</div><div class="ln-meta">Falta el punto de equilibrio</div></div></li></ol></div></div></main>
   </div>
 </div>
 <div class="overlay" id="ov"></div>
@@ -1345,7 +1363,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     return "\uFEFF" + filas.join("\r\n");
   }
   function tablaComoHTML() {
-    var t = $("main table.tabla") || $("table.tabla");
+    var t = tablaDoc();
     if (!t) return "";
     var c = t.cloneNode(true);
     $$("th.acc, td.acc, input, button, a.table-act", c).forEach(function (n) { n.remove(); });
@@ -1354,13 +1372,21 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   /* Item 3: documento imprimible de la pantalla. Si hay tabla principal se
      imprime la tabla; si no (tarjetas, kanban, linea de tiempo) se imprime una
      copia legible del contenido, sin controles ni paneles ocultos. */
+  /* Las tablas dentro de [data-doc] pertenecen al documento aunque no sean
+     la tabla principal de la pantalla; [data-no-doc] excluye lo que solo
+     sirve en vivo (la barra de progreso, por ejemplo). */
+  function tablaDoc() {
+    var t = $("main [data-doc] table.tabla") || $("main [data-doc]") ||
+      $("main table.tabla") || $("table.tabla");
+    return t ? t.cloneNode(true) : null;
+  }
   function vistaDocumento() {
     var t = tablaComoHTML();
     if (t) return t;
     var main = $("main.content") || $("main");
     if (!main) return "";
     var c = main.cloneNode(true);
-    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [hidden]", c)
+    $$("button, input, select, textarea, script, .tabs, .toolbar, .buscador, .crumbs, .page-head, [data-no-doc], [hidden]", c)
       .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
     return c.innerHTML;
   }
@@ -1375,8 +1401,11 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
     "dt{width:190px;color:#162644;font-size:13px}dd{margin:0;flex:1;font-size:13px}" +
     "table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}" +
     "th,td{border:1px solid #bbbbbb;padding:6px 8px;text-align:left}th{background:#ffffff}" +
+    "tbody tr:nth-child(even) td{background:#fafafa}" +
     "footer{margin-top:24px;font-size:13px;color:#162644;border-top:1px solid #bbbbbb;padding-top:8px}" +
     "h2,h3{font-size:14px;margin:14px 0 4px}ul{margin:8px 0 8px 18px}li{margin:2px 0}" +
+    ".doc-suave{color:#162644;font-size:12px}" +
+    "h2{margin-top:22px;padding-top:10px;border-top:1px solid #bbbbbb}" +
     ".badge{display:inline-block;border:1px solid #bbbbbb;border-radius:999px;padding:1px 7px;font-size:13px;margin-right:4px}" +
     ".card{margin:10px 0;border:1px solid #bbbbbb;border-radius:6px;padding:8px 10px}" +
     ".kan-col,.ln-item,.aviso{margin-bottom:8px}" +
@@ -1723,13 +1752,76 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
       }
 
       case "exportar-expediente": {
-        /* El boton "Exportar" de Mi emprendimiento genera el expediente: el
-           reporte completo de la pantalla, listo para guardar como PDF. */
+        /* El boton "Exportar" de Mi emprendimiento genera el expediente del
+           emprendimiento: la tabla del listado mas los bloques que el
+           estudiante ve en pantalla (avance por fase e historial). */
         e.preventDefault();
+        var clonExp = tablaDoc();
+        var tablaExp = clonExp ? clonExp.outerHTML : "";
+        var bloquesExp = "";
+        $$("[data-expediente]").forEach(function (z) {
+          var cc = z.cloneNode(true);
+          $$("button, input, select, textarea, script, [data-no-doc], [hidden]", cc)
+            .forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+          bloquesExp += cc.innerHTML;
+        });
+        if (tablaExp) bloquesExp = tablaExp + bloquesExp;
+        var resumenExp = csvDeMetricas() ? "" : "";
         imprimirDocumento("Expediente - " + tituloPagina(),
           '<p class="doc-meta">' + esc(tituloPagina()) +
-          " &middot; reporte completo</p>" + vistaDocumento());
+          " &middot; expediente completo</p>" +
+          (bloquesExp || vistaDocumento()));
         toast("Abriendo el expediente para guardar como PDF…", "info");
+        break;
+      }
+
+      case "descargar-plan": {
+        /* Descargar el plan de trabajo: un documento con encabezado, resumen de
+           las cuatro fases y el detalle de tareas por fase. Antes volcaba un
+           CSV plano con las celdas desordenadas; ahora la lectura es la misma
+           de la pantalla. */
+        e.preventDefault();
+        var raizPlan = $("[data-panel-nombre]:not([hidden])") || document;
+        var resumen = "", detalle = "";
+        $$(".card", raizPlan).forEach(function (card) {
+          var t = $(".card-head h3 a, .card-head h3", card);
+          var fase = t ? t.textContent.replace(/\s+/g, " ").trim() : "";
+          if (!fase) return;
+          var pctEl = $(".card-head > span:last-child", card);
+          var pct = pctEl ? pctEl.textContent.replace(/\s+/g, " ").trim() : "";
+          var tareas = $$(".fila-tarea", card);
+          var hechas = 0;
+          var filasHtml = tareas.map(function (f) {
+            var c = f.cloneNode(true);
+            var b = $(".badge", c);
+            var estado = b ? b.textContent.replace(/\s+/g, " ").trim() : "";
+            if (b) b.parentNode.removeChild(b);
+            var sub = $(".fila-sub", c);
+            var meta = sub ? sub.textContent.replace(/\s+/g, " ").trim() : "";
+            if (sub) sub.parentNode.removeChild(sub);
+            var titulo = c.textContent.replace(/\s+/g, " ").trim();
+            if (estado.toLowerCase().indexOf("completada") >= 0) hechas++;
+            return "<tr><td><b>" + esc(titulo) + "</b><br><span class=\"doc-suave\">" +
+              esc(meta) + "</span></td><td>" + esc(estado) + "</td></tr>";
+          }).join("");
+          if (!filasHtml) {
+            filasHtml = '<tr><td colspan="2" class="doc-suave">Sin tareas asignadas en esta fase.</td></tr>';
+          }
+          resumen += "<tr><td><b>" + esc(fase) + "</b></td><td>" + esc(pct) +
+            "</td><td>" + hechas + " de " + tareas.length + "</td></tr>";
+          detalle += "<h2>" + esc(fase) + " &middot; " + esc(pct) + "</h2>" +
+            "<table><thead><tr><th>Tarea</th><th>Estado</th></tr></thead><tbody>" +
+            filasHtml + "</tbody></table>";
+        });
+        var cuerpoPlan =
+          '<p class="doc-meta">' + esc(tituloPagina()) +
+          " &middot; las cuatro fases del programa con el avance y las tareas de cada una</p>" +
+          "<h2>Resumen de avance</h2>" +
+          "<table><thead><tr><th>Fase</th><th>Avance</th><th>Tareas completadas</th></tr></thead>" +
+          "<tbody>" + resumen + "</tbody></table>" +
+          detalle;
+        imprimirDocumento("Plan de trabajo - " + tituloPagina(), cuerpoPlan);
+        toast("Abriendo el plan de trabajo para guardar como PDF...", "info");
         break;
       }
 
@@ -2602,6 +2694,98 @@ guardar(estado);
     $$(".who-menu.visible").forEach(function (m) { m.classList.remove("visible"); });
   });
 
+  /* --- datos academicos del perfil (estudiante) -------------------------- */
+  /* Tres niveles: pregrado, posgrado y egresado. Cada uno muestra un juego
+     distinto de campos; el semestre depende del programa (posgrado) o
+     desaparece (egresado). */
+  function opcionSelect(sel, valor) {
+    if (!sel || !valor) return false;
+    var ok = false;
+    $$("option", sel).forEach(function (o) {
+      if (o.value === valor || o.textContent.trim() === valor) { o.selected = true; ok = true; }
+    });
+    return ok;
+  }
+  function sincronizarAcademico() {
+    var nivel = $("[data-acad-nivel]");
+    if (!nivel) return;
+    var v = (nivel.value || "").toLowerCase();
+    var posgrado = v.indexOf("posgrado") >= 0;
+    var egresado = v.indexOf("egresado") >= 0;
+    var tipo = $("[data-acad-tipo]");
+    var semestre = $("[data-acad-semestre]");
+    var modalidad = $("[data-acad-modalidad]");
+    var posgradoCampos = $("[data-acad-posgrado-campos]");
+    var egresadoCampos = $("[data-acad-egresado-campos]");
+    var semestreCampo = $("[data-acad-semestre-campo]");
+    var duracion = $("[data-acad-duracion]");
+    if (posgradoCampos) posgradoCampos.hidden = !posgrado;
+    if (egresadoCampos) egresadoCampos.hidden = !egresado;
+    if (semestreCampo) semestreCampo.hidden = egresado;
+    if (modalidad && modalidad.closest(".campo")) {
+      modalidad.closest(".campo").hidden = egresado;
+    }
+
+    /* Duracion por tipo de posgrado en UNIMINUTO (El programa confirma 2
+       periodos para especializacion; la maestria va de 3 a 4; el doctorado
+       depende del programa y suele ir de 6 a 8). El minimo y el maximo
+       marcan cuantos semestres ofrece el campo "Semestre". */
+    var DURACION = {
+      "especialización": [2, 2], "especializacion": [2, 2],
+      "maestría": [3, 4], "maestria": [3, 4],
+      "doctorado": [6, 8]
+    };
+    var ORD = ["Primero", "Segundo", "Tercero", "Cuarto", "Quinto", "Sexto",
+      "Séptimo", "Octavo", "Noveno", "Décimo", "Undécimo", "Duodécimo"];
+    var NUM = {};
+    ORD.forEach(function (o, k) { NUM[o] = k + 1; });
+
+    function llenarSemestre(desde, hasta) {
+      if (!semestre) return;
+      var previo = semestre.value;
+      var n = hasta;
+      var opciones = [];
+      for (var k = 1; k <= n; k++) opciones.push(ORD[k - 1]);
+      if ($$("option", semestre).length !== n) {
+        semestre.innerHTML = opciones.map(function (o) {
+          return "<option>" + o + "</option>";
+        }).join("");
+      }
+      var queria = NUM[previo] || desde;
+      if (queria < desde) queria = desde;
+      if (queria > hasta) queria = hasta;
+      semestre.value = ORD[queria - 1];
+    }
+
+    if (posgrado) {
+      var tipoVal = (tipo ? tipo.value : "").toLowerCase();
+      var rango = DURACION[tipoVal] || [3, 4];
+      llenarSemestre(rango[0], rango[1]);
+      if (duracion) {
+        duracion.textContent = rango[0] === rango[1]
+          ? ("Duración: " + rango[0] + " semestres.")
+          : ("Duración: " + rango[0] + " a " + rango[1] + " semestres; elige el semestre en el que vas.");
+      }
+    } else {
+      /* Pregrado conserva los diez semestres de un programa profesional. */
+      llenarSemestre(1, 10);
+      if (duracion) duracion.textContent = "";
+    }
+  }
+  var nivelAcad = $("[data-acad-nivel]");
+  if (nivelAcad) {
+    nivelAcad.addEventListener("change", sincronizarAcademico);
+    var tipoAcad = $("[data-acad-tipo]");
+    if (tipoAcad) tipoAcad.addEventListener("change", sincronizarAcademico);
+    var prevAcad = store(true);
+    var nivelPrevio = prevAcad && prevAcad.perfil && prevAcad.perfil["nivel academico"];
+    if (nivelPrevio && opcionSelect(nivelAcad, nivelPrevio)) {
+      setTimeout(sincronizarAcademico, 0);
+    } else {
+      sincronizarAcademico();
+    }
+  }
+
   /* --- estado inicial ----------------------------------------------------- */
   var previo = store(true);
   if (previo && previo.tab != null) {
@@ -2666,6 +2850,21 @@ guardar(estado);
     bComp.disabled = true;
     bComp.innerHTML = "Completada " + icono(ICO.check, 15);
   }
+  /* Calendario de Inicio: el dia con evento abre un modal en la misma
+     pagina (sin redireccionar). El detalle viaja en data-ev-*. */
+  $$(".cal-dia-btn").forEach(function (celda) {
+    celda.addEventListener("click", function () {
+      var titulo = celda.getAttribute("data-ev-titulo");
+      var detalle = celda.getAttribute("data-ev-detalle") || "";
+      abrirModal(titulo,
+        "<p><b>" + esc(titulo) + "</b></p><p>" + esc(detalle) + "</p>",
+        [
+          { txt: "Ver en Eventos", clase: "btn btn-primario",
+            alClic: function () { location.href = "eventos.html"; } },
+          { txt: "Cerrar", clase: "btn btn-secundario" }
+        ]);
+    });
+  });
   /* Estado inicial de los estados vacios de listas y tablas. */
   vacioRefrescar();
   document.documentElement.classList.add("js-listo");
@@ -2679,15 +2878,14 @@ guardar(estado);
 
   var GUARDAR = {
     "guardar-avance": "Avance registrado",
-    "guardar-calificacion": "Calificacion guardada",
+    "guardar-calificacion": "Calificación guardada",
     "devolver-tarea": "Tarea devuelta al estudiante",
     "asignar-tarea": "Tarea asignada",
-    "generar-asesoria": "Asesoria generada",
-    "confirmar-asesoria": "Asesoria confirmada",
+    "generar-asesoria": "Asesoría generada",
+    "confirmar-asesoria": "Asesoría confirmada",
     "reprogramar-asesoria": "Nueva fecha propuesta",
     "rechazar-asesoria": "Solicitud rechazada",
-    "guardar-recomendaciones": "Recomendaciones guardadas",
-    "actualizar-contrasena": "Contrasena actualizada"
+    "guardar-recomendaciones": "Recomendaciones guardadas"
   };
 
   var pila = null;
@@ -2738,11 +2936,12 @@ guardar(estado);
     var no = document.createElement("button");
     no.className = "btn btn-secundario";
     no.textContent = "Cancelar";
-    no.addEventListener("click", cerrarModal);
+    no.addEventListener("click", function (e) { e.stopPropagation(); cerrarModal(); });
     var si = document.createElement("button");
     si.className = "btn btn-peligro";
     si.textContent = "Confirmar";
-    si.addEventListener("click", function () {
+    si.addEventListener("click", function (e) {
+      e.stopPropagation();
       cerrarModal();
       if (al) al();
     });
@@ -2780,7 +2979,7 @@ guardar(estado);
       if (v) {
         var sec = $("[data-est-perfil]:not([hidden])");
         if (sec) {
-          var t = $(".tabs button", sec);
+          var t = $(".pest button", sec);
           if (t) t.click();
         }
       }
@@ -2788,6 +2987,27 @@ guardar(estado);
     selEst.addEventListener("change", pintar);
     if (selEst.value) pintar();
   }
+
+  /* Expediente: cada emprendimiento tiene su propia seccion ya renderizada.
+     El enlace llega con ?emp=<slug> y aqui se muestra solo la que corresponde
+     (el titulo, el breadcrumb y la pestana del navegador acompanan). */
+  (function () {
+    var secs = $$("[data-exp-perfil]");
+    if (!secs.length) return;
+    var m = location.search.match(/[?&]emp=([^&]+)/);
+    var clave = m ? decodeURIComponent(m[1]) : "";
+    var hay = secs.filter(function (s) {
+      return s.getAttribute("data-exp-perfil") === clave;
+    })[0];
+    if (!hay) hay = secs[0];
+    secs.forEach(function (s) { s.hidden = s !== hay; });
+    var nombre = hay.getAttribute("data-exp-nombre") || "";
+    var h1 = $("main h1");
+    if (h1 && nombre) h1.textContent = nombre;
+    var miga = $(".crumbs b");
+    if (miga && nombre) miga.textContent = nombre;
+    if (nombre) document.title = nombre + " — SGEMD";
+  })();
 
   /* Inicio: calendario de compromisos. Al hacer clic en un dia cambia el panel
      visible; el dia de hoy queda seleccionado al cargar la pagina. */
@@ -2842,23 +3062,253 @@ guardar(estado);
     }
   }
 
-  function aplicarFiltroDesdeURL() {
-    var m = location.search.match(/[?&]f=([^&]+)/);
-    if (!m) return;
-    var val = decodeURIComponent(m[1].split("+").join(" "));
+  /* Pestanas locales (selector de estudiante y expediente). El kit alterna
+     todos los [data-panel-nombre] de la pagina, por eso estas usan su propio
+     contrato y aqui solo se conmutan los paneles hermanos de la barra. */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-tab-local]");
+    if (!b) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var barra = b.closest("[data-tabs-local]");
+    if (!barra) return;
+    var clave = b.getAttribute("data-tab-local");
+    $$("button[data-tab-local]", barra).forEach(function (o) {
+      var es = o === b;
+      o.classList.toggle("activo", es);
+      o.setAttribute("aria-selected", es ? "true" : "false");
+    });
+    var caja = barra.parentNode;
+    Array.prototype.forEach.call(caja.children, function (p) {
+      if (p.hasAttribute("data-tab-panel")) {
+        p.hidden = p.getAttribute("data-tab-panel") !== clave;
+      }
+    });
+  }, true);
+
+  /* ---- controlador de tablas del docente ------------------------------- */
+  /* Mismo contrato que el paginador del administrador, pero con los ganchos
+     del rol ([data-filtro], [data-pag-doc]). Corta las filas de verdad: el
+     kit solo movia la etiqueta "Mostrando X a Y". */
+  function norm(txt) {
+    return (txt || "").toLowerCase().normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "").trim();
+  }
+
+  var ZONAS = [];
+
+  function crearZona(zona) {
+    var tabla = $("table.tabla", zona);
+    if (!tabla) return null;
+    var filas = $$("tbody tr", tabla);
+    var control = $("[data-pag-doc]", zona);
+    var tam = control ? (parseInt(control.dataset.pagTam, 10) || 5) : 0;
+    var buscador = $(".buscador input", zona);
+    var filtros = $$("[data-filtro='1'], [data-diag-emp]", zona);
+    var contador = $("[data-resultados]", zona);
+    var vacio = $("[data-vacio]", zona);
+    var pagina = 1;
+
+    function coincide(fila) {
+      var q = buscador ? norm(buscador.value) : "";
+      if (q && norm(fila.textContent).indexOf(q) < 0) return false;
+      for (var i = 0; i < filtros.length; i++) {
+        var sel = filtros[i];
+        var valor = norm(sel.value);
+        if (!valor) continue;
+        var col = parseInt(sel.dataset.filtroCol, 10);
+        if (isNaN(col)) continue;
+        var celda = fila.children[col];
+        if (!celda) continue;
+        var texto = norm(celda.textContent);
+        /* Una opcion puede agrupar varios estados ("En revision|Devuelta"):
+           se acepta la fila si coincide cualquiera de ellos. */
+        var opt = sel.options[sel.selectedIndex];
+        var multi = opt ? opt.getAttribute("data-valores") : null;
+        if (multi) {
+          var partes = multi.split("|"), hallado = false;
+          for (var k = 0; k < partes.length; k++) {
+            if (texto.indexOf(norm(partes[k])) >= 0) { hallado = true; break; }
+          }
+          if (!hallado) return false;
+        } else if (texto.indexOf(valor) < 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function visibles() {
+      return filas.filter(coincide);
+    }
+
+    function pintarPag(nPag) {
+      var pag = control ? $(".pag", control) : null;
+      if (!pag) return;
+      var tplPrev = control.querySelector("template[data-pg-ico-prev]");
+      var tplNext = control.querySelector("template[data-pg-ico-next]");
+      var ip = tplPrev ? tplPrev.innerHTML : "";
+      var inx = tplNext ? tplNext.innerHTML : "";
+      var h = '<button class="btn btn-secundario btn-sm" data-pagina="prev"' +
+        (pagina <= 1 ? " disabled" : "") + ">" + ip + " Anterior</button>";
+      for (var n = 1; n <= nPag; n++) {
+        h += '<button class="btn btn-sm ' + (n === pagina ? "btn-acento" : "btn-secundario") +
+          '" data-pagina="' + n + '"' + (n === pagina ? ' aria-current="page"' : "") + ">" + n + "</button>";
+      }
+      h += '<button class="btn btn-secundario btn-sm" data-pagina="next"' +
+        (pagina >= nPag ? " disabled" : "") + ">Siguiente " + inx + "</button>";
+      pag.innerHTML = h;
+    }
+
+    function aplicar() {
+      var vis = visibles();
+      var nPag = tam ? Math.max(1, Math.ceil(vis.length / tam)) : 1;
+      if (pagina > nPag) pagina = nPag;
+      if (pagina < 1) pagina = 1;
+      var desde = (pagina - 1) * tam;
+      var hasta = tam ? Math.min(desde + tam, vis.length) : vis.length;
+      filas.forEach(function (f) { f.hidden = true; });
+      vis.slice(desde, hasta).forEach(function (f) { f.hidden = false; });
+      if (contador) {
+        contador.textContent = vis.length + (vis.length === 1 ? " resultado" : " resultados");
+      }
+      if (vacio) vacio.hidden = vis.length > 0;
+      if (control) {
+        control.dataset.pagActual = pagina;
+        control.dataset.pagTotal = nPag;
+        control.dataset.pagRegs = vis.length;
+        var t = $("[data-pag-texto]", control);
+        if (t) {
+          t.textContent = "Mostrando " + (vis.length && tam ? desde + 1 : 0) +
+            " a " + hasta + " de " + vis.length;
+        }
+        pintarPag(nPag);
+      }
+      return vis;
+    }
+
+    if (buscador) {
+      var tb = null;
+      buscador.addEventListener("input", function () {
+        clearTimeout(tb);
+        /* 240 ms: despues del filtro del kit (220 ms) para que el corte de
+           paginas sea el ultimo en aplicarse. */
+        tb = setTimeout(function () { pagina = 1; aplicar(); }, 240);
+      });
+      buscador.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          clearTimeout(tb);
+          pagina = 1;
+          aplicar();
+        }
+      });
+    }
+    filtros.forEach(function (f) {
+      if (f.tagName === "SELECT") {
+        f.addEventListener("change", function () { pagina = 1; aplicar(); });
+      }
+    });
+    if (control) {
+      control.addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-pagina]");
+        if (!b || b.disabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var nPag = parseInt(control.dataset.pagTotal, 10) || 1;
+        var v = b.dataset.pagina;
+        if (v === "prev") pagina = Math.max(1, pagina - 1);
+        else if (v === "next") pagina = Math.min(nPag, pagina + 1);
+        else pagina = parseInt(v, 10) || 1;
+        aplicar();
+      });
+    }
+    aplicar();
+    return { zona: zona, aplicar: aplicar };
+  }
+
+  $$("[data-tabla-zona]").forEach(function (z) {
+    var c = crearZona(z);
+    if (c) ZONAS.push(c);
+  });
+
+  function refrescarZona(el) {
+    for (var i = 0; i < ZONAS.length; i++) {
+      if (ZONAS[i].zona.contains(el)) { ZONAS[i].aplicar(); return; }
+    }
+  }
+
+  /* Diagnostico: el emprendimiento elegido cambia KPIs, graficas, datos e
+     historial; ademas acota las opciones de "Proyecto / grupo" a su grupo. */
+  var diagEmp = $("[data-diag-emp]");
+  if (diagEmp) {
+    var diagProy = $("[data-diag-proyecto]");
+    var diagCtx = $$("[data-diag-contexto]");
+    var diagEmps = $$("option", diagEmp).slice(1).map(function (o) {
+      return o.value;
+    });
+    var pintarDiag = function () {
+      var op = diagEmp.selectedOptions[0];
+      var clave = (op && op.getAttribute("data-slug")) || "todos";
+      diagCtx.forEach(function (c) {
+        c.hidden = c.getAttribute("data-diag-contexto") !== clave;
+      });
+      if (diagProy) {
+        var lista = diagEmp.value ? [diagEmp.value] : diagEmps;
+        var h = '<option value="">Todos los proyectos</option>';
+        lista.forEach(function (x) {
+          h += '<option value="' + x + '">' + x + "</option>";
+        });
+        diagProy.innerHTML = h;
+        diagProy.value = "";
+      }
+      refrescarZona(diagEmp);
+    };
+    diagEmp.addEventListener("change", pintarDiag);
+  }
+
+  /* Aplica un valor a los filtros de la pagina comparando con el valor exacto
+     de cada opcion. Devuelve true si encontro donde aplicarlo. */
+  function filtrarPor(val) {
     var sels = document.querySelectorAll("select[data-filtro]");
     for (var i = 0; i < sels.length; i++) {
       var s = sels[i], ok = false;
       for (var j = 0; j < s.options.length; j++) {
         if (s.options[j].value === val) { ok = true; break; }
       }
-      if (ok) { s.value = val; s.dispatchEvent(new Event("change")); return; }
+      if (ok) { s.value = val; s.dispatchEvent(new Event("change")); return true; }
     }
+    return false;
+  }
+
+  function aplicarFiltroDesdeURL() {
+    var m = location.search.match(/[?&]f=([^&]+)/);
+    if (m) filtrarPor(decodeURIComponent(m[1].split("+").join(" ")));
+    /* ?emp=<emprendimiento> preselecciona el filtro del mismo nombre (Tareas,
+       Asesorias). No interfiere con el ?emp= del expediente: alli no hay
+       filtros de tabla que coincidan con un slug. */
+    var e = location.search.match(/[?&]emp=([^&]+)/);
+    if (e) filtrarPor(decodeURIComponent(e[1].split("+").join(" ")));
+  }
+
+  /* ?vista=tabla abre directamente la pestana Tabla de Emprendimientos, para
+     que el clic en una tarjeta muestre el resultado ya filtrado. */
+  function aplicarVistaDesdeURL() {
+    var m = location.search.match(/[?&]vista=([^&]+)/);
+    if (!m || m[1] !== "tabla") return;
+    var b = document.querySelector(
+      '#vista-emprendimientos button[data-panel="tabla"]');
+    if (b) b.click();
+  }
+
+  function aplicarURL() {
+    aplicarFiltroDesdeURL();
+    aplicarVistaDesdeURL();
   }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", aplicarFiltroDesdeURL);
+    document.addEventListener("DOMContentLoaded", aplicarURL);
   } else {
-    aplicarFiltroDesdeURL();
+    aplicarURL();
   }
 
   document.addEventListener("click", function (e) {
@@ -2869,16 +3319,43 @@ guardar(estado);
 
     if (acc === "marcar-todo-leido") {
       e.preventDefault();
-      confirmar("Marcar todo como leido",
+      e.stopPropagation();
+      confirmar("Marcar todo como leído",
         "Se archivaran todas las notificaciones pendientes.",
         function () {
+          $$(".aviso").forEach(function (av) {
+            av.classList.add("leida");
+            $$("[data-accion='marcar-leida']", av).forEach(function (m) {
+              m.disabled = true;
+              m.textContent = "Leída";
+            });
+          });
           var c = $(".count");
           if (c) c.textContent = "0";
           toast("Notificaciones marcadas como leidas", "ok");
         });
       return;
     }
+    if (acc === "marcar-leida") {
+      e.preventDefault();
+      e.stopPropagation();
+      var av = b.closest(".aviso");
+      if (av && !av.classList.contains("leida")) {
+        av.classList.add("leida");
+        b.disabled = true;
+        b.textContent = "Leída";
+        var cuenta = $(".count");
+        if (cuenta) {
+          cuenta.textContent = String(Math.max(0,
+            (parseInt(cuenta.textContent, 10) || 0) - 1));
+        }
+      }
+      toast("Notificación marcada como leída", "ok");
+      return;
+    }
     if (acc === "filtrar-notificacion") {
+      e.preventDefault();
+      e.stopPropagation();
       var tipo = b.getAttribute("data-tipo");
       $$(".chips .chip").forEach(function (c) {
         c.classList.toggle("activo", c === b);
@@ -2891,6 +3368,8 @@ guardar(estado);
       return;
     }
     if (acc === "publicar-comentario") {
+      e.preventDefault();
+      e.stopPropagation();
       var cont = b.closest(".comentario-form") || document;
       var ta = $("textarea", cont);
       var txt = ta && ta.value.trim();
@@ -2920,11 +3399,9 @@ guardar(estado);
       toast("Comentario publicado", "ok");
       return;
     }
-    if (acc === "descargar-pdf") {
-      toast("PDF del diagnostico generado", "info");
-      return;
-    }
     if (GUARDAR[acc]) {
+      e.preventDefault();
+      e.stopPropagation();
       toast(GUARDAR[acc], "ok");
       return;
     }

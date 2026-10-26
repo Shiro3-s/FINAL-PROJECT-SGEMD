@@ -15,6 +15,7 @@ en fase de captura y atiende sus data-accion; el resto lo sigue manejando lib_js
 """
 
 import re
+from urllib.parse import quote_plus
 
 from lib_ui import (
     shell, metricas, tabla, toolbar, paginas, badge, campo, select, callout,
@@ -54,6 +55,36 @@ DOCENTE_CSS = (
     "color:var(--tinta);background:var(--blanco)}"
     ".texto-ayuda{font-size:14px;line-height:1.6;color:var(--tinta-2)}"
     ".medida{min-width:110px}"
+    # Un .tabs/.pest hijo directo de un .grid se estiraba a todo el alto de la
+    # fila del grid (335-380 px de alto en escritorio). Con align-self:start
+    # recupera su alto natural (39 px) sin tocar el CSS compartido.
+    ".grid > .tabs,.grid > .pest{align-self:start;margin-bottom:0}"
+    ".pila-exp{display:flex;flex-direction:column;gap:20px;min-width:0}"
+    # Pestanas de ambito local (selector de estudiante y expediente). No llevan
+    # la clase .tabs para que el kit no las trate como pestanas globales.
+    ".pest{display:flex;gap:4px;border-bottom:1px solid var(--gris);"
+    "margin-bottom:20px;overflow-x:auto}"
+    ".pest button{background:transparent;border:none;border-bottom:2px solid "
+    "transparent;padding:10px 14px;font-family:var(--sans);font-size:14px;"
+    "font-weight:600;color:var(--tinta-2);cursor:pointer;white-space:nowrap}"
+    ".pest button.activo{color:var(--azul-real);border-bottom-color:var(--azul-real)}"
+    ".celda-sub{font-size:12px;color:var(--tinta-2);margin-top:2px}"
+    ".diag-contexto{display:block}"
+    ".aviso.leida{opacity:.6}"
+    ".aviso.leida .aviso-titulo{font-weight:600}"
+    # Tarjetas de Inicio: la vista previa y el enlace los aporta el kit
+    # (.metrica-enlace/.mini-prev). Aqui solo se agrega la flecha visible y la
+    # nota inferior, sin tocar los estilos compartidos.
+    ".metrica-flecha{margin-left:auto;flex:0 0 26px;width:26px;height:26px;"
+    "border-radius:50%;display:flex;align-items:center;justify-content:center;"
+    "color:var(--azul-real);background:var(--azul-08);"
+    "transition:background .15s ease,color .15s ease,transform .15s ease}"
+    ".metrica-enlace:hover .metrica-flecha,.metrica-enlace:focus-visible "
+    ".metrica-flecha{background:var(--azul-real);color:var(--blanco);"
+    "transform:translateX(2px)}"
+    ".metrica-nota{margin-top:10px;font-size:13px;font-weight:600;"
+    "color:var(--tinta-2)}"
+    "@media (prefers-reduced-motion:reduce){.metrica-flecha{transition:none}}"
     "@media (max-width:479px){.acciones-rapidas{grid-template-columns:minmax(0,1fr)}}"
 )
 
@@ -65,15 +96,14 @@ DOCENTE_JS = """
 
   var GUARDAR = {
     "guardar-avance": "Avance registrado",
-    "guardar-calificacion": "Calificacion guardada",
+    "guardar-calificacion": "Calificación guardada",
     "devolver-tarea": "Tarea devuelta al estudiante",
     "asignar-tarea": "Tarea asignada",
-    "generar-asesoria": "Asesoria generada",
-    "confirmar-asesoria": "Asesoria confirmada",
+    "generar-asesoria": "Asesoría generada",
+    "confirmar-asesoria": "Asesoría confirmada",
     "reprogramar-asesoria": "Nueva fecha propuesta",
     "rechazar-asesoria": "Solicitud rechazada",
-    "guardar-recomendaciones": "Recomendaciones guardadas",
-    "actualizar-contrasena": "Contrasena actualizada"
+    "guardar-recomendaciones": "Recomendaciones guardadas"
   };
 
   var pila = null;
@@ -124,11 +154,12 @@ DOCENTE_JS = """
     var no = document.createElement("button");
     no.className = "btn btn-secundario";
     no.textContent = "Cancelar";
-    no.addEventListener("click", cerrarModal);
+    no.addEventListener("click", function (e) { e.stopPropagation(); cerrarModal(); });
     var si = document.createElement("button");
     si.className = "btn btn-peligro";
     si.textContent = "Confirmar";
-    si.addEventListener("click", function () {
+    si.addEventListener("click", function (e) {
+      e.stopPropagation();
       cerrarModal();
       if (al) al();
     });
@@ -166,7 +197,7 @@ DOCENTE_JS = """
       if (v) {
         var sec = $("[data-est-perfil]:not([hidden])");
         if (sec) {
-          var t = $(".tabs button", sec);
+          var t = $(".pest button", sec);
           if (t) t.click();
         }
       }
@@ -174,6 +205,27 @@ DOCENTE_JS = """
     selEst.addEventListener("change", pintar);
     if (selEst.value) pintar();
   }
+
+  /* Expediente: cada emprendimiento tiene su propia seccion ya renderizada.
+     El enlace llega con ?emp=<slug> y aqui se muestra solo la que corresponde
+     (el titulo, el breadcrumb y la pestana del navegador acompanan). */
+  (function () {
+    var secs = $$("[data-exp-perfil]");
+    if (!secs.length) return;
+    var m = location.search.match(/[?&]emp=([^&]+)/);
+    var clave = m ? decodeURIComponent(m[1]) : "";
+    var hay = secs.filter(function (s) {
+      return s.getAttribute("data-exp-perfil") === clave;
+    })[0];
+    if (!hay) hay = secs[0];
+    secs.forEach(function (s) { s.hidden = s !== hay; });
+    var nombre = hay.getAttribute("data-exp-nombre") || "";
+    var h1 = $("main h1");
+    if (h1 && nombre) h1.textContent = nombre;
+    var miga = $(".crumbs b");
+    if (miga && nombre) miga.textContent = nombre;
+    if (nombre) document.title = nombre + " — SGEMD";
+  })();
 
   /* Inicio: calendario de compromisos. Al hacer clic en un dia cambia el panel
      visible; el dia de hoy queda seleccionado al cargar la pagina. */
@@ -228,23 +280,253 @@ DOCENTE_JS = """
     }
   }
 
-  function aplicarFiltroDesdeURL() {
-    var m = location.search.match(/[?&]f=([^&]+)/);
-    if (!m) return;
-    var val = decodeURIComponent(m[1].split("+").join(" "));
+  /* Pestanas locales (selector de estudiante y expediente). El kit alterna
+     todos los [data-panel-nombre] de la pagina, por eso estas usan su propio
+     contrato y aqui solo se conmutan los paneles hermanos de la barra. */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-tab-local]");
+    if (!b) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var barra = b.closest("[data-tabs-local]");
+    if (!barra) return;
+    var clave = b.getAttribute("data-tab-local");
+    $$("button[data-tab-local]", barra).forEach(function (o) {
+      var es = o === b;
+      o.classList.toggle("activo", es);
+      o.setAttribute("aria-selected", es ? "true" : "false");
+    });
+    var caja = barra.parentNode;
+    Array.prototype.forEach.call(caja.children, function (p) {
+      if (p.hasAttribute("data-tab-panel")) {
+        p.hidden = p.getAttribute("data-tab-panel") !== clave;
+      }
+    });
+  }, true);
+
+  /* ---- controlador de tablas del docente ------------------------------- */
+  /* Mismo contrato que el paginador del administrador, pero con los ganchos
+     del rol ([data-filtro], [data-pag-doc]). Corta las filas de verdad: el
+     kit solo movia la etiqueta "Mostrando X a Y". */
+  function norm(txt) {
+    return (txt || "").toLowerCase().normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "").trim();
+  }
+
+  var ZONAS = [];
+
+  function crearZona(zona) {
+    var tabla = $("table.tabla", zona);
+    if (!tabla) return null;
+    var filas = $$("tbody tr", tabla);
+    var control = $("[data-pag-doc]", zona);
+    var tam = control ? (parseInt(control.dataset.pagTam, 10) || 5) : 0;
+    var buscador = $(".buscador input", zona);
+    var filtros = $$("[data-filtro='1'], [data-diag-emp]", zona);
+    var contador = $("[data-resultados]", zona);
+    var vacio = $("[data-vacio]", zona);
+    var pagina = 1;
+
+    function coincide(fila) {
+      var q = buscador ? norm(buscador.value) : "";
+      if (q && norm(fila.textContent).indexOf(q) < 0) return false;
+      for (var i = 0; i < filtros.length; i++) {
+        var sel = filtros[i];
+        var valor = norm(sel.value);
+        if (!valor) continue;
+        var col = parseInt(sel.dataset.filtroCol, 10);
+        if (isNaN(col)) continue;
+        var celda = fila.children[col];
+        if (!celda) continue;
+        var texto = norm(celda.textContent);
+        /* Una opcion puede agrupar varios estados ("En revision|Devuelta"):
+           se acepta la fila si coincide cualquiera de ellos. */
+        var opt = sel.options[sel.selectedIndex];
+        var multi = opt ? opt.getAttribute("data-valores") : null;
+        if (multi) {
+          var partes = multi.split("|"), hallado = false;
+          for (var k = 0; k < partes.length; k++) {
+            if (texto.indexOf(norm(partes[k])) >= 0) { hallado = true; break; }
+          }
+          if (!hallado) return false;
+        } else if (texto.indexOf(valor) < 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function visibles() {
+      return filas.filter(coincide);
+    }
+
+    function pintarPag(nPag) {
+      var pag = control ? $(".pag", control) : null;
+      if (!pag) return;
+      var tplPrev = control.querySelector("template[data-pg-ico-prev]");
+      var tplNext = control.querySelector("template[data-pg-ico-next]");
+      var ip = tplPrev ? tplPrev.innerHTML : "";
+      var inx = tplNext ? tplNext.innerHTML : "";
+      var h = '<button class="btn btn-secundario btn-sm" data-pagina="prev"' +
+        (pagina <= 1 ? " disabled" : "") + ">" + ip + " Anterior</button>";
+      for (var n = 1; n <= nPag; n++) {
+        h += '<button class="btn btn-sm ' + (n === pagina ? "btn-acento" : "btn-secundario") +
+          '" data-pagina="' + n + '"' + (n === pagina ? ' aria-current="page"' : "") + ">" + n + "</button>";
+      }
+      h += '<button class="btn btn-secundario btn-sm" data-pagina="next"' +
+        (pagina >= nPag ? " disabled" : "") + ">Siguiente " + inx + "</button>";
+      pag.innerHTML = h;
+    }
+
+    function aplicar() {
+      var vis = visibles();
+      var nPag = tam ? Math.max(1, Math.ceil(vis.length / tam)) : 1;
+      if (pagina > nPag) pagina = nPag;
+      if (pagina < 1) pagina = 1;
+      var desde = (pagina - 1) * tam;
+      var hasta = tam ? Math.min(desde + tam, vis.length) : vis.length;
+      filas.forEach(function (f) { f.hidden = true; });
+      vis.slice(desde, hasta).forEach(function (f) { f.hidden = false; });
+      if (contador) {
+        contador.textContent = vis.length + (vis.length === 1 ? " resultado" : " resultados");
+      }
+      if (vacio) vacio.hidden = vis.length > 0;
+      if (control) {
+        control.dataset.pagActual = pagina;
+        control.dataset.pagTotal = nPag;
+        control.dataset.pagRegs = vis.length;
+        var t = $("[data-pag-texto]", control);
+        if (t) {
+          t.textContent = "Mostrando " + (vis.length && tam ? desde + 1 : 0) +
+            " a " + hasta + " de " + vis.length;
+        }
+        pintarPag(nPag);
+      }
+      return vis;
+    }
+
+    if (buscador) {
+      var tb = null;
+      buscador.addEventListener("input", function () {
+        clearTimeout(tb);
+        /* 240 ms: despues del filtro del kit (220 ms) para que el corte de
+           paginas sea el ultimo en aplicarse. */
+        tb = setTimeout(function () { pagina = 1; aplicar(); }, 240);
+      });
+      buscador.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          clearTimeout(tb);
+          pagina = 1;
+          aplicar();
+        }
+      });
+    }
+    filtros.forEach(function (f) {
+      if (f.tagName === "SELECT") {
+        f.addEventListener("change", function () { pagina = 1; aplicar(); });
+      }
+    });
+    if (control) {
+      control.addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-pagina]");
+        if (!b || b.disabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var nPag = parseInt(control.dataset.pagTotal, 10) || 1;
+        var v = b.dataset.pagina;
+        if (v === "prev") pagina = Math.max(1, pagina - 1);
+        else if (v === "next") pagina = Math.min(nPag, pagina + 1);
+        else pagina = parseInt(v, 10) || 1;
+        aplicar();
+      });
+    }
+    aplicar();
+    return { zona: zona, aplicar: aplicar };
+  }
+
+  $$("[data-tabla-zona]").forEach(function (z) {
+    var c = crearZona(z);
+    if (c) ZONAS.push(c);
+  });
+
+  function refrescarZona(el) {
+    for (var i = 0; i < ZONAS.length; i++) {
+      if (ZONAS[i].zona.contains(el)) { ZONAS[i].aplicar(); return; }
+    }
+  }
+
+  /* Diagnostico: el emprendimiento elegido cambia KPIs, graficas, datos e
+     historial; ademas acota las opciones de "Proyecto / grupo" a su grupo. */
+  var diagEmp = $("[data-diag-emp]");
+  if (diagEmp) {
+    var diagProy = $("[data-diag-proyecto]");
+    var diagCtx = $$("[data-diag-contexto]");
+    var diagEmps = $$("option", diagEmp).slice(1).map(function (o) {
+      return o.value;
+    });
+    var pintarDiag = function () {
+      var op = diagEmp.selectedOptions[0];
+      var clave = (op && op.getAttribute("data-slug")) || "todos";
+      diagCtx.forEach(function (c) {
+        c.hidden = c.getAttribute("data-diag-contexto") !== clave;
+      });
+      if (diagProy) {
+        var lista = diagEmp.value ? [diagEmp.value] : diagEmps;
+        var h = '<option value="">Todos los proyectos</option>';
+        lista.forEach(function (x) {
+          h += '<option value="' + x + '">' + x + "</option>";
+        });
+        diagProy.innerHTML = h;
+        diagProy.value = "";
+      }
+      refrescarZona(diagEmp);
+    };
+    diagEmp.addEventListener("change", pintarDiag);
+  }
+
+  /* Aplica un valor a los filtros de la pagina comparando con el valor exacto
+     de cada opcion. Devuelve true si encontro donde aplicarlo. */
+  function filtrarPor(val) {
     var sels = document.querySelectorAll("select[data-filtro]");
     for (var i = 0; i < sels.length; i++) {
       var s = sels[i], ok = false;
       for (var j = 0; j < s.options.length; j++) {
         if (s.options[j].value === val) { ok = true; break; }
       }
-      if (ok) { s.value = val; s.dispatchEvent(new Event("change")); return; }
+      if (ok) { s.value = val; s.dispatchEvent(new Event("change")); return true; }
     }
+    return false;
+  }
+
+  function aplicarFiltroDesdeURL() {
+    var m = location.search.match(/[?&]f=([^&]+)/);
+    if (m) filtrarPor(decodeURIComponent(m[1].split("+").join(" ")));
+    /* ?emp=<emprendimiento> preselecciona el filtro del mismo nombre (Tareas,
+       Asesorias). No interfiere con el ?emp= del expediente: alli no hay
+       filtros de tabla que coincidan con un slug. */
+    var e = location.search.match(/[?&]emp=([^&]+)/);
+    if (e) filtrarPor(decodeURIComponent(e[1].split("+").join(" ")));
+  }
+
+  /* ?vista=tabla abre directamente la pestana Tabla de Emprendimientos, para
+     que el clic en una tarjeta muestre el resultado ya filtrado. */
+  function aplicarVistaDesdeURL() {
+    var m = location.search.match(/[?&]vista=([^&]+)/);
+    if (!m || m[1] !== "tabla") return;
+    var b = document.querySelector(
+      '#vista-emprendimientos button[data-panel="tabla"]');
+    if (b) b.click();
+  }
+
+  function aplicarURL() {
+    aplicarFiltroDesdeURL();
+    aplicarVistaDesdeURL();
   }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", aplicarFiltroDesdeURL);
+    document.addEventListener("DOMContentLoaded", aplicarURL);
   } else {
-    aplicarFiltroDesdeURL();
+    aplicarURL();
   }
 
   document.addEventListener("click", function (e) {
@@ -255,16 +537,43 @@ DOCENTE_JS = """
 
     if (acc === "marcar-todo-leido") {
       e.preventDefault();
-      confirmar("Marcar todo como leido",
+      e.stopPropagation();
+      confirmar("Marcar todo como leído",
         "Se archivaran todas las notificaciones pendientes.",
         function () {
+          $$(".aviso").forEach(function (av) {
+            av.classList.add("leida");
+            $$("[data-accion='marcar-leida']", av).forEach(function (m) {
+              m.disabled = true;
+              m.textContent = "Leída";
+            });
+          });
           var c = $(".count");
           if (c) c.textContent = "0";
           toast("Notificaciones marcadas como leidas", "ok");
         });
       return;
     }
+    if (acc === "marcar-leida") {
+      e.preventDefault();
+      e.stopPropagation();
+      var av = b.closest(".aviso");
+      if (av && !av.classList.contains("leida")) {
+        av.classList.add("leida");
+        b.disabled = true;
+        b.textContent = "Leída";
+        var cuenta = $(".count");
+        if (cuenta) {
+          cuenta.textContent = String(Math.max(0,
+            (parseInt(cuenta.textContent, 10) || 0) - 1));
+        }
+      }
+      toast("Notificación marcada como leída", "ok");
+      return;
+    }
     if (acc === "filtrar-notificacion") {
+      e.preventDefault();
+      e.stopPropagation();
       var tipo = b.getAttribute("data-tipo");
       $$(".chips .chip").forEach(function (c) {
         c.classList.toggle("activo", c === b);
@@ -277,6 +586,8 @@ DOCENTE_JS = """
       return;
     }
     if (acc === "publicar-comentario") {
+      e.preventDefault();
+      e.stopPropagation();
       var cont = b.closest(".comentario-form") || document;
       var ta = $("textarea", cont);
       var txt = ta && ta.value.trim();
@@ -306,11 +617,9 @@ DOCENTE_JS = """
       toast("Comentario publicado", "ok");
       return;
     }
-    if (acc === "descargar-pdf") {
-      toast("PDF del diagnostico generado", "info");
-      return;
-    }
     if (GUARDAR[acc]) {
+      e.preventDefault();
+      e.stopPropagation();
       toast(GUARDAR[acc], "ok");
       return;
     }
@@ -367,86 +676,374 @@ COLOR_GRUPO_AS = {
 }
 
 # Campos: (codigo, emprendimiento, estudiante, sector, estado, fecha, modalidad, tema)
+# 24 asesorias: la tabla declara 24 registros y ahora el paginador los pagina de
+# verdad (antes habia 6 filas y el control prometia 24).
 ASESORIAS = [
-    ("ASES-014", "Sabor y Sabe", "Mariana Lopez", "Alimentos",
-     "Confirmada", "12 nov 2024, 10:00", "Modalidad mixta",
-     "FASE 2 - Prototipo: empaque"),
+    ("ASES-019", "EcoPack", "Lucía Fernández", "Ambiental",
+     "Confirmada", "26 nov 2024, 08:00", "Virtual",
+     "FASE 3 - Validación: usabilidad"),
+    ("ASES-024", "Muebles Origen", "Andrés Felipe", "Muebles",
+     "Pendiente de confirmar", "25 nov 2024, 10:00", "Presencial",
+     "FASE 2 - Prototipo: proveedores"),
+    ("ASES-015", "Sabor y Sabe", "Mariana López", "Alimentos",
+     "Pendiente de confirmar", "22 nov 2024, 10:00", "Modalidad mixta",
+     "FASE 2 - Prototipo: costos"),
+    ("ASES-017", "Aromas del Sur", "Sofía Ramírez", "Alimentos",
+     "Pendiente de confirmar", "21 nov 2024, 11:00", "Presencial",
+     "FASE 1 - Ideación: cliente"),
+    ("ASES-012", "EcoPack", "Lucía Fernández", "Ambiental",
+     "Pendiente de confirmar", "20 nov 2024, 09:00", "Presencial",
+     "FASE 3 - Validación: prueba con usuarios"),
+    ("ASES-018", "Muebles Origen", "Andrés Felipe", "Muebles",
+     "Confirmada", "19 nov 2024, 15:00", "Modalidad mixta",
+     "FASE 2 - Prototipo: mobiliario"),
+    ("ASES-016", "Krea Textil", "Jhon Ospina", "Moda",
+     "Confirmada", "18 nov 2024, 09:00", "Virtual",
+     "Tarea: catálogo de productos"),
     ("ASES-013", "Krea Textil", "Jhon Ospina", "Moda",
      "Confirmada", "14 nov 2024, 15:30", "Virtual",
      "Tarea: Perfil en redes sociales"),
-    ("ASES-012", "EcoPack", "Lucia Fernandez", "Ambiental",
-     "Pendiente de confirmar", "20 nov 2024, 09:00", "Presencial",
-     "FASE 3 - Validación: prueba con usuarios"),
-    ("ASES-011", "Sabor y Sabe", "Mariana Lopez", "Alimentos",
+    ("ASES-014", "Sabor y Sabe", "Mariana López", "Alimentos",
+     "Confirmada", "12 nov 2024, 10:00", "Modalidad mixta",
+     "FASE 2 - Prototipo: empaque"),
+    ("ASES-020", "Muebles Origen", "Andrés Felipe", "Muebles",
+     "Finalizada", "07 nov 2024, 10:00", "Presencial",
+     "FASE 2 - Prototipo: materiales"),
+    ("ASES-011", "Sabor y Sabe", "Mariana López", "Alimentos",
      "Finalizada", "05 nov 2024, 10:00", "Presencial",
      "FASE 2 - Prototipo: precios"),
+    ("ASES-021", "Aromas del Sur", "Camilo Rojas", "Alimentos",
+     "Finalizada", "04 nov 2024, 14:00", "Virtual",
+     "FASE 1 - Ideación: propuesta de valor"),
+    ("ASES-008", "Muebles Origen", "Andrés Felipe", "Muebles",
+     "Confirmada", "04 nov 2024, 11:00", "Presencial",
+     "FASE 2 - Prototipo: acabados"),
     ("ASES-010", "Krea Textil", "Jhon Ospina", "Moda",
      "Finalizada", "31 oct 2024, 14:00", "Virtual",
      "Tarea: Análisis de competencia"),
-    ("ASES-009", "EcoPack", "Lucia Fernandez", "Ambiental",
+    ("ASES-022", "Sabor y Sabe", "Diego Torres", "Alimentos",
+     "Finalizada", "30 oct 2024, 09:00", "Modalidad mixta",
+     "FASE 1 - Ideación: segmento"),
+    ("ASES-023", "Krea Textil", "Mariana López", "Moda",
+     "Cancelada por el estudiante", "29 oct 2024, 16:00", "Virtual",
+     "Tarea: presupuesto de telas"),
+    ("ASES-009", "EcoPack", "Lucía Fernández", "Ambiental",
      "Cancelada por el estudiante", "28 oct 2024, 11:00", "Presencial",
+     "FASE 1 - Ideación: problema"),
+    ("ASES-007", "Aromas del Sur", "Sofía Ramírez", "Alimentos",
+     "Cancelada por el estudiante", "25 oct 2024, 10:00", "Virtual",
+     "FASE 1 - Ideación: entrevistas"),
+    ("ASES-006", "EcoPack", "Diego Torres", "Ambiental",
+     "Finalizada", "24 oct 2024, 09:00", "Presencial",
+     "FASE 2 - Prototipo: empaque reciclado"),
+    ("ASES-005", "Sabor y Sabe", "Diego Torres", "Alimentos",
+     "Finalizada", "22 oct 2024, 15:00", "Virtual",
+     "FASE 1 - Ideación: problema"),
+    ("ASES-004", "Krea Textil", "Jhon Ospina", "Moda",
+     "Finalizada", "21 oct 2024, 11:00", "Virtual",
+     "Tarea: análisis de competencia"),
+    ("ASES-003", "EcoPack", "Lucía Fernández", "Ambiental",
+     "Finalizada", "18 oct 2024, 10:00", "Modalidad mixta",
+     "FASE 2 - Prototipo: prototipo v1"),
+    ("ASES-002", "Aromas del Sur", "Camilo Rojas", "Alimentos",
+     "Finalizada", "16 oct 2024, 09:00", "Presencial",
+     "FASE 1 - Ideación: cliente"),
+    ("ASES-001", "Muebles Origen", "Andrés Felipe", "Muebles",
+     "Finalizada", "14 oct 2024, 14:00", "Virtual",
      "FASE 1 - Ideación: problema"),
 ]
 
-# Avances del emprendimiento: (fecha, fase, descripcion, calificacion, evidencia)
-AVANCES = [
-    ("12 nov 2024", "FASE 2", "Prototipo de empaque listo para 20 unidades",
-     92, "Con evidencia"),
-    ("05 nov 2024", "FASE 2", "Definicion de precios y punto de equilibrio",
-     88, "Con evidencia"),
-    ("28 oct 2024", "FASE 1", "Diagnostico inicial y problema claro",
-     81, "Sin evidencia"),
-]
+# Avances del emprendimiento: (fecha, fase, descripcion, calificacion, evidencia).
+# Un juego por emprendimiento para que el expediente de cada uno muestre lo suyo.
+AVANCES_EMP = {
+    "Sabor y Sabe": [
+        ("12 nov 2024", "FASE 2",
+         "Prototipo de empaque listo para 20 unidades", 92, "Con evidencia"),
+        ("05 nov 2024", "FASE 2",
+         "Definición de precios y punto de equilibrio", 88, "Con evidencia"),
+        ("28 oct 2024", "FASE 1",
+         "Diagnóstico inicial y problema claro", 81, "Sin evidencia"),
+    ],
+    "Krea Textil": [
+        ("14 nov 2024", "FASE 1",
+         "Perfil de cliente y propuesta de valor", 85, "Con evidencia"),
+        ("31 oct 2024", "FASE 1",
+         "Análisis de competencia del sector moda", 79, "Con evidencia"),
+        ("22 oct 2024", "FASE 1",
+         "Entrevistas iniciales con compradores", 74, "Sin evidencia"),
+    ],
+    "EcoPack": [
+        ("09 nov 2024", "FASE 3",
+         "Prueba de resistencia del empaque reciclado", 95, "Con evidencia"),
+        ("31 oct 2024", "FASE 2",
+         "Prototipo v2 con materiales locales", 90, "Con evidencia"),
+        ("18 oct 2024", "FASE 2",
+         "Ficha técnica de materiales", 86, "Con evidencia"),
+    ],
+    "Aromas del Sur": [
+        ("06 nov 2024", "FASE 1",
+         "Perfil del cliente ideal", 72, "Con evidencia"),
+        ("24 oct 2024", "FASE 1",
+         "Propuesta de valor inicial", 68, "Sin evidencia"),
+        ("16 oct 2024", "FASE 1",
+         "Entrevistas con usuarios", 64, "Sin evidencia"),
+    ],
+    "Muebles Origen": [
+        ("04 nov 2024", "FASE 2",
+         "Selección de maderas y acabados", 88, "Con evidencia"),
+        ("25 oct 2024", "FASE 1",
+         "Diagnóstico del taller y capacidad", 83, "Con evidencia"),
+        ("14 oct 2024", "FASE 1",
+         "Problema y segmento del cliente", 77, "Sin evidencia"),
+    ],
+}
 
-# Tareas del docente: (titulo, emprendimiento, estudiante, prioridad, vence, estado)
+# Tareas del docente: (titulo, emprendimiento, estudiante, prioridad, vence, estado).
+# 23 registros: es el total que declara la tabla, para que las 5 paginas
+# muestren filas distintas.
 TAREAS_DOC = [
-    ("Evidencia fotografica del punto de venta", "Sabor y Sabe", "Mariana Lopez",
+    ("Evidencia fotografica del punto de venta", "Sabor y Sabe", "Mariana López",
      "Alta", "12 nov 2024", "En revision"),
-    ("Presupuesto de insumos", "Sabor y Sabe", "Mariana Lopez",
+    ("Lista de precios del catálogo", "Sabor y Sabe", "Diego Torres",
+     "Media", "13 nov 2024", "Devuelta"),
+    ("Presupuesto de insumos", "Sabor y Sabe", "Mariana López",
      "Media", "15 nov 2024", "Completada"),
+    ("Ficha técnica del producto", "Sabor y Sabe", "Mariana López",
+     "Baja", "19 nov 2024", "Pendiente"),
+    ("Registro fotografico del taller", "Sabor y Sabe", "Diego Torres",
+     "Media", "20 nov 2024", "Completada"),
     ("Perfil en redes sociales", "Krea Textil", "Jhon Ospina",
      "Baja", "16 nov 2024", "Pendiente"),
-    ("Prototipo de empaque", "EcoPack", "Lucia Fernandez",
+    ("Cotización con proveedores", "Krea Textil", "Mariana López",
+     "Alta", "17 nov 2024", "En revision"),
+    ("Patronaje de la primera colección", "Krea Textil", "Jhon Ospina",
+     "Media", "21 nov 2024", "Pendiente"),
+    ("Catálogo de telas", "Krea Textil", "Jhon Ospina",
+     "Baja", "22 nov 2024", "Completada"),
+    ("Prueba de color y acabados", "Krea Textil", "Mariana López",
+     "Media", "23 nov 2024", "Devuelta"),
+    ("Prototipo de empaque", "EcoPack", "Lucía Fernández",
      "Alta", "14 nov 2024", "En revision"),
-    ("Analisis de competencia", "Aromas del Sur", "Sofia Ramirez",
+    ("Ficha de materiales reciclados", "EcoPack", "Lucía Fernández",
+     "Alta", "15 nov 2024", "Completada"),
+    ("Prueba de resistencia del empaque", "EcoPack", "Diego Torres",
+     "Alta", "18 nov 2024", "En revision"),
+    ("Registro de proveedores locales", "EcoPack", "Lucía Fernández",
+     "Media", "24 nov 2024", "Pendiente"),
+    ("Encuesta a usuarios", "EcoPack", "Diego Torres",
+     "Media", "25 nov 2024", "Completada"),
+    ("Análisis de competencia", "Aromas del Sur", "Sofía Ramírez",
      "Media", "18 nov 2024", "Pendiente"),
+    ("Perfil del cliente ideal", "Aromas del Sur", "Sofía Ramírez",
+     "Alta", "16 nov 2024", "Completada"),
+    ("Prueba de aromas con usuarios", "Aromas del Sur", "Camilo Rojas",
+     "Media", "19 nov 2024", "En revision"),
+    ("Etiqueta y empaque del producto", "Aromas del Sur", "Sofía Ramírez",
+     "Baja", "26 nov 2024", "Pendiente"),
+    ("Medición del taller", "Muebles Origen", "Andrés Felipe",
+     "Media", "17 nov 2024", "Completada"),
+    ("Selección de maderas", "Muebles Origen", "Andrés Felipe",
+     "Alta", "20 nov 2024", "En revision"),
+    ("Ficha de acabados", "Muebles Origen", "Andrés Felipe",
+     "Media", "22 nov 2024", "Devuelta"),
+    ("Cotización de transporte", "Muebles Origen", "Andrés Felipe",
+     "Baja", "27 nov 2024", "Pendiente"),
 ]
 
 PRIO_AS = {"Alta": "b-amarillo", "Media": "b-azul", "Baja": "b-linea"}
 ESTADO_TAREA = {"En revision": "b-amarillo", "Completada": "b-azul",
                 "Pendiente": "b-neutra", "Devuelta": "b-neutra"}
 
-# Diagnostico generado: (origen, emprendimiento, estudiante, tema, estado, fecha)
+# Diagnostico generado: (origen, detalle, emprendimiento, estudiante, tema,
+# estado, fecha). `origen` usa exactamente las opciones del filtro para que el
+# select filtre de verdad; el detalle se conserva como segunda linea.
 DIAGNOSTICOS = [
-    ("FASE 1 completada", "Sabor y Sabe", "Mariana Lopez",
-     "Problema y perfil", "Completado", "28 oct 2024"),
-    ("FASE 2 en curso", "Sabor y Sabe", "Mariana Lopez",
-     "Prototipo y precios", "En curso", "12 nov 2024"),
-    ("Tareas clave", "Krea Textil", "Jhon Ospina",
-     "Validación con usuarios", "Pendiente", "Pendiente"),
+    ("Fases y tareas clave", "FASE 2 en curso", "Sabor y Sabe",
+     "Mariana López", "Prototipo y precios", "En curso", "12 nov 2024"),
+    ("Solo por tareas clave", "2 de 5 tareas clave", "Sabor y Sabe",
+     "Diego Torres", "Empaque y costos", "En curso", "08 nov 2024"),
+    ("Fases y tareas clave", "FASE 1 completada", "Sabor y Sabe",
+     "Mariana López", "Problema y perfil", "Completado", "28 oct 2024"),
+    ("Solo por fases (4)", "FASE 1 en curso", "Krea Textil",
+     "Jhon Ospina", "Cliente y propuesta", "En curso", "06 nov 2024"),
+    ("Solo por tareas clave", "1 de 4 tareas clave", "Krea Textil",
+     "Jhon Ospina", "Validación con usuarios", "Pendiente", "Sin fecha"),
+    ("Fases y tareas clave", "FASE 1 completada", "Krea Textil",
+     "Mariana López", "Problema y perfil", "Completado", "30 oct 2024"),
+    ("Fases y tareas clave", "FASE 3 en curso", "EcoPack",
+     "Lucía Fernández", "Validación con usuarios", "En curso", "10 nov 2024"),
+    ("Solo por fases (4)", "FASE 2 completada", "EcoPack",
+     "Lucía Fernández", "Prototipo y materiales", "Completado", "31 oct 2024"),
+    ("Solo por tareas clave", "1 de 4 tareas clave", "EcoPack",
+     "Diego Torres", "Resistencia del empaque", "Pendiente", "Sin fecha"),
+    ("Solo por fases (4)", "FASE 1 en curso", "Aromas del Sur",
+     "Sofía Ramírez", "Problema y cliente", "En curso", "07 nov 2024"),
+    ("Solo por tareas clave", "0 de 4 tareas clave", "Aromas del Sur",
+     "Camilo Rojas", "Entrevistas", "Pendiente", "Sin fecha"),
+    ("Fases y tareas clave", "FASE 1 completada", "Aromas del Sur",
+     "Sofía Ramírez", "Propuesta de valor", "Completado", "24 oct 2024"),
+    ("Fases y tareas clave", "FASE 2 en curso", "Muebles Origen",
+     "Andrés Felipe", "Prototipo y materiales", "En curso", "11 nov 2024"),
+    ("Solo por tareas clave", "2 de 4 tareas clave", "Muebles Origen",
+     "Andrés Felipe", "Acabados", "En curso", "09 nov 2024"),
+    ("Solo por fases (4)", "FASE 1 completada", "Muebles Origen",
+     "Andrés Felipe", "Problema y perfil", "Completado", "25 oct 2024"),
 ]
 
-DIAG_FASES = [
-    ("FASE 1 - Ideación", 100, AZUL),
-    ("FASE 2 - Prototipo", 62, AZUL),
-    ("FASE 3 - Validación", 24, AMAR),
-    ("FASE 4 - Formalización", 0, "#bbbbbb"),
-]
+COMP_LABELS = ["Visión", "Creatividad", "Resiliencia", "Liderazgo",
+               "Trabajo en equipo", "Toma de decisiones"]
+
+# Contexto del diagnostico por emprendimiento: lo que cambia en pantalla al
+# elegir uno en el filtro. Antes todo esto estaba escrito a mano para Sabor y
+# Sabe, sin importar el emprendimiento elegido.
+DIAG_EMP = {
+    "Sabor y Sabe": {
+        "fases": [("FASE 1 - Ideación", 100, AZUL),
+                  ("FASE 2 - Prototipo", 62, AZUL),
+                  ("FASE 3 - Validación", 24, AMAR),
+                  ("FASE 4 - Formalización", 0, "#bbbbbb")],
+        "comportamiento": [85, 78, 70, 82, 88, 66],
+        "fases_completadas": "1 de 4",
+        "pct_fases": 25,
+        "tareas_clave": "2 de 5",
+        "pct_tareas": 40,
+        "puntaje": "7.8",
+        "ultima_revision": "12 nov 2024, 09:14",
+        "recomendaciones": "Canal de venta y presupuesto de publicidad",
+        "historial": [
+            ("12", "nov", "Diagnóstico FASE 2 en curso", "62% de la fase", ""),
+            ("28", "oct", "Diagnóstico FASE 1", "Puntaje 7.8 de 10", ""),
+        ],
+    },
+    "Krea Textil": {
+        "fases": [("FASE 1 - Ideación", 28, AZUL),
+                  ("FASE 2 - Prototipo", 0, AZUL),
+                  ("FASE 3 - Validación", 0, AMAR),
+                  ("FASE 4 - Formalización", 0, "#bbbbbb")],
+        "comportamiento": [72, 88, 64, 70, 74, 68],
+        "fases_completadas": "0 de 4",
+        "pct_fases": 7,
+        "tareas_clave": "1 de 4",
+        "pct_tareas": 25,
+        "puntaje": "6.9",
+        "ultima_revision": "06 nov 2024, 16:20",
+        "recomendaciones": "Cerrar el perfil del cliente y el análisis de competencia",
+        "historial": [
+            ("06", "nov", "Diagnóstico FASE 1 en curso", "28% de la fase", ""),
+            ("30", "oct", "Diagnóstico FASE 1", "Puntaje 6.9 de 10", ""),
+        ],
+    },
+    "EcoPack": {
+        "fases": [("FASE 1 - Ideación", 100, AZUL),
+                  ("FASE 2 - Prototipo", 100, AZUL),
+                  ("FASE 3 - Validación", 84, AMAR),
+                  ("FASE 4 - Formalización", 0, "#bbbbbb")],
+        "comportamiento": [88, 82, 90, 76, 84, 80],
+        "fases_completadas": "2 de 4",
+        "pct_fases": 50,
+        "tareas_clave": "3 de 4",
+        "pct_tareas": 75,
+        "puntaje": "8.6",
+        "ultima_revision": "10 nov 2024, 11:05",
+        "recomendaciones": "Documentar la prueba de resistencia y el plan de producción",
+        "historial": [
+            ("10", "nov", "Diagnóstico FASE 3 en curso", "84% de la fase", ""),
+            ("31", "oct", "Diagnóstico FASE 2", "Puntaje 8.6 de 10", ""),
+        ],
+    },
+    "Aromas del Sur": {
+        "fases": [("FASE 1 - Ideación", 15, AZUL),
+                  ("FASE 2 - Prototipo", 0, AZUL),
+                  ("FASE 3 - Validación", 0, AMAR),
+                  ("FASE 4 - Formalización", 0, "#bbbbbb")],
+        "comportamiento": [68, 74, 62, 66, 71, 58],
+        "fases_completadas": "0 de 4",
+        "pct_fases": 4,
+        "tareas_clave": "0 de 4",
+        "pct_tareas": 0,
+        "puntaje": "6.2",
+        "ultima_revision": "07 nov 2024, 09:40",
+        "recomendaciones": "Completar entrevistas y definir la propuesta de valor",
+        "historial": [
+            ("07", "nov", "Diagnóstico FASE 1 en curso", "15% de la fase", ""),
+            ("24", "oct", "Diagnóstico FASE 1", "Puntaje 6.2 de 10", ""),
+        ],
+    },
+    "Muebles Origen": {
+        "fases": [("FASE 1 - Ideación", 100, AZUL),
+                  ("FASE 2 - Prototipo", 55, AZUL),
+                  ("FASE 3 - Validación", 0, AMAR),
+                  ("FASE 4 - Formalización", 0, "#bbbbbb")],
+        "comportamiento": [80, 72, 84, 78, 76, 74],
+        "fases_completadas": "1 de 4",
+        "pct_fases": 25,
+        "tareas_clave": "2 de 4",
+        "pct_tareas": 50,
+        "puntaje": "7.5",
+        "ultima_revision": "11 nov 2024, 15:30",
+        "recomendaciones": "Cerrar cotizaciones de proveedores y transporte",
+        "historial": [
+            ("11", "nov", "Diagnóstico FASE 2 en curso", "55% de la fase", ""),
+            ("25", "oct", "Diagnóstico FASE 1", "Puntaje 7.5 de 10", ""),
+        ],
+    },
+}
+
+TIPO_EMP = {
+    "Sabor y Sabe": "Comercio",
+    "Krea Textil": "Manufactura",
+    "EcoPack": "Manufactura",
+    "Aromas del Sur": "Comercio",
+    "Muebles Origen": "Manufactura",
+}
+
+COMENTARIOS_EMP = {
+    "Sabor y Sabe": [
+        ("Carlos Mendoza", "12 nov 2024",
+         "Buen avance en el prototipo. Falta medir el costo unitario de los empaques."),
+        ("Mariana López", "11 nov 2024",
+         "Adjunte las fotos del punto de venta y la lista de precios."),
+    ],
+    "Krea Textil": [
+        ("Carlos Mendoza", "14 nov 2024",
+         "El análisis de competencia está bien; aterricen el precio de la primera colección."),
+        ("Jhon Ospina", "13 nov 2024",
+         "Subimos el catálogo de telas y el perfil del cliente."),
+    ],
+    "EcoPack": [
+        ("Carlos Mendoza", "09 nov 2024",
+         "La prueba de resistencia quedó documentada. Falta el plan de producción."),
+        ("Lucía Fernández", "08 nov 2024",
+         "Adjuntamos la ficha técnica y las fotos del prototipo v2."),
+    ],
+    "Aromas del Sur": [
+        ("Carlos Mendoza", "06 nov 2024",
+         "Faltan entrevistas antes de cerrar la propuesta de valor."),
+        ("Sofía Ramírez", "05 nov 2024",
+         "Programamos tres entrevistas para esta semana."),
+    ],
+    "Muebles Origen": [
+        ("Carlos Mendoza", "04 nov 2024",
+         "Buen avance en materiales; revisen el costo del transporte."),
+        ("Andrés Felipe", "03 nov 2024",
+         "Actualizamos la medición del taller y los acabados."),
+    ],
+}
 
 # Grupo de cada emprendimiento: un emprendimiento puede tener varios estudiantes
 # y un estudiante puede tener varios emprendimientos (relación N:N).
 # Campos: (estudiante, codigo, sede). El código es el mismo ID de 6 dígitos que
 # usa el administrador en la gestión de perfiles.
 ESTUDIANTES_EMP = {
-    "Sabor y Sabe": [("Mariana Lopez", "912646", "Sede Norte"),
+    "Sabor y Sabe": [("Mariana López", "912646", "Sede Norte"),
                      ("Diego Torres", "912658", "Sede Norte")],
     "Krea Textil": [("Jhon Ospina", "912647", "Sede Centro"),
-                    ("Mariana Lopez", "912646", "Sede Norte")],
-    "EcoPack": [("Lucia Fernandez", "912648", "Sede Norte"),
+                    ("Mariana López", "912646", "Sede Norte")],
+    "EcoPack": [("Lucía Fernández", "912648", "Sede Norte"),
                 ("Diego Torres", "912658", "Sede Norte")],
-    "Aromas del Sur": [("Sofia Ramirez", "912649", "Sede Sur"),
+    "Aromas del Sur": [("Sofía Ramírez", "912649", "Sede Sur"),
                        ("Camilo Rojas", "912651", "Sede Sur")],
-    "Muebles Origen": [("Andres Felipe", "912650", "Sede Centro")],
+    "Muebles Origen": [("Andrés Felipe", "912650", "Sede Centro")],
 }
 
 # Cartera del docente. Campos: (emprendimiento, sector, etapa, avance,
@@ -497,24 +1094,26 @@ EVENTOS = [
 
 # Recomendaciones ya enviadas por el docente: (estudiante, evento, estado, fecha).
 RECOMENDACIONES = [
-    ("Mariana Lopez", "Startup Minuto de Dios", "Aceptada", "12 nov 2024"),
+    ("Mariana López", "Startup Minuto de Dios", "Aceptada", "12 nov 2024"),
     ("Diego Torres", "Capacitación en modelado de negocios", "Enviada", "11 nov 2024"),
     ("Jhon Ospina", "Showroom de emprendimientos", "Aceptada", "10 nov 2024"),
 ]
 
-# Compromisos del calendario del Inicio, por día de noviembre de 2024.
-# Formato: día -> [(hora, título, meta, badge_html)].
+# Compromisos propios del calendario del Inicio (tareas y eventos del día),
+# por día de noviembre de 2024. Formato: día -> [(hora, título, meta, badge)].
+# Las asesorías no se escriben aquí: dashboard() las agrega desde ASESORIAS
+# para que el calendario no se separe de la vista de Asesorías.
 COMPROMISOS_DIA = {
     12: [
-        ("10:00", "Asesoría con Sabor y Sabe", "Mariana Lopez · Modalidad mixta",
+        ("10:00", "Asesoría con Sabor y Sabe", "Mariana López · Modalidad mixta",
          badge("Confirmada", "b-azul")),
-        ("14:00", "Revisar evidencia de EcoPack", "Lucia Fernandez · 3 archivos",
+        ("14:00", "Revisar evidencia de EcoPack", "Lucía Fernández · 3 archivos",
          badge("Por revisar", "b-amarillo")),
         ("16:30", "Calificar tarea de Krea Textil", "Jhon Ospina · Evidencia",
          badge("Pendiente", "b-linea")),
     ],
     20: [
-        ("09:00", "Asesoría con EcoPack", "Lucia Fernandez · Presencial",
+        ("09:00", "Asesoría con EcoPack", "Lucía Fernández · Presencial",
          badge("Por confirmar", "b-amarillo")),
     ],
     21: [
@@ -522,10 +1121,6 @@ COMPROMISOS_DIA = {
          badge("Evento", "b-azul", "calendar")),
         ("14:00", "Capacitación en modelado de negocios", "Sala virtual institucional",
          badge("Evento", "b-azul", "calendar")),
-    ],
-    22: [
-        ("15:30", "Asesoría con Krea Textil", "Jhon Ospina · Virtual",
-         badge("Confirmada", "b-azul")),
     ],
     26: [
         ("10:00", "Asesoría grupal de empleabilidad", "Sala de reuniones 204",
@@ -595,6 +1190,35 @@ def _lnk(href, icono, texto, clase="btn btn-primario"):
             % (clase, href, ico(icono, 16), texto))
 
 
+def _metrica_enlace(ic, lbl, val, uni, barra, nota, href, prev_titulo,
+                    prev_texto, cta, aria_val=None):
+    """Tarjeta de resumen que ademas abre la vista correspondiente.
+
+    Al pasar el mouse (o al enfocar con el teclado) muestra una mini vista
+    previa con lo que hay dentro; el clic navega. Se arma con las clases del
+    kit (.metrica-enlace/.mini-prev) pero con dos ajustes locales: el nombre
+    accesible del enlace es fijo (aria-label) y la preview queda oculta a los
+    lectores de pantalla (aria-hidden), para que no cambie al mostrarse.
+
+    `aria_val` permite que el lector de pantalla anuncie el dato completo
+    ("1 de 4") cuando en pantalla el numero y la unidad van separados."""
+    anuncio = val if aria_val is None else aria_val
+    return (
+        '<a class="card metrica metrica-enlace" href="%s" '
+        'aria-label="%s: %s. %s">'
+        '<div class="metrica-top"><span class="metrica-ico">%s</span>'
+        '<div><div class="metrica-lbl">%s</div>'
+        '<div class="metrica-val">%s<span class="u">%s</span></div></div>'
+        '<span class="metrica-flecha" aria-hidden="true">%s</span></div>'
+        '<div class="barra"><span style="width:%d%%"></span></div>'
+        '<div class="metrica-nota">%s</div>'
+        '<span class="mini-prev" aria-hidden="true"><b>%s</b><span>%s</span>'
+        '<em>%s %s</em></span></a>'
+        % (href, lbl, anuncio, cta, ico(ic, 18), lbl, val, uni, ico("der", 14),
+           barra, nota, prev_titulo, prev_texto, ico("der", 12), cta)
+    )
+
+
 def _a(icono, etiqueta, href):
     """Accion de tabla como enlace real (para navegar, no modal)."""
     return ('<a class="table-act" href="%s" title="%s" aria-label="%s">%s</a>'
@@ -622,12 +1246,66 @@ def _contador(n=0):
             '%d resultados</span>' % n)
 
 
-def _filtro(aria, opciones, col):
+ESTADO_VIS = {"En revision": "En revisión"}
+
+
+def _estado_vis(estado):
+    """Texto visible de un estado, sin tocar el valor interno.
+
+    Los datos y los filtros siguen usando "En revision" (contrato de
+    ?f=En+revision); solo la insignia se muestra acentuada."""
+    return ESTADO_VIS.get(estado, estado)
+
+
+def _filtro(aria, opciones, col, extra="", valores=None, etiquetas=None):
+    """Select de filtro de la tabla.
+
+    `valores` permite que una opcion represente varios valores de la celda:
+    {etiqueta: "En revision|Devuelta"} agrega data-valores y el JS del rol
+    acepta la fila cuando coincide cualquiera de ellos.
+
+    `etiquetas` separa lo que se ve de lo que se filtra: {valor: "texto"} deja
+    el `value` intacto (contratos como ?f=En+revision) y muestra el texto
+    acentuado."""
+    valores = valores or {}
+    etiquetas = etiquetas or {}
     opts = '<option value="">%s</option>' % opciones[0]
     for o in opciones[1:]:
-        opts += "<option>%s</option>" % o
+        extra_opt = (' data-valores="%s"' % valores[o]) if o in valores else ""
+        opts += '<option value="%s"%s>%s</option>' % (
+            o, extra_opt, etiquetas.get(o, o))
     return ('<select class="filtro" data-filtro="1" data-filtro-col="%d" '
-            'aria-label="%s">%s</select>' % (col, aria, opts))
+            'aria-label="%s"%s>%s</select>' % (col, aria, extra, opts))
+
+
+def _tabs_local(items):
+    """Pestanas de ambito local: cada item es (id-panel, etiqueta).
+
+    No usan `data-panel` ni la clase `.tabs`: el kit alterna TODOS los
+    `[data-panel-nombre]` de la pagina, y con pestanas anidadas ocultaba los
+    contenedores externos (selector de estudiante en blanco). El JS del rol
+    alterna solo los paneles hermanos de la barra.
+    """
+    h = '<div class="pest" data-tabs-local>'
+    for i, (pid, etiqueta) in enumerate(items):
+        h += ('<button type="button" role="tab" aria-selected="%s" class="%s" '
+              'data-tab-local="%s">%s</button>'
+              % ("true" if i == 0 else "false", "activo" if i == 0 else "",
+                 pid, etiqueta))
+    return h + "</div>"
+
+
+def _panel_local(clave, contenido, activo=False):
+    return '<div data-tab-panel="%s"%s>%s</div>' % (
+        clave, "" if activo else " hidden", contenido)
+
+
+def _paginas_doc(desde, hasta, total, tabla_id):
+    """Paginador de tabla del docente. Se marca `data-pag-doc` (no
+    `data-paginacion`) para que el kit no lo toque: el corte real de filas lo
+    hace el JS del rol, igual que el administrador con su propio paginador."""
+    return paginas(desde, hasta, total, tabla_id=tabla_id).replace(
+        "data-pag-adm", "data-pag-doc")
 
 
 def _tabs(items):
@@ -662,10 +1340,15 @@ def _barra(pct):
             '<span class="prog-num">%d%%</span>' % (pct, pct))
 
 
-def _tabla_con_titulo(titulo, cabeceras, filas):
-    return tabla(cabeceras, filas).replace(
+def _tabla_con_titulo(titulo, cabeceras, filas, pag=""):
+    h = tabla(cabeceras, filas).replace(
         '<table class="tabla">',
         '<table class="tabla"><caption class="visually-hidden">%s</caption>' % titulo, 1)
+    if pag:
+        # El pie de paginacion vive dentro de la tarjeta de la tabla (antes
+        # quedaba suelto debajo, con un borde superior sin tarjeta).
+        h = h.replace('</div><div data-vacio', "</div>%s<div data-vacio" % pag, 1)
+    return h
 
 
 def _campo_libre(idc, etiqueta, ph=""):
@@ -718,13 +1401,97 @@ def registrar(reg):
 
 
 # --- 21. Dashboard -----------------------------------------------------------
+# --- 21. Inicio --------------------------------------------------------------
+_MESES = {
+    "ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6,
+    "jul": 7, "ago": 8, "sep": 9, "oct": 10, "nov": 11, "dic": 12,
+}
+
+
+def _fecha_orden(texto):
+    """Convierte '14 nov 2024, 15:30' en una tupla ordenable."""
+    m = re.match(r"(\d{1,2})\s+([a-z]{3})\s+(\d{4})(?:,\s*(\d{1,2}):(\d{2}))?",
+                 texto)
+    if not m:
+        return (0, 0, 0, 0, 0)
+    dia, mes, anio, hora, minuto = m.groups()
+    return (int(anio), _MESES.get(mes, 0), int(dia), int(hora or 0),
+            int(minuto or 0))
+
+
+def _fecha_corta(texto):
+    """'14 nov 2024, 15:30' -> '14 nov'."""
+    return re.sub(r"\s+\d{4}(?=,|$)", "", texto.split(",")[0])
+
+
+def _badge_asesoria(estado):
+    """Etiqueta del estado de una asesoría, igual que en su vista."""
+    if estado == "Confirmada":
+        return badge("Confirmada", "b-azul")
+    if estado == "Finalizada":
+        return badge("Finalizada", "b-linea")
+    if estado == "Cancelada por el estudiante":
+        return badge("Cancelada", "b-neutra")
+    return badge("Por confirmar", "b-amarillo")
+
+
 def dashboard():
-    cuerpo = metricas([
-        ("maleta", "Emprendimientos asignados", "8", "", 62, "+2 este mes"),
-        ("chat", "Asesorías del mes", "14", "", 78, "+4"),
-        ("checklist", "Tareas por revisar", "9", "", 45, None),
-        ("trend", "Avances registrados", "23", "", 88, "+7"),
-    ])
+    """Inicio del docente.
+
+    Las cuatro tarjetas se calculan con los mismos datos que alimentan sus
+    vistas de destino y funcionan como enlaces: al pasar el cursor muestran
+    una mini vista previa y al hacer clic abren esa vista."""
+    emp_total = len(ASIGNADOS)
+    emp_evid = sum(1 for a in ASIGNADOS if a[6])
+    nov = [a for a in ASESORIAS if "nov 2024" in a[5]]
+    nov_conf = sum(1 for a in nov if a[4] == "Confirmada")
+    nov_pend = sum(1 for a in nov if a[4] == "Pendiente de confirmar")
+    nov_fin = sum(1 for a in nov if a[4] == "Finalizada")
+    futuras = sorted((a for a in nov
+                      if _fecha_orden(a[5])[:3] > _fecha_orden("12 nov 2024")[:3]),
+                     key=lambda a: _fecha_orden(a[5]))
+    siguiente = futuras[0]
+    revisar = [t for t in TAREAS_DOC if t[5] == "En revision"]
+    rev_alta = sum(1 for t in revisar if t[3] == "Alta")
+    avances = [(emp, x) for emp, lista in AVANCES_EMP.items() for x in lista]
+    av_evid = sum(1 for _, x in avances if x[4] == "Con evidencia")
+    ultimo = max(avances, key=lambda p: _fecha_orden(p[1][0]))
+    alta = sum(1 for t in TAREAS_DOC if t[3] == "Alta")
+    media = sum(1 for t in TAREAS_DOC if t[3] == "Media")
+    baja = sum(1 for t in TAREAS_DOC if t[3] == "Baja")
+
+    cartera = " · ".join("%s %d %%" % (a[0], a[3]) for a in ASIGNADOS[:3])
+    cuerpo = '<div class="grid g-4">' + _metrica_enlace(
+        "maleta", "Emprendimientos asignados", str(emp_total), "", 100,
+        "%d activos" % emp_total, "emprendimientos.html",
+        "Tus emprendimientos",
+        "%s · %d en cartera · %d con evidencia"
+        % (cartera, emp_total, emp_evid), "Ver emprendimientos")
+    cuerpo += _metrica_enlace(
+        "chat", "Asesorías del mes", str(len(nov)), "",
+        int(round(nov_fin * 100.0 / len(nov))),
+        "%d completadas" % nov_fin, "asesorias.html",
+        "Asesorías de noviembre",
+        "%d agendadas · %d por agendar · %d completadas · Próxima: %s, %s"
+        % (nov_conf, nov_pend, nov_fin, _fecha_corta(siguiente[5]),
+           siguiente[1]), "Ver asesorías")
+    cuerpo += _metrica_enlace(
+        "checklist", "Tareas por revisar", str(len(revisar)), "",
+        int(round(len(revisar) * 100.0 / len(TAREAS_DOC))),
+        "%d de prioridad alta" % rev_alta,
+        "tareas.html?f=En+revision", "Tareas en revisión",
+        "%d alta · %d media · %s (%s)"
+        % (rev_alta, len(revisar) - rev_alta, revisar[0][0], revisar[0][1]),
+        "Ver tareas en revisión")
+    cuerpo += _metrica_enlace(
+        "trend", "Avances registrados", str(len(avances)), "",
+        int(round(av_evid * 100.0 / len(avances))),
+        "%d con evidencia" % av_evid, "emprendimientos.html",
+        "Avances de tus emprendimientos",
+        "%d con evidencia · %d sin evidencia · Último: %s, %s"
+        % (av_evid, len(avances) - av_evid, _fecha_corta(ultimo[1][0]),
+           ultimo[0]), "Ver avances por emprendimiento")
+    cuerpo += "</div>"
     cuerpo += _sep()
     # La gráfica ocupa el ancho completo (barras responsivas) para que cada
     # emprendimiento se lea grande y centrado, en lugar de quedar encajonada.
@@ -733,9 +1500,22 @@ def dashboard():
         maximo=100, unidad="%", ancho=760, pad_l=200, pad_r=64, alto_fila=40,
         responsive=True))
     cuerpo += _sep()
-    compromisos = {}
-    for dia in sorted(COMPROMISOS_DIA):
-        compromisos[dia] = agenda([("Agenda del día", COMPROMISOS_DIA[dia])])
+    # Compromisos del calendario: lo propio del día (tareas y eventos) más las
+    # asesorías reales del mes desde ASESORIAS, sin duplicar las ya listadas.
+    compromisos = {dia: list(items) for dia, items in COMPROMISOS_DIA.items()}
+    for a in nov:
+        dia = _fecha_orden(a[5])[2]
+        if dia < 12:
+            continue
+        titulo = "Asesoría con %s" % a[1]
+        items = compromisos.setdefault(dia, [])
+        if any(i[1] == titulo for i in items):
+            continue
+        items.append((a[5].split(", ")[1], titulo,
+                      "%s · %s" % (a[2], a[6]), _badge_asesoria(a[4])))
+        items.sort(key=lambda i: i[0])
+    compromisos = {dia: agenda([("Agenda del día", items)])
+                   for dia, items in sorted(compromisos.items())}
     vacio = estado_vacio(
         "Sin compromisos",
         "No tienes asesorías, tareas ni eventos agendados para este día.",
@@ -744,12 +1524,12 @@ def dashboard():
     cuerpo += '<div class="grid">'
     cuerpo += card("Actividad reciente", _tabla_con_titulo(
         "Actividad reciente del docente",
-        ["Fecha", "Emprendimiento", "Accion registrada", "@ACC"],
+        ["Fecha", "Emprendimiento", "Acción registrada", "@ACC"],
         [["12 nov 2024", "Sabor y Sabe", "Registraste un avance de fase",
           _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
-         ["11 nov 2024", "Krea Textil", "Calificaste una tarea con 92 de 100",
-          _acc(_a("eye", "Ver tarea", "tarea-detalle.html"))],
-         ["11 nov 2024", "EcoPack", "Confirmaste la asesoría del 20 de noviembre",
+         ["11 nov 2024", "Sabor y Sabe", "Calificaste un avance con 92 de 100",
+          _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
+         ["11 nov 2024", "EcoPack", "Confirmaste la asesoría del 26 de noviembre",
           _acc(_a("eye", "Ver asesoría", "asesoria-detalle.html"))],
          ["08 nov 2024", "Sabor y Sabe", "Asignaste la tarea de evidencia fotografica",
           _acc(_a("eye", "Ver tarea", "tarea-detalle.html"))]]))
@@ -759,30 +1539,30 @@ def dashboard():
                    hint="<span>Haz clic en un día</span>")
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Acciones rapidas", '<div class="acciones-rapidas">'
+    cuerpo += card("Acciones rápidas", '<div class="acciones-rapidas">'
                    + _lnk("avance-form.html", "edit", "Registrar avance")
                    + _lnk("tareas.html", "check", "Calificar", "btn btn-secundario")
-                   + _lnk("diagnostico-revision.html", "clipboard", "Revisar diagnostico",
+                   + _lnk("diagnostico-revision.html", "clipboard", "Revisar diagnóstico",
                           "btn btn-secundario")
-                   + _lnk("asesoria-form.html", "chat", "Generar asesoria",
+                   + _lnk("asesoria-form.html", "chat", "Generar asesoría",
                           "btn btn-secundario")
                    + "</div>")
-    cuerpo += card("Proximas asesorias", agenda([
-        ("Hoy", [("10:00", "Sabor y Sabe", "Mariana Lopez · Modalidad mixta",
-                  badge("Confirmada", "b-azul"))]),
-        ("20 nov", [("09:00", "EcoPack", "Lucia Fernandez · Presencial",
-                     badge("Por confirmar", "b-amarillo"))]),
-        ("22 nov", [("15:30", "Krea Textil", "Jhon Ospina · Virtual",
-                     badge("Confirmada", "b-azul"))]),
-    ]))
+    proximas = [("Hoy", [("10:00", "Sabor y Sabe",
+                          "Mariana López · Modalidad mixta",
+                          badge("Confirmada", "b-azul"))])]
+    for a in futuras[:2]:
+        proximas.append((_fecha_corta(a[5]), [(
+            a[5].split(", ")[1], a[1], "%s · %s" % (a[2], a[6]),
+            _badge_asesoria(a[4]))]))
+    cuerpo += card("Próximas asesorías", agenda(proximas))
     cuerpo += card("Carga semanal", stacked_tareas(
-        [("Prioridad alta", 9, AZUL), ("Prioridad media", 14, "#162644"),
-         ("Prioridad baja", 5, "#bbbbbb")], "tareas"))
+        [("alta", alta, AZUL), ("media", media, "#162644"),
+         ("baja", baja, "#bbbbbb")], "tareas"))
     cuerpo += "</div></div>"
     return shell(R, "dashboard", "Inicio", cuerpo,
                  migas=["Inicio"],
                  sub="Panorama de tus emprendimientos asignados y tu carga de trabajo.",
-                 acciones=_lnk("asesoria-form.html", "plus", "Generar asesoria"))
+                 acciones=_lnk("asesoria-form.html", "plus", "Generar asesoría"))
 
 
 # --- 22. Mis asesorias -------------------------------------------------------
@@ -807,12 +1587,13 @@ def asesorias():
         "Como docente tú confirmas la <b>fecha y la hora</b> que el estudiante solicitó. "
         "El estudiante no puede agendar por su cuenta.", "bombilla")
     cuerpo += _sep()
+    pag = _paginas_doc(1, 6, len(filas), "tabla-asesorias")
     cuerpo += _zona(toolbar(filtros=filtros)
                     + _tabla_con_titulo(
                         "Asesorías agendadas, completadas y por agendar",
                         ["Código", "Emprendimiento", "Estudiante", "Tema",
-                         "Estado", "Fecha y hora", "Modalidad", "@ACC"], filas)
-                    + paginas(1, 6, 24))
+                         "Estado", "Fecha y hora", "Modalidad", "@ACC"], filas,
+                        pag=pag))
     return shell(R, "asesorias", "Mis asesorías", cuerpo,
                  migas=["Inicio", "Mis asesorías"],
                  sub="Todas tus asesorías: por agendar, agendadas y completadas.",
@@ -821,19 +1602,19 @@ def asesorias():
 
 # --- 23. Detalle de asesoria -------------------------------------------------
 def asesoria_detalle():
-    cuerpo = steps(["Solicitud recibida", "Confirmar fecha", "Registrar sesion",
-                    "Cerrar asesoria"], 1)
+    cuerpo = steps(["Solicitud recibida", "Confirmar fecha", "Registrar sesión",
+                    "Cerrar asesoría"], 1)
     cuerpo += _sep_lg()
     cuerpo += metricas([
         ("chat", "Modalidad", "Mixta", "", 60, "Sala 3 / enlace"),
-        ("reloj", "Duracion", "60", "min", 60, "10:00 a 11:00"),
+        ("reloj", "Duración", "60", "min", 60, "10:00 a 11:00"),
         ("users", "Agendada a", "2", "estudiantes", 100, "Todo el grupo"),
     ])
     cuerpo += _sep()
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
     cuerpo += card("Solicitud del estudiante", lista_def([
-        ("Estudiante que solicita", "Mariana Lopez"),
+        ("Estudiante que solicita", "Mariana López"),
         ("Emprendimiento", "Sabor y Sabe"),
         ("Tema por defecto", "FASE 2 - Prototipo: empaque"),
         ("Necesidades descritas", "Revisar el costo unitario del empaque y el "
@@ -941,14 +1722,15 @@ def _emp_resumen(emp):
         ("Sector", sector),
         ("Etapa", badge(etapa, "b-azul")),
         ("Avance", _barra(avance)),
-        ("Estado de revision", badge(rev, col)),
+        ("Estado de revisión", badge(_estado_vis(rev), col)),
         ("Evidencia", badge("Con evidencia" if evid else "Sin evidencia",
                             "b-azul" if evid else "b-amarillo")),
-        ("Ultima actividad", act),
+        ("Última actividad", act),
     ])) + card("Estudiantes del grupo", lista_def(
         [(n, "%s · %s" % (cod, sede)) for n, cod, sede in roster_de(emp)]))
     der = card("Acciones", '<div class="acciones-col">'
-               + _lnk("emprendimiento-expediente.html", "eye", "Abrir expediente")
+               + _lnk("emprendimiento-expediente.html?emp=%s" % _slug(emp),
+                      "eye", "Abrir expediente")
                + _lnk("asesorias.html", "chat", "Ver asesorías", "btn btn-secundario")
                + _lnk("diagnostico.html", "clipboard", "Diagnóstico",
                       "btn btn-secundario")
@@ -965,9 +1747,9 @@ def _secciones_estudiantes():
         emps = emprendimientos_de(est)
         if not emps:
             continue
-        tabs = _tabs([(_slug(e), e) for e in emps])
+        tabs = _tabs_local([(_slug(e), e) for e in emps])
         paneles = "".join(
-            _panel(_slug(e), _emp_resumen(e), activo=(i == 0))
+            _panel_local(_slug(e), _emp_resumen(e), activo=(i == 0))
             for i, e in enumerate(emps))
         out.append('<section data-est-perfil="%s" hidden>%s%s</section>'
                    % (_slug(est), tabs, paneles))
@@ -980,24 +1762,53 @@ def emprendimientos():
         "Solo aparecen los emprendimientos que tienes asignados. Al elegir un "
         "<b>estudiante</b>, sus emprendimientos se muestran como pestañas.", "bombilla")
     cuerpo += _sep()
-    cuerpo += metricas([
-        ("maleta", "Asignados", "%d" % len(ASIGNADOS), "", 62, None),
-        ("upload", "Con evidencia", "3", "", 60, None),
-        ("alerta", "Requieren atención", "2", "", 25, None),
-    ])
+    total = len(ASIGNADOS)
+    con_evid = [a[0] for a in ASIGNADOS if a[6]]
+    atencion = [a[0] for a in ASIGNADOS if REVISION[a[0]][0] in ("En revision",
+                                                                "Devuelta")]
+    n_rev = sum(1 for e in atencion if REVISION[e][0] == "En revision")
+    n_dev = len(atencion) - n_rev
+    cartera = " · ".join("%s %d %%" % (a[0], a[3]) for a in ASIGNADOS[:3])
+    detalle_at = " · ".join(
+        "%s %s" % (e, "en revisión" if REVISION[e][0] == "En revision"
+                   else "devuelta") for e in atencion)
+    # Las tres tarjetas abren la pestana Tabla con el filtro ya aplicado: el
+    # dato que muestran es exactamente el conjunto de filas que se ve al hacer
+    # clic (5, 3 y 2 resultados).
+    cuerpo += '<div class="grid g-3">'
+    cuerpo += _metrica_enlace(
+        "maleta", "Asignados", str(total), "", 100,
+        "%d expedientes" % total,
+        "emprendimientos.html?vista=tabla", "Tus emprendimientos",
+        "%s · %d en cartera" % (cartera, total), "Ver la tabla completa")
+    cuerpo += _metrica_enlace(
+        "upload", "Con evidencia", str(len(con_evid)), "",
+        int(round(len(con_evid) * 100.0 / total)), "%d de %d" % (len(con_evid),
+                                                                 total),
+        "emprendimientos.html?vista=tabla&f=" + quote_plus("Con evidencia"),
+        "Con evidencia", ", ".join(con_evid) + " · %d de %d expedientes"
+        % (len(con_evid), total), "Ver los %d expedientes" % len(con_evid))
+    cuerpo += _metrica_enlace(
+        "alerta", "Requieren atención", str(len(atencion)), "",
+        int(round(len(atencion) * 100.0 / total)),
+        "%d en revisión · %d devuelta" % (n_rev, n_dev),
+        "emprendimientos.html?vista=tabla&f=" + quote_plus("Requieren atención"),
+        "Requieren atención", detalle_at, "Ver los %d casos" % len(atencion))
+    cuerpo += "</div>"
     cuerpo += _sep()
 
     tarjetas = '<div class="emp-grid">'
     for emp, sector, etapa, avance, asesoria, act, _evid in ASIGNADOS:
-        pie = ('<a class="btn btn-sm btn-secundario" href="emprendimiento-expediente.html">'
-               "Abrir expediente</a>")
+        pie = ('<a class="btn btn-sm btn-secundario" '
+               'href="emprendimiento-expediente.html?emp=%s">'
+               "Abrir expediente</a>" % _slug(emp))
         grupo = estudiantes_de(emp)
         meta = ("1 estudiante" if len(grupo) == 1
                 else "%d estudiantes" % len(grupo)) + " · " + sector
         tarjetas += tarjeta_emp("maleta", emp, meta, avance,
                                 etapa, "%d%%" % avance, pie)
     tarjetas += "</div>"
-    tarjetas += ('<p class="nota-foot">Ultima actividad registrada en el expediente '
+    tarjetas += ('<p class="nota-foot">Última actividad registrada en el expediente '
                  "de cada estudiante.</p>")
 
     filas = []
@@ -1006,12 +1817,12 @@ def emprendimientos():
         filas.append([
             "<b>%s</b>" % emp,
             ", ".join(estudiantes_de(emp)),
-            sector, etapa, _barra(avance), badge(rev, col),
+            sector, etapa, _barra(avance), badge(_estado_vis(rev), col),
             badge("Con evidencia" if evid else "Sin evidencia",
                   "b-azul" if evid else "b-amarillo"),
             act,
             '<a class="btn btn-sm btn-secundario" '
-            'href="emprendimiento-expediente.html">Abrir</a>',
+            'href="emprendimiento-expediente.html?emp=%s">Abrir</a>' % _slug(emp),
         ])
     filtros = (_filtro("Filtrar por etapa",
                        ["Todas las etapas", "FASE 1 - Ideación", "FASE 2 - Prototipo",
@@ -1019,13 +1830,17 @@ def emprendimientos():
                + _filtro("Filtrar por sector",
                          ["Todos los sectores", "Alimentos", "Moda", "Ambiental",
                           "Muebles"], 2)
+               + _filtro("Filtrar por estado de revisión",
+                         ["Todos los estados", "En revisión", "Devuelta",
+                          "Requieren atención"], 5,
+                         valores={"Requieren atención": "En revision|Devuelta"})
                + _filtro("Filtrar por evidencia",
                          ["Toda la evidencia", "Con evidencia", "Sin evidencia"], 6)
                + _contador(len(filas)))
     tabla_proy = _zona(toolbar(filtros=filtros) + _tabla_con_titulo(
         "Proyectos asignados al docente",
         ["Emprendimiento", "Estudiante", "Sector", "Etapa", "Avance",
-         "Estado de revision", "Evidencia", "Ultima actividad", "@ACC"], filas))
+         "Estado de revisión", "Evidencia", "Última actividad", "@ACC"], filas))
 
     opts = '<option value="">Todos los estudiantes</option>'
     for est in TODOS_ESTUDIANTES:
@@ -1058,98 +1873,122 @@ def emprendimientos():
 
 
 # --- 26. Expediente ----------------------------------------------------------
-def emprendimiento_expediente():
-    """Expediente académico del docente: lo que califica y su evidencia."""
-    cuerpo = metricas([
-        ("trend", "Avance de fase", "62", "%", 62, "FASE 2 - Prototipo"),
-        ("medalla", "Promedio de calificación", "87", "/ 100", 87,
-         "3 avances calificados"),
-        ("clipboard", "Tareas con evidencia", "9", "/ 11", 82, "2 sin adjuntar"),
-        ("checklist", "Calificaciones por hacer", "2", "", 20, "Vence el 12 nov"),
-    ])
-    cuerpo += _sep()
-
-    avances = _tabla_con_titulo(
-        "Avances y calificaciones del emprendimiento",
-        ["Fecha", "Fase", "Descripcion del avance", "Calificacion", "@ACC"],
-        [["12 nov 2024", "FASE 2", "Prototipo de empaque listo para 20 unidades",
-          badge("92 de 100", "b-azul"), _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
-         ["05 nov 2024", "FASE 2", "Definicion de precios y punto de equilibrio",
-          badge("88 de 100", "b-azul"), _acc(_a("eye", "Ver avance", "avance-detalle.html"))],
-         ["28 oct 2024", "FASE 1", "Diagnostico inicial y problema claro",
-          badge("81 de 100", "b-azul"), _acc(_a("eye", "Ver avance", "avance-detalle.html"))]])
-
-    tareas = kanban([
-        ("Por calificar", [
-            ("Evidencia fotografica del punto de venta",
-             "Sabor y Sabe · Vence 12 nov 2024",
-             badge("Alta", "b-amarillo"),
-             _lnk("tarea-detalle.html", "check", "Calificar", "btn btn-sm btn-primario")),
-        ]),
-        ("Devueltas al estudiante", [
-            ("Presupuesto de insumos", "Sabor y Sabe · Faltan soportes",
-             badge("Media", "b-linea"),
-             _lnk("tarea-detalle.html", "eye", "Ver", "btn btn-sm btn-secundario")),
-        ]),
-        ("Calificadas", [
-            ("Perfil en redes sociales", "Calificada el 09 nov 2024",
-             badge("Completada", "b-azul"),
-             _lnk("tarea-detalle.html", "eye", "Ver", "btn btn-sm btn-secundario")),
-        ]),
+def _exp_metricas(emp):
+    """Metricas reales del emprendimiento (antes eran cifras de Sabor y Sabe)."""
+    a = INFO_EMP[emp]
+    av = AVANCES_EMP[emp]
+    prom = int(round(sum(x[3] for x in av) / max(1, len(av))))
+    tareas = [t for t in TAREAS_DOC if t[1] == emp]
+    hechas = len([t for t in tareas if t[5] == "Completada"])
+    por_cal = len([t for t in tareas if t[5] == "En revision"])
+    pct_ev = int(round(hechas * 100 / max(1, len(tareas))))
+    pend = next((t[4] for t in tareas if t[5] == "En revision"), "")
+    return metricas([
+        ("trend", "Avance de fase", str(a[3]), "%", a[3], a[2]),
+        ("medalla", "Promedio de calificación", str(prom), "/ 100", prom,
+         "%d avances calificados" % len(av)),
+        ("clipboard", "Tareas con evidencia", str(hechas), "/ %d" % len(tareas),
+         pct_ev, "%d sin adjuntar" % (len(tareas) - hechas)),
+        ("checklist", "Calificaciones por hacer", str(por_cal), "",
+         min(100, por_cal * 20),
+         ("Vence el %s" % pend) if pend else "Sin pendientes"),
     ])
 
-    filas_as = []
-    for cod, emp, estu, sector, estado, fecha, mod, tema in ASESORIAS:
-        if emp == "Sabor y Sabe":
-            filas_as.append([cod, fecha, mod, badge(estado, ESTADOS_AS[estado]),
-                             _acc(_a("eye", "Ver asesoría", "asesorias.html"))])
-    asesorias_panel = tabla(["Codigo", "Fecha y hora", "Modalidad", "Estado", "@ACC"],
-                            filas_as)
-    asesorias_panel += ('<div class="form-acciones">'
-                        + _lnk("asesorias.html", "chat", "Ver todas las asesorías",
-                               "btn btn-secundario") + "</div>")
 
-    diag_panel = lista_def([
-        ("Ultima revision", "28 oct 2024, 09:14"),
-        ("Puntaje heuristics", "7.8 de 10"),
-        ("Recomendaciones enviadas", "Canal de venta y presupuesto de publicidad"),
+def _exp_panel_avances(emp):
+    filas = [[fecha, fase, desc, badge("%d de 100" % nota, "b-azul"),
+              _acc(_a("eye", "Ver avance", "avance-detalle.html"))]
+             for fecha, fase, desc, nota, _evid in AVANCES_EMP[emp]]
+    return _tabla_con_titulo(
+        "Avances y calificaciones de %s" % emp,
+        ["Fecha", "Fase", "Descripción del avance", "Calificación", "@ACC"], filas)
+
+
+def _exp_panel_tareas(emp):
+    cols = [("Por calificar", []), ("Devueltas al estudiante", []),
+            ("Calificadas", [])]
+    for titulo, _e, estu, prio, vence, estado in TAREAS_DOC:
+        if _e != emp:
+            continue
+        if estado == "En revision":
+            pie = _lnk("tarea-detalle.html", "check", "Calificar",
+                       "btn btn-sm btn-primario")
+            col = 0
+        elif estado == "Devuelta":
+            pie = _lnk("tarea-detalle.html", "eye", "Ver",
+                       "btn btn-sm btn-secundario")
+            col = 1
+        elif estado == "Completada":
+            pie = _lnk("tarea-detalle.html", "eye", "Ver",
+                       "btn btn-sm btn-secundario")
+            col = 2
+        else:
+            pie = _lnk("tareas.html", "eye", "Revisar",
+                       "btn btn-sm btn-secundario")
+            col = 0
+        cols[col][1].append((titulo, "%s · Vence %s" % (estu, vence),
+                             badge(prio, PRIO_AS[prio]), pie))
+    return kanban(cols)
+
+
+def _exp_panel_asesorias(emp):
+    filas = [[cod, fecha, mod, badge(estado, ESTADOS_AS[estado]),
+              _acc(_a("eye", "Ver asesoría", "asesorias.html"))]
+             for cod, e, _estu, _sec, estado, fecha, mod, _tema in ASESORIAS
+             if e == emp]
+    return (tabla(["Código", "Fecha y hora", "Modalidad", "Estado", "@ACC"], filas)
+            + '<div class="form-acciones">'
+            + _lnk("asesorias.html", "chat", "Ver todas las asesorías",
+                   "btn btn-secundario") + "</div>")
+
+
+def _exp_panel_diag(emp):
+    d = DIAG_EMP[emp]
+    return (lista_def([
+        ("Última revisión", d["ultima_revision"]),
+        ("Puntaje heurístico", "%s de 10" % d["puntaje"]),
+        ("Fases completadas", d["fases_completadas"]),
+        ("Recomendaciones enviadas", d["recomendaciones"]),
     ]) + '<div class="form-acciones">' + _lnk(
-        "diagnostico-revision.html", "clipboard", "Revisar y recomendar") + "</div>"
+        "diagnostico-revision.html", "clipboard", "Revisar y recomendar")
+        + "</div>")
 
-    com_panel = ('<div class="comentarios">'
-                 + _comentario("Carlos Mendoza", "12 nov 2024",
-                               "Buen avance en el prototipo. Falta medir el costo unitario "
-                               "de los empaques.")
-                 + _comentario("Mariana Lopez", "11 nov 2024",
-                               "Adjunte las fotos del punto de venta y la lista de precios.")
-                 + "</div>"
-                 + '<div class="comentario-form">'
-                 + _campo_libre("com-obs", "Observacion",
-                                "Escribe una observacion para el estudiante")
-                 + _bt("publicar-comentario", "enviar", "Publicar comentario")
-                 + "</div>")
 
-    cuerpo += '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid">'
-    cuerpo += _tabs([("avances", "Avances"), ("tareas", "Tareas"),
-                     ("asesorias", "Asesorias"), ("diag", "Diagnostico"),
-                     ("com", "Comentarios")])
-    cuerpo += _panel("avances", avances, activo=True)
-    cuerpo += _panel("tareas", tareas)
-    cuerpo += _panel("asesorias", asesorias_panel)
-    cuerpo += _panel("diag", diag_panel)
-    cuerpo += _panel("com", com_panel)
+def _exp_panel_comentarios(emp):
+    return ('<div class="comentarios">'
+            + "".join(_comentario(a, f, t) for a, f, t in COMENTARIOS_EMP[emp])
+            + "</div>"
+            + '<div class="comentario-form">'
+            + _campo_libre("com-obs-%s" % _slug(emp), "Observación",
+                           "Escribe una observacion para el estudiante")
+            + _bt("publicar-comentario", "enviar", "Publicar comentario")
+            + "</div>")
+
+
+def _exp_seccion(emp, activo=False):
+    """Expediente completo de un emprendimiento, listo para conmutar con ?emp=."""
+    a = INFO_EMP[emp]
+    cuerpo = _exp_metricas(emp) + _sep()
+    cuerpo += '<div class="grid g-2-1"><div class="pila-exp">'
+    cuerpo += _tabs_local([
+        ("avances", "Avances"), ("tareas", "Tareas"),
+        ("asesorias", "Asesorías"), ("diag", "Diagnóstico"),
+        ("com", "Comentarios")])
+    cuerpo += _panel_local("avances", _exp_panel_avances(emp), activo=True)
+    cuerpo += _panel_local("tareas", _exp_panel_tareas(emp))
+    cuerpo += _panel_local("asesorias", _exp_panel_asesorias(emp))
+    cuerpo += _panel_local("diag", _exp_panel_diag(emp))
+    cuerpo += _panel_local("com", _exp_panel_comentarios(emp))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
     cuerpo += card("Datos del emprendimiento", lista_def([
-        ("Nombre", "Sabor y Sabe"),
-        ("Tipo", "Comercio"),
-        ("Sector", "Alimentos"),
-        ("Etapa", "FASE 2 - Prototipo"),
+        ("Nombre", emp),
+        ("Tipo", TIPO_EMP[emp]),
+        ("Sector", a[1]),
+        ("Etapa", a[2]),
     ]))
     cuerpo += card("Estudiantes del grupo", lista_def(
-        [(n, "%s · %s" % (cod, sede))
-         for n, cod, sede in roster_de("Sabor y Sabe")])
+        [(n, "%s · %s" % (cod, sede)) for n, cod, sede in roster_de(emp)])
         + '<div class="nota-foot">Este emprendimiento se trabaja en equipo: las '
           "calificaciones y los avances aplican a todos sus integrantes.</div>")
     cuerpo += card("Acciones",
@@ -1161,8 +2000,17 @@ def emprendimiento_expediente():
                           "btn btn-secundario")
                    + "</div>")
     cuerpo += "</div></div>"
-    return shell(R, "emprendimientos", "Sabor y Sabe", cuerpo,
-                 migas=["Inicio", "Emprendimientos asignados", "Sabor y Sabe"],
+    return ('<section data-exp-perfil="%s" data-exp-nombre="%s"%s>%s</section>'
+            % (_slug(emp), emp, "" if activo else " hidden", cuerpo))
+
+
+def emprendimiento_expediente():
+    """Expediente académico por emprendimiento (se elige con ?emp=<slug>)."""
+    primero = ASIGNADOS[0][0]
+    cuerpo = "".join(_exp_seccion(a[0], activo=(i == 0))
+                     for i, a in enumerate(ASIGNADOS))
+    return shell(R, "emprendimientos", primero, cuerpo,
+                 migas=["Inicio", "Emprendimientos asignados", primero],
                  sub="Expediente académico del emprendimiento y su grupo de estudiantes.",
                  acciones=_lnk("emprendimientos.html", "izq", "Volver",
                                "btn btn-secundario"))
@@ -1191,10 +2039,10 @@ def avance_detalle():
     ]))
     der = card("Datos del avance", lista_def([
         ("Emprendimiento", "Sabor y Sabe"),
-        ("Estudiante", "Mariana Lopez"),
+        ("Estudiante", "Mariana López"),
         ("Fase", "FASE 2 - Prototipo"),
         ("Fecha", "12 nov 2024"),
-        ("Estado de revision", badge("En revision", "b-amarillo")),
+        ("Estado de revisión", badge("En revisión", "b-amarillo")),
     ]))
     der += card("Acciones", '<div class="acciones-col">'
                 + _lnk("avance-form.html", "edit", "Editar avance")
@@ -1232,14 +2080,14 @@ def avance_form():
                + select("Fase alcanzada", FASES, req=True, valor="FASE 2 - Prototipo")
                + campo("Fecha del avance", tipo="date", valor="2024-11-12", req=True)
                + campo("Puntaje (0 a 100)", tipo="number", valor="92")
-               + select("Estado de revision",
-                        ["Pendiente", "En revision", "Calificada", "Devuelta"],
-                        valor="En revision")
+               + select("Estado de revisión",
+                        ["Pendiente", "En revisión", "Calificada", "Devuelta"],
+                        valor="En revisión")
                + select("Evidencia", ["Con evidencia", "Sin evidencia"],
                         valor="Con evidencia"))
     izq += card("Descripción del avance", campo(
         "Descripción", alto=True,
-        valor="Prototipo de empaque listo para 20 unidades, con ficha tecnica y "
+        valor="Prototipo de empaque listo para 20 unidades, con ficha técnica y "
               "costos unitarios.",
         ph="Qué se avanzó en esta fase"))
     der = card("Aplicar a los estudiantes del grupo", lista_def(
@@ -1263,67 +2111,209 @@ def avance_form():
 
 
 # --- 29. Diagnostico ---------------------------------------------------------
+def _diag_kpis(emp):
+    """KPIs del emprendimiento elegido (o del conjunto si emp es None).
+
+    Cada tarjeta es un enlace con vista previa: lleva al expediente del
+    emprendimiento, a la revision de diagnosticos o a sus tareas. En el
+    contexto agregado ("Todos") los destinos son las vistas generales."""
+    if emp:
+        d = DIAG_EMP[emp]
+        n_fases = int(d["fases_completadas"].split(" de ")[0])
+        n_tareas, tot_tareas = [int(x) for x in d["tareas_clave"].split(" de ")]
+        pend = tot_tareas - n_tareas
+        fases = " · ".join("F%d %d %%" % (i + 1, f[1])
+                           for i, f in enumerate(d["fases"]))
+        return ('<div class="grid g-4">'
+                + _metrica_enlace(
+                    "trend", "Fases completadas", str(n_fases), "de 4",
+                    d["pct_fases"], d["fases_completadas"] + " fases",
+                    "emprendimiento-expediente.html?emp=%s" % _slug(emp),
+                    "Fases de %s" % emp, fases, "Ver el expediente",
+                    aria_val="%s de 4" % n_fases)
+                + _metrica_enlace(
+                    "clipboard", "Diagnósticos", "3", "", 100,
+                    "3 de 3 registrados", "diagnostico-revision.html",
+                    "Diagnósticos de %s" % emp,
+                    "3 registrados · Último: %s · %s de 10"
+                    % (d["ultima_revision"], d["puntaje"]),
+                    "Ver los diagnósticos")
+                + _metrica_enlace(
+                    "checklist", "Tareas clave", str(n_tareas),
+                    "de %d" % tot_tareas, d["pct_tareas"],
+                    "%d pendiente%s" % (pend, "" if pend == 1 else "s"),
+                    "tareas.html?emp=" + quote_plus(emp),
+                    "Tareas clave de %s" % emp,
+                    "%d de %d completadas · %d pendiente%s"
+                    % (n_tareas, tot_tareas, pend, "" if pend == 1 else "s"),
+                    "Ver las tareas",
+                    aria_val="%d de %d" % (n_tareas, tot_tareas))
+                + _metrica_enlace(
+                    "medalla", "Puntaje heurístico", d["puntaje"], "/ 10",
+                    int(float(d["puntaje"]) * 10), "Revisión del docente",
+                    "diagnostico-revision.html", "Puntaje de %s" % emp,
+                    "%s de 10 · Recomendación: %s"
+                    % (d["puntaje"], d["recomendaciones"]),
+                    "Ver la revisión", aria_val="%s de 10" % d["puntaje"])
+                + "</div>")
+    n_fases = sum(int(DIAG_EMP[e]["fases_completadas"].split(" de ")[0])
+                  for e in EMPRESAS)
+    n_tareas = sum(int(DIAG_EMP[e]["tareas_clave"].split(" de ")[0])
+                   for e in EMPRESAS)
+    tot_tareas = sum(int(DIAG_EMP[e]["tareas_clave"].split(" de ")[1])
+                     for e in EMPRESAS)
+    tot_fases = 4 * len(EMPRESAS)
+    pct_fases = int(round(n_fases * 100 / tot_fases))
+    pct_tareas = int(round(n_tareas * 100 / max(1, tot_tareas)))
+    ultima = max((DIAG_EMP[e]["ultima_revision"] for e in EMPRESAS),
+                 key=_fecha_orden)
+    return ('<div class="grid g-4">'
+            + _metrica_enlace(
+                "maleta", "Emprendimientos", str(len(EMPRESAS)), "", 100,
+                "Cartera del docente", "emprendimientos.html",
+                "Tus emprendimientos",
+                "%s · %d en cartera" % (" · ".join(EMPRESAS[:3]),
+                                        len(EMPRESAS)),
+                "Ver emprendimientos")
+            + _metrica_enlace(
+                "trend", "Fases completadas", str(n_fases),
+                "de %d" % tot_fases, pct_fases, "%d%% del total" % pct_fases,
+                "emprendimientos.html", "Avance por fases",
+                "%d de %d fases completadas en %d emprendimientos"
+                % (n_fases, tot_fases, len(EMPRESAS)), "Ver emprendimientos",
+                aria_val="%d de %d" % (n_fases, tot_fases))
+            + _metrica_enlace(
+                "clipboard", "Diagnósticos", str(len(DIAGNOSTICOS)), "", 100,
+                "%d por emprendimiento" % (len(DIAGNOSTICOS) // len(EMPRESAS)),
+                "diagnostico-revision.html", "Diagnósticos del periodo",
+                "%d registrados · Última revisión: %s"
+                % (len(DIAGNOSTICOS), ultima), "Ver la revisión")
+            + _metrica_enlace(
+                "checklist", "Tareas clave", str(n_tareas),
+                "de %d" % tot_tareas, pct_tareas,
+                "%d pendientes" % (tot_tareas - n_tareas), "tareas.html",
+                "Tareas clave del programa",
+                "%d de %d completadas · %d pendientes"
+                % (n_tareas, tot_tareas, tot_tareas - n_tareas),
+                "Ver las tareas",
+                aria_val="%d de %d" % (n_tareas, tot_tareas))
+            + "</div>")
+
+
+def _diag_fases(emp):
+    if emp:
+        return DIAG_EMP[emp]["fases"]
+    out = []
+    for i, (fase, _v, color) in enumerate(DIAG_EMP[EMPRESAS[0]]["fases"]):
+        prom = int(round(sum(DIAG_EMP[e]["fases"][i][1] for e in EMPRESAS)
+                         / len(EMPRESAS)))
+        out.append((fase, prom, color))
+    return out
+
+
+def _diag_comportamiento(emp):
+    if emp:
+        return DIAG_EMP[emp]["comportamiento"]
+    return [int(round(sum(DIAG_EMP[e]["comportamiento"][i] for e in EMPRESAS)
+                       / len(EMPRESAS)))
+            for i in range(len(COMP_LABELS))]
+
+
+def _diag_historial(emp):
+    if emp:
+        return linea_tiempo([
+            (dia, mes, titulo, "%s · %s" % (emp, sub), href)
+            for dia, mes, titulo, sub, href in DIAG_EMP[emp]["historial"]])
+    items = []
+    for e in EMPRESAS:
+        dia, mes, titulo, sub, href = DIAG_EMP[e]["historial"][0]
+        items.append((dia, mes, titulo, "%s · %s" % (e, sub), href))
+    return linea_tiempo(items)
+
+
+def _diag_datos(emp):
+    if emp:
+        a = INFO_EMP[emp]
+        return card("Datos del emprendimiento", lista_def([
+            ("Emprendimiento", emp),
+            ("Sector", a[1]),
+            ("Etapa", a[2]),
+            ("Grupo", " · ".join(estudiantes_de(emp))),
+        ]))
+    return card("Datos de los emprendimientos", lista_def([
+        (e, "%s · %s" % (INFO_EMP[e][1], INFO_EMP[e][2])) for e in EMPRESAS]))
+
+
+def _diag_contexto(emp, activo=False):
+    """Bloque de informacion que cambia al elegir el emprendimiento."""
+    clave = _slug(emp) if emp else "todos"
+    titulo_fases = "Avance por fases" if emp else "Avance por fases (promedio)"
+    comportamiento = _diag_comportamiento(emp)
+    cuerpo = _diag_kpis(emp)
+    cuerpo += '<div class="grid g-2">'
+    cuerpo += card(titulo_fases, progreso_fases(_diag_fases(emp)))
+    cuerpo += card("Comportamiento", barras_h(
+        "", "", COMP_LABELS, comportamiento, maximo=100, unidad="%"))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid g-2-1"><div class="grid">'
+    cuerpo += card("Historial de diagnósticos" if emp
+                   else "Historial de diagnósticos recientes",
+                   _diag_historial(emp))
+    cuerpo += "</div><div class=\"grid\">%s</div></div>" % _diag_datos(emp)
+    return ('<div data-diag-contexto="%s"%s>%s</div>'
+            % (clave, "" if activo else " hidden", cuerpo))
+
+
+def _diag_filtro_emp():
+    opts = '<option value="" data-slug="todos">Todos los emprendimientos</option>'
+    for e in EMPRESAS:
+        opts += '<option value="%s" data-slug="%s">%s</option>' % (e, _slug(e), e)
+    return ('<select class="filtro" data-filtro="off" data-diag-emp '
+            'data-filtro-col="1" aria-label="Filtrar por emprendimiento">%s</select>' % opts)
+
+
+def _diag_filtro_proyecto():
+    opts = '<option value="">Todos los proyectos</option>'
+    for e in EMPRESAS:
+        opts += "<option>%s</option>" % e
+    return ('<select class="filtro" data-filtro="1" data-diag-proyecto '
+            'data-filtro-col="1" aria-label="Filtrar por proyecto o grupo">%s</select>'
+            % opts)
+
+
 def diagnostico():
     cuerpo = callout(
         "Elige el emprendimiento y filtra por estudiante o proyecto. El "
         "diagnóstico se calcula por la <b>completación de las 4 fases</b> o por "
         "una serie de <b>tareas clave</b> completadas.", "bombilla")
     cuerpo += _sep()
-    cuerpo += metricas([
-        ("maleta", "Emprendimientos", "%d" % len(ASIGNADOS), "", 60, None),
-        ("trend", "Fases completadas", "1 de 4", "", 25, None),
-        ("clipboard", "Diagnósticos", "3", "", 45, None),
-        ("checklist", "Tareas clave", "2 de 5", "", 40, None),
-    ])
-    cuerpo += _sep()
-    cuerpo += ('<div class="grid g-2-1">'
-               '<div class="grid">'
-               + select("Emprendimiento", EMPRESAS, valor="Sabor y Sabe")
-               + select("Estudiante", ["Todos los estudiantes"] + TODOS_ESTUDIANTES,
-                        valor="Mariana Lopez")
-               + select("Proyecto / grupo", ["Todos los proyectos"] + EMPRESAS,
-                        valor="Sabor y Sabe")
-               + select("Origen del diagnóstico",
-                        ["Fases y tareas clave", "Solo por fases (4)",
-                         "Solo por tareas clave"], valor="Fases y tareas clave")
-               + "</div>"
-               '<div class="grid">'
-               + card("Datos del emprendimiento", lista_def([
-                   ("Emprendimiento", "Sabor y Sabe"),
-                   ("Sector", "Alimentos"),
-                   ("Etapa", "FASE 2 - Prototipo"),
-                   ("Grupo", "Mariana Lopez · Diego Torres"),
-               ]))
-               + "</div></div>")
-    cuerpo += _sep()
-    cuerpo += card("Avance por fases", progreso_fases(DIAG_FASES))
-    cuerpo += card("Comportamiento entrepreneurial", barras_h(
-        "", "", ["Visión", "Creatividad", "Resiliencia", "Liderazgo",
-                 "Trabajo en equipo", "Toma de decisiones"],
-        [85, 78, 70, 82, 88, 66], maximo=100, unidad="%"))
-    filtros = (_filtro("Filtrar por estado",
-                       ["Todos los estados", "Completado", "En curso",
-                        "Pendiente"], 4)
-               + _filtro("Filtrar por emprendimiento",
-                         ["Todos los emprendimientos"] + EMPRESAS, 1)
+    filtros = (_diag_filtro_emp()
                + _filtro("Filtrar por estudiante",
                          ["Todos los estudiantes"] + TODOS_ESTUDIANTES, 2)
+               + _diag_filtro_proyecto()
+               + _filtro("Filtrar por origen del diagnóstico",
+                         ["Todos los orígenes", "Fases y tareas clave",
+                          "Solo por fases (4)", "Solo por tareas clave"], 0)
+               + _filtro("Filtrar por estado",
+                         ["Todos los estados", "Completado", "En curso",
+                          "Pendiente"], 4)
                + _contador(len(DIAGNOSTICOS)))
-    filas = [[origen, emp, estu, tema, badge(estado, "b-azul" if estado == "Completado"
-              else "b-amarillo" if estado == "En curso" else "b-linea"), fecha,
+    filas = [['<span>%s</span><div class="celda-sub">%s</div>' % (origen, detalle),
+              emp, estu, tema,
+              badge(estado, "b-azul" if estado == "Completado"
+                    else "b-amarillo" if estado == "En curso" else "b-linea"),
+              fecha,
               _acc(_a("eye", "Revisar", "diagnostico-revision.html"))]
-             for origen, emp, estu, tema, estado, fecha in DIAGNOSTICOS]
-    cuerpo += _zona(toolbar(buscar=False, filtros=filtros)
+             for origen, detalle, emp, estu, tema, estado, fecha in DIAGNOSTICOS]
+    contextos = _diag_contexto(None, activo=True)
+    contextos += "".join(_diag_contexto(e) for e in EMPRESAS)
+    pag = _paginas_doc(1, 5, len(filas), "tabla-diagnosticos")
+    cuerpo += _zona(toolbar(buscar=True, filtros=filtros)
+                    + contextos
                     + _tabla_con_titulo(
                         "Diagnósticos por fase o tareas clave",
                         ["Origen", "Emprendimiento", "Estudiante", "Tema", "Estado",
-                         "Fecha", "@ACC"], filas)
-                    + paginas(1, 3, 3, tam=10))
-    cuerpo += _sep()
-    cuerpo += card("Historial de diagnósticos", linea_tiempo([
-        ("28", "oct", "Diagnóstico FASE 1", "Puntaje 7.8 de 10", ""),
-        ("12", "nov", "Diagnóstico FASE 2 en curso", "62% de la fase", ""),
-    ]))
+                         "Fecha", "@ACC"], filas, pag=pag))
     return shell(R, "diagnostico", "Diagnóstico", cuerpo,
                  migas=["Inicio", "Diagnóstico"],
                  sub="Diagnóstico por fases o por tareas clave de cada emprendimiento.",
@@ -1338,7 +2328,7 @@ def diagnostico_revision():
         "responde el estudiante y la revisión se guarda en el expediente.", "bombilla")
     cuerpo += _sep()
     cuerpo += metricas([
-        ("trend", "Puntaje heuristics", "7.8", "/ 10", 78, "28 oct 2024"),
+        ("trend", "Puntaje heurístico", "7.8", "/ 10", 78, "28 oct 2024"),
         ("clipboard", "Fases completadas", "1", "de 4", 25, "FASE 1"),
         ("checklist", "Tareas clave", "2", "de 5", 40, "3 pendientes"),
     ])
@@ -1346,7 +2336,7 @@ def diagnostico_revision():
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
     cuerpo += card("Datos de la revisión", lista_def([
-        ("Estudiante", "Mariana Lopez"),
+        ("Estudiante", "Mariana López"),
         ("Emprendimiento", "Sabor y Sabe"),
         ("Respondido", "28 oct 2024, 09:14"),
         ("Origen", "Fases y tareas clave"),
@@ -1367,12 +2357,12 @@ def diagnostico_revision():
         ("A reforzar", "Toma de decisiones"),
         ("Pendientes", "FASES 2 a 4 y 3 tareas clave"),
     ]))
-    cuerpo += card("Pendientes de revision", _tabla_con_titulo(
-        "Pendientes de revision del diagnostico",
+    cuerpo += card("Pendientes de revisión", _tabla_con_titulo(
+        "Pendientes de revisión del diagnóstico",
         ["Estudiante", "Emprendimiento", "Fecha", "@ACC"],
         [["Jhon Ospina", "Krea Textil", "30 oct 2024",
           _acc(_a("eye", "Revisar", "diagnostico-revision.html"))],
-         ["Sofia Ramirez", "Aromas del Sur", "02 nov 2024",
+         ["Sofía Ramírez", "Aromas del Sur", "02 nov 2024",
           _acc(_a("eye", "Revisar", "diagnostico-revision.html"))]]))
     cuerpo += "</div></div>"
     return shell(R, "diagnostico", "Revisión del diagnóstico", cuerpo,
@@ -1384,7 +2374,7 @@ def diagnostico_revision():
 
 def _cuerpo_tarea():
     emps = ["Sabor y Sabe", "Krea Textil", "EcoPack", "Aromas del Sur"]
-    ests = ["Mariana Lopez", "Jhon Ospina", "Lucia Fernandez", "Sofia Ramirez"]
+    ests = ["Mariana López", "Jhon Ospina", "Lucía Fernández", "Sofía Ramírez"]
     return ('<div class="grid g-2 g-col">'
             + campo("Título de la tarea", ph="Ej.: Presentación de pitch", req=True)
             + select("Emprendimiento", ["- Elegir -"] + emps)
@@ -1407,24 +2397,29 @@ def tareas():
         filas.append([
             "<b>%s</b>" % titulo, emp, estu,
             badge(prio, PRIO_AS[prio]), vence,
-            badge(estado, ESTADO_TAREA[estado]),
+            badge(_estado_vis(estado), ESTADO_TAREA[estado]),
             _acc(*acciones),
         ])
+    empresas_tar = [e for e in EMPRESAS if any(t[1] == e for t in TAREAS_DOC)]
     filtros = (_filtro("Filtrar por estado",
                        ["Todos los estados", "Pendiente", "En revision",
-                        "Completada"], 5)
+                        "Devuelta", "Completada"], 5,
+                       etiquetas={"En revision": "En revisión"})
                + _filtro("Filtrar por prioridad",
                          ["Toda la prioridad", "Alta", "Media", "Baja"], 3)
+               + _filtro("Filtrar por emprendimiento",
+                         ["Todos los emprendimientos"] + empresas_tar, 1)
                + _contador(len(filas)))
     cuerpo = callout("La tarea se considera <b>completada</b> cuando el estudiante "
                      "adjunta al menos una evidencia.", "bombilla")
     cuerpo += '<div id="form-tarea" hidden>' + _cuerpo_tarea() + "</div>"
     cuerpo += _sep()
+    pag = _paginas_doc(1, 5, len(filas), "tabla-tareas")
     cuerpo += _zona(toolbar(filtros=filtros)
                     + _tabla_con_titulo("Tareas asignadas por revisar",
                                         ["Tarea", "Emprendimiento", "Estudiante",
-                                         "Prioridad", "Vence", "Estado", "@ACC"], filas)
-                    + paginas(1, 5, 23))
+                                         "Prioridad", "Vence", "Estado", "@ACC"], filas,
+                                        pag=pag))
     return shell(R, "tareas", "Tareas asignadas", cuerpo,
                  migas=["Inicio", "Tareas"],
                  sub="Revisa y califica las entregas con evidencia de tus estudiantes.",
@@ -1459,14 +2454,14 @@ def tarea_detalle():
     der = card("Datos de la entrega", lista_def([
         ("Tarea", "Evidencia fotografica del punto de venta"),
         ("Emprendimiento", "Sabor y Sabe"),
-        ("Estudiante", "Mariana Lopez"),
+        ("Estudiante", "Mariana López"),
         ("Entregada", "12 nov 2024, 16:40"),
         ("Vence", "12 nov 2024"),
     ]))
     der += card("Calificación", circular(92, "Calificación", "Sobre 100")
                 + campo("Puntaje (0 a 100)", tipo="number", valor="92")
                 + select("Resultado",
-                         ["Aprobada", "En revision", "Devuelta"], valor="Aprobada"))
+                         ["Aprobada", "En revisión", "Devuelta"], valor="Aprobada"))
     der += card("Acciones", '<div class="acciones-col">'
                 + _bt("guardar-calificacion", "check", "Guardar calificación")
                 + _lnk("tarea-devolver.html", "x", "Devolver tarea",
@@ -1490,7 +2485,7 @@ def tarea_devolver():
     izq = card("Datos de la entrega", lista_def([
         ("Tarea", "Prototipo de empaque"),
         ("Emprendimiento", "EcoPack"),
-        ("Estudiante", "Lucia Fernandez"),
+        ("Estudiante", "Lucía Fernández"),
         ("Entregada", "14 nov 2024, 11:20"),
         ("Vence", "14 nov 2024"),
     ]))
@@ -1978,24 +2973,24 @@ def notificaciones():
              "Tareas · Sabor y Sabe · Vencio el 09 nov 2024",
              "tareas.html", "alta",
              '<a class="btn btn-sm btn-primario" href="tareas.html">Revisar</a>'
-             + _b("check", "Marcar como leída")),
+             + _ba("marcar-leida", "check", "Marcar como leída")),
             ("reloj", "Revisión de diagnóstico pendiente",
              "Emprendimientos · Krea Textil · Sin revisar hace 3 días",
              "diagnostico.html", "alta",
              '<a class="btn btn-sm btn-primario" href="diagnostico.html">Revisar</a>'
-             + _b("check", "Marcar como leída")),
+             + _ba("marcar-leida", "check", "Marcar como leída")),
         ]),
         ("Hoy", [
-            ("bell", "Solicitud de asesoría de Mariana Lopez",
+            ("bell", "Solicitud de asesoría de Mariana López",
              "Asesorías · Modalidad mixta · 10:00",
              "asesoria-detalle.html", "media",
              '<a class="btn btn-sm btn-primario" href="asesoria-detalle.html">Confirmar</a>'
-             + _b("check", "Marcar como leída")),
+             + _ba("marcar-leida", "check", "Marcar como leída")),
             ("upload", "Evidencia enviada: Sabor y Sabe",
              "Emprendimientos · Prototipo · Entregada 16:40",
              "tarea-detalle.html", "media",
              '<a class="btn btn-sm btn-primario" href="tarea-detalle.html">Calificar</a>'
-             + _b("check", "Marcar como leída")),
+             + _ba("marcar-leida", "check", "Marcar como leída")),
         ]),
         ("Recientes", [
             ("check", "Asesoría finalizada con EcoPack",
@@ -2007,7 +3002,7 @@ def notificaciones():
         ]),
     ]
     cuerpo = metricas([
-        ("alerta", "Requieren accion hoy", "2", "", 40, None),
+        ("alerta", "Requieren acción hoy", "2", "", 40, None),
         ("bell", "Pendientes de revisión", "2", "", 25, None),
         ("check", "Resueltas este mes", "18", "", 90, None),
     ])
@@ -2024,9 +3019,9 @@ def notificaciones():
                "</div>")
     cuerpo += lista_avisos(grupos)
     cuerpo += ('<p class="nota-foot">Las notificaciones se archivan solas '
-               "30 dias despues de resolverse.</p>")
+               "30 días después de resolverse.</p>")
     return shell(R, "notificaciones", "Notificaciones", cuerpo,
                  migas=["Inicio", "Notificaciones"],
                  sub="Lo que debes revisar, ordenado por urgencia.",
-                 acciones=_bt("marcar-todo-leido", "check", "Marcar todo como leido",
+                 acciones=_bt("marcar-todo-leido", "check", "Marcar todo como leído",
                               "btn btn-secundario"))
