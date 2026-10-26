@@ -704,7 +704,7 @@ asesoría.
 | `POST /api/requests` | Cualquier sesión | El solicitante es siempre la sesión actual |
 | `GET /api/requests` | Admin | Bandeja paginada con contador de pendientes |
 | `GET /api/requests/:id` | Admin | |
-| `PUT /api/requests/:id/approve` | Admin | Aplica el efecto de dominio una sola vez |
+| `PUT /api/requests/:id/approve` | Admin | Aplica el efecto de dominio una sola vez; una `Cita` exige docente y horario |
 | `PUT /api/requests/:id/reject` | Admin | Motivo obligatorio, sin efecto de dominio |
 
 Forma de una solicitud:
@@ -747,7 +747,8 @@ Forma de una solicitud:
   (`403 ROLE_NOT_ALLOWED`) y un emprendimiento propio vigente (`400` si falta o es ajeno).
   `Paralelo` exige además que esté `Aprobado` (`422 ENTREPRENEURSHIP_NOT_APPROVED`).
 - `detalle` es texto libre: el diagrama no tiene columnas para los campos del prototipo
-  (P-20).
+  (P-20). En una `Cita`, la fecha y la hora preferidas viajan ahí; la aprobación fija el
+  bloque real y crea la asesoría.
 
 `201` con la solicitud. Audita `Solicitud creada` y notifica a los administradores
 `Activo` con la URL de la bandeja.
@@ -783,17 +784,39 @@ Forma de una solicitud:
 
 ### `PUT /api/requests/:id/approve`
 
-Sin cuerpo. `200` con la solicitud en `Aprobada`, `fechaResolucion` y `resueltoPor`.
+Cuerpo vacío para `Desbloqueo` y `Paralelo`. Para una `Cita`, el cuerpo lleva los datos con
+los que nace la asesoría (P-19 cerrado en la Etapa 8):
+
+```json
+{
+  "docenteId": 2,
+  "tema": "Validación de la propuesta de valor",
+  "fecha": "2026-12-10",
+  "horaInicio": "09:00",
+  "horaFin": "10:00",
+  "modalidadId": 2,
+  "lugarEnlace": "https://meet.example.com/asesoria"
+}
+```
+
+`docenteId`, `tema`, `fecha`, `horaInicio` y `horaFin` son obligatorios para una `Cita`
+(`400 VALIDATION_ERROR` con el campo que falte); `modalidadId` y `lugarEnlace` son
+opcionales. Enviar campos de programación en otro tipo de solicitud → `400`.
+
+`200` con la solicitud en `Aprobada`, `fechaResolucion` y `resueltoPor`.
 
 | Tipo | Efecto |
 |---|---|
 | `Desbloqueo` | `Limitado`/`Inactivo` → `Activo` (si ya estaba `Activo`, solo se resuelve) |
 | `Paralelo` | `es_paralelo = TRUE` en el emprendimiento, recalculando `paralelos_maximos` |
-| `Cita` | Ninguno todavía: la asesoría se crea en su módulo (P-19) |
+| `Cita` | Crea la asesoría en `Programada` con el docente y el bloque elegidos; el docente la confirma después con `accept` |
 
-Una segunda aprobación responde `422 REQUEST_ALREADY_RESOLVED`. Si la cuenta o el
-emprendimiento ya no existen: `422 REQUEST_TARGET_MISSING`. Audita `Solicitud aprobada`
-con el efecto aplicado y notifica al solicitante.
+La asesoría de una `Cita` se crea con las mismas reglas que `POST /api/advice`: docente
+vigente y `Activo` (`422 MENTOR_NOT_ACTIVE`), modalidad existente y control de solapamiento
+(`409 ADVICE_SCHEDULE_CONFLICT`). Una segunda aprobación responde
+`422 REQUEST_ALREADY_RESOLVED`. Si la cuenta o el emprendimiento ya no existen: `422
+REQUEST_TARGET_MISSING`. Audita `Solicitud aprobada` con el efecto aplicado (incluida la
+asesoría creada) y notifica al solicitante.
 
 ### `PUT /api/requests/:id/reject`
 
@@ -1040,26 +1063,192 @@ Admite `descripcion`, `fasePlanId`, `puntaje`, `estadoRevision`, `fechaSeguimien
 `200` con `{ "success": true, "message": "Seguimiento dado de baja." }`. La fila conserva
 `fechaEliminacion` y sus archivos se borran del disco (BR-006).
 
-## Adjuntos
+## Asesorías
 
-Evidencias de una tarea o de un seguimiento (FR-008, BR-006, BR-007). Módulo de trabajo:
+Acompañamiento del docente al emprendimiento (FR-004, FR-015, BR-002). Módulo de trabajo:
 sesión **y** cuenta `Activo`.
+
+El estudiante **solicita** (bandeja de solicitudes) y **lee**; nunca crea, edita ni
+confirma una sesión. La creación directa es del administrador o del docente asignado, y la
+confirmación del docente asignado o del administrador.
 
 | Ruta | Roles | Notas |
 |---|---|---|
-| `POST /api/attachments/:entity/:id` | Admin, Docente, Estudiante | `entity`: `task` o `tracing`; `multipart/form-data`, campo `file` |
+| `GET /api/advice` | Admin, Docente, Estudiante | Cada rol con su alcance |
+| `GET /api/advice/:id` | Admin, Docente, Estudiante | Fuera de alcance: `404` |
+| `POST /api/advice` | Admin, Docente | El docente solo para sí mismo y en sus emprendimientos asignados |
+| `PUT /api/advice/:id` | Admin, Docente asignado | Contenido, horario y las transiciones del día |
+| `POST /api/advice/:id/accept` | Admin, Docente asignado | `Por agendar`/`Programada` → `Confirmada` |
+| `POST /api/advice/:id/repropose` | Admin, Docente asignado | Exige horario; deja `Programada` |
+| `POST /api/advice/:id/reject` | Admin, Docente asignado | Motivo obligatorio; deja `Cancelada` |
+| `DELETE /api/advice/:id` | Admin, Docente asignado | Baja lógica + evidencias (BR-006) |
+
+Forma de una asesoría:
+
+```json
+{
+  "id": 1,
+  "codigo": "ASES-001",
+  "tema": "Validación de la propuesta de valor",
+  "estado": "Programada",
+  "fecha": "2026-12-01",
+  "horaInicio": "09:00",
+  "horaFin": "10:00",
+  "fechaAsesoria": "2026-12-01T14:00:00.000Z",
+  "lugarEnlace": "https://meet.example.com/asesoria",
+  "modalidad": { "id": 2, "nombre": "Virtual" },
+  "emprendimiento": { "id": 1, "codigo": "EMP-001", "nombre": "Sabor y Sabe" },
+  "estudiante": {
+    "id": 4,
+    "nombres": "Estudiante",
+    "apellidos": "Demo Uno",
+    "correoInstitucional": "estudiante.demo1@uniminuto.edu.co"
+  },
+  "docente": {
+    "id": 2,
+    "nombres": "Docente",
+    "apellidos": "Demo Uno",
+    "correoInstitucional": "docente.demo1@uniminuto.edu.co"
+  },
+  "evidencias": 0
+}
+```
+
+`codigo` se deriva del id (`ASES-###`): el diagrama no tiene columna de código (P-28).
+`fecha`/`horaInicio`/`horaFin` son el bloque de `fecha_y_horarios`; `fechaAsesoria` es ese
+bloque en la zona `America/Bogota`. Sin horario, los cuatro son `null` y el estado es
+`Por agendar`.
+
+### `GET /api/advice`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `estado` | `Por agendar` · `Programada` · `Confirmada` · `En curso` · `Completada` · `Cancelada` | — | |
+| `grupo` | `Agendada` | — | Etiqueta del prototipo: `Programada` + `Confirmada` + `En curso`; no se guarda |
+| `docenteId` | entero | — | |
+| `estudianteId` | entero | — | |
+| `emprendimientoId` | entero | — | |
+| `modalidadId` | entero | — | |
+| `q` | texto ≤ 100 | — | Tema, emprendimiento, estudiante o docente |
+| `desde` · `hasta` | `AAAA-MM-DD` | — | Sobre la fecha del bloque |
+| `sort` | `fecha` · `estado` · `tema` · `emprendimiento` · `estudiante` · `docente` | `fecha` | |
+| `order` | `asc` · `desc` | `desc` | |
+
+`200` con `{ items, total, page, pageSize }`. El alcance es el de siempre: el administrador
+ve todo, el docente solo las que tiene asignadas y el estudiante solo las suyas. Un filtro
+por un `docenteId` ajeno no amplía el alcance.
+
+### `POST /api/advice`
+
+```json
+{
+  "emprendimientoId": 1,
+  "docenteId": 2,
+  "tema": "Revisión del modelo de negocio",
+  "modalidadId": 2,
+  "lugarEnlace": "https://meet.example.com/asesoria",
+  "fecha": "2026-12-01",
+  "horaInicio": "09:00",
+  "horaFin": "10:00"
+}
+```
+
+- `emprendimientoId` y `docenteId` son obligatorios; `tema` también. El horario es todo o
+  nada (`400` si falta una de las tres partes o si `horaFin <= horaInicio`).
+- Con horario nace `Programada`; sin horario, `Por agendar`.
+- El administrador puede agendar cualquier emprendimiento. El docente solo uno con
+  asignación activa y con él mismo como docente (`403` si intenta asignar a otro; `404` si
+  el emprendimiento no es suyo).
+- `docenteId` debe ser un docente vigente con rol Docente (`400`) y cuenta `Activo`
+  (`422 MENTOR_NOT_ACTIVE`). `modalidadId` debe existir (`400`).
+- Si el docente ya tiene una asesoría que se solapa ese día → `409
+  ADVICE_SCHEDULE_CONFLICT` (T35).
+
+`201` con la asesoría. Audita `Alta de asesoría` y avisa al estudiante y al docente.
+
+### `PUT /api/advice/:id`
+
+Edita `tema`, `lugarEnlace`, `modalidadId`, el bloque de horario y `estado`. `docenteId`
+solo lo cambia el administrador (`403 FIELD_NOT_ALLOWED` para el docente). El horario se
+envía completo o no se envía; si la asesoría estaba `Por agendar` y llega un bloque, pasa a
+`Programada`. `estado` solo acepta `En curso` (desde `Confirmada`) y `Completada` (desde
+`En curso`); cualquier otra transición → `422 INVALID_ADVICE_TRANSITION`. Una asesoría
+`Completada` o `Cancelada` ya no se edita (`422 ADVICE_NOT_EDITABLE`), y una `En curso` no
+cambia de horario. Audita `Edición de asesoría`.
+
+### `POST /api/advice/:id/accept`
+
+Cuerpo opcional con el bloque (`fecha`, `horaInicio`, `horaFin`). Confirma una asesoría
+`Por agendar` o `Programada`; sin bloque en el cuerpo ni en la fila → `422
+ADVICE_NOT_SCHEDULED`. Vuelve a comprobar el solapamiento (`409`). Audita `Confirmación de
+asesoría` y avisa al estudiante.
+
+### `POST /api/advice/:id/repropose`
+
+```json
+{ "fecha": "2026-12-04", "horaInicio": "14:00", "horaFin": "15:00" }
+```
+
+Exige el bloque completo y deja la asesoría en `Programada` desde `Por agendar`,
+`Programada` o `Confirmada`. Comprueba el solapamiento (`409`). Audita `Reprogramación de
+asesoría` y avisa al estudiante.
+
+### `POST /api/advice/:id/reject`
+
+```json
+{ "motivo": "El docente no tiene disponibilidad" }
+```
+
+`motivo` obligatorio. Deja `Cancelada` desde `Por agendar`, `Programada` o `Confirmada`; una
+sesión `En curso`, `Completada` o ya `Cancelada` responde `422 INVALID_ADVICE_TRANSITION`.
+El diagrama no tiene columna de motivo (P-29): se guarda en la auditoría
+(`Cancelación de asesoría`) y se envía en el aviso al estudiante.
+
+### `DELETE /api/advice/:id`
+
+`200` con `{ "success": true, "message": "Asesoría dada de baja." }`. Marca
+`fechaEliminacion`, da de baja lógica sus evidencias y borra los archivos del disco después
+del commit (BR-006). La fila se conserva para el histórico. Audita `Baja lógica de
+asesoría` y avisa al estudiante.
+
+### Ciclo de vida
+
+```
+Por agendar ──(accept + horario)──► Confirmada ──(PUT estado)──► En curso ──► Completada
+     │                                  │
+     ├──(repropose)──► Programada ──────┘
+     └──(reject)──────────────────────────────────────────────► Cancelada
+```
+
+`Completada` y `Cancelada` son finales. El paso a `En curso` es manual: ninguna regla pide
+que el reloj cambie el estado, y no existe un estado «No asistió» (P-34).
+
+## Adjuntos
+
+Evidencias de una tarea, un seguimiento o una asesoría (FR-008, BR-006, BR-007). Módulo de
+trabajo: sesión **y** cuenta `Activo`.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `POST /api/attachments/:entity/:id` | Admin, Docente, Estudiante | `entity`: `task`, `tracing` o `advice`; `multipart/form-data`, campo `file` |
 | `GET /api/attachments/:id` | Admin, Docente, Estudiante | Descarga con el alcance del padre |
 | `DELETE /api/attachments/:id` | Admin, autor de la evidencia | Baja lógica + borrado físico del archivo |
 
 ### `POST /api/attachments/:entity/:id`
 
-- `entity` solo admite `task` y `tracing`; `advice` (asesorías) llega con la Etapa 8 (P-27)
-  y cualquier otro valor responde `400`.
+- `entity` admite `task`, `tracing` y `advice`; cualquier otro valor responde `400`.
 - **Autorización de escritura**: en una tarea, el estudiante destinatario o el
   administrador (el docente califica, no sube evidencia); en un seguimiento, su autor o el
+  administrador; en una asesoría, el estudiante dueño, el docente asignado o el
   administrador. Fuera de alcance: `404`; rol sin permiso: `403`.
 - Una tarea `En revisión` o `Completada` tiene la evidencia congelada
   (`422 TASK_EVIDENCE_LOCKED`); el administrador puede retirarla.
+- Una asesoría `Completada` o `Cancelada` también la tiene congelada
+  (`422 ADVICE_EVIDENCE_LOCKED`); el administrador puede retirarla. El límite de archivos
+  se cuenta por entidad (`upload_max_files_per_entity`), igual que en tareas y
+  seguimientos.
 - El MIME se decide por **el contenido** (firma), no por la extensión ni por la cabecera
   declarada; solo JPG/JPEG, PNG y PDF (`400` en otro caso). El nombre en disco es aleatorio
   (`<uuid>.<ext>`) y el original se guarda como metadato. Un nombre con separadores, `..`
@@ -1099,6 +1288,96 @@ pero el archivo ya no está en el disco: `404 ATTACHMENT_FILE_MISSING`.
 `fechaEliminacion`, el pivote se elimina y el archivo se borra del disco (BR-006). Un
 archivo ya ausente no impide la baja: el efecto es idempotente. Audita `Baja lógica de
 evidencia`.
+
+## Notificaciones
+
+Bandeja personal y canal en tiempo real (FR-019, T21). **Ninguna** ruta exige cuenta
+`Activo`: AQ-07 opción A deja las notificaciones disponibles también para una cuenta
+`Limitado`, que es justo la que necesita enterarse de que su desbloqueo fue resuelto.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/notifications` | Admin, Docente, Estudiante | Bandeja propia, paginada |
+| `PUT /api/notifications/:id/read` | Admin, Docente, Estudiante | Idempotente; la ajena responde `404` |
+| `PUT /api/notifications/read-all` | Admin, Docente, Estudiante | Marca todas las propias |
+| `GET /api/notifications/stream` | Admin, Docente, Estudiante | SSE (`text/event-stream`) |
+
+Forma de una notificación:
+
+```json
+{
+  "id": 12,
+  "tipo": "Asesoría",
+  "mensaje": "Tu asesoría «Revisión del modelo de negocio» fue confirmada.",
+  "url": "/estudiante/asesorias",
+  "tipoObjeto": "asesoria",
+  "objetoId": 3,
+  "leida": false,
+  "fecha": "2026-10-25T18:00:00.000Z"
+}
+```
+
+`tipo` es uno de `Tarea`, `Asesoría`, `Seguimiento`, `Solicitud`, `Diagnóstico`, `Evento`
+o `Sistema` (P-5). `url`, `tipoObjeto` y `objetoId` son opcionales y pueden ser `null`: son
+la pista de navegación de la SPA, no una regla de negocio.
+
+### `GET /api/notifications`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `leida` | `true` · `false` | — | Filtra por estado de lectura |
+| `tipo` | los 7 valores de `tipo` | — | |
+
+`200` con `{ items, total, page, pageSize, sinLeer }`. El orden es siempre el más reciente
+primero (`fecha DESC, id DESC`); no se expone un `ORDER BY` arbitrario (`.strict()` → `400`
+si llega `orderBy`).
+
+`sinLeer` es el total de no leídas del usuario **con el filtro de `tipo` aplicado, pero sin
+el de `leida`**. Así, al pedir «no leídas» el contador sigue diciendo cuántas hay en total
+para ese tipo, y al pedir «leídas» no se vuelve cero.
+
+### `PUT /api/notifications/:id/read`
+
+`200` con la notificación y el `sinLeer` actualizado. Es idempotente: repetir la llamada
+devuelve la misma fila y el mismo contador. Una notificación de otro usuario responde
+`404 NOT_FOUND` (el `WHERE` incluye al propietario, así que el id ajeno no se revela). La
+lectura no se audita.
+
+### `PUT /api/notifications/read-all`
+
+`200` con `{ "actualizadas": 3, "sinLeer": 0 }`. `actualizadas` cuenta solo las que estaban
+sin leer; repetir la llamada devuelve `0`.
+
+### `GET /api/notifications/stream`
+
+Canal SSE con `Content-Type: text/event-stream`, `Cache-Control: no-cache, no-transform`,
+`Connection: keep-alive` y `X-Accel-Buffering: no`. La respuesta queda abierta hasta que el
+cliente cierra; no hay cuerpo JSON.
+
+| Evento | `data` | Cuándo |
+|---|---|---|
+| `ready` | `{ "unreadCount": 3 }` | Al abrir el flujo |
+| `notification` | `{ "notificationId": 12, "tipo": "Asesoría", "unreadCount": 4 }` | Al publicarse un aviso para ese usuario |
+
+- El evento **no** lleva el mensaje, la `url` ni el objeto: solo el id, el tipo y el
+  contador. El cliente invalida su bandeja y pide el texto por la API normal.
+- Los latidos son comentarios SSE (`: keep-alive`) cada **25 s**; mantienen viva la conexión
+  a través de Caddy y permiten descartar clientes muertos sin enviar datos de negocio.
+- Cada usuario tiene su propio conjunto de conexiones: un aviso de A nunca se escribe en la
+  conexión de B (T21).
+- La publicación ocurre **después del commit** de la transacción que crea el aviso, así que
+  el cliente nunca recibe un id que todavía no puede leer.
+- El canal es en memoria y de **una sola instancia** (P-32). Con varias réplicas haría falta
+  un bus compartido (Redis, PostgreSQL `LISTEN/NOTIFY`).
+
+### Preferencias de aviso
+
+`notify()` respeta tres claves de `configuracion_programa`: `notif_tareas`,
+`notif_asesorias` y `notif_seguimiento`. Si una vale `false`, no se escribe la fila ni se
+publica el evento para ese tipo; los demás tipos no tienen interruptor. Las claves son
+globales del programa, no por usuario (P-31).
 
 ## Diagnóstico
 

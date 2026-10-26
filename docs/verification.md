@@ -564,3 +564,94 @@ solo del administrador).
 **Puerta:** superada (T16, T17, T18, T19, T37 y T40 en verde; completar una tarea sin
 evidencia es imposible por API; la evidencia se borra del disco al dar de baja la tarea, el
 seguimiento o el emprendimiento; el avance se deriva de la base y no del cliente).
+
+---
+
+## Etapa 8 — Asesorías, notificaciones y tiempo real
+
+- **Fecha:** 2026-10-25
+- **Commit:** `9d65319`
+
+### Hecho
+
+- `modules/advice`: ciclo completo de la asesoría. El alta exige `emprendimientoId`,
+  `docenteId` y `tema`; con bloque nace `Programada` y sin bloque `Por agendar`. El
+  estudiante no crea, edita ni confirma (BR-002); el docente solo agenda para sí mismo y
+  en sus emprendimientos con asignación activa. La lectura respeta el rol y un id fuera de
+  alcance responde `404`.
+- Ciclo de vida con rutas propias: `accept` (`Por agendar`/`Programada` → `Confirmada`,
+  exige bloque), `repropose` (exige bloque, → `Programada`), `reject` (motivo obligatorio,
+  → `Cancelada`) y `PUT` para `En curso`/`Completada`. `Completada` y `Cancelada` son
+  finales (`422 ADVICE_NOT_EDITABLE`); el resto de transiciones inválidas responde `422
+  INVALID_ADVICE_TRANSITION`.
+- T35: el solapamiento se comprueba en la transacción bajo
+  `pg_advisory_xact_lock('asesorias:docente:<id>:<fecha>')` y una consulta de intersección
+  de horas, excluyendo la propia y las canceladas → `409 ADVICE_SCHEDULE_CONFLICT`. Se
+  aplica al crear, confirmar, reprogramar, editar el horario y cambiar de docente.
+- El bloque de `fecha_y_horarios` se reutiliza por `(fecha, hora_inicio, hora_fin)` bajo su
+  propio advisory lock; `fecha_asesoria` se calcula en `America/Bogota`.
+- P-19 cerrado: aprobar una `Cita` exige docente, tema y bloque, y crea la asesoría en
+  `Programada` con las mismas reglas del alta. El efecto se aplica una sola vez.
+- `modules/notifications`: bandeja propia paginada con filtros `leida`/`tipo` y contador
+  `sinLeer` exacto por tipo; marcar una como leída es idempotente y la ajena responde
+  `404`; `read-all` devuelve `{ actualizadas, sinLeer }`. Ninguna ruta exige cuenta
+  `Activo` (AQ-07 opción A).
+- `services/notificationChannel`: SSE con fan-out por usuario, evento `ready`, evento
+  `notification` mínimo (id, tipo, contador) y latido cada 25 s. La publicación ocurre
+  **después del commit** gracias a `afterCommit` (`AsyncLocalStorage` en `db/pool.ts`).
+- `services/notify.ts` respeta `notif_tareas`, `notif_asesorias` y `notif_seguimiento`.
+- `advice` es una entidad de adjuntos: escriben el estudiante dueño, el docente asignado y
+  el admin; se congela en `Completada`/`Cancelada` (`422 ADVICE_EVIDENCE_LOCKED`), salvo el
+  borrado del administrador.
+- 6 acciones de auditoría nuevas (`Alta`, `Edición`, `Confirmación`, `Reprogramación`,
+  `Cancelación` y `Baja lógica de asesoría`).
+- Defecto del seed corregido: los catálogos se siembran con id explícito y el `SERIAL` no
+  avanzaba; el seed cierra con `setval(pg_get_serial_sequence(...))` para las 14 tablas.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 12 archivos) | **176 pruebas en verde** (158 de las etapas 3–7 + 18 nuevas: 10 de asesorías, 7 de notificaciones y la ampliación de solicitudes) |
+| T20 · BR-002 y alcance | El estudiante no crea, edita ni confirma (`403 ROLE_NOT_ALLOWED`); el docente no agenda para otro (`403`); un docente sin asignación recibe `404`; el estudiante solo ve las suyas y el docente solo las que tiene asignadas; la cuenta `Limitado` recibe `403 ACCOUNT_NOT_ACTIVE`; el auditor `403` |
+| Ciclo de vida | Alta con y sin bloque (`Programada` / `Por agendar`); `accept` sin horario → `422 ADVICE_NOT_SCHEDULED`; con horario → `Confirmada`; `En curso` y `Completada` solo en orden; editar o rechazar una completada → `422 ADVICE_NOT_EDITABLE`; el docente no cambia de docente (`403 FIELD_NOT_ALLOWED`); `repropose` parcial → `400`; `reject` sin motivo → `400` y con motivo → `Cancelada` |
+| T35 · solapamiento | Bloque solapado → `409 ADVICE_SCHEDULE_CONFLICT`; bloque contiguo → `201`; otro docente a la misma hora → `201`; al cancelar, el bloque se libera y se puede reutilizar |
+| T36 · Cita (P-19) | Aprobar sin datos → `400` con el campo que falta; con docente y bloque → solicitud `Aprobada` y **una** asesoría `Programada`; la segunda aprobación → `422 REQUEST_ALREADY_RESOLVED` y no crea otra |
+| T21 · bandeja | Solo las propias, orden descendente, `total`/`page`/`pageSize`, filtros `leida` y `tipo`, `sinLeer` por tipo; `pageSize` 101, `tipo` inválido, `leida` inválido y `orderBy` → `400`; marcar leída dos veces mantiene el contador; la ajena → `404`; `read-all` es idempotente; sin sesión → `401`; la cuenta `Limitado` lee y marca, pero sigue bloqueada en asesorías |
+| T21 · SSE | Dos conexiones reales (`app.listen(0)`): el aviso de A llega a A y **nunca** a B; el frame trae `notificationId`, `tipo` y `unreadCount`, y no el mensaje; una conexión nueva recibe el contador actualizado en `ready`; marcar leída baja el contador de la siguiente conexión |
+| Evidencias de asesoría | El estudiante sube y el docente descarga con el MIME verificado; el docente ajeno recibe `404`; al completar, la subida → `422 ADVICE_EVIDENCE_LOCKED`; el admin puede borrar y la evidencia queda dada de baja |
+| Baja de asesoría | `DELETE` deja `fecha_eliminacion`, la lectura responde `404` y la fila se conserva; se audita la baja |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Pila recreada desde cero (`down -v` + `up --build`): **107 comprobaciones, 107 en el estado esperado**. Incluye las 5 sesiones del seed, BR-002, T35, el ciclo completo, la reprogramación y la cancelación, la reutilización del bloque, el alcance por rol, las evidencias, la baja lógica, la Cita de T36, la bandeja, los dos flujos SSE a través del proxy, las 6 acciones de auditoría y el avance de la secuencia de `fecha_y_horarios` |
+
+### Decisiones y huecos registrados
+
+- §5.9: alcance, BR-002, alta, horario, T35, ciclo de vida, edición, rechazo, baja,
+  evidencias, Cita, listado, bandeja, tiempo real, preferencias, auditoría y el ajuste de
+  secuencias del seed.
+- P-19 y P-27 cerrados.
+- P-28: no hay columna de código ni de descripción en `asesorias`; `ASES-###` se deriva.
+- P-29: el motivo de cancelación no tiene columna; va en la auditoría y en el aviso.
+- P-30: T35 solo cubre al mismo docente el mismo día y no hay índice único.
+- P-31: las preferencias de aviso son claves globales, no por usuario.
+- P-32: SSE en memoria de una sola instancia; el evento no lleva el cuerpo.
+- P-33: la fecha preferida de la cita viaja en `detalle`; la aprobación fija el bloque.
+- P-34: los cambios de estado son manuales; no hay «No asistió».
+- #35: el prototipo dice «Finalizada» y el estado canónico es `Completada`.
+- #36: el formulario pide Estudiante y la API recibe el emprendimiento.
+- #37: no se crea catálogo de temas ni columna de descripción.
+
+### Sin verificar / pendiente
+
+- El canal SSE es de una sola instancia; con varias réplicas haría falta un bus compartido
+  (P-32, Etapa 12).
+- La SPA que consume la bandeja y el flujo llega en la Etapa 11; el contrato ya expone
+  `sinLeer`, los filtros y los eventos.
+- El aviso por correo de las asesorías no se envía: FR-019 se cumple con la bandeja y el
+  tiempo real; el correo se decide con la Coordinadora.
+- La exportación de asesorías y la vista de calendario son de la Etapa 11.
+
+**Puerta:** superada (T20, T21, T35 y T36 en verde; el estudiante no puede agendar por API;
+el solapamiento del docente se impide en la transacción; un aviso de A nunca llega a la
+conexión de B; el evento se publica después del commit).
