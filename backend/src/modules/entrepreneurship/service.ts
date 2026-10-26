@@ -5,8 +5,10 @@ import { ROLES } from '../../policy/roles.js';
 import { AUDIT_ACTIONS, audit } from '../../services/audit.js';
 import { assertCatalogIds } from '../../services/catalogs.js';
 import { entrepreneurshipCode } from '../../services/codes.js';
+import { softDeleteEntrepreneurshipEvidence } from '../../services/evidence.js';
 import { notify } from '../../services/notify.js';
 import { settingInt, settingValue } from '../../services/programSettings.js';
+import { removeStoredFile } from '../../services/storage.js';
 import { AppError } from '../../utils/AppError.js';
 import type { SessionUser } from '../auth/types.js';
 import type {
@@ -565,7 +567,7 @@ export async function deleteEntrepreneurship(
   const existing = await findRaw(pool, id);
   if (!existing) throw notFound();
 
-  await withTransaction(async (db) => {
+  const rutas = await withTransaction(async (db) => {
     const { rowCount } = await db.query(
       `UPDATE emprendimiento
           SET fecha_eliminacion = now()
@@ -588,7 +590,14 @@ export async function deleteEntrepreneurship(
       usuarioId: actor.id,
       ip,
     });
+
+    // BR-006/R36: la baja es lógica en la fila y **física** en los archivos. Se recogen
+    // las rutas dentro de la transacción y se borran del disco después de confirmar, para
+    // que un fallo de disco no revierta la baja ni deje la fila apuntando a un archivo vivo.
+    return softDeleteEntrepreneurshipEvidence(db, id);
   });
+
+  await Promise.all(rutas.map((ruta) => removeStoredFile(ruta)));
 }
 
 /* -------------------------------------------------------------------------------------

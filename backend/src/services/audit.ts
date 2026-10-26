@@ -43,6 +43,17 @@ export const AUDIT_ACTIONS = {
   CREATE_ASSIGNMENT: 'Alta de asignación',
   UPDATE_ASSIGNMENT: 'Edición de asignación',
   DEACTIVATE_ASSIGNMENT: 'Baja de asignación',
+  CREATE_TASK: 'Alta de tarea',
+  UPDATE_TASK: 'Edición de tarea',
+  SUBMIT_TASK: 'Entrega de tarea',
+  GRADE_TASK: 'Calificación de tarea',
+  RETURN_TASK: 'Devolución de tarea',
+  DELETE_TASK: 'Baja lógica de tarea',
+  CREATE_TRACING: 'Alta de seguimiento',
+  UPDATE_TRACING: 'Edición de seguimiento',
+  DELETE_TRACING: 'Baja lógica de seguimiento',
+  UPLOAD_ATTACHMENT: 'Carga de evidencia',
+  DELETE_ATTACHMENT: 'Baja lógica de evidencia',
 } as const;
 
 export async function audit(db: Queryable, entry: AuditEntry): Promise<void> {

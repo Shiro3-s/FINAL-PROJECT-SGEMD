@@ -6,6 +6,7 @@
   "dependencies": {
     "@sgemd/shared": "*",
     "bcryptjs": "3.0.3",
+    "busboy": "1.6.0",
     "cookie-parser": "1.4.7",
     "dotenv": "18.0.9",
     "express": "5.3.0",
@@ -26,6 +27,7 @@
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@types/busboy": "1.5.4",
     "@types/cookie-parser": "1.4.10",
     "@types/express": "5.0.6",
     "@types/node": "26.6.5",

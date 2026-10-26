@@ -58,9 +58,11 @@ stack, una ruta interna ni un valor de configuración.
 | 403 | `FIELD_NOT_ALLOWED` | El rol puede editar el recurso, pero no ese campo (p. ej. un estudiante cambiando el sector) |
 | 403 | `ORIGIN_NOT_ALLOWED` | Mutación con `Origin` ajeno o ausente |
 | 404 | `NOT_FOUND` | Recurso inexistente **o fuera de alcance** (un estudiante pidiendo el id de otro) |
+| 404 | `ATTACHMENT_FILE_MISSING` | La fila de la evidencia existe, pero el archivo ya no está en el disco |
 | 409 | `EMAIL_TAKEN` | Correo institucional ya registrado |
 | 409 | `DOCUMENT_TAKEN` | Número de documento ya registrado |
 | 409 | `ASSIGNMENT_ALREADY_ACTIVE` | El emprendimiento ya tiene una asignación `activa` (R11) |
+| 413 | `PAYLOAD_TOO_LARGE` | El archivo supera `upload_max_mb` (FR-008) |
 | 422 | `OTP_INVALID` | Código incorrecto, vencido, ya usado o inexistente |
 | 422 | `INVALID_STATE_TRANSITION` | Transición de cuenta no permitida (BR-003, R34) |
 | 422 | `SELF_STATE_CHANGE_NOT_ALLOWED` | El administrador intenta cambiar el estado de su propia cuenta |
@@ -79,6 +81,11 @@ stack, una ruta interna ni un valor de configuración.
 | 422 | `ENTREPRENEURSHIP_NOT_APPROVED` | Se pide un paralelo sobre un emprendimiento que no está `Aprobado` |
 | 422 | `REQUEST_ALREADY_RESOLVED` | La solicitud ya fue aprobada o rechazada |
 | 422 | `REQUEST_TARGET_MISSING` | La cuenta o el emprendimiento de la solicitud ya no existe |
+| 422 | `TASK_EVIDENCE_REQUIRED` | Se intenta entregar una tarea sin ninguna evidencia vigente (BR-007) |
+| 422 | `INVALID_TASK_TRANSITION` | La acción no corresponde al estado actual de la tarea (T16) |
+| 422 | `TASK_NOT_EDITABLE` | Se intenta editar una tarea en revisión o completada |
+| 422 | `TASK_EVIDENCE_LOCKED` | Se intenta subir o borrar evidencia de una tarea ya entregada |
+| 422 | `ATTACHMENT_LIMIT_REACHED` | La entidad alcanzó `upload_max_files_per_entity` |
 | 429 | `OTP_COOLDOWN` | Reenvío antes del cooldown (60 s); incluye `Retry-After` |
 | 429 | `OTP_ATTEMPTS_EXCEEDED` | Se agotaron los 5 intentos del código; incluye `Retry-After` |
 | 429 | `RATE_LIMITED` | Se superó el límite de peticiones del endpoint; incluye `Retry-After` |
@@ -797,6 +804,301 @@ con el efecto aplicado y notifica al solicitante.
 `motivo` obligatorio. `200` con `estado: "Rechazada"`, `motivoRechazo`, `fechaResolucion` y
 `resueltoPor`. No cambia el estado de la cuenta ni del emprendimiento; audita
 `Solicitud rechazada` y notifica al solicitante con el motivo.
+
+## Tareas
+
+Módulo de trabajo: sesión **y** cuenta `Activo`. El administrador y el docente con
+asignación activa crean, editan, califican, devuelven y dan de baja; el estudiante lee
+las suyas y las entrega. El alcance se resuelve en el servicio: fuera de alcance `404`.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/task` | Admin, Docente, Estudiante | Admin todas; docente las de sus emprendimientos asignados; estudiante las suyas |
+| `GET /api/task/my-task` | Estudiante | Atajo de las tareas propias; un docente o admin recibe `403` |
+| `GET /api/task/entrepreneurship/:id` | Admin, Docente, Estudiante | Exige ver el expediente; si no, `404` |
+| `GET /api/task/advance/entrepreneurship/:id` | Admin, Docente, Estudiante | Avance total y por fase (FR-022) |
+| `GET /api/task/:id` | Admin, Docente, Estudiante | Fuera de alcance: `404` |
+| `POST /api/task` | Admin, Docente | El destinatario es el propietario del emprendimiento |
+| `PUT /api/task/:id` | Admin, Docente | Edita la tarea y admite `estado: 'En curso'` desde `Pendiente` |
+| `PUT /api/task/:id/complete` | Estudiante destinatario, Admin | Entrega: exige ≥1 evidencia (BR-007) |
+| `PUT /api/task/:id/grade` | Admin, Docente | Califica 0–100 desde `En revisión` |
+| `PUT /api/task/:id/return` | Admin, Docente | Devuelve con motivo obligatorio (R19b) |
+| `DELETE /api/task/:id` | Admin, Docente | Baja lógica + borrado físico de sus evidencias (BR-006) |
+
+Forma de una tarea:
+
+```json
+{
+  "id": 3,
+  "titulo": "Subir evidencia fotográfica",
+  "descripcion": "Adjunta las fotos del punto de venta.",
+  "fechaLimite": "2026-12-31",
+  "prioridad": "Alta",
+  "puntos": 100,
+  "estado": "Pendiente",
+  "vencida": false,
+  "puntajeObtenido": null,
+  "retroalimentacion": null,
+  "estadoRevision": "Pendiente",
+  "evidenciaRequerida": true,
+  "motivoDevolucion": null,
+  "observacionesDevolucion": null,
+  "evidencias": 0,
+  "fechaEnvio": null,
+  "emprendimiento": { "id": 1, "codigo": "EMP-001", "nombre": "Sabor y Sabe" },
+  "estudiante": {
+    "id": 4,
+    "nombres": "Estudiante",
+    "apellidos": "Demo Uno",
+    "correoInstitucional": "estudiante.demo1@uniminuto.edu.co"
+  },
+  "creador": { "id": 2, "nombres": "Carlos", "apellidos": "Mendoza" },
+  "fase": { "id": 1, "nombre": "FASE 1 Ideación y priorización de ideas" }
+}
+```
+
+### Ciclo de vida
+
+```
+Pendiente ──PUT estado=En curso──► En curso ──complete (≥1 evidencia)──► En revisión
+     └──────────────────────────────complete──────────────────────────────┘
+En revisión ──grade──► Completada        En revisión ──return + motivo──► Devuelta
+Devuelta ──complete (nueva entrega)──► En revisión
+```
+
+- `Vencida` **no se almacena**: se deriva de `fechaLimite < hoy` mientras la tarea siga
+  `Pendiente` o `En curso`, en cada lectura y en el filtro `estado=Vencida`. Una tarea
+  vencida todavía se puede entregar.
+- `evidenciaRequerida` es siempre `true` (BR-007, §20.5 #13) y no se acepta del cliente.
+- `fechaEnvio` se deriva de la evidencia vigente más reciente: el diagrama no tiene una
+  columna de fecha de entrega (P-24).
+- El avance del emprendimiento se recalcula en la misma transacción al calificar, al dar
+  de baja y al crear una tarea: `ROUND(100 × Completada / total)`, 0 sin tareas (R21).
+- Cada transición escribe su acción de auditoría y avisa al estudiante o a los docentes
+  con asignación activa.
+
+### `GET /api/task`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `q` | texto ≤ 100 | — | Título o descripción (`ILIKE`) |
+| `estado` | `Pendiente` · `En curso` · `En revisión` · `Completada` · `Vencida` · `Devuelta` | — | `Vencida` filtra por el estado derivado |
+| `estadoRevision` | `Pendiente` · `En revisión` · `Calificada` · `Devuelta` | — | |
+| `prioridad` | `Alta` · `Media` · `Baja` | — | |
+| `emprendimientoId` | entero > 0 | — | |
+| `estudianteId` | entero > 0 | — | |
+| `fasePlanId` | entero > 0 | — | |
+| `sort` | `limite` · `prioridad` · `estado` · `titulo` | `limite` | Lista blanca: otra columna da `400` |
+| `order` | `asc` · `desc` | `asc` | |
+
+`200`: `{ items, total, page, pageSize }`.
+
+### `POST /api/task`
+
+```json
+{
+  "titulo": "Subir evidencia fotográfica",
+  "descripcion": "Adjunta las fotos del punto de venta.",
+  "emprendimientoId": 1,
+  "fasePlanId": 1,
+  "fechaLimite": "2026-12-31",
+  "prioridad": "Alta",
+  "puntos": 100
+}
+```
+
+- `emprendimientoId` debe existir y el actor debe ser su mentor activo o el administrador;
+  si no, `404`.
+- `fasePlanId` debe existir en `faseplan` (`400`).
+- `estado`, `estadoRevision`, `puntajeObtenido`, `retroalimentacion`, `motivoDevolucion`,
+  `observacionesDevolucion`, `evidenciaRequerida` y `usuariosId` no se aceptan (`400`).
+- Nace `Pendiente`, `estadoRevision = 'Pendiente'`, `evidenciaRequerida = true`.
+
+`201` con la tarea. Audita `Alta de tarea`, avisa al estudiante y recalcula el avance.
+
+### `PUT /api/task/:id`
+
+Admite `titulo`, `descripcion`, `fasePlanId`, `fechaLimite`, `prioridad`, `puntos` y
+`estado: 'En curso'` (solo desde `Pendiente`, `422 INVALID_TASK_TRANSITION` en otro caso).
+Una tarea `En revisión` o `Completada` no se edita (`422 TASK_NOT_EDITABLE`). Los campos
+enviados como `null` limpian el valor. Audita `Edición de tarea`.
+
+### `PUT /api/task/:id/complete`
+
+Sin cuerpo. Solo el estudiante destinatario (o el administrador). Se permite desde
+`Pendiente`, `En curso` y `Devuelta`; sin al menos una evidencia vigente responde `422
+TASK_EVIDENCE_REQUIRED`. Deja `estado = 'En revisión'` y `estadoRevision = 'En revisión'`,
+audita `Entrega de tarea` y avisa a los docentes asignados.
+
+### `PUT /api/task/:id/grade`
+
+```json
+{ "puntajeObtenido": 85, "retroalimentacion": "Cumple con lo solicitado." }
+```
+
+Solo desde `En revisión`. Deja `Completada` / `Calificada`, guarda el puntaje y la
+retroalimentación, audita `Calificación de tarea`, avisa al estudiante y recalcula el
+avance. Calificar dos veces responde `422 INVALID_TASK_TRANSITION`.
+
+### `PUT /api/task/:id/return`
+
+```json
+{ "motivo": "Archivos ilegibles", "observaciones": "La foto está borrosa." }
+```
+
+`motivo` es obligatorio y pertenece al vocabulario del prototipo (`Evidencia incompleta`,
+`No cumple con lo solicitado`, `Archivos ilegibles`, `Entrega fuera de fecha`,
+`Otro motivo`). Solo desde `En revisión`. Deja `Devuelta`, guarda motivo y observaciones,
+audita `Devolución de tarea` y avisa al estudiante. La evidencia sigue adjunta para que
+pueda corregir y volver a entregar.
+
+### `DELETE /api/task/:id`
+
+`200` con `{ "success": true, "message": "Tarea dada de baja." }`. La fila conserva
+`fechaEliminacion` y sus archivos se borran del disco después de confirmar la transacción
+(BR-006). Recalcula el avance porque la tarea sale del denominador.
+
+### `GET /api/task/advance/entrepreneurship/:id`
+
+```json
+{
+  "emprendimientoId": 1,
+  "avance": 33,
+  "total": 3,
+  "completadas": 1,
+  "fases": [
+    { "faseId": 1, "fase": "FASE 1 …", "total": 1, "completadas": 0, "porcentaje": 0 },
+    { "faseId": null, "fase": null, "total": 2, "completadas": 1, "porcentaje": 50 }
+  ]
+}
+```
+
+Las cuatro fases del catálogo aparecen siempre; las tareas sin fase se agrupan en una
+fila con `faseId: null`.
+
+## Seguimientos
+
+Registros de avance y comentarios del docente (FR-022). Módulo de trabajo: sesión **y**
+cuenta `Activo`. El estudiante solo lee; el docente asignado y el administrador escriben.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/tracing/entrepreneurship/:id` | Admin, Docente, Estudiante | Exige ver el expediente; si no, `404` |
+| `GET /api/tracing/:id` | Admin, Docente, Estudiante | Fuera de alcance: `404` |
+| `POST /api/tracing` | Admin, Docente | El autor es siempre la sesión |
+| `PUT /api/tracing/:id` | Autor, Admin | Un docente ajeno recibe `404` |
+| `DELETE /api/tracing/:id` | Autor, Admin | Baja lógica + borrado físico de sus evidencias |
+
+```json
+{
+  "id": 1,
+  "descripcion": "Prototipo de empaque listo para 20 unidades.",
+  "tipo": "Avance de fase",
+  "puntaje": 80,
+  "estadoRevision": "Pendiente",
+  "fechaSeguimiento": "2026-03-10T17:00:00.000Z",
+  "retroalimentacion": null,
+  "evidencias": 0,
+  "emprendimiento": { "id": 1, "codigo": "EMP-001", "nombre": "Sabor y Sabe" },
+  "autor": { "id": 2, "nombres": "Carlos", "apellidos": "Mendoza" },
+  "fase": { "id": 2, "nombre": "FASE 2 Estructuración y ejecución" }
+}
+```
+
+### `POST /api/tracing`
+
+```json
+{
+  "emprendimientoId": 1,
+  "tipoSeguimiento": "Avance de fase",
+  "descripcion": "Prototipo de empaque listo para 20 unidades.",
+  "fasePlanId": 2,
+  "puntaje": 80,
+  "estadoRevision": "Pendiente",
+  "fechaSeguimiento": "2026-03-10",
+  "retroalimentacion": null
+}
+```
+
+- Un `Avance de fase` exige `fasePlanId` (`400` con `fields.fasePlanId`); un `Comentario`
+  no la lleva.
+- `puntaje` es 0–100; `fechaSeguimiento` es una fecha `AAAA-MM-DD` y se guarda a mediodía
+  de Bogotá para que no se muestre el día anterior.
+- `usuariosId` no se acepta: el autor es la sesión.
+- `201` con el seguimiento; audita `Alta de seguimiento` y avisa al estudiante.
+
+### `PUT /api/tracing/:id`
+
+Admite `descripcion`, `fasePlanId`, `puntaje`, `estadoRevision`, `fechaSeguimiento` y
+`retroalimentacion`. `tipoSeguimiento` y `emprendimientoId` no se editan (`400`). Audita
+`Edición de seguimiento`.
+
+### `DELETE /api/tracing/:id`
+
+`200` con `{ "success": true, "message": "Seguimiento dado de baja." }`. La fila conserva
+`fechaEliminacion` y sus archivos se borran del disco (BR-006).
+
+## Adjuntos
+
+Evidencias de una tarea o de un seguimiento (FR-008, BR-006, BR-007). Módulo de trabajo:
+sesión **y** cuenta `Activo`.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `POST /api/attachments/:entity/:id` | Admin, Docente, Estudiante | `entity`: `task` o `tracing`; `multipart/form-data`, campo `file` |
+| `GET /api/attachments/:id` | Admin, Docente, Estudiante | Descarga con el alcance del padre |
+| `DELETE /api/attachments/:id` | Admin, autor de la evidencia | Baja lógica + borrado físico del archivo |
+
+### `POST /api/attachments/:entity/:id`
+
+- `entity` solo admite `task` y `tracing`; `advice` (asesorías) llega con la Etapa 8 (P-27)
+  y cualquier otro valor responde `400`.
+- **Autorización de escritura**: en una tarea, el estudiante destinatario o el
+  administrador (el docente califica, no sube evidencia); en un seguimiento, su autor o el
+  administrador. Fuera de alcance: `404`; rol sin permiso: `403`.
+- Una tarea `En revisión` o `Completada` tiene la evidencia congelada
+  (`422 TASK_EVIDENCE_LOCKED`); el administrador puede retirarla.
+- El MIME se decide por **el contenido** (firma), no por la extensión ni por la cabecera
+  declarada; solo JPG/JPEG, PNG y PDF (`400` en otro caso). El nombre en disco es aleatorio
+  (`<uuid>.<ext>`) y el original se guarda como metadato. Un nombre con separadores, `..`
+  o caracteres de control se rechaza (`400`).
+- El archivo se escribe en un `*.part` y se renombra al terminar; ningún `.part` se sirve.
+- Tamaño máximo por archivo: `upload_max_mb` (500 por defecto) → `413
+  PAYLOAD_TOO_LARGE`. Archivos por entidad: `upload_max_files_per_entity` (5) → `422
+  ATTACHMENT_LIMIT_REACHED`. Ambos se leen de `configuracion_programa`.
+
+`201`:
+
+```json
+{
+  "id": 7,
+  "nombreArchivo": "punto-de-venta.jpg",
+  "tamanoBytes": 2048,
+  "tipoMime": "image/jpeg",
+  "fechaSubida": "2026-10-25T18:00:00.000Z",
+  "subidoPor": { "id": 4, "nombres": "Estudiante", "apellidos": "Demo Uno" },
+  "entidad": "task",
+  "entidadId": 3
+}
+```
+
+Audita `Carga de evidencia`.
+
+### `GET /api/attachments/:id`
+
+Transmite el archivo con `Content-Type` verificado, `Content-Length`,
+`Content-Disposition: attachment` (nombre ASCII de respaldo + `filename*=UTF-8''…`),
+`Cache-Control: private, no-store` y `X-Content-Type-Options: nosniff`. Si la fila existe
+pero el archivo ya no está en el disco: `404 ATTACHMENT_FILE_MISSING`.
+
+### `DELETE /api/attachments/:id`
+
+`200` con `{ "success": true, "message": "Evidencia eliminada." }`. La fila queda con
+`fechaEliminacion`, el pivote se elimina y el archivo se borra del disco (BR-006). Un
+archivo ya ausente no impide la baja: el efecto es idempotente. Audita `Baja lógica de
+evidencia`.
 
 ## Diagnóstico
 
