@@ -9,7 +9,7 @@ import { z } from 'zod';
  *
  * `estado` solo admite `Pendiente` (borrador) y `Publicado` en la escritura: el
  * administrador es el organizador, así que no hay un flujo de aprobación separado. Los
- * valores `Aprobado`/`Rechazado` del diagrama quedan reservados (P-36).
+ * valores `Aprobado`/`Rechazado` del diagrama quedan reservados (P-37).
  */
 
 const fecha = z

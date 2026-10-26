@@ -5,7 +5,10 @@ import { adminSession, type Session } from './api.js';
 import {
   createAccount,
   createEntrepreneurship,
+  evidenceScenario,
+  jpegBuffer,
   pdfBuffer,
+  uploadEvidence,
 } from './fixtures.js';
 
 /**
@@ -268,6 +271,41 @@ describe('T26 · alcance del acta y su archivo', () => {
     const list = await limited.session.get('/api/acta');
     expect(list.status).toBe(200);
     expect(list.body.data.total).toBe(1);
+
+    // El archivo del acta también está disponible para la cuenta limitada.
+    const attachmentId = created.body.data.adjunto.id as number;
+    const download = await limited.session.get(`/api/attachments/${attachmentId}`);
+    expect(download.status).toBe(200);
+    expect(download.headers['content-type']).toContain('application/pdf');
+  });
+
+  it('una cuenta inactiva no descarga evidencias de un módulo de trabajo', async () => {
+    const scenario = await evidenceScenario();
+    const task = await scenario.admin.post('/api/task').send({
+      titulo: 'Evidencia antes del bloqueo',
+      emprendimientoId: scenario.emprendimientoId,
+      prioridad: 'Media',
+    });
+    expect(task.status).toBe(201);
+
+    const evidence = await uploadEvidence(
+      scenario.student.session,
+      'task',
+      task.body.data.id as number,
+      jpegBuffer(),
+    );
+    expect(evidence.status).toBe(201);
+
+    const changed = await scenario.admin
+      .patch(`/api/users/${scenario.student.id}/state`)
+      .send({ estado: 'Inactivo' });
+    expect(changed.status).toBe(200);
+
+    const denied = await scenario.student.session.get(
+      `/api/attachments/${evidence.body.data.id}`,
+    );
+    expect(denied.status).toBe(403);
+    expect(denied.body.error.code).toBe('ACCOUNT_NOT_ACTIVE');
   });
 
   it('un estudiante sin emprendimiento recibe ENTREPRENEURSHIP_REQUIRED', async () => {

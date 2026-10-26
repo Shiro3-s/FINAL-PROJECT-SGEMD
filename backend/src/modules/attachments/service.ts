@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { query, withTransaction } from '../../db/pool.js';
+import { blockedReason, canOperate } from '../../policy/accountState.js';
 import { ROLES } from '../../policy/roles.js';
 import { AUDIT_ACTIONS, audit } from '../../services/audit.js';
 import {
@@ -379,7 +380,13 @@ export async function downloadAttachment(
   res: Response,
 ): Promise<void> {
   const row = await loadRow(id);
-  await authorizeRead(row, actor);
+  const { entity } = await authorizeRead(row, actor);
+
+  // AQ-07 opción A: el archivo del acta se lee con la regla del acta, sin exigir `Activo`.
+  // Las evidencias de tareas, seguimientos y asesorías son módulos de trabajo.
+  if (entity !== 'acta' && !canOperate(actor.estado)) {
+    throw new AppError(403, 'ACCOUNT_NOT_ACTIVE', blockedReason(actor.estado));
+  }
 
   const stream = openStoredFile(row.ruta_archivo);
 

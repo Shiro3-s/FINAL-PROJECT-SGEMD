@@ -49,9 +49,13 @@ attachmentsRouter.post(
   }),
 );
 
+// La lectura no exige `Activo` en el middleware porque el archivo del acta sí está
+// disponible para una cuenta `Limitado` (AQ-07 opción A). El servicio aplica la cuenta
+// activa a las evidencias de tareas, seguimientos y asesorías, que son módulos de trabajo.
 attachmentsRouter.get(
   '/attachments/:id',
-  ...reader,
+  requireAuth,
+  requireRole(ROLES.ADMIN, ROLES.DOCENTE, ROLES.ESTUDIANTE),
   asyncHandler(async (req, res) => {
     await downloadAttachment(parseId(req, 'evidencia'), requireUser(req), res);
   }),
