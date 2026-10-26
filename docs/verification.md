@@ -843,3 +843,97 @@ sus emprendimientos y el estudiante solo ve eventos publicados).
 a un agregado SQL; un respaldo `Completo` lista sus dos artefactos con tamaños reales y el
 segundo se apoya en el primero; el auditor no escribe y ve los datos personales
 enmascarados; D19 queda decidida antes de la Etapa 11).
+
+---
+
+## Etapa 11 — Frontend de las 64 vistas
+
+- **Fecha:** 2026-10-26
+- **Commit:** pendiente de esta etapa (sin push)
+- **Entorno:** Vite 8 en `http://localhost:5173`, backend y PostgreSQL en Docker
+  (`docker-compose.yml` + `docker-compose.dev.yml`)
+
+### Hecho
+
+- **Base de la SPA**: tema en `styles/tokens.css` con los seis hex de la paleta, escala
+  tipográfica 13–32 px, Inter autoalojada (`@fontsource/inter`) y hojas separadas
+  `base`, `layout`, `components`, `lists`, `interactions`, `auth` y `fonts`.
+- **Componentes** (26): `Icon` con 50 iconos, `Badge` icono+texto, `Button`, `Card`,
+  `PageHeader`, `States` (loading/error/empty), `Toolbar`, `Pagination`, `DataTable`,
+  `ListTable`, `FormField`, `Modal`, `Drawer`, `Toast`, `Tabs`, `ProgressBar`, `Metric`,
+  `DefinitionList`, `Dropzone`, `EvidenceUploader`, `OtpInput`, `AuthLayout`,
+  `ReasonModal`, `QueryGate`, `AppShell` y `NotificationDrawer`.
+- **Datos**: `api/client.ts` con `apiGet`/`apiSend`/`apiDownload`/`apiUpload`, DTO de lectura
+  en `api/types.ts` alineados con el payload real y consultas TanStack Query por módulo en
+  `queries/`. Toda consulta pasa por `QueryGate`; las listas tienen loading, error con
+  reintento y vacío propio. El SSE `notification` invalida la bandeja y el contador.
+- **Sesión y guardas**: `AuthProvider` resuelve la sesión con `GET /users/me`; `RequireAuth`,
+  `RequireRole` y `RequireActive`; la guarda `Active` deja fuera perfil, acta y
+  notificaciones (AQ-07 opción A). `HomeRedirect` manda a cada rol a su panel o a
+  `/estudiante/perfil` si la cuenta está `Limitado`.
+- **Rutas**: públicas `/login`, `/registro`, `/verificar`, `/recuperar`, `/`, `/403`, `*`;
+  bloques `/estudiante`, `/docente` y `/admin` con las 64 vistas. Los segmentos van en
+  español (D24) y los enlaces profundos de notificación resuelven.
+- **Compartidas**: `EntrepreneurshipPlanPage`, `ExpedientePage`, `ActaPage` (nueva),
+  `PasswordPage` y `AccountSettingsPage`; listas y detalles compartidos con acciones y
+  columnas por rol (`EntrepreneurshipsListPage`, `TasksListPage`, `TaskDetailPage`,
+  `AdviceListPage`, `AdviceFormPage`, `TracingListPage`, `TracingFormPage`,
+  `EventsListPage`, `EventFormPage`, `DiagnosesListPage`, `DiagnosisDetailPage`).
+- **Vistas nuevas**: `/estudiante/acta` (plantilla con hueco P-36, carga, historial y
+  reemplazo) y `/admin/actas` (bandeja, filtro, aprobar y rechazar con observaciones).
+- **Buscador global**: la barra superior navega a `?q=` del listado principal del rol; los
+  listados inicializan y sincronizan el término con la URL.
+- **Configuración admin**: 18 claves agrupadas en 5 bloques, etiquetas humanas, guardado por
+  lote solo de lo cambiado y bitácora en pestaña aparte.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm run typecheck` | Shared, backend y frontend sin errores (`strict`, `noUnusedLocals`, `noUnusedParameters`) |
+| `npm run build -w frontend` | Build de producción correcto; único aviso, el chunk > 500 kB esperado por el alcance de la SPA |
+| Recorrido real de las 64 rutas | Login con los tres roles demo; 19 vistas de estudiante, 20 de docente y 19 de administrador más las compartidas y las dos nuevas, todas en navegador contra la API real |
+| Estados de error y vacío | Detalle de asesoría y de seguimiento ajenos/inexistentes, diagnóstico inexistente, listas sin resultados, acta sin plantilla y cuenta `Limitado` muestran su estado propio; ninguna pantalla con `[object Object]`, `undefined` o `NaN` |
+| Consola del navegador | Único error: el `401` esperado de `/users/me` antes de iniciar sesión |
+| Registro real | Alta de `estudiante.prueba11@uniminuto.edu.co` → `/verificar`; OTP de 8 dígitos leído de `storage/mail/*.eml` → correo verificado y aviso de cuenta pendiente |
+| Cuenta `Limitado` | Inicia sesión y aterriza en `/estudiante/perfil`; `/estudiante/tareas` responde con la pantalla «Tu cuenta está limitada» y los enlaces a perfil, acta y notificaciones |
+| Recuperación real | Tres pasos con OTP leído del `.eml`; contraseña nueva guardada e inicio de sesión correcto con ella |
+| Activación y baja | `POST /users/:id/validate` desde la UI activa la cuenta `Limitado`; la baja lógica la saca de los listados y deja el estado vacío |
+| Buscador global `?q=` | Verificado en `/estudiante/emprendimientos`, `/docente/emprendimientos` y `/admin/usuarios`, con aviso «Resultados para «q»» y vacío específico |
+| Correcciones de la revisión visual | Badge `Revisión: …` en el detalle de tarea; sin botón «Activar» duplicado cuando la cuenta es `Limitado`; etiquetas humanas en Configuración; valores nulos de respaldos y del actor de auditoría con fallback |
+| Estado del entorno | Base recreada con `docker compose down -v` + `up -d postgres backend`: 5 usuarios demo, 1 emprendimiento y 2 tareas del seed; backend con los tres jobs programados; sin datos de prueba |
+
+### Decisiones y huecos registrados
+
+- §5.12 (D23–D38): OTP, rutas en español, adjuntos no listables, seguimiento sin listado
+  global, actas del administrador, contraseña por OTP, guarda `Active`, buscador global,
+  etiquetas y guardado por lote, entorno de desarrollo, páginas compartidas por rol, DTO a
+  mano, solicitud de asesoría, plan CSV y evidencias posteriores al alta, huecos visibles y
+  reset de la base de desarrollo.
+- AQ-09: el diagnóstico y su resultado se muestran sin puntaje, dimensiones ni bandas.
+- P-3/P-35: el PDF del diagnóstico no se genera; el botón queda deshabilitado y explicado.
+- P-36: `GET /acta/template` responde `404 ACTA_TEMPLATE_NOT_CONFIGURED`; la vista lo trata
+  como hueco y permite subir el archivo firmado.
+- P-1: el estudiante no reprograma; solicita una cita nueva con fecha y hora preferidas
+  (P-20) y el administrador fija docente y bloque.
+- P-40: las recomendaciones de evento quedan `Pendiente` sin transiciones.
+- P-44: el reporte de emprendimientos no ofrece periodo.
+- P-31: las preferencias de aviso son claves globales del programa, no interruptores por
+  usuario.
+- P-16: no hay restauración de cuentas dadas de baja.
+- D22: no hay restauración de respaldos en la interfaz.
+
+### Sin verificar / pendiente
+
+- No se ejecutó la suite del backend en esta etapa porque no se modificó: siguen vigentes las
+  285 pruebas en verde de la Etapa 10.
+- El recorrido se hizo con Vite y el proxy `/api`; la puerta final con el build servido por
+  Caddy y la suite Playwright corresponden a la Etapa 12.
+- No se creó commit ni rama nueva; el trabajo queda en el árbol de trabajo, como se pidió.
+- Los datos sintéticos de registro, recuperación y baja se descartaron al recrear la base;
+  no viajan a la Etapa 12.
+
+**Puerta:** superada (las 64 rutas existen y se recorrieron con datos reales; typecheck y
+build en verde; registro, verificación OTP, recuperación, activación y baja probados de punta
+a punta; los huecos AQ-09, P-3, P-36, P-1, P-40, P-44, P-31 y P-16 se muestran explicados y
+no simulados; el entorno queda en el seed prístino).
