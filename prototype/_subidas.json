@@ -1,0 +1,394 @@
+{
+  "_marca/logo-color-1200.png": {
+    "alto": null,
+    "ancho": null,
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/11783388781562382565",
+    "titulo": "SGEMD - Logo institucional"
+  },
+  "admin/asesorias.html": {
+    "alto": "2414",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/17271043833329362007",
+    "titulo": "43 Administrador - Metricas de asesorias"
+  },
+  "admin/asignaciones.html": {
+    "alto": "2314",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/8948068843655736350",
+    "titulo": "46 Administrador - Asignaciones"
+  },
+  "admin/asignar-emprendimiento.html": {
+    "alto": "2108",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/1535442082738836527",
+    "titulo": "41 Administrador - Asignar emprendimiento"
+  },
+  "admin/comentarios.html": {
+    "alto": "2482",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/12948338779164818657",
+    "titulo": "42 Administrador - Moderacion de comentarios"
+  },
+  "admin/dashboard.html": {
+    "alto": "2750",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/11590773122365749378",
+    "titulo": "33 Administrador - Inicio (dashboard)"
+  },
+  "admin/diagnosticos.html": {
+    "alto": "2520",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/8225432933862408897",
+    "titulo": "47 Administrador - Diagnosticos respondidos"
+  },
+  "admin/emprendimiento-plan.html": {
+    "alto": "2966",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/4218907298745999198",
+    "titulo": "38 Administrador - Plan de trabajo del emprendimiento"
+  },
+  "admin/emprendimientos.html": {
+    "alto": "2014",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/15839280402321530987",
+    "titulo": "37 Administrador - Emprendimientos"
+  },
+  "admin/evento-form.html": {
+    "alto": "2704",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/8948068843655735994",
+    "titulo": "45 Administrador - Crear evento"
+  },
+  "admin/eventos.html": {
+    "alto": "2046",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/15702074526996921727",
+    "titulo": "44 Administrador - Eventos"
+  },
+  "admin/notificaciones.html": {
+    "alto": "2158",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/16886820917635914853",
+    "titulo": "50 Administrador - Notificaciones"
+  },
+  "admin/perfil.html": {
+    "alto": "2422",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/14154949437650247864",
+    "titulo": "49 Administrador - Mi perfil"
+  },
+  "admin/reportes.html": {
+    "alto": "2476",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/14788713495130255103",
+    "titulo": "48 Administrador - Exportar reportes"
+  },
+  "admin/seguimiento-dashboard.html": {
+    "alto": "2668",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/13008578869379625647",
+    "titulo": "40 Administrador - Tablero de seguimiento"
+  },
+  "admin/seguimiento.html": {
+    "alto": "2332",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/3409022568498847134",
+    "titulo": "39 Administrador - Seguimiento (lista)"
+  },
+  "admin/usuarios.html": {
+    "alto": "3070",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/14084440942116068230",
+    "titulo": "34 Administrador - Gestion de perfiles"
+  },
+  "compartido/login.html": {
+    "alto": "1668",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/13535838646707244854",
+    "titulo": "01 Acceso - Login (global)"
+  },
+  "compartido/recuperar-contrasena.html": {
+    "alto": "1600",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/500367493234484902",
+    "titulo": "04 Acceso - Recuperar contrasena (global)"
+  },
+  "compartido/registro.html": {
+    "alto": "1902",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/13350298923758051643",
+    "titulo": "02 Acceso - Registro (global)"
+  },
+  "compartido/verificar-otp.html": {
+    "alto": "1600",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/580389815609180831",
+    "titulo": "03 Acceso - Verificar OTP (global)"
+  },
+  "docente/asesoria-form.html": {
+    "alto": "2794",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/5397322518407271841",
+    "titulo": "23 Docente - Registrar asesoria"
+  },
+  "docente/asesorias.html": {
+    "alto": "2168",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/5532115021905822362",
+    "titulo": "22 Docente - Mis asesorias"
+  },
+  "docente/dashboard.html": {
+    "alto": "2258",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/11673326827382158138",
+    "titulo": "21 Docente - Inicio (dashboard)"
+  },
+  "docente/diagnostico.html": {
+    "alto": "2150",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/13661225143925660111",
+    "titulo": "29 Docente - Revision del diagnostico"
+  },
+  "docente/emprendimiento-expediente.html": {
+    "alto": "2458",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/1795060956032208183",
+    "titulo": "25 Docente - Expediente del emprendimiento"
+  },
+  "docente/emprendimientos.html": {
+    "alto": "1686",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/6734413068932421784",
+    "titulo": "24 Docente - Emprendimientos asignados"
+  },
+  "docente/notificaciones.html": {
+    "alto": "2174",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/1923205685635775646",
+    "titulo": "32 Docente - Notificaciones"
+  },
+  "docente/perfil.html": {
+    "alto": "2592",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/2546664871850524852",
+    "titulo": "31 Docente - Mi perfil"
+  },
+  "docente/seguimiento-dashboard.html": {
+    "alto": "2302",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/7169650412992084894",
+    "titulo": "27 Docente - Tablero de seguimiento"
+  },
+  "docente/seguimiento-notas.html": {
+    "alto": "2716",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/8805269787745454768",
+    "titulo": "28 Docente - Registrar avance y calificar"
+  },
+  "docente/seguimiento.html": {
+    "alto": "1632",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/4627682408074639766",
+    "titulo": "26 Docente - Seguimiento (lista)"
+  },
+  "docente/tareas.html": {
+    "alto": "1676",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/15805617781641850035",
+    "titulo": "30 Docente - Tareas asignadas"
+  },
+  "estudiante/asesorias.html": {
+    "alto": "2412",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/15069351535736624912",
+    "titulo": "16 Estudiante - Mis asesorias"
+  },
+  "estudiante/dashboard.html": {
+    "alto": "2394",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/7773175235148460141",
+    "titulo": "05 Estudiante - Inicio (dashboard)"
+  },
+  "estudiante/diagnostico-resultados.html": {
+    "alto": "2152",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/8359780650820119137",
+    "titulo": "11 Estudiante - Resultados del diagnostico"
+  },
+  "estudiante/diagnostico.html": {
+    "alto": "1798",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/14574526668287581608",
+    "titulo": "10 Estudiante - Diagnostico (cuestionario)"
+  },
+  "estudiante/emprendimiento-detalle.html": {
+    "alto": "2346",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/12185051933244727093",
+    "titulo": "08 Estudiante - Detalle del emprendimiento"
+  },
+  "estudiante/emprendimiento-editar.html": {
+    "alto": "1986",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/12347162319587915296",
+    "titulo": "09 Estudiante - Editar emprendimiento"
+  },
+  "estudiante/emprendimientos.html": {
+    "alto": "1600",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/3805023420385655884",
+    "titulo": "07 Estudiante - Mi emprendimiento (lista)"
+  },
+  "estudiante/estado-seguimiento.html": {
+    "alto": "1832",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/9644682771876055552",
+    "titulo": "06 Estudiante - Estado de seguimiento"
+  },
+  "estudiante/eventos.html": {
+    "alto": "2138",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/4629061994126736387",
+    "titulo": "18 Estudiante - Eventos"
+  },
+  "estudiante/notificaciones.html": {
+    "alto": "1714",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/2893330669465796747",
+    "titulo": "20 Estudiante - Notificaciones"
+  },
+  "estudiante/perfil.html": {
+    "alto": "2300",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/11041799640784532944",
+    "titulo": "19 Estudiante - Mi perfil"
+  },
+  "estudiante/plan-trabajo.html": {
+    "alto": "2770",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/6607079564305805123",
+    "titulo": "12 Estudiante - Plan de trabajo"
+  },
+  "estudiante/seguimiento.html": {
+    "alto": "1820",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/3071964041161702276",
+    "titulo": "13 Estudiante - Seguimiento (historial)"
+  },
+  "estudiante/solicitar-asesoria.html": {
+    "alto": "1992",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/3840246817840665762",
+    "titulo": "17 Estudiante - Solicitar asesoria"
+  },
+  "estudiante/tarea-detalle.html": {
+    "alto": "2732",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/12347162319587915693",
+    "titulo": "15 Estudiante - Detalle de tarea"
+  },
+  "estudiante/tareas.html": {
+    "alto": "1890",
+    "ancho": "2560",
+    "duplicadas": 0,
+    "estado": "ok",
+    "pantalla": "projects/3060781598377201049/screens/5747886547515464814",
+    "titulo": "14 Estudiante - Mis tareas"
+  }
+}
