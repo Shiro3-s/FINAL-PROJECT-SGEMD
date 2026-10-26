@@ -9,7 +9,8 @@ node_modules/
 npm-debug.log*
 *.tsbuildinfo
 dist/
-.vite/
+.vite
+backend/node_modules/
 
 # Entorno y secretos
 .env
