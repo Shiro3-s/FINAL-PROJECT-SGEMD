@@ -655,3 +655,96 @@ seguimiento o el emprendimiento; el avance se deriva de la base y no del cliente
 **Puerta:** superada (T20, T21, T35 y T36 en verde; el estudiante no puede agendar por API;
 el solapamiento del docente se impide en la transacción; un aviso de A nunca llega a la
 conexión de B; el evento se publica después del commit).
+
+## Etapa 9 — Diagnóstico, actas y eventos
+
+- **Fecha:** 2026-10-25
+- **Commit:** `e6b5e57` (módulos) + `cce68ca` (descarga del acta para la cuenta `Limitado`)
+
+### Hecho
+
+- `modules/diagnosis`: instrumento, borrador y envío. Un emprendimiento tiene **un**
+  diagnóstico inicial: el borrador (`En progreso`) se reutiliza en cada guardado y, al
+  enviar, las respuestas quedan bloqueadas (`Enviado`). El envío exige las 22 preguntas
+  activas; una pregunta inexistente o un valor fuera de las opciones de una selección
+  única responde `400` con el índice exacto. `GET /diagnosis`, `GET /diagnosis/:id` y
+  `GET /diagnosis/:id/report` usan el alcance del expediente (admin, docente asignado,
+  dueño); `GET /characterization/me` devuelve el avance por sección.
+- **Sin rúbrica no hay puntaje** (AQ-09): `puntajeTotal` queda `null`, no se escriben filas
+  de `valoracion` ni de `caracterizacion`, y cada lectura declara `RUBRIC_NOT_CONFIGURED`.
+  El informe se sirve como JSON con las cinco secciones sin puntaje y `urlInforme: null`.
+- `modules/acta`: cada carga crea una **versión** en `En revisión`. Una pendiente responde
+  `409 ACTA_ALREADY_PENDING`, una aprobada `409 ACTA_ALREADY_APPROVED` y una rechazada se
+  puede reemplazar. La revisión es solo del administrador y solo desde `En revisión`
+  (`422 ACTA_NOT_REVIEWABLE`); el rechazo exige `observaciones` (BR-009). Se guardan
+  revisor y fecha, se audita y se avisa al estudiante con el motivo.
+- Ninguna ruta de acta exige cuenta `Activo` (AQ-07 opción A). La descarga del archivo
+  (`GET /attachments/:id` con `entidad = acta`) tampoco: se retiró `requireActiveAccount`
+  del middleware de lectura y el servicio exige `Activo` solo para las evidencias de
+  tareas, seguimientos y asesorías.
+- `modules/events`: el administrador crea, edita, publica y da de baja; `estado` acepta
+  `Pendiente` y `Publicado` (`Aprobado`/`Rechazado` reservados, P-37). El docente y el
+  estudiante solo ven los publicados; un borrador responde `404` también por id. La
+  inscripción mueve `cupo` (puestos disponibles) bajo `pg_advisory_xact_lock`, y una
+  capacidad menor que las inscripciones responde `422 EVENT_CAPACITY_BELOW_REGISTRATIONS`.
+  El docente recomienda solo a sus emprendimientos con asignación activa y a eventos
+  publicados; la recomendación nace `Pendiente`, se audita y avisa al estudiante.
+- `services/schedule.ts`: el bloque `(fecha, hora_inicio, hora_fin)` de asesorías se
+  extrajo a un servicio compartido y lo reutilizan los eventos.
+- 10 acciones de auditoría nuevas y `setval` para la secuencia de `eventos` en el seed.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 15 archivos) | **201 pruebas en verde** (176 de las etapas 3–8 + 25 nuevas) |
+| T25 · instrumento y borrador | Formulario con 22 preguntas en 5 secciones; sin diagnóstico → `404`; el borrador queda `En progreso` con 1 respuesta y se reutiliza (una sola fila); el envío incompleto → `422 DIAGNOSIS_INCOMPLETE`; el envío completo deja `Enviado` con 22 respuestas, `puntajeTotal: null` y `RUBRIC_NOT_CONFIGURED`; un nuevo guardado → `422 DIAGNOSIS_ALREADY_SUBMITTED`; no se escriben `valoracion` ni `caracterizacion`; se audita el envío con el motivo |
+| T25 · validaciones | Pregunta inexistente → `400` con `respuestas.0.preguntaId`; valor fuera de opciones → `400` con `respuestas.0.valor`; pregunta repetida y `puntajeTotal` en el cuerpo → `400`; `pageSize` 101, `sort` y `order` fuera de lista → `400` |
+| T25 · alcance | El administrador, el docente asignado y el dueño leen el diagnóstico; otro estudiante y otro docente reciben `404`; el docente ajeno ve `total = 0`; una cuenta `Limitado` recibe `403 ACCOUNT_NOT_ACTIVE`; un estudiante sin emprendimiento → `422 ENTREPRENEURSHIP_REQUIRED` |
+| T25 · informe y caracterización | `informe.disponible = false`, `motivo = RUBRIC_NOT_CONFIGURED`, cinco secciones con `puntaje` y `resultado` en `null`, `valoracion: []`, `urlInforme: null`; la caracterización suma 22 respuestas repartidas en las cinco secciones |
+| T26 · ciclo del acta | Carga → `En revisión` con adjunto PDF; segunda carga → `409 ACTA_ALREADY_PENDING`; rechazo sin motivo → `400`; rechazo con motivo → `Rechazada` con revisor, fecha, aviso y auditoría; revisar dos veces → `422 ACTA_NOT_REVIEWABLE`; la rechazada admite una versión nueva; la aprobada bloquea otra carga con `409 ACTA_ALREADY_APPROVED`; el histórico conserva `Rechazada, Aprobada` |
+| T26 · archivo y alcance | La plantilla responde `404 ACTA_TEMPLATE_NOT_CONFIGURED`; el docente recibe `403` en `/acta` y `404` al descargar el archivo; el dueño y el administrador descargan con `Content-Disposition`; un tercero recibe `404`; `DELETE /attachments/:id` sobre el acta → `403 ROLE_NOT_ALLOWED`; el listado propio y el filtro del administrador coinciden |
+| T26 · cuenta `Limitado` | Carga su acta, la lista y **descarga el archivo** (`200`, `application/pdf`); una cuenta inactiva no descarga la evidencia de una tarea de su propiedad (`403 ACCOUNT_NOT_ACTIVE`) |
+| T27 · CRUD y visibilidad | El administrador crea, lee, edita y da de baja; el estudiante y el docente reciben `403` al escribir; `organizadorId`, horario parcial, horas invertidas y capacidad 0 → `400`; el borrador responde `404` al docente y al estudiante y no aparece en su listado; el publicado sí |
+| T27 · inscripción y cupo | La inscripción descuenta `cupo` y devuelve `inscrito: true`; duplicada → `409 EVENT_ALREADY_REGISTERED`; sin puestos → `422 EVENT_FULL`; docente y administrador → `403`; cancelar libera el puesto y una segunda cancelación → `404 EVENT_REGISTRATION_NOT_FOUND`; capacidad menor que las inscripciones → `422 EVENT_CAPACITY_BELOW_REGISTRATIONS`; un evento sin `requiereRegistro` → `422 EVENT_REGISTRATION_NOT_REQUIRED`; sin capacidad, `cupo = null` |
+| T27 · recomendaciones | El docente asignado recomienda (`201`, `Pendiente`, estudiante derivado) y el estudiante lo ve; otro estudiante ve `0`; el docente ajeno recibe `404`; estudiante y administrador `403`; un borrador `404`; un `estudianteId` ajeno `400`; se audita y se avisa con tipo `Evento` |
+| T27 · baja y auditoría | `DELETE` deja `fecha_eliminacion`, la lectura responde `404` y las inscripciones se conservan; se auditan alta, edición, baja, inscripción, cancelación y recomendación |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Pila recreada desde cero (`down -v` + `up --build`): **160 comprobaciones, 160 en el estado esperado**. Incluye las 5 sesiones del seed, el cuestionario completo, el informe sin rúbrica, el ciclo del acta con sus versiones y su archivo, el alta de un tercer estudiante para el cupo, la inscripción y el evento lleno, las recomendaciones, la baja lógica y las 10 acciones de auditoría |
+
+### Decisiones y huecos registrados
+
+- §5.10: alcance y ciclo del diagnóstico, puntaje e informe, revisión docente,
+  caracterización, ciclo del acta, cuenta `Limitado`, plantilla, archivo del acta, eventos
+  (escritura, visibilidad, cupo, inscripción, recomendaciones), auditoría y seed.
+- P-35: sin rúbrica no hay puntaje, ni PDF, ni filas de `valoracion`/`caracterizacion`.
+- P-36: la plantilla legal del acta no está en el repositorio; `GET /acta/template` declara
+  el hueco con `404 ACTA_TEMPLATE_NOT_CONFIGURED`.
+- P-37: `Aprobado`/`Rechazado` de `eventos` quedan reservados; el administrador es el
+  organizador y no hay flujo de aprobación.
+- P-38: `cupo` es el número de puestos **disponibles**; sin capacidad no hay tope ni lista
+  de espera.
+- P-39: `Revisado` no es alcanzable; no hay endpoint de revisión del diagnóstico.
+- P-40: la recomendación nace `Pendiente` y no hay endpoint para aceptarla, rechazarla ni
+  marcar asistencia; el diagrama no define esos valores.
+- #38: el prototipo muestra puntaje por dimensión y el requisito no lo permite.
+- #39: la revisión docente del prototipo escribe recomendaciones; `valoracion` sigue
+  detrás de AQ-09 y la API es de solo lectura.
+- #40: el prototipo no tiene vista de acta; se implementa el circuito real y la SPA llega
+  en la Etapa 11.
+
+### Sin verificar / pendiente
+
+- El PDF del informe de diagnóstico no se genera (P-3, P-35); `urlInforme` queda `null`.
+- La plantilla legal del acta lo aporta la Coordinadora (AQ-12, P-36).
+- No hay revisión del diagnóstico ni escritura de recomendaciones docentes hasta que
+  AQ-09 defina dimensiones, pesos y fórmula (P-39).
+- No hay aceptación/rechazo de recomendaciones ni control de asistencia a eventos: el
+  diagrama no define esos flujos (P-9, P-40).
+- Las vistas de diagnóstico, acta y eventos se pintan en la Etapa 11; el contrato ya
+  devuelve secciones, adjunto, cupo, inscritos e `inscrito`.
+
+**Puerta:** superada (T25, T26 y T27 en verde; sin rúbrica no se inventa puntaje; el acta
+solo la revisa el administrador y el rechazo exige motivo; el docente solo recomienda a
+sus emprendimientos y el estudiante solo ve eventos publicados).

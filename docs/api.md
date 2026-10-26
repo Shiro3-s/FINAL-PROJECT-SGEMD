@@ -1228,17 +1228,21 @@ que el reloj cambie el estado, y no existe un estado «No asistió» (P-34).
 ## Adjuntos
 
 Evidencias de una tarea, un seguimiento o una asesoría (FR-008, BR-006, BR-007). Módulo de
-trabajo: sesión **y** cuenta `Activo`.
+trabajo: sesión **y** cuenta `Activo` (una cuenta `Limitado` o `Inactivo` recibe
+`403 ACCOUNT_NOT_ACTIVE`). La única excepción es la **descarga del archivo del acta**, que
+se rige por la regla del acta y está disponible para una cuenta `Limitado` (AQ-07
+opción A).
 
 | Ruta | Roles | Notas |
 |---|---|---|
 | `POST /api/attachments/:entity/:id` | Admin, Docente, Estudiante | `entity`: `task`, `tracing` o `advice`; `multipart/form-data`, campo `file` |
-| `GET /api/attachments/:id` | Admin, Docente, Estudiante | Descarga con el alcance del padre |
+| `GET /api/attachments/:id` | Admin, Docente, Estudiante | Descarga con el alcance del padre; el archivo del acta no exige `Activo` |
 | `DELETE /api/attachments/:id` | Admin, autor de la evidencia | Baja lógica + borrado físico del archivo |
 
 ### `POST /api/attachments/:entity/:id`
 
-- `entity` admite `task`, `tracing` y `advice`; cualquier otro valor responde `400`.
+- `entity` admite `task`, `tracing` y `advice`; cualquier otro valor —incluido `acta`,
+  que solo se lee— responde `400`.
 - **Autorización de escritura**: en una tarea, el estudiante destinatario o el
   administrador (el docente califica, no sube evidencia); en un seguimiento, su autor o el
   administrador; en una asesoría, el estudiante dueño, el docente asignado o el
@@ -1282,12 +1286,17 @@ Transmite el archivo con `Content-Type` verificado, `Content-Length`,
 `Cache-Control: private, no-store` y `X-Content-Type-Options: nosniff`. Si la fila existe
 pero el archivo ya no está en el disco: `404 ATTACHMENT_FILE_MISSING`.
 
+La respuesta también cubre el **archivo del acta** (`entidad: "acta"`): lo leen el
+administrador y el estudiante dueño; el docente recibe `404`. En ese caso `entidadId` es
+el `id` del acta, no el de una tarea o asesoría.
+
 ### `DELETE /api/attachments/:id`
 
 `200` con `{ "success": true, "message": "Evidencia eliminada." }`. La fila queda con
 `fechaEliminacion`, el pivote se elimina y el archivo se borra del disco (BR-006). Un
 archivo ya ausente no impide la baja: el efecto es idempotente. Audita `Baja lógica de
-evidencia`.
+evidencia`. El archivo del acta no se borra por esta ruta: responde `403
+ROLE_NOT_ALLOWED` y se reemplaza subiendo una nueva versión en `POST /api/acta`.
 
 ## Notificaciones
 
@@ -1381,32 +1390,357 @@ globales del programa, no por usuario (P-31).
 
 ## Diagnóstico
 
+Caracterización del emprendimiento (FR-002, T25). Es un **módulo de trabajo**: exige
+sesión y cuenta `Activo` (`403 ACCOUNT_NOT_ACTIVE`). El estudiante diligencia el suyo; el
+administrador y el docente con asignación activa lo leen. Un id fuera de alcance responde
+`404`.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/diagnosis/form` | Admin, Docente, Estudiante | Banco de preguntas activo |
+| `GET /api/diagnosis` | Admin, Docente, Estudiante | Bandeja con el alcance del expediente |
+| `GET /api/diagnosis/me` | Estudiante | Diagnóstico de su emprendimiento |
+| `POST /api/diagnosis/me` | Estudiante | Guarda borrador o envía |
+| `GET /api/diagnosis/:id` | Admin, Docente, Estudiante | Detalle con respuestas |
+| `GET /api/diagnosis/:id/report` | Admin, Docente, Estudiante | Informe JSON |
+| `GET /api/characterization/me` | Estudiante | Secciones y avance de respuestas |
+
+`GET /api/diagnosis/me` y `GET /api/characterization/me` aceptan `emprendimientoId` para
+elegir entre emprendimientos paralelos; sin él se usa el más reciente. Un estudiante sin
+emprendimiento vigente recibe `422 ENTREPRENEURSHIP_REQUIRED`; si todavía no guardó nada,
+`404 NOT_FOUND`.
+
 ### `GET /api/diagnosis/form`
 
-Requiere sesión **y** cuenta `Activo`; una cuenta `Limitado` o `Inactivo` recibe
-`403 ACCOUNT_NOT_ACTIVE`. Devuelve el banco de preguntas activo.
+`200` con `{ total, secciones, preguntas }`. Las 22 preguntas activas se agrupan en cinco
+secciones (Perfil, Problema, Propuesta de valor, Mercado y Capacidad operativa); cada
+pregunta trae `id`, `seccion`, `orden`, `enunciado`, `tipo` y `opciones` (vacío en texto).
 
-> Implementado en la Etapa 3 únicamente porque T03 exige un endpoint restringido
-> real. El resto del módulo (envío, puntaje, informe) llega en la Etapa 9.
-
-`200`:
+### `POST /api/diagnosis/me`
 
 ```json
 {
-  "success": true,
-  "data": {
-    "total": 22,
-    "preguntas": [
-      {
-        "id": 1,
-        "seccion": 1,
-        "orden": 1,
-        "enunciado": "…",
-        "tipo": "Texto",
-        "opciones": []
-      }
-    ]
+  "emprendimientoId": 1,
+  "respuestas": [
+    { "preguntaId": 1, "valor": "Sabor y Sabe" },
+    { "preguntaId": 2, "valor": "Pequeño" }
+  ],
+  "enviar": false
+}
+```
+
+- `enviar: false` (o ausente) guarda el borrador: se puede enviar solo una parte y volver
+  después. El borrador **reutiliza** el mismo diagnóstico (`En progreso`); no crea filas
+  nuevas.
+- `enviar: true` exige las 22 preguntas activas. Si falta alguna: `422
+  DIAGNOSIS_INCOMPLETE` con el campo `respuestas`. Al enviar, las respuestas quedan
+  bloqueadas (`Enviado`); un nuevo guardado responde `422 DIAGNOSIS_ALREADY_SUBMITTED`.
+- Una pregunta inexistente o inactiva y un valor fuera de las opciones de una selección
+  única responden `400 VALIDATION_ERROR` con el índice exacto (`respuestas.0.preguntaId`).
+- `puntajeTotal`, `estado` y `urlInforme` no se aceptan: `.strict()` → `400`.
+
+Forma del diagnóstico:
+
+```json
+{
+  "id": 1,
+  "estado": "En progreso",
+  "fechaDiagnostico": "2026-10-25T18:00:00.000Z",
+  "puntajeTotal": null,
+  "urlInforme": null,
+  "emprendimiento": { "id": 1, "codigo": "EMP-001", "nombre": "Sabor y Sabe" },
+  "estudiante": { "id": 4, "nombres": "Estudiante", "apellidos": "Demo Uno", "correoInstitucional": "…" },
+  "respuestas": [{ "id": 1, "seccion": 1, "orden": 1, "enunciado": "…", "tipo": "Texto", "opciones": [], "valor": "…" }],
+  "totalPreguntas": 22,
+  "respondidas": 2,
+  "puntuacion": {
+    "disponible": false,
+    "motivo": "RUBRIC_NOT_CONFIGURED",
+    "mensaje": "La rúbrica del diagnóstico no está aprobada (AQ-09): se guardan las respuestas, pero no se produce puntaje."
   }
+}
+```
+
+**Sin rúbrica no hay puntaje.** `rubrica_diagnostico_aprobada` está en `false` y el
+repositorio no tiene dimensiones, pesos ni fórmula aprobados (AQ-09). Por eso
+`puntajeTotal` es `null`, no se escriben filas de `valoracion` ni de `caracterizacion`, y
+la API declara `RUBRIC_NOT_CONFIGURED` en cada lectura. No se inventa un cálculo (P-35).
+
+### `GET /api/diagnosis`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `q` | texto ≤ 100 | — | Emprendimiento, estudiante o correo |
+| `estado` | `En progreso` · `Enviado` · `Revisado` | — | |
+| `emprendimientoId` | entero | — | |
+| `estudianteId` | entero | — | No amplía el alcance |
+| `sort` | `fecha` · `estado` · `emprendimiento` · `estudiante` | `fecha` | Lista blanca |
+| `order` | `asc` · `desc` | `desc` | |
+
+`200` con `{ items, total, page, pageSize }`. El alcance es el del expediente: el
+administrador ve todo, el docente solo los emprendimientos con asignación activa y el
+estudiante solo los suyos.
+
+### `GET /api/diagnosis/:id/report`
+
+`200` con `{ diagnostico, informe }`. Mientras no haya rúbrica, el informe declara el
+hueco y deja las cinco secciones sin puntaje:
+
+```json
+{
+  "informe": {
+    "disponible": false,
+    "motivo": "RUBRIC_NOT_CONFIGURED",
+    "mensaje": "…",
+    "urlInforme": null,
+    "generadoEn": "2026-10-25T18:00:00.000Z",
+    "secciones": [
+      { "numero": 1, "titulo": "Perfil del emprendimiento", "puntaje": null,
+        "resultado": null, "fortalezas": null, "oportunidades": null }
+    ],
+    "valoracion": []
+  }
+}
+```
+
+El PDF no se genera todavía: `urlInforme` queda en `null` (P-3) y el informe se sirve como
+JSON para que la SPA pueda mostrarlo.
+
+### `GET /api/characterization/me`
+
+`200` con `{ diagnosticoId, estado, emprendimiento, respondidas, totalPreguntas,
+puntuacion, secciones, valoracion }`. Cada sección trae `respondidas`, `total` y los
+campos de puntaje en `null`; `valoracion` es `[]`. Es la vista de avance del cuestionario,
+no un resultado puntuado.
+
+## Actas
+
+Acta de compromiso y confidencialidad (FR-003, BR-001, BR-009, T26). El estudiante
+descarga la plantilla, la firma y la sube; el administrador la revisa. **Ninguna ruta
+exige cuenta `Activo`**: AQ-07 opción A deja el acta disponible también para una cuenta
+`Limitado`.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/acta/template` | Admin, Estudiante | Plantilla para firmar |
+| `GET /api/acta` | Admin, Estudiante | Bandeja o actas propias |
+| `POST /api/acta` | Estudiante | `multipart/form-data`, campo `file` |
+| `GET /api/acta/:id` | Admin, Estudiante | El docente recibe `403` |
+| `PUT /api/acta/:id/review` | Admin | Aprobar o rechazar con motivo |
+
+Forma del acta:
+
+```json
+{
+  "id": 3,
+  "estado": "En revisión",
+  "observaciones": null,
+  "fechaCarga": "2026-10-25T18:00:00.000Z",
+  "fechaRevision": null,
+  "emprendimiento": { "id": 1, "codigo": "EMP-001", "nombre": "Sabor y Sabe" },
+  "estudiante": { "id": 4, "nombres": "Estudiante", "apellidos": "Demo Uno", "correoInstitucional": "…" },
+  "revisor": null,
+  "adjunto": {
+    "id": 8,
+    "nombreArchivo": "acta-firmada.pdf",
+    "tamanoBytes": 512,
+    "tipoMime": "application/pdf",
+    "fechaSubida": "2026-10-25T18:00:00.000Z"
+  }
+}
+```
+
+### `GET /api/acta/template`
+
+La plantilla legal del acta **no está en el repositorio** (AQ-12 no la aporta). Servir un
+documento inventado sería peor que declarar el hueco, así que responde `404
+ACTA_TEMPLATE_NOT_CONFIGURED`. Mientras tanto el estudiante puede subir la que reciba por
+otro canal (P-36).
+
+### `POST /api/acta`
+
+`multipart/form-data` con un único archivo en el campo `file` (PDF, JPEG o PNG, MIME
+verificado por contenido). Cada carga crea una **versión** del acta en `En revisión`:
+
+- Si la última versión está `En revisión`: `409 ACTA_ALREADY_PENDING`.
+- Si está `Aprobada`: `409 ACTA_ALREADY_APPROVED`.
+- Si está `Rechazada`: se permite subir una nueva versión.
+- Sin emprendimiento vigente: `422 ENTREPRENEURSHIP_REQUIRED`.
+
+El archivo se guarda en `adjuntos` y se enlaza con `actas.adjuntos_id_adjunto`; la carga se
+audita como `Carga de acta` y avisa a los administradores.
+
+### `PUT /api/acta/:id/review`
+
+```json
+{ "estado": "Rechazada", "observaciones": "La firma no coincide con el documento." }
+```
+
+- Solo se revisa un acta `En revisión`; cualquier otro estado responde `422
+  ACTA_NOT_REVIEWABLE`.
+- `Rechazada` exige `observaciones` (BR-009): sin motivo, `400 VALIDATION_ERROR`.
+- Se guardan el revisor y `fechaRevision`; se audita como `Revisión de acta` y se avisa al
+  estudiante con el motivo.
+- BR-001: una asignación docente exige al menos un acta `Aprobada`; la aprobación es la que
+  habilita el mentor.
+
+### Archivo del acta
+
+`GET /api/attachments/:id` transmite el archivo cuando `entidad` es `acta`. Lo leen el
+administrador y el estudiante dueño —incluida una cuenta `Limitado`, porque esta ruta no
+exige `Activo`—; el docente recibe `404`. **No hay borrado independiente**:
+`DELETE /api/attachments/:id` responde `403 ROLE_NOT_ALLOWED` porque el archivo se
+reemplaza subiendo una nueva versión desde `POST /api/acta`.
+
+### Listado
+
+`GET /api/acta` acepta `page`, `pageSize` (25), `q`, `estado`, `emprendimientoId`,
+`estudianteId`, `sort` (`fecha` · `estado` · `estudiante` · `emprendimiento`) y `order`
+(`desc` por defecto). El administrador ve todas; el estudiante, solo las suyas.
+
+## Eventos
+
+Eventos institucionales y recomendaciones (FR-021, T27). El administrador es el
+organizador: crea, edita, publica y da de baja. El docente recomienda eventos **solo** a
+los emprendimientos que tiene asignados. El estudiante ve los publicados y se inscribe.
+
+| Ruta | Roles | Notas |
+|---|---|---|
+| `GET /api/event` | Admin, Docente, Estudiante | Listado con alcance |
+| `GET /api/event/:id` | Admin, Docente, Estudiante | Borrador oculto para no admin |
+| `POST /api/event` | Admin | Alta |
+| `PUT /api/event/:id` | Admin | Edición parcial |
+| `DELETE /api/event/:id` | Admin | Baja lógica |
+| `POST /api/event/:id/register` | Estudiante | Inscripción |
+| `DELETE /api/event/:id/register` | Estudiante | Cancelación |
+| `GET /api/event/:id/recommendations` | Admin, Docente, Estudiante | Recomendaciones visibles |
+| `POST /api/event/:id/recommendations` | Docente | Recomendar a un emprendimiento asignado |
+
+Forma del evento:
+
+```json
+{
+  "id": 1,
+  "nombreEvento": "Startup Minuto de Dios",
+  "descripcion": "Jornada de presentación de emprendimientos.",
+  "dirigidoA": "Todos los estudiantes",
+  "capacidadMaxima": 40,
+  "cupo": 40,
+  "estado": "Publicado",
+  "requiereRegistro": true,
+  "lugar": "Auditorio principal",
+  "enlace": null,
+  "tipoEvento": { "id": 1, "nombre": "Startup" },
+  "modalidad": { "id": 1, "nombre": "Presencial" },
+  "fecha": "2026-11-05",
+  "horaInicio": "09:00",
+  "horaFin": "11:00",
+  "organizador": { "id": 1, "nombres": "Coordinación", "apellidos": "SGEMD" },
+  "inscritos": 0,
+  "inscrito": false
+}
+```
+
+### `GET /api/event`
+
+| Parámetro | Tipo | Default | Notas |
+|---|---|---|---|
+| `page` | entero ≥ 1 | 1 | |
+| `pageSize` | entero 1–100 | 25 | |
+| `q` | texto ≤ 100 | — | Nombre, descripción, lugar o dirigido a |
+| `estado` | los 4 valores de `EVENTO_ESTADOS` | — | |
+| `tipoEventoId` | entero | — | |
+| `modalidadId` | entero | — | |
+| `desde` / `hasta` | `AAAA-MM-DD` | — | Sobre la fecha del bloque |
+| `sort` | `fecha` · `nombre` · `estado` · `cupo` | `fecha` | Lista blanca |
+| `order` | `asc` · `desc` | `asc` | |
+
+`200` con `{ items, total, page, pageSize }`. El administrador ve todos los eventos,
+publicados o no; el docente y el estudiante **solo** los `Publicado`. Un borrador responde
+`404` a quien no es administrador, también por id.
+
+### `POST /api/event`
+
+```json
+{
+  "nombreEvento": "Taller de costos",
+  "descripcion": "…",
+  "dirigidoA": "Todos los estudiantes",
+  "capacidadMaxima": 30,
+  "estado": "Publicado",
+  "requiereRegistro": true,
+  "lugar": "Aula 204",
+  "enlace": null,
+  "tipoEventoId": 2,
+  "modalidadId": 1,
+  "fecha": "2026-12-15",
+  "horaInicio": "10:00",
+  "horaFin": "12:00"
+}
+```
+
+- `estado` solo admite `Pendiente` (borrador) y `Publicado`; `Aprobado` y `Rechazado`
+  quedan reservados (P-37). El valor por defecto es `Pendiente`.
+- El horario es todo o nada: si llega una de las tres partes, faltan las otras → `400`. La
+  hora de fin debe ser posterior a la de inicio.
+- `capacidadMaxima` es opcional. Sin ella, `cupo` es `null` y no hay tope. Con ella, `cupo`
+  nace igual a la capacidad.
+- `tipoEventoId` y `modalidadId` se validan contra el catálogo (`400` si no existen).
+- Se audita como `Alta de evento`.
+
+### `PUT /api/event/:id`
+
+Edición parcial de los mismos campos. `estado` sigue limitado a `Pendiente`/`Publicado`.
+Si se cambia `capacidadMaxima`, `cupo` se recalcula como `capacidad - inscritos`; una
+capacidad menor que las inscripciones actuales responde `422
+EVENT_CAPACITY_BELOW_REGISTRATIONS`. Un `PUT` sin campos responde `400`. Se audita como
+`Edición de evento`.
+
+### `DELETE /api/event/:id`
+
+Baja lógica (`fecha_eliminacion`): el evento desaparece de las lecturas y conserva sus
+inscripciones y recomendaciones para el histórico. `200` con `{ "success": true, "message":
+"Evento dado de baja." }`. Se audita como `Baja lógica de evento`.
+
+### `POST /api/event/:id/register` y `DELETE /api/event/:id/register`
+
+Solo el estudiante se inscribe. El evento debe estar publicado y `requiereRegistro` debe
+ser `true`; en caso contrario: `422 EVENT_REGISTRATION_NOT_REQUIRED`.
+
+- `POST` descuenta un puesto de `cupo` y devuelve el evento con `inscrito: true`. Una
+  segunda inscripción responde `409 EVENT_ALREADY_REGISTERED`; sin puestos, `422
+  EVENT_FULL`. El descuento ocurre bajo `pg_advisory_xact_lock('evento:cupo:<id>')` para
+  que dos estudiantes no tomen el mismo último puesto.
+- `DELETE` libera el puesto y devuelve `{ eventoId, inscrito: false, cupo }`. Si no había
+  inscripción: `404 EVENT_REGISTRATION_NOT_FOUND`.
+- Se auditan como `Inscripción a evento` y `Cancelación de inscripción a evento`.
+
+### Recomendaciones
+
+`POST /api/event/:id/recommendations` es **solo del docente** y exige una asignación
+activa al emprendimiento (`404` si no la tiene) y un evento publicado (`404` si es
+borrador). El cuerpo es `{ emprendimientoId, estudianteId?, mensaje? }`; si llega
+`estudianteId`, debe ser el propietario del emprendimiento (`400`). La recomendación nace
+`Pendiente`, se audita como `Recomendación de evento` y avisa al estudiante con tipo
+`Evento`.
+
+`GET /api/event/:id/recommendations` devuelve `{ items, total, page, pageSize }` con
+`pageSize` 25. El administrador ve todas; el docente, las suyas; el estudiante, las de su
+emprendimiento. El estado de la recomendación no se mueve: no hay endpoint para aceptarla,
+rechazarla ni marcar asistencia (P-40). Forma de una recomendación:
+
+```json
+{
+  "id": 1,
+  "mensaje": "Te servirá para el modelo de negocio.",
+  "estado": "Pendiente",
+  "fecha": "2026-10-25T18:00:00.000Z",
+  "evento": { "id": 1, "nombreEvento": "Startup Minuto de Dios" },
+  "emprendimiento": { "id": 1, "codigo": "EMP-001", "nombre": "Sabor y Sabe" },
+  "estudiante": { "id": 4, "nombres": "Estudiante", "apellidos": "Demo Uno" },
+  "docente": { "id": 2, "nombres": "Docente", "apellidos": "Demo Uno" }
 }
 ```
 
