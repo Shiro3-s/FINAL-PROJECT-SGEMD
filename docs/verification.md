@@ -482,3 +482,85 @@ una sola vez y siempre notifica).
 **Puerta:** superada (T07 y T15 en verde; ambos topes se aplican bajo transacción y lock;
 una sola asignación activa por emprendimiento; la lectura respeta el rol y la escritura es
 solo del administrador).
+
+---
+
+## Etapa 7 — Tareas, seguimientos y evidencias
+
+- **Fecha:** 2026-10-25
+- **Commit:** `3f457c2`
+
+### Hecho
+
+- `modules/tasks`: ciclo de vida completo. El alta deriva el estudiante del propietario del
+  emprendimiento (no se acepta `estudianteId`) y nace `Pendiente` con
+  `evidencia_requerida = TRUE`. `PUT` admite `estado: 'En curso'` solo desde `Pendiente`;
+  la entrega, la calificación y la devolución tienen rutas propias. `Vencida` se deriva de
+  `fecha_limite` en cada lectura y en el filtro, nunca se escribe en la fila.
+- `modules/tracing`: avances de fase y comentarios. El autor es la sesión; un
+  `Avance de fase` exige `fasePlanId` (`400`) y un `Comentario` no la lleva. Editar y dar
+  de baja es del autor o del administrador; un docente ajeno recibe `404`. La fecha del
+  avance se guarda a mediodía de Bogotá para no mostrarse como el día anterior.
+- `modules/attachments`: subida `multipart/form-data` en streaming con `busboy`,
+  descarga con `Content-Disposition` (respaldo ASCII + `filename*=UTF-8''`) y borrado con
+  baja lógica de la fila, borrado del pivote y borrado físico del archivo.
+- `services/storage.ts`: MIME por **firma del contenido** (JPEG, PNG, PDF), nombre en disco
+  `<uuid>.<ext>`, escritura en `*.part` + `rename`, travesía de rutas rechazada con
+  `preservePath` y tamaño desde `upload_max_mb`.
+- `services/evidence.ts`: los tres pivotes (`tareas`, `seguimientos`, `asesorías`) y la
+  cascada de BR-006 al dar de baja un emprendimiento, incluida el acta.
+- `services/progress.ts`: `avance = ROUND(100 × Completada / total)` recalculado dentro de
+  la transacción y progreso por fase (las cuatro fases siempre presentes).
+- BR-007 se aplica en el servidor: `PUT /task/:id/complete` sin evidencia vigente responde
+  `422 TASK_EVIDENCE_REQUIRED`; el botón deshabilitado de la interfaz es solo la primera
+  capa.
+- 11 acciones de auditoría nuevas y avisos `Tarea` / `Seguimiento` al estudiante y a los
+  docentes con asignación activa.
+
+### Verificado
+
+| Comprobación | Resultado |
+|---|---|
+| `npm test` (PostgreSQL real, 10 archivos) | **158 pruebas en verde** (116 de las etapas 3–6 + 42 nuevas) |
+| T16 · ciclo de vida | `Pendiente → En curso → En revisión → Completada` con `puntajeObtenido` y `estadoRevision = 'Calificada'`; calificar o devolver antes de tiempo → `422 INVALID_TASK_TRANSITION`; `estado: 'Completada'` en el `PUT` → `400`; una tarea `En revisión` no se edita (`422 TASK_NOT_EDITABLE`); el estudiante no crea, edita, califica ni borra (`403`); otro estudiante recibe `404` al entregar y un docente `404` al calificar sin asignación |
+| T17 · BR-007 | Entrega sin evidencia → `422 TASK_EVIDENCE_REQUIRED` y la tarea sigue `Pendiente`; tras subir una imagen → `200`; si se borra la única evidencia, la entrega vuelve a fallar. `evidenciaRequerida`, `estado`, `estadoRevision`, `puntajeObtenido` y `usuariosId` enviados por el cliente → `400` |
+| T18 · devolución | Sin motivo → `400`; con motivo y observaciones → `200 Devuelta`, motivo y observaciones guardados, aviso al estudiante y auditoría; un motivo fuera del vocabulario → `400`; tras corregir, la reentrega vuelve a `En revisión` |
+| T19 · subida | JPG, PNG y PDF aceptados; PNG declarado como `image/gif` con nombre `.jpg` se guarda como `image/png` (manda el contenido); dos subidas con el mismo nombre original obtienen rutas distintas y sin `.part`; 1,5 MB con `upload_max_mb = 1` → `413 PAYLOAD_TOO_LARGE`; GIF → `400`; `filename="../../etc/passwd.jpg"` → `400`; tercer archivo con tope 2 → `422 ATTACHMENT_LIMIT_REACHED`; sin archivo y entidad `advice` → `400`; sin sesión → `401` |
+| T40 · descarga y borrado | `200` con el MIME verificado, `Content-Disposition` con el nombre codificado y `nosniff`; el docente asignado y el admin descargan; otro estudiante y otro docente reciben `404`; el dueño borra (`200`) y el archivo desaparece del disco, la fila queda con `fecha_eliminacion` y se audita; otro estudiante `404`, el docente `403`; con la tarea `En revisión` la subida → `422 TASK_EVIDENCE_LOCKED` y el admin puede retirar la evidencia; archivo ausente en disco → `404 ATTACHMENT_FILE_MISSING` y el borrado sigue siendo idempotente |
+| T37 · cascada | `DELETE /entrepreneurship/:id` deja la fila con `fecha_eliminacion`, borra el archivo del disco y conserva la tarea (histórico legible); el adjunto queda con baja lógica |
+| Avance (R21) | Dos tareas con una calificada → `avance = 50`, `total = 2`, `completadas = 1`; al dar de baja la pendiente → `avance = 100`; sin tareas → `0`; el endpoint por fase devuelve las cuatro fases y una fila `faseId: null` para las tareas sin fase |
+| Vencida | `fechaLimite` pasada → `estado = 'Vencida'` y `vencida = true` en la lectura y en el filtro; la columna guardada sigue `Pendiente`; la entrega funciona igual |
+| Alcance | Estudiante solo lo propio (`my-task`); docente solo los emprendimientos con asignación activa; detalle ajeno `404`; admin todo; filtros por estado, prioridad y texto; `sort` y `pageSize` fuera de rango → `400` |
+| `npm run typecheck` | Los tres workspaces sin errores |
+| `npm run check:schema` | Sigue en verde (41 tablas, 22 listas `CHECK`) |
+| Recorrido manual a través de Caddy | Pila recreada desde cero (`down -v` + `up --build`): **96 comprobaciones, 96 en el estado esperado**. Incluye las 5 sesiones del seed (incluida la cuenta `Limitado` bloqueada con `403 ACCOUNT_NOT_ACTIVE`), el ciclo completo de la tarea, `TASK_EVIDENCE_REQUIRED`, `TASK_EVIDENCE_LOCKED`, la calificación, la devolución sin y con motivo, el avance 33 % en la ficha, los seguimientos con su evidencia, la descarga y el borrado, las validaciones de subida (GIF, travesía, sin archivo), la cascada de BR-006 comprobando el archivo en el disco del host, y las 11 acciones de auditoría y los avisos al estudiante |
+
+### Decisiones y huecos registrados
+
+- §5.8: módulo de trabajo y alcance, destinatario de la tarea, evidencia obligatoria,
+  ciclo de vida, calificación y devolución, avance, evidencia congelada, subida, límites,
+  borrado, cascada, seguimientos y paginación.
+- P-24: el diagrama no tiene fecha de entrega; `fechaEnvio` se deriva de la evidencia más
+  reciente y «Entregada a tiempo» no se calcula.
+- P-25: BR-006 pide borrar los archivos al eliminar un usuario, pero T37 exige conservar el
+  histórico legible. La cascada física se aplica solo al emprendimiento; la baja de un
+  usuario conserva sus archivos hasta que se confirme.
+- P-26: el prototipo ofrece tipo de evidencia, entrega fuera de fecha, asignación al grupo y
+  un campo «Puntos» que no aparece en el formulario; no se crean columnas para ello.
+- P-27: `advice` se rechaza con `400` hasta que exista el módulo de asesorías de la Etapa 8.
+- #34: la tarea se asigna al propietario del emprendimiento; no se inventa un modelo de
+  grupos.
+
+### Sin verificar / pendiente
+
+- Las asesorías y sus adjuntos llegan con la Etapa 8; el pivote `adjuntos_asesorias` ya está
+  previsto y la cascada de BR-006 lo incluye.
+- Las vistas de tareas y seguimientos se pintan en la Etapa 11; el contrato ya devuelve
+  `evidencias`, `fechaEnvio`, `fase` y el progreso por fase.
+- El enlace de la notificación usa las rutas de la SPA (`/estudiante/tareas/:id`,
+  `/docente/tareas/:id`); se valida al construir la navegación.
+- La descarga no implementa `Range` ni reanudación: no lo pide ningún requisito.
+
+**Puerta:** superada (T16, T17, T18, T19, T37 y T40 en verde; completar una tarea sin
+evidencia es imposible por API; la evidencia se borra del disco al dar de baja la tarea, el
+seguimiento o el emprendimiento; el avance se deriva de la base y no del cliente).
