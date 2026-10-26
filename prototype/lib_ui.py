@@ -73,47 +73,182 @@ def ico(nombre, tam=18, extra=""):
 NAV = {
     "estudiante": [
         ("Inicio", "home", "dashboard"),
-        ("Estado de seguimiento", "trend", "estado-seguimiento"),
-        ("Mi emprendimiento", "maleta", "emprendimientos"),
-        ("Diagnostico", "clipboard", "diagnostico"),
-        ("Plan de trabajo", "layers", "plan-trabajo"),
-        ("Seguimiento", "doc", "seguimiento"),
-        ("Tareas", "checklist", "tareas"),
-        ("Asesorias", "chat", "asesorias"),
-        ("Eventos", "calendar", "eventos"),
-        ("Notificaciones", "bell", "notificaciones"),
-        ("Perfil", "user", "perfil"),
+        ("Mi emprendimiento", [
+            ("Mi emprendimiento", "maleta", "emprendimientos"),
+            ("Diagnóstico", "clipboard", "diagnostico"),
+        ]),
+        ("Planificación y seguimiento", [
+            ("Estado de seguimiento", "trend", "estado-seguimiento"),
+            ("Plan de trabajo", "layers", "plan-trabajo"),
+            ("Tareas", "checklist", "tareas"),
+            ("Seguimiento", "doc", "seguimiento"),
+        ]),
+        ("Acompañamiento y actividades", [
+            ("Asesorías", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+        ]),
     ],
     "docente": [
         ("Inicio", "pie", "dashboard"),
-        ("Mis asesorias", "chat", "asesorias"),
-        ("Emprendimientos asignados", "maleta", "emprendimientos"),
-        ("Seguimiento", "trend", "seguimiento"),
-        ("Diagnostico", "clipboard", "diagnostico"),
-        ("Tareas", "checklist", "tareas"),
-        ("Notificaciones", "bell", "notificaciones"),
-        ("Perfil", "user", "perfil"),
+        ("Mis emprendimientos", [
+            ("Emprendimientos asignados", "maleta", "emprendimientos"),
+            ("Diagnóstico", "clipboard", "diagnostico"),
+            ("Tareas", "checklist", "tareas"),
+        ]),
+        ("Acompañamiento y actividades", [
+            ("Asesorías", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+        ]),
     ],
     "administrador": [
         ("Inicio", "grid", "dashboard"),
-        ("Gestion de perfiles", "users", "usuarios"),
-        ("Emprendimientos", "maleta", "emprendimientos"),
-        ("Seguimiento", "trend", "seguimiento"),
-        ("Asignaciones", "sliders", "asignaciones"),
-        ("Diagnosticos", "clipboard", "diagnosticos"),
-        ("Eventos", "calendar", "eventos"),
-        ("Asesorias", "chat", "asesorias"),
-        ("Reportes", "download", "reportes"),
+        ("Solicitudes", "checklist", "solicitudes", "10"),
+        ("Usuarios y asignaciones", [
+            ("Gestión de perfiles", "users", "usuarios"),
+            ("Asignaciones", "sliders", "asignaciones"),
+            ("Asignar docente", "user", "asignaciones",
+             "asignaciones.html#asignar-docente"),
+        ]),
+        ("Emprendimientos y seguimiento", [
+            ("Emprendimientos", "maleta", "emprendimientos"),
+            ("Diagnósticos", "clipboard", "diagnosticos"),
+            ("Seguimiento", "trend", "seguimiento"),
+            ("Tareas", "checklist", "tareas"),
+        ]),
+        ("Acompañamiento y actividades", [
+            ("Asesorías", "chat", "asesorias"),
+            ("Eventos", "calendar", "eventos"),
+        ]),
+        ("Institucional", [
+            ("Reportes", "download", "reportes"),
+            ("Respaldos", "bd", "respaldos"),
+        ]),
         ("Notificaciones", "bell", "notificaciones"),
         ("Perfil", "user", "perfil"),
     ],
 }
 
 ROLES = {
-    "estudiante": ("ESTUDIANTE", "Mariana Lopez", "ML"),
+    "estudiante": ("ESTUDIANTE", "Mariana López", "ML"),
     "docente": ("DOCENTE", "Carlos Mendoza", "CM"),
     "administrador": ("ADMINISTRADOR", "Ana Restrepo", "AR"),
 }
+
+# --- Migas navegables --------------------------------------------------------
+# El breadcrumb era texto muerto: solo "Inicio" navegaba. Aqui vive el mapa
+# rotulo -> archivo, por rol, para que cada nivel intermedio sea un enlace real
+# a la vista que representa. El ultimo nivel nunca se enlaza: es la pagina
+# actual. El valor es el nombre de archivo dentro de la carpeta del rol.
+MIGAS = {
+    "estudiante": {
+        "inicio": "dashboard.html",
+        "mi emprendimiento": "emprendimientos.html",
+        "sabor y sabe": "emprendimiento-detalle.html",
+        "mochilas origen": "emprendimiento-detalle-mochilas.html",
+        "diagnóstico": "diagnostico.html",
+        "resultado": "diagnostico-resultados.html",
+        "plan de trabajo": "plan-trabajo.html",
+        "tareas": "tareas.html",
+        "detalle de tarea": "tareas.html",
+        "seguimiento": "seguimiento.html",
+        "estado de seguimiento": "estado-seguimiento.html",
+        "asesorías": "asesorias.html",
+        "solicitar": "solicitar-asesoria.html",
+        "eventos": "eventos.html",
+        "perfil": "perfil.html",
+        "mi perfil": "perfil.html",
+        "configuración": "configuracion.html",
+        "notificaciones": "notificaciones.html",
+        "editar": "emprendimiento-editar.html",
+    },
+    "docente": {
+        "inicio": "dashboard.html",
+        "mis asesorías": "asesorias.html",
+        "asesorías": "asesorias.html",
+        "detalle de asesoría": "asesoria-detalle.html",
+        "registrar asesoría": "asesoria-form.html",
+        "generar asesoría": "asesoria-form.html",
+        "emprendimientos asignados": "emprendimientos.html",
+        "sabor y sabe": "emprendimiento-expediente.html",
+        "detalle del avance": "avance-detalle.html",
+        "registrar avance": "avance-form.html",
+        "editar avance": "avance-form.html",
+        "diagnóstico": "diagnostico.html",
+        "revisión": "diagnostico-revision.html",
+        "tareas": "tareas.html",
+        "detalle de tarea": "tarea-detalle.html",
+        "devolver tarea": "tarea-devolver.html",
+        "asignar tarea": "tarea-form.html",
+        "eventos": "eventos.html",
+        "startup minuto de dios": "evento-detalle-startup.html",
+        "capacitación en modelado de negocios": "evento-detalle-capacitacion.html",
+        "asesoría grupal de empleabilidad": "evento-detalle-asesoria-grupal.html",
+        "showroom de emprendimientos": "evento-detalle-showroom.html",
+        "mi perfil": "perfil.html",
+        "configuración": "configuracion.html",
+        "cambiar contraseña": "contrasena.html",
+        "notificaciones": "notificaciones.html",
+    },
+    "administrador": {
+        "inicio": "dashboard.html",
+        "gestión de perfiles": "usuarios.html",
+        "editar docente": "usuario-docente.html",
+        "editar estudiante": "usuario-estudiante.html",
+        "emprendimientos": "emprendimientos.html",
+        "sabor y sabe": "emprendimiento-expediente.html",
+        "plan de trabajo": "emprendimiento-plan.html",
+        "seguimiento": "seguimiento.html",
+        "tablero": "seguimiento-dashboard.html",
+        "asignaciones": "asignaciones.html",
+        "asignar emprendimiento": "asignaciones.html",
+        "asesorías": "asesorias.html",
+        "eventos": "eventos.html",
+        "crear evento": "evento-form.html",
+        "diagnosticos": "diagnosticos.html",
+        "reportes": "reportes.html",
+        "tareas": "tareas.html",
+        "mi perfil": "perfil.html",
+        "configuración": "configuracion.html",
+        "notificaciones": "notificaciones.html",
+    },
+}
+
+# Fuente unica de notificaciones del estudiante: la campana de la esquina y la
+# vista de Notificaciones leen de aqui, para que muestren exactamente lo mismo.
+# Campos: (leida, titulo, texto, fecha, icono, tipo, href).
+NOTIFS_EST = [
+    (True, "Asesoría confirmada",
+     "Tu asesoría con Carlos Mendoza quedó confirmada para el martes 19 de noviembre a las 9:00.",
+     "hace 12 minutos", "chat", "asesoria", "asesorias.html"),
+    (True, "Nueva tarea asignada",
+     "Debes subir la evidencia fotografica del punto de venta antes del 12 de noviembre.",
+     "hace 2 horas", "checklist", "tarea", "tareas.html"),
+    (True, "Seguimiento registrado",
+     "Carlos Mendoza registró un avance de fase en tu emprendimiento Sabor y Sabe.",
+     "ayer, 16:40", "trend", "seguimiento", "seguimiento.html"),
+    (False, "Evento nuevo",
+     "Se publicó el evento Startup Minuto de Dios. Postulación hasta el 25 de noviembre.",
+     "10 nov 2024", "calendar", "sistema", "eventos.html"),
+]
+
+# Fuente unica de notificaciones del administrador: la campana (badge y drawer) y
+# la metrica "Sin leer" de la bandeja leen de aqui, igual que el estudiante, para
+# que el topbar y la vista no puedan divergir. Campos:
+# (leida, titulo, texto, fecha, icono, tipo, href).
+NOTIFS_ADMIN = [
+    (False, "1 emprendimiento sin docente",
+     "Un emprendimiento sigue sin docente asignado en la fase actual.",
+     "hoy, 08:15", "users", "asignacion", "asignaciones.html"),
+    (False, "5 diagnosticos sin revisión",
+     "Cinco diagnosticos enviados por estudiantes esperan tu revisión.",
+     "hoy, 09:40", "clipboard", "diagnostico", "diagnosticos.html"),
+    (True, "Evento aprobado: Jornada de mentoria",
+     "Aprobaste el evento Jornada de mentoria para el 25 de noviembre.",
+     "ayer, 16:40", "calendar", "evento", "eventos.html"),
+    (True, "Reporte de seguimiento generado",
+     "El informe de seguimiento del mes está listo para descargar.",
+     "12 nov 2024, 18:20", "doc", "reporte", "reportes.html"),
+]
 
 # El logo aparece UNA sola vez por pantalla. En escritorio vive en la sidebar
 # (siempre visible); el del topbar solo se muestra por CSS cuando la sidebar
@@ -148,27 +283,107 @@ ICONO_ACCION = {
 
 
 def boton_accion(icono, etiqueta, clase=""):
-    """Boton de accion de tabla: icono + etiqueta accesible + data-accion."""
+    """Botón de accion de tabla: icono + etiqueta accesible + data-accion."""
     accion = ICONO_ACCION.get(icono, "accion")
     c = ' class="%s"' % clase if clase else ""
     return ('<button%s data-accion="%s" title="%s" aria-label="%s">%s</button>'
             % (c, accion, etiqueta, etiqueta, ico(icono, 16)))
 
 
-def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=None, extra_head=""):
-    """Envoltorio completo: sidebar + header + contenido."""
+def _item_nav(txt, ic, clave, activo, badge="", href=""):
+    bd = '<span class="nav-badge">%s</span>' % badge if badge else ""
+    destino = href or ("%s.html" % clave)
+    return '<a class="%s" href="%s">%s<span>%s</span>%s</a>' % (
+        "activo" if clave == activo else "", destino, ico(ic, 16), txt, bd)
+
+
+_ACENTOS_ID = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
+
+
+def _slug_id(texto):
+    """Identificador seguro (sin tildes ni espacios) a partir de un rótulo."""
+    return texto.lower().translate(_ACENTOS_ID).replace(" ", "-")
+
+
+def _nav_html(rol, activo):
+    """Renderiza el menú lateral. Cada entrada de NAV es un ítem plano
+    (txt, ic, clave [, badge]) o un grupo (etiqueta, [(txt, ic, clave), ...]).
+
+    Un ítem de grupo puede traer un cuarto elemento con el href exacto, por si
+    el destino no es "<clave>.html" (por ejemplo una vista con ancla).
+
+    Los grupos son acordeones: la etiqueta es un botón que despliega sus
+    ítems. El grupo que contiene la página activa arranca abierto; el resto
+    arranca cerrado y recuerda su estado mientras se navega (ver lib_js)."""
+    out = []
+    for e in NAV[rol]:
+        if len(e) >= 3:
+            out.append(_item_nav(e[0], e[1], e[2], activo, e[3] if len(e) > 3 else ""))
+        else:
+            etiqueta, hijos = e
+            abierto = " abierto" if any(hijo[2] == activo for hijo in hijos) else ""
+            gid = _slug_id(etiqueta)
+            chev = ico("abajo", 12)
+            hij = ""
+            for hijo in hijos:
+                href = hijo[3] if len(hijo) > 3 else ""
+                hij += _item_nav(hijo[0], hijo[1], hijo[2], activo, "", href)
+            out.append(
+                '<div class="nav-group%s" data-grupo="%s">'
+                '<button type="button" class="nav-label" aria-expanded="%s" '
+                'aria-controls="hij-%s" data-grupo="%s"><span>%s</span>%s</button>'
+                '<div class="nav-hijos" id="hij-%s">%s</div></div>'
+                % (abierto, gid, "true" if abierto else "false", gid, gid,
+                   etiqueta, chev, gid, hij))
+    return "".join(out)
+
+
+def _notif_fuente(items):
+    """Fuente oculta de la campana: los mismos 4 avisos de la bandeja, enlazados.
+
+    lib_js los clona en el drawer para que la campana muestre exactamente las
+    mismas notificaciones que la vista de notificaciones, y cada una navegue a
+    la vista que referencia."""
+    lis = ""
+    for ic, tit, txt, hora, href in items:
+        lis += ('<li><a href="%s">%s<b>%s</b><span>%s</span><time>%s</time></a></li>'
+                % (href, ico(ic, 15), tit, txt, hora))
+    return ('<ul class="sg-notif-fuente" hidden data-notif-fuente>%s</ul>' % lis)
+
+
+def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=None,
+          extra_head="", notif_lista=None):
+    """Envoltorio completo: sidebar + header + contenido.
+
+    notif_lista: [(icono, titulo, texto, hora, href)] que alimenta el drawer de
+    la campana. Estudiante y administrador tienen su propia fuente (NOTIFS_EST /
+    NOTIFS_ADMIN): el badge y el drawer de su rol salen de ahi. El resto conserva
+    el contenido generico."""
     etiqueta, nombre, iniciales = ROLES[rol]
-    items = "".join(
-        '<a class="%s" href="%s.html">%s<span>%s</span></a>'
-        % ("activo" if clave == activo else "", clave, ico(ic), txt)
-        for txt, ic, clave in NAV[rol]
-    )
+    items = _nav_html(rol, activo)
+    mapa = MIGAS.get(rol, {})
     m = ""
     if migas:
+        # BT1: el breadcrumb no tiene enlaces muertos. Cada nivel intermedio que
+        # corresponde a una vista real es un <a>; los que son solo contexto
+        # quedan como texto. El ultimo nivel es la pagina actual.
+        def _miga(i, x):
+            if i == len(migas) - 1:
+                return "<b>%s</b>" % x
+            href = mapa.get(x.strip().lower())
+            if href:
+                return '<a href="%s">%s</a>' % (href, x)
+            return '<span class="miga-item">%s</span>' % x
         m = '<div class="crumbs">' + " &rsaquo; ".join(
-            '<a href="#">' + x + "</a>" if i < len(migas) - 1 else x
-            for i, x in enumerate(migas)
-        ) + "</div>"
+            _miga(i, x) for i, x in enumerate(migas)) + "</div>"
+    if notif_lista is None and rol == "estudiante":
+        notif_lista = [(n[4], n[1], n[2], n[3], n[6]) for n in NOTIFS_EST]
+    elif notif_lista is None and rol == "administrador":
+        notif_lista = [(n[4], n[1], n[2], n[3], n[6]) for n in NOTIFS_ADMIN]
+    if notif is None:
+        notif = (sum(1 for n in NOTIFS_ADMIN if not n[0])
+                 if rol == "administrador" else 3)
+    fuente = _notif_fuente(notif_lista) if notif_lista else ""
     encabezado = "<h1>%s</h1>" % titulo
     if sub:
         encabezado += '<p class="sub">%s</p>' % sub
@@ -182,7 +397,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>%(css)s</style>
+<style>%(css)s%(extra_head)s</style>
 </head>
 <body>
 <div class="shell">
@@ -193,13 +408,13 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
     </div>
     <nav class="nav">%(items)s</nav>
     <div class="side-foot"><div class="side-card">
-      <b>Institucion Minuto de Dios</b>
-      <span>Modulo %(rol)s</span>
+      <b>Institución Minuto de Dios</b>
+      <span>Módulo %(rol)s</span>
     </div></div>
   </aside>
   <div class="main">
     <header class="topbar">
-      <button class="burger" data-accion="menu" aria-label="Abrir menu" aria-expanded="false">%(ico_menu)s</button>
+      <button class="burger" data-accion="menu" aria-label="Abrir menú" aria-expanded="false">%(ico_menu)s</button>
       <div class="topbar-mark" aria-hidden="true"></div>
       <div class="search">%(ico_search)s
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
@@ -215,11 +430,13 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
   </div>
 </div>
 <div class="overlay" id="ov"></div>
+%(notif_fuente)s
 <script>%(js)s</script>
 </body>
 </html>""" % {
         "titulo": titulo,
         "css": CSS,
+        "extra_head": extra_head,
         "logo": LOGO_TILE,
         "items": items,
         "rol": etiqueta,
@@ -227,6 +444,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=3, acciones="", sub=Non
         "nombre": nombre,
         "ini": iniciales,
         "notif": notif,
+        "notif_fuente": fuente,
         "ico_menu": ico("menu", 20),
         "ico_search": ico("search", 16),
         "ico_bell": ico("bell", 18),
@@ -259,6 +477,50 @@ def metricas(items):
     return "".join(out)
 
 
+def metrica_enlace(ic, lbl, val, uni, barra, delta, href, prev_titulo, prev_texto):
+    """Metrica que ademas es un enlace.
+
+    Al pasar el mouse por encima muestra una mini vista previa con lo que hay
+    dentro de esa vista; al hacer clic navega a ella, y si el mouse se retira el
+    resumen desaparece."""
+    d = '<span class="metrica-delta">%s %s</span>' % (ico("trend", 13), delta) if delta else ""
+    return (
+        '<a class="card metrica metrica-enlace" href="%s">'
+        '<div class="metrica-top"><span class="metrica-ico">%s</span>'
+        '<div><div class="metrica-lbl">%s</div>'
+        '<div class="metrica-val">%s<span class="u">%s</span></div></div>%s</div>'
+        '<div class="barra"><span style="width:%d%%"></span></div>'
+        '<span class="mini-prev"><b>%s</b><span>%s</span><em>%s Ver esta vista</em></span></a>'
+        % (href, ico(ic, 18), lbl, val, uni, d, barra, prev_titulo, prev_texto, ico("der", 12))
+    )
+
+
+def metricas_enlace(items):
+    """items: lista de (icono, etiqueta, valor, unidad, barra, delta, href,
+    titulo_previa, texto_previa)."""
+    out = ['<div class="grid g-4">']
+    for it in items:
+        out.append(metrica_enlace(*it))
+    out.append("</div>")
+    return "".join(out)
+
+
+def opciones_card(nombre, opciones, seleccion=0):
+    """Selector de tarjetas: opciones = [(titulo, descripcion), ...].
+
+    Se usa para el sector productivo y el tipo de emprendimiento del
+    diagnostico: se elige la tarjeta y debajo queda visible su descripcion."""
+    h = '<div class="radio-grupo">'
+    for i, (tit, desc) in enumerate(opciones):
+        i2 = _fid("r")
+        h += ('<label class="radio-card%s" for="%s">'
+              '<input type="radio" name="%s" id="%s"%s>'
+              '<div><strong>%s</strong><small>%s</small></div></label>'
+              % (" sel" if i == seleccion else "", i2, nombre, i2,
+                 " checked" if i == seleccion else "", tit, desc))
+    return h + "</div>"
+
+
 def th(c):
     """Construye un <th>. Acepta 'Etiqueta', ('num','Etiqueta') o '@ACC'."""
     if c == "@ACC":
@@ -281,17 +543,17 @@ def _etiqueta(c):
     return re.sub(r"<[^>]+>", "", str(c)).strip()
 
 
-def tabla(cabeceras, filas, con_checkbox=False):
+def tabla(cabeceras, filas, con_checkbox=False, id="", caption=""):
     """cabeceras: lista de 'Etiqueta' | ('num','Etiqueta') | '@ACC'.
-    filas: listas de HTML con la misma longitud que cabeceras."""
+    filas: listas de HTML con la misma longitud que cabeceras.
+    id: id opcional para la <table>, usado por EV2 (inscripción a eventos).
+    caption: titulo accesible de la tabla (oculto visualmente, C6/a11y)."""
     cab = ""
     if con_checkbox:
         cab += ('<th scope="col" style="width:44px">'
-                '<input type="checkbox" aria-label="Seleccionar todo" '
-                'style="accent-color:#004a93;width:16px;height:16px"></th>')
+                '<input type="checkbox" aria-label="Seleccionar todo"></th>')
     cab += "".join(th(c) for c in cabeceras)
-    sel = ('<td class="sel"><input type="checkbox" aria-label="Seleccionar fila" '
-           'style="accent-color:#004a93;width:16px;height:16px"></td>') if con_checkbox else ""
+    sel = ('<td class="sel"><input type="checkbox" aria-label="Seleccionar fila"></td>') if con_checkbox else ""
     etiquetas = [_etiqueta(c) for c in cabeceras]
     body = ""
     for f in filas:
@@ -304,10 +566,20 @@ def tabla(cabeceras, filas, con_checkbox=False):
             else:
                 celdas += '<td data-label="%s">%s</td>' % (eti, x)
         body += "<tr>%s%s</tr>" % (sel, celdas)
+    tid = ' id="%s"' % id if id else ""
+    cap = ('<caption class="visually-hidden">%s</caption>' % caption) if caption else ""
+    # Estado vacio enlazado a la tabla (hallazgo MEDIO P6-P10): arranca oculto
+    # y lib_js (#vacioRefrescar) lo muestra cuando no hay filas visibles
+    # (datos vacios o filtro/buscador sin resultados).
+    vacio = ('<div data-vacio hidden>%s</div>' % estado_vacio(
+        "Sin resultados para esta búsqueda",
+        "No hay registros que coincidan con la búsqueda o los filtros "
+        "actuales. Límpialos para volver a ver todos los registros.",
+        "", "search"))
     return (
         '<div class="card tabla-envoltura"><div class="tabla-scroll">'
-        '<table class="tabla"><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
-        "</div></div>" % (cab, body)
+        '<table class="tabla"%s>%s<thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
+        "</div>%s</div>" % (tid, cap, cab, body, vacio)
     )
 
 
@@ -319,22 +591,65 @@ def toolbar(buscar=True, filtros="", acciones="", extra=""):
     return '<div class="toolbar">%s%s%s</div>' % (s, filtros, extra or acciones)
 
 
-def paginas(desde, hasta, total):
+def paginas(desde, hasta, total, pag=1, tam=None, tabla_id=""):
+    """Control de paginación con estado real.
+
+    EM5: antes "Anterior/Siguiente" no traían `data-paginacion` (el gancho que
+    el kit JS usa), así que solo mostraban un toast. Ahora el control publica
+    su página actual y su tamaño de página, y `lib_js` lo mueve, actualiza el
+    rango "Mostrando X a Y de Z" y recuerda la página en `localStorage`.
+
+    tabla_id: cuando se indica, el control es de una TABLA concreta y lo lleva
+    el JS propio del rol (no el kit): se marca con `data-pag-adm` y
+    `data-pag-tabla`, y NO lleva `data-paginacion`, de modo que el kit no lo
+    toque y no haya dos paginadores peleando por la misma tabla.
+    """
+    tam = tam or max(1, hasta - desde + 1)
+    n_pag = max(1, (total + tam - 1) // tam)
+    pag = min(max(1, pag), n_pag)
+    mostrados = "%d a %d" % ((pag - 1) * tam + 1, min(pag * tam, total))
+    botones = (
+        '<button class="btn btn-secundario btn-sm" data-pagina="prev"%s>%s Anterior</button>'
+        % (" disabled" if pag <= 1 else "", ico("izq", 14))
+    )
+    for n in range(1, n_pag + 1):
+        botones += (
+            '<button class="btn btn-sm %s" data-pagina="%d"%s>%d</button>'
+            % ("btn-acento" if n == pag else "btn-secundario", n,
+               ' aria-current="page"' if n == pag else "", n)
+        )
+    botones += (
+        '<button class="btn btn-secundario btn-sm" data-pagina="next"%s>Siguiente %s</button>'
+        % (" disabled" if pag >= n_pag else "", ico("der", 14))
+    )
+    if tabla_id:
+        return (
+            '<div class="paginacion" data-pag-adm data-pag-tabla="%s" data-pag-actual="%d" '
+            'data-pag-total="%d" data-pag-tam="%d" data-pag-regs="%d">'
+            '<span data-pag-texto>Mostrando %s de %d</span><div class="pag">%s</div>'
+            '<template data-pg-ico-prev>%s</template>'
+            '<template data-pg-ico-next>%s</template></div>'
+            % (tabla_id, pag, n_pag, tam, total, mostrados, total, botones,
+               ico("izq", 14), ico("der", 14))
+        )
     return (
-        '<div class="paginacion"><span>Mostrando %d a %d de %d</span>'
-        '<div class="pag"><button class="btn btn-secundario btn-sm">%s Anterior</button>'
-        '<button class="btn btn-secundario btn-sm">Siguiente %s</button></div></div>'
-        % (desde, hasta, total, ico("izq", 14), ico("der", 14))
+        '<div class="paginacion" data-paginacion data-pag-actual="%d" data-pag-total="%d" '
+        'data-pag-tam="%d" data-pag-regs="%d">'
+        '<span data-pag-texto>Mostrando %s de %d</span><div class="pag">%s</div></div>'
+        % (pag, n_pag, tam, total, mostrados, total, botones)
     )
 
 
 def badge(texto, tipo="neutra", icono=None):
+    # Los llamados pasan el tipo como "b-azul" pero el helper ya antepone "b-";
+    # sin normalizar salia "b-b-azul", que no existe en el CSS (badge sin color).
+    tipo = tipo[2:] if tipo.startswith("b-") else tipo
     return '<span class="badge b-%s">%s%s</span>' % (
         tipo, ico(icono, 12) if icono else "", texto)
 
 
 def _fid(prefijo="f"):
-    """Id unico por control, para que cada label este asociado al input correcto."""
+    """Id único por control, para que cada label este asociado al input correcto."""
     global _CONTADOR
     _CONTADOR += 1
     return "%s%d" % (prefijo, _CONTADOR)
@@ -343,32 +658,41 @@ def _fid(prefijo="f"):
 _CONTADOR = 0
 
 
-def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False):
+def campo(label, tipo="text", valor="", ph="", req=False, ayuda="", bloqueo="", alto=False,
+          name="", attrs=""):
     i = _fid("f")
-    h = '<div class="campo"><label for="%s">%s%s</label>' % (
+    h = '<div class="campo"' + ((" " + attrs) if attrs else "") + '><label for="%s">%s%s</label>' % (
         i, label, '<span class="req">*</span>' if req else "")
     if bloqueo:
-        h += ('<input id="%s" type="text" value="%s" disabled>'
-              '<div class="bloqueo">%s%s</div></div>' % (i, valor, ico("lock", 12), bloqueo))
+        # El name se mantiene tambien en los campos bloqueados: el kit los
+        # localiza por nombre para rellenar el formulario antes de abrirlo.
+        h += ('<input id="%s" type="text" value="%s"%s disabled>'
+              '<div class="bloqueo">%s%s</div></div>'
+              % (i, valor, (' name="%s"' % name) if name else "",
+                 ico("lock", 12), bloqueo))
     elif alto:
-        h += '<textarea id="%s" placeholder="%s">%s</textarea>' % (i, ph, valor)
+        h += '<textarea id="%s"%s placeholder="%s">%s</textarea>' % (
+            i, (' name="%s"' % name) if name else "", ph, valor)
         if ayuda:
             h += '<div class="ayuda">%s%s</div>' % (ico("alerta", 13), ayuda)
         h += "</div>"
     else:
-        h += '<input id="%s" type="%s" value="%s" placeholder="%s"%s>' % (
-            i, tipo, valor, ph, " required" if req else "")
+        h += '<input id="%s" type="%s" value="%s" placeholder="%s"%s%s>' % (
+            i, tipo, valor, ph, (" name=\"%s\"" % name) if name else "",
+            " required" if req else "")
         if ayuda:
             h += '<div class="ayuda">%s%s</div>' % (ico("alerta", 13), ayuda)
         h += "</div>"
     return h
 
 
-def select(label, opciones, req=False, bloqueo="", valor=None):
+def select(label, opciones, req=False, bloqueo="", valor=None, name="", attrs=""):
     i = _fid("s")
-    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s>' % (
+    h = '<div class="campo"><label for="%s">%s%s</label><select id="%s"%s%s%s>' % (
         i, label, '<span class="req">*</span>' if req else "", i,
-        " disabled" if bloqueo else "")
+        " disabled" if bloqueo else "",
+        (' name="%s"' % name) if name else "",
+        (" " + attrs) if attrs else "")
     for o in opciones:
         sel = " selected" if valor and o == valor else ""
         h += '<option%s>%s</option>' % (sel, o)
@@ -383,11 +707,13 @@ def callout(txt, icono="alerta"):
     return '<div class="callout">%s<div>%s</div></div>' % (ico(icono, 18), txt)
 
 
-def card(titulo, cuerpo, hint="", accion="", sin_pad=False):
+def card(titulo, cuerpo, hint="", accion="", sin_pad=False, id=""):
     return (
-        '<div class="card"><div class="card-head"><h3>%s</h3>%s<span class="hint">%s</span></div>'
+        '<div class="card"%s><div class="card-head"><h3>%s</h3>%s'
+        '<span class="hint">%s</span></div>'
         '<div class="card-body%s">%s</div></div>'
-        % (titulo, accion, hint, " sin-pad" if sin_pad else "", cuerpo)
+        % ((' id="%s"' % id) if id else "", titulo, accion, hint,
+           " sin-pad" if sin_pad else "", cuerpo)
     )
 
 
@@ -396,11 +722,34 @@ def estado_vacio(titulo, txt, accion="", icono="doc"):
             % (ico(icono, 40), titulo, txt, accion))
 
 
+def formulario(id_vista, cuerpo):
+    """<form> nativo que envuelve el contenido de una vista (hallazgo C-01).
+
+    Cada pantalla admin lleva un id unico (prefijo vista-) para que labels,
+    aria-describedby y las auditorias puedan referenciar el formulario de la
+    vista. La clase .vista-form resuelve display:contents en lib_css, asi la
+    caja del <form> no altera el layout ni corta los selectores .content > *.
+    novalidate + onsubmit="return false" conservan el comportamiento simulado
+    del prototipo y lib_js ignora estos envoltorios (form:not(.vista-form)),
+    de modo que los botones de accion siguen resolviendose por data-accion
+    sin disparar el toast de "Guardado correctamente".
+    """
+    return ('<form class="vista-form" id="vista-%s" action="#" method="post" '
+            'novalidate onsubmit="return false">%s</form>'
+            % (_slug_id(id_vista), cuerpo))
+
+
 def lista_def(filas):
     h = '<dl class="lista-def">'
     for k, v in filas:
         h += '<div class="def-row"><dt>%s</dt><dd>%s</dd></div>' % (k, v)
     return h + "</dl>"
+
+
+def espacio(px=20):
+    """Separador vertical de altura fija. Sustituye los <div style="height:Npx">
+    dispersos en las vistas; la clase se resuelve en lib_css (.sep-N)."""
+    return '<div class="sep sep-%d"></div>' % px
 
 
 def steps(items, actual=0):
@@ -418,10 +767,102 @@ def steps(items, actual=0):
     return h + "</div>"
 
 
+def calendario(mes, anio, hoy=12, marcados=(21, 26, 2), eventos=None):
+    """Calendario mensual del kit (rejilla Lu..Do) con marcas en dias de evento.
+
+    Misma salida que el calendario del rol Estudiante (celdas `.cal` y un punto
+    en los dias con evento). `mes` es el nombre en espanol. `eventos` es un
+    dict {dia: (titulo, detalle)}: esos dias se pintan como botones
+    `.cal-dia-btn` cuyo clic abre un modal en la misma pagina (ver
+    #cal-dia-btn en lib_js) sin redireccionar a otra vista."""
+    import calendar
+    MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5,
+             "junio": 6, "julio": 7, "agosto": 8, "septiembre": 9,
+             "setiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
+    m = MESES.get(str(mes).lower(), 11)
+    dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"]
+    primer_dia, n_dias = calendar.monthrange(anio, m)
+    h = ('<div class="cal cal-cab">'
+         + "".join("<div>%s</div>" % d for d in dias) + "</div>")
+    h += '<div class="cal">'
+    for _ in range(primer_dia):
+        h += '<div class="cal-vacio"></div>'
+    eventos = eventos or {}
+
+    def attr(s):
+        return str(s).replace("&", "&amp;").replace('"', "&quot;")
+
+    for d in range(1, n_dias + 1):
+        ev = eventos.get(d)
+        clase = " hoy" if d == hoy else ""
+        if ev:
+            h += ('<button type="button" class="cal-celda cal-dia-btn%s" '
+                  'data-ev-titulo="%s" data-ev-detalle="%s" '
+                  'aria-label="%d de %s: %s">%d'
+                  % (clase, attr(ev[0]), attr(ev[1]), d, mes, attr(ev[0]), d))
+        else:
+            h += '<div class="cal-celda%s">%d' % (clase, d)
+        if d in marcados:
+            h += '<span class="cal-punto"></span>'
+        h += "</button>" if ev else "</div>"
+    return h + "</div>"
+
+def calendario_interactivo(mes, anio, dias, hoy=12, vacio=""):
+    """Calendario navegable: al elegir un dia cambia el panel de compromisos.
+
+    `dias` es {numero_de_dia: html}. Cada dia se pinta como un <button
+    data-dia="N"> con su etiqueta legible; los paneles llevan `data-dia-panel` y
+    solo el dia `hoy` arranca visible. El contenedor expone `data-cal-doc` y
+    `data-hoy` para que el JS del rol Docente lo controle. Un panel
+    `data-dia-panel="sin"` cubre los dias sin compromisos."""
+    import calendar
+    MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5,
+             "junio": 6, "julio": 7, "agosto": 8, "septiembre": 9,
+             "setiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
+    m = MESES.get(str(mes).lower(), 11)
+    abrev = str(mes)[:3]
+    cab_dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"]
+    primer_dia, n_dias = calendar.monthrange(anio, m)
+    h = ('<div class="cal-envoltura" data-cal-doc data-hoy="%d">' % hoy)
+    h += ('<div class="cal cal-cab">'
+          + "".join("<div>%s</div>" % d for d in cab_dias) + "</div>")
+    h += '<div class="cal">'
+    for _ in range(primer_dia):
+        h += '<div class="cal-vacio"></div>'
+    for d in range(1, n_dias + 1):
+        et = "%d %s %d" % (d, abrev, anio)
+        cls = "cal-celda cal-btn" + (" hoy activo" if d == hoy else "")
+        punto = '<span class="cal-punto"></span>' if d in dias else ""
+        h += ('<button type="button" class="%s" data-dia="%d" data-etiqueta="%s" '
+              'aria-pressed="%s" aria-label="Ver compromisos del %s">%d%s</button>'
+              % (cls, d, et, "true" if d == hoy else "false", et, d, punto))
+    h += "</div>"
+    h += ('<p class="cal-resumen">Compromisos del <b data-dia-titulo>%d %s %d</b></p>'
+          % (hoy, abrev, anio))
+    h += '<div data-dia-paneles>'
+    for d in sorted(dias):
+        h += ('<div data-dia-panel="%d"%s>%s</div>'
+              % (d, "" if d == hoy else " hidden", dias[d]))
+    h += '<div data-dia-panel="sin"%s>%s</div>' % (
+        " hidden" if hoy in dias else "", vacio)
+    return h + "</div></div>"
+
+
 def tabs(items, activo=0):
     h = '<div class="tabs">'
     for i, it in enumerate(items):
         h += '<button class="%s">%s</button>' % ("activo" if i == activo else "", it)
+    return h + "</div>"
+
+
+def tabs_paneles(items, activo=0):
+    """Pestanas que alternan paneles: cada item es (etiqueta, id-panel) y debe
+    existir un contenedor con data-panel-nombre="id-panel". El JS del kit
+    sincroniza la clase activa, alterna los paneles y recuerda la seleccion."""
+    h = '<div class="tabs">'
+    for i, (etiqueta, pid) in enumerate(items):
+        h += '<button class="%s" data-panel="%s">%s</button>' % (
+            "activo" if i == activo else "", pid, etiqueta)
     return h + "</div>"
 
 
@@ -437,7 +878,7 @@ def _aviso(estado):
 
 
 def aviso_grupo(titulo, items):
-    """items: (icono, titulo, meta, href, estado, acciones_html)."""
+    """items: (icono, título, meta, href, estado, acciones_html)."""
     h = ('<section class="aviso-grp"><div class="aviso-grp-head">'
          '<h3 class="aviso-grp-titulo">%s</h3>'
          '<span class="aviso-grp-n">%d</span></div>' % (titulo, len(items)))
@@ -451,14 +892,15 @@ def aviso_grupo(titulo, items):
 
 
 def lista_avisos(grupos):
-    """grupos: lista de (titulo, items) tal como los recibe aviso_grupo."""
+    """grupos: lista de (título, items) tal como los recibe aviso_grupo."""
     return '<div class="avisos">' + "".join(
         aviso_grupo(t, it) for t, it in grupos) + "</div>"
 
 
 def kanban(columnas):
-    """columnas: lista de (titulo, [(titulo, meta, badge_html, pie_html)])."""
-    h = '<div class="kanban">'
+    """columnas: lista de (título, [(título, meta, badge_html, pie_html)])."""
+    extra = ' data-cols="%d"' % len(columnas) if len(columnas) != 3 else ""
+    h = '<div class="kanban"%s>' % extra
     for titulo, tarjetas in columnas:
         h += ('<section class="kan-col"><div class="kan-head">'
               '<span class="kan-titulo">%s</span>'
@@ -474,7 +916,7 @@ def kanban(columnas):
 
 
 def linea_tiempo(items):
-    """items: lista de (dia, mes, titulo, meta, extra_html)."""
+    """items: lista de (día, mes, título, meta, extra_html)."""
     h = '<ol class="linea">'
     for dia, mes, titulo, meta, extra in items:
         h += ('<li class="ln-item"><div class="ln-fecha"><b>%s</b><span>%s</span></div>'
@@ -485,7 +927,7 @@ def linea_tiempo(items):
 
 
 def agenda(dias):
-    """dias: lista de (etiqueta, [(hora, titulo, meta, badge_html)])."""
+    """días: lista de (etiqueta, [(hora, título, meta, badge_html)])."""
     h = '<div class="agenda">'
     for etiqueta, eventos in dias:
         n = len(eventos)

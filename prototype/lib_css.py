@@ -70,7 +70,7 @@ SHELL_CSS = """
 .shell{display:flex;min-height:100vh;background:var(--blanco)}
 .sidebar{
   width:264px;flex:0 0 264px;background:var(--azul-noche);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 .brand{
   display:flex;flex-direction:column;align-items:center;gap:12px;
@@ -87,13 +87,31 @@ SHELL_CSS = """
 .brand-text{text-align:center}
 .brand-name{font-size:20px;font-weight:700;color:var(--blanco);line-height:1.15;letter-spacing:.02em}
 .brand-sub{font-size:13px;color:var(--blanco);opacity:.82;line-height:1.4;margin-top:4px}
-.nav{padding:16px 12px;overflow-y:auto;flex:1}
-.nav-group{margin-bottom:18px}
-.nav-label{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blanco);opacity:.6;padding:0 12px 8px}
-.nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:14px;font-weight:500;margin-bottom:2px}
+.nav{padding:10px 10px 8px;flex:1 0 auto;overflow:visible}
+.nav-group{margin-bottom:6px}
+.nav-label{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;
+  background:transparent;border:0;cursor:pointer;text-align:left;font-family:inherit;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blanco);opacity:.55;padding:4px 10px 4px;transition:opacity .15s ease;
+}
+.nav-label:hover{opacity:1;text-decoration:none}
+.nav-label:focus-visible{outline:2px solid var(--azul-real);outline-offset:2px;border-radius:var(--r-sm)}
+.nav-label span{flex:1}
+.nav-label svg{flex:0 0 12px;transition:transform .2s ease}
+.nav-group.abierto .nav-label svg{transform:rotate(180deg)}
+/* Acordeon: los hijos se despliegan con max-height animado; el chevron usa el
+   icono "abajo" del kit y rota al abrir. Se respeta prefers-reduced-motion.
+   El max-height se ajusta al grupo mas largo (4 hijos) para que la animacion
+   no quede con una cola muerta antes de terminar de abrir. */
+.nav-hijos{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.nav-group.abierto .nav-hijos{max-height:400px}
+@media (prefers-reduced-motion:reduce){.nav-label svg,.nav-hijos{transition:none}}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);color:var(--blanco);opacity:.78;font-size:13px;font-weight:500;line-height:1.3;margin-bottom:1px}
 .nav a:hover{background:var(--blanco-08);opacity:1;text-decoration:none}
 .nav a.activo{background:var(--azul-real);opacity:1;font-weight:600}
-.nav a svg{flex:0 0 18px}
+.nav a svg{flex:0 0 16px}
+.nav-badge{margin-left:auto;background:var(--amarillo);color:var(--azul-noche);font-size:13px;font-weight:700;line-height:1.4;padding:3px 7px;border-radius:var(--r-full)}
 .side-foot{padding:16px;border-top:1px solid var(--blanco-08)}
 .side-card{background:var(--blanco-08);border-radius:var(--r-sm);padding:12px}
 .side-card b{display:block;color:var(--blanco);font-size:13px;margin-bottom:2px}
@@ -129,8 +147,8 @@ SHELL_CSS = """
 .page-head .acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 .crumbs{font-size:13px;color:var(--tinta-2);margin-bottom:10px}
 .crumbs a{color:var(--tinta-2)}
-@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}}
-@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.nav-label,.side-foot{display:block}.nav a{justify-content:flex-start}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
+@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}.nav-group{margin-bottom:8px}.nav-hijos{max-height:none;overflow:visible}}
+@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.side-foot{display:block}.nav a{justify-content:flex-start}.nav-label{display:flex}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
 /* Con el drawer abierto el logo del drawer tiene el protagonismo: se oculta el
    del topbar para que nunca haya dos logos visibles a la vez. */
 .shell:has(.sidebar.abierto) .topbar-mark{display:none}
@@ -183,6 +201,33 @@ COMPONENTES_CSS = """
 @media (max-width:1023px){.g-3,.g-2-1,.g-1-2{grid-template-columns:1fr}}
 @media (max-width:767px){.g-4,.g-3,.g-2{grid-template-columns:1fr}}
 
+/* Utilidades de espaciado y de fila: sustituyen los estilos en linea que se
+   repetian en las vistas (separadores de altura fija, filas de botones, textos
+   secundarios). Mantienen la paleta via tokens. */
+.sep-8{height:8px}
+.sep-12{height:12px}
+.sep-16{height:16px}
+.sep-20{height:20px}
+.sep-22{height:22px}
+.sep-24{height:24px}
+.sep-28{height:28px}
+.g-col{gap:0 16px}
+.suave{font-size:13px;color:var(--tinta-2)}
+.fuerte{font-size:13px;color:var(--tinta)}
+.fila-acciones{display:flex;gap:10px}
+.form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.fila-6{display:flex;gap:6px}
+.fila-fin{display:flex;justify-content:flex-end;gap:10px}
+.fila-col{display:flex;flex-direction:column;gap:10px}
+.kpi-caja{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px}
+.kpi-caja .k-lbl{font-size:13px;color:var(--tinta-2)}
+.kpi-caja .k-val{font-size:20px;font-weight:700;color:var(--tinta)}
+.fila-paso{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--gris)}
+.mt-8{margin-top:8px}
+.mt-10{margin-top:10px}
+.mt-14{margin-top:14px}
+.pt-8{padding-top:8px}
+
 .metrica{padding:20px}
 .metrica-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
 .metrica-ico{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-sm);background:var(--azul-08);color:var(--azul-real);display:flex;align-items:center;justify-content:center}
@@ -193,6 +238,8 @@ COMPONENTES_CSS = """
 .barra{height:6px;background:var(--azul-15);border-radius:var(--r-full);overflow:hidden;margin-top:12px}
 .barra span{display:block;height:100%;background:var(--azul-real);border-radius:var(--r-full)}
 .barra.amarilla span{background:var(--amarillo)}
+.barra-celda{min-width:110px}
+.barra-pct{font-size:13px;color:var(--azul-profundo)}
 
 table.tabla{width:100%;border-collapse:collapse;font-size:14px}
 table.tabla thead th{
@@ -206,11 +253,15 @@ table.tabla tbody tr:nth-child(even){background:var(--noche-03)}
 table.tabla tbody tr:hover{background:var(--azul-06)}
 table.tabla .num{text-align:right;font-variant-numeric:tabular-nums}
 table.tabla .acc{text-align:right;white-space:nowrap}
+.acciones-cell{display:flex;align-items:center;justify-content:flex-end}
 table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
 .tabla-scroll{overflow-x:auto}
 .tabla-envoltura{overflow:hidden}
+/* A31: el checkbox de seleccion de tabla ya no lleva accent-color inline;
+   color y medidas salen de los tokens (antes style="...#004a93..." x2). */
+.tabla th input[type=checkbox],.tabla td.sel input[type=checkbox]{accent-color:var(--azul-real);width:16px;height:16px}
 
 /* La tabla de administracion tiene 9 columnas. A 16px de padding horizontal por
    celda se pasa del ancho disponible y obliga a desplazar en horizontal, asi que
@@ -251,6 +302,7 @@ table.tabla tbody tr:last-child td{border-bottom:none}
 .buscador input::placeholder{color:var(--gris)}
 .buscador svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--azul-real)}
 select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 12px;font-family:var(--sans);font-size:14px;color:var(--tinta);background:var(--blanco)}
+select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 8px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tinta);background:var(--blanco);cursor:pointer}
 .paginacion{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2);flex-wrap:wrap}
 .paginacion .pag{margin-left:auto;display:flex;gap:6px}
 
@@ -283,8 +335,11 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
   .otp{gap:6px}
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
-.drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2)}
+.drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
+.drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
+.drop-tit{display:block;color:var(--azul-noche);font-size:13px}
+.drop-nota{font-size:13px}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--tinta);margin-bottom:14px}
 .chk input{margin-top:2px;width:17px;height:17px;accent-color:var(--azul-real);flex:0 0 17px}
 .radio-card{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
@@ -295,6 +350,10 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 .vacio svg{color:var(--gris);margin:0 auto 12px}
 .vacio h3{margin-bottom:6px}
 .vacio p{font-size:13px;max-width:420px;margin:0 auto 16px}
+/* Formulario envolvente de cada vista admin (hallazgo C-01). display:contents
+   anula la caja del <form> para que el layout de .content no cambie ni se
+   rompan los selectores que esperan los hijos reales dentro de .main. */
+.vista-form{display:contents}
 
 .steps{display:flex;align-items:center;gap:0;margin-bottom:28px;flex-wrap:wrap}
 .step{display:flex;align-items:center;gap:9px}
@@ -492,6 +551,8 @@ INTERACCION_CSS = (
     ".sg-drawer-lista li{display:flex;gap:10px;align-items:flex-start;padding:12px;"
     "border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;color:var(--tinta)}"
     ".sg-drawer-lista svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}"
+    ".sg-drawer-pie{margin-top:auto;padding:14px 20px;border-top:1px solid var(--gris)}"
+    ".sg-drawer-pie .btn{width:100%}"
     ".who-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:200px;"
     "background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);"
     "box-shadow:var(--shadow-3);padding:6px;display:none}"
@@ -505,8 +566,8 @@ INTERACCION_CSS = (
     "[aria-invalid=true]{border-color:var(--azul-real);box-shadow:0 0 0 3px var(--azul-12)}"
     "button.hecho{background:var(--azul-real);border-color:var(--azul-real);color:var(--blanco)}"
     "tr.seleccionada{background:var(--azul-06)}"
-    ".kanban-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}"
-    ".k-card.arrastrando{opacity:.45}"
+    ".kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}"
+    ".kan-card.arrastrando{opacity:.45}"
     "@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}"
     "@media (max-width:767px){"
     ".toast-pila{left:12px;right:12px;bottom:12px;max-width:none}"
@@ -531,7 +592,174 @@ CALENDARIO_CSS = (
     ".cal-celda.hoy{background:#ffd300;font-weight:700}"
     ".cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;"
     "border-radius:999px;background:#004a93}"
+    ".cal-celda.cal-dia-btn{display:block;width:100%;box-sizing:border-box;font:inherit;"
+    "font-size:13px;font-weight:400;padding:8px;text-align:center;cursor:pointer;"
+    "color:#051533;background:#ffffff;border:1px solid #bbbbbb}"
+    ".cal-celda.cal-dia-btn:hover{background:rgba(0,74,147,.06);border-color:#004a93}"
+    ".cal-celda.cal-dia-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}"
+    # Calendario navegable del Docente: cada dia es un boton. Se anaden
+    # selectores nuevos (.cal-btn, .cal-resumen) para no alterar el calendario
+    # estatico del Estudiante, cuyas celdas siguen siendo divs .cal-celda.
+    ".cal-envoltura{background:#ffffff}"
+    ".cal-btn{font:inherit;margin:0;width:100%;cursor:pointer;text-align:center}"
+    ".cal-btn:hover{border-color:#004a93}"
+    ".cal-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}"
+    ".cal-btn[aria-pressed=true],.cal-btn.activo{background:#004a93;border-color:#004a93;"
+    "color:#ffffff;font-weight:700}"
+    ".cal-btn.activo .cal-punto{background:#ffd300}"
+    ".cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}"
+    ".cal-resumen b{font-size:16px;color:#051533}"
 )
 
+# --- Ampliaciones del rol Estudiante -----------------------------------------
+# Migas navegables, previsualizaciones al pasar el mouse, desplegable de tareas,
+# comentarios del docente, cabecera de perfil estilo GitHub y enlaces de la
+# bandeja de notificaciones. Todo se construye con la paleta absoluta.
+EXTRA_CSS = """
+/* El atributo [hidden] lo sobreescribia cualquier regla con display (por
+   ejemplo .notif{display:flex}), asi que los filtros de la bandeja ocultaban
+   filas que seguian visibles. Con !important [hidden] vuelve a mandar. */
+[hidden]{display:none!important}
+
+/* --- Migas de pan navegables --------------------------------------------- */
+.crumbs a{color:var(--tinta-2)}
+.crumbs a:hover{color:var(--azul-real)}
+.crumbs .miga-item{color:var(--tinta-2)}
+
+/* --- Previsualizacion de las metricas al pasar el mouse ------------------- */
+.metrica-enlace{position:relative;display:block;color:inherit;text-decoration:none;
+  transition:border-color .15s ease,box-shadow .15s ease}
+.metrica-enlace:hover,.metrica-enlace:focus-visible{border-color:var(--azul-real);
+  box-shadow:var(--shadow-2);text-decoration:none}
+.mini-prev{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:40;
+  background:var(--azul-noche);color:var(--blanco);border-radius:var(--r-sm);
+  padding:12px 14px;box-shadow:var(--shadow-3);opacity:0;visibility:hidden;
+  transform:translateY(-4px);pointer-events:none;
+  transition:opacity .15s ease,transform .15s ease,visibility .15s}
+.mini-prev b{display:block;font-size:13px;margin-bottom:4px;color:var(--blanco)}
+.mini-prev span{display:block;font-size:13px;color:var(--blanco);opacity:.85;line-height:1.5}
+.mini-prev em{display:block;margin-top:8px;font-style:normal;font-weight:700;
+  font-size:13px;color:var(--amarillo)}
+.metrica-enlace:hover .mini-prev,.metrica-enlace:focus-visible .mini-prev{
+  opacity:1;visibility:visible;transform:none}
+@media (prefers-reduced-motion:reduce){.mini-prev{transition:none}}
+
+/* --- Aviso superior de Inicio (tareas pendientes) ------------------------- */
+.mini-aviso{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border:1px solid var(--azul-real);border-left:4px solid var(--amarillo);
+  border-radius:var(--r-sm);background:var(--azul-06);color:var(--tinta-2);
+  text-decoration:none}
+.mini-aviso:hover{background:var(--azul-12);text-decoration:none}
+.mini-aviso b{color:var(--tinta)}
+.mini-aviso .mini-aviso-ico{flex:0 0 18px;color:var(--azul-real);margin-top:1px}
+.mini-aviso .mini-aviso-cta{margin-left:auto;font-weight:700;color:var(--azul-real);white-space:nowrap}
+
+/* --- Desplegable de opciones de tareas ------------------------------------ */
+.desplegable{border:1px solid var(--gris);border-radius:var(--r-sm);background:var(--blanco)}
+.desplegable>summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:13px;
+  color:var(--azul-real);list-style:none;display:flex;align-items:center;gap:8px}
+.desplegable>summary::-webkit-details-marker{display:none}
+.desplegable[open]>summary{border-bottom:1px solid var(--gris)}
+.desp-lista{display:flex;flex-direction:column}
+.desp-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-bottom:1px solid var(--gris);font-size:13px;color:var(--tinta);text-decoration:none}
+.desp-item:last-child{border-bottom:none}
+.desp-item:hover{background:var(--azul-06);text-decoration:none}
+.desp-item svg{flex:0 0 16px;color:var(--azul-real)}
+.desp-item span{margin-left:auto;color:var(--tinta-2);white-space:nowrap}
+
+/* --- Comentarios del docente ---------------------------------------------- */
+.coment{display:flex;gap:12px;align-items:flex-start;padding:12px 0}
+.coment+.coment{border-top:1px solid var(--gris)}
+.coment .avatar{width:34px;height:34px;flex:0 0 34px;font-size:13px}
+.coment-cab{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.coment-cab b{font-size:13px;color:var(--tinta)}
+.coment-cab .who-role{padding:0 7px}
+.coment-cab time{font-size:13px;color:var(--tinta-2)}
+.coment-txt{margin-top:7px;font-size:13px;color:var(--tinta);
+  background:var(--noche-03);border-left:3px solid var(--azul-real);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;line-height:1.55}
+
+/* --- Cabecera de perfil (patron tipo GitHub) ------------------------------ */
+.perfil-cab{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.perfil-foto{width:132px;height:132px;flex:0 0 132px;border-radius:var(--r-full);
+  background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;
+  justify-content:center;font-size:32px;font-weight:700;border:1px solid var(--gris);overflow:hidden}
+.perfil-foto img{width:100%;height:100%;object-fit:cover}
+.perfil-datos{flex:1;min-width:240px}
+.perfil-nombre{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.perfil-usuario{font-size:16px;color:var(--tinta-2);margin-top:2px}
+.perfil-bio{font-size:14px;color:var(--tinta-2);margin-top:12px;max-width:640px}
+.perfil-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;
+  font-size:13px;color:var(--tinta-2)}
+.perfil-meta span{display:inline-flex;align-items:center;gap:6px}
+.perfil-meta svg{color:var(--azul-real);flex:0 0 15px}
+.perfil-acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.perfil-repo{display:block;color:inherit;text-decoration:none}
+.perfil-repo:hover{text-decoration:none}
+
+/* --- Diagnostico: selector por tarjetas ----------------------------------- */
+.radio-grupo{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.radio-card strong{display:block;font-size:13px;color:var(--tinta)}
+.radio-card small{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.radio-card.sel{background:var(--azul-06)}
+.radio-card input:checked+div strong{color:var(--azul-real)}
+
+/* --- Kanban de 4 columnas (tareas: comple., en curso, revision, pendiente) -- */
+.kanban[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1279px){.kanban[data-cols="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:767px){.kanban[data-cols="4"]{grid-template-columns:1fr}}
+
+/* --- Bandeja de notificaciones: cada aviso navega ------------------------- */
+a.notif{color:inherit;text-decoration:none;cursor:pointer;align-items:center}
+a.notif:hover{background:var(--azul-06);text-decoration:none}
+.notif-flecha{margin-left:auto;flex:0 0 16px;color:var(--gris)}
+.notif-ico{flex:0 0 34px;width:34px;height:34px;border-radius:8px;
+  background:var(--azul-06);color:var(--azul-real);display:flex;align-items:center;
+  justify-content:center}
+.notif-cuerpo{flex:1;min-width:0}
+.chip{cursor:pointer}
+.chip:hover{border-color:var(--azul-real);color:var(--azul-real)}
+
+/* --- Drawer de la campana: avisos enlazados ------------------------------ */
+.sg-drawer-lista a{display:flex;gap:10px;align-items:flex-start;padding:12px;
+  border-bottom:1px solid var(--gris);font-size:13px;line-height:1.6;
+  color:var(--tinta);text-decoration:none}
+.sg-drawer-lista a:hover{background:var(--azul-06);text-decoration:none}
+.sg-drawer-lista a svg{flex:0 0 15px;margin-top:2px;color:var(--azul-real)}
+.sg-drawer-lista a b{display:block;font-size:13px;color:var(--tinta)}
+.sg-drawer-lista a span{display:block;color:var(--tinta-2);margin-top:2px}
+.sg-drawer-lista a time{display:block;color:var(--gris);margin-top:3px;font-size:13px}
+
+/* --- Filas de tarea del plan (navegan al detalle) ------------------------- */
+.fila-tarea{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--gris);color:inherit;text-decoration:none}
+.fila-tarea:last-child{border-bottom:none}
+.fila-tarea:hover{background:var(--azul-06);text-decoration:none}
+.fila-ico{flex:0 0 16px;color:var(--azul-real);display:flex}
+.fila-txt{flex:1;font-size:13px;color:var(--tinta)}
+.fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
+.fase-link{color:inherit;text-decoration:none}
+.fase-link:hover{color:var(--azul-real);text-decoration:underline}
+
+/* --- Avance por fase del estudiante --------------------------------------- */
+/* Cada fase con su propia pista y su porcentaje: la barra apilada ocultaba las
+   fases posteriores cuando la primera estaba al 100%. */
+.fase-avance{margin-top:12px}
+.fase-avance:first-child{margin-top:0}
+.fase-avance-top{display:flex;align-items:baseline;gap:10px}
+.fase-avance-nombre{flex:1;font-size:13px;color:var(--tinta-2)}
+.fase-avance-pct{font-size:13px;color:var(--azul-noche);font-variant-numeric:tabular-nums}
+.fase-avance .barra{margin-top:6px}
+
+/* --- Tarjeta "sin docente asignado" -------------------------------------- */
+.estado-vacio-mini{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.estado-vacio-mini>svg{flex:0 0 22px;color:var(--azul-real);margin-top:2px}
+.estado-vacio-mini b{display:block;color:var(--tinta)}
+
+/* --- Ayuda bajo un select en formularios --------------------------------- */
+.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
+"""
+
 CSS = (TOKENS_CSS + TOKENS_LOGO_CSS + SHELL_CSS + COMPONENTES_CSS + LISTADOS_CSS
-       + CALENDARIO_CSS + INTERACCION_CSS + LOGO_MARCA_CSS)
+       + CALENDARIO_CSS + INTERACCION_CSS + LOGO_MARCA_CSS + EXTRA_CSS)

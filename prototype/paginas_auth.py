@@ -15,9 +15,9 @@ LOGO_BIG = (
 )
 
 _PUNTOS = [
-    ("clipboard", "Diagnostico inicial y plan de trabajo por fases"),
+    ("clipboard", "Diagnóstico inicial y plan de trabajo por fases"),
     ("trend", "Seguimiento y tareas con evidencia adjunta"),
-    ("chat", "Asesorias academicas y eventos de la institucion"),
+    ("chat", "Asesorías academicas y eventos de la institución"),
 ]
 
 _IZQ = """
@@ -27,13 +27,13 @@ _IZQ = """
   </div>
   <div>
     <h2 style="color:#ffffff;font-size:28px;line-height:1.2;max-width:420px">
-      Gestion de clases de emprendimiento</h2>
+      Gestión de clases de emprendimiento</h2>
     <p style="color:#ffffff;opacity:.78;font-size:14px;margin-top:14px;max-width:420px">
       Un solo lugar para diagnosticar, planificar, dar seguimiento y medir el avance
       de tu emprendimiento.</p>
     <div style="display:flex;flex-direction:column;gap:12px;margin-top:32px">__PUNTOS__</div>
   </div>
-  <p style="color:#ffffff;opacity:.6;font-size:13px">Institucion Minuto de Dios &middot;
+  <p style="color:#ffffff;opacity:.6;font-size:13px">Institución Minuto de Dios &middot;
      Prototipo de interfaz</p>
 </div>
 """
@@ -50,7 +50,7 @@ _PAG = """<!DOCTYPE html>
 <style>__CSS__
 __LOGO_COLOR_CSS__
 .auth{display:flex;min-height:100vh}
-/* Panel navy. Esto vive en una clase y no en un style= en linea a proposito: un
+/* Panel navy. Esto vive en una clase y no en un style= en línea a proposito: un
    estilo inline gana a cualquier media query, asi que con el inline este panel
    no se ocultaba nunca en movil y empujaba el formulario fuera de pantalla. */
 .auth-izq{flex:1;background:#051533;color:#ffffff;padding:56px 60px;
@@ -141,7 +141,7 @@ AUTH_JS = r"""
 (function () {
   "use strict";
 
-  /* Las tres cuentas de demostracion acordadas. La contrasena coincide con el
+  /* Las tres cuentas de demostracion acordadas. La contraseña coincide con el
      usuario; es un prototipo sin backend, no una politica de seguridad. */
   var CUENTAS = {
     estudiante: { rol: "Estudiante",    clave: "estudiante", destino: "../estudiante/dashboard.html" },
@@ -179,7 +179,7 @@ AUTH_JS = r"""
     campo.focus();
   }
 
-  /* --- panel de demostracion: un clic deja usuario y contrasena puestos --- */
+  /* --- panel de demostracion: un clic deja usuario y contraseña puestos --- */
   $$("[data-demo]").forEach(function (fila) {
     function usar() {
       var usuario = fila.dataset.demo;
@@ -200,7 +200,7 @@ AUTH_JS = r"""
     });
   });
 
-  /* --- recordar el ultimo usuario ---------------------------------------- */
+  /* --- recordar el último usuario ---------------------------------------- */
   var recordar = document.getElementById("recordar");
   var campoUsuario = document.getElementById("usuario");
   try {
@@ -218,18 +218,18 @@ AUTH_JS = r"""
       e.preventDefault();
       var clave = document.getElementById("clave");
       /* trim() y minusculas en el usuario: "  Estudiante " es el mismo usuario
-         que "estudiante". La contrasena se respeta tal cual. */
+         que "estudiante". La contraseña se respeta tal cual. */
       var usuario = (campoUsuario.value || "").trim().toLowerCase();
       var dato = CUENTAS[usuario];
 
       limpiar();
       if (!usuario) { marcar(campoUsuario, "Escribe tu usuario"); return; }
-      if (!clave.value) { marcar(clave, "Escribe tu contrasena"); return; }
+      if (!clave.value) { marcar(clave, "Escribe tu contraseña"); return; }
       if (!dato || clave.value !== dato.clave) {
         aviso("acceso-error",
-          "Usuario o contrasena incorrectos. Usa una de las cuentas del panel de demostracion.",
+          "Usuario o contraseña incorrectos. Usa una de las cuentas del panel de demostracion.",
           "acceso-error");
-        /* El aviso es de formulario, no de un campo: se marca la contrasena como
+        /* El aviso es de formulario, no de un campo: se marca la contraseña como
            invalida y se la asocia al aviso, que es donde esta la explicacion. */
         clave.setAttribute("aria-invalid", "true");
         clave.setAttribute("aria-describedby", "acceso-error");
@@ -245,23 +245,23 @@ AUTH_JS = r"""
         else localStorage.removeItem(CLAVE_RECORDAR);
       } catch (x) { /* sin persistencia la redireccion sigue siendo valida */ }
 
-      aviso("acceso-ok", "Sesion iniciada como " + dato.rol + ". Abriendo el panel...", "acceso-ok");
+      aviso("acceso-ok", "Sesión iniciada como " + dato.rol + ". Abriendo el panel...", "acceso-ok");
       window.setTimeout(function () { location.href = dato.destino; }, 600);
     });
   }
 
   /* --- registro, verificacion y recuperacion ------------------------------
      No tienen backend: validan lo obligatorio y confirman que el paso quedo
-     simulado, sin Inventar un envio que no ocurre. */
+     simulado, sin Inventar un envío que no ocurre. */
   $$("form[data-form-simulado]").forEach(function (f) {
     f.addEventListener("submit", function (e) {
       e.preventDefault();
       limpiar();
-      /* El codigo se valida como grupo: ocho campos de un digito. */
+      /* El código se valida como grupo: ocho campos de un digito. */
       var digitos = $$(".otp input", f);
       if (digitos.length) {
         for (var k = 0; k < digitos.length; k++) {
-          if (!digitos[k].value.trim()) { marcar(digitos[k], "Faltan digitos del codigo"); return; }
+          if (!digitos[k].value.trim()) { marcar(digitos[k], "Faltan digitos del código"); return; }
         }
       }
       for (var i = 0; i < f.elements.length; i++) {
@@ -273,13 +273,13 @@ AUTH_JS = r"""
         var vacio = c.type === "checkbox" ? !c.checked : !c.value.trim();
         if (vacio) { marcar(c, "Este campo es obligatorio"); return; }
       }
-      aviso("acceso-ok", f.dataset.mensaje || "Listo. En el prototipo este paso se simula aqui.", "acceso-ok");
+      aviso("acceso-ok", f.dataset.mensaje || "Listo. En el prototipo este paso se simula aquí.", "acceso-ok");
       var destino = f.dataset.destino;
       if (destino) window.setTimeout(function () { location.href = destino; }, 700);
     });
   });
 
-  /* --- codigo de 8 digitos: el foco avanza y atrasa solo ------------------ */
+  /* --- código de 8 digitos: el foco avanza y atrasa solo ------------------ */
   var digitos = $$(".otp input");
   if (digitos.length) {
     digitos.forEach(function (d, i) {
@@ -301,12 +301,12 @@ AUTH_JS = r"""
     digitos[0].focus();
   }
 
-  /* --- botones sueltos con data-accion (reenviar codigo) ------------------ */
+  /* --- botones sueltos con data-accion (reenviar código) ------------------ */
   document.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-accion]");
     if (!b) return;
     if (b.dataset.accion === "reenviar") {
-      aviso("acceso-ok", "Codigo reenviado a tu correo institucional.", "acceso-ok");
+      aviso("acceso-ok", "Código reenviado a tu correo institucional.", "acceso-ok");
     }
   });
 })();
@@ -355,14 +355,14 @@ _CUENTAS_DEMO = [
 
 
 def _filas_demo():
-    """Filas del panel de demostracion. El texto de la credencial va en el DOM
+    """Filas del panel de demostración. El texto de la credencial va en el DOM
     a proposito: es un prototipo que se recorre sin backend y quien lo lea
     necesita ver como entrar."""
     filas = []
     for usuario, rol in _CUENTAS_DEMO:
         filas.append(
             '<div class="demo-fila" data-demo="%s" role="button" tabindex="0" '
-            'aria-label="Usar la cuenta de demostracion %s">'
+            'aria-label="Usar la cuenta de demostración %s">'
             '<div class="demo-info"><div class="demo-rol">%s</div>'
             '<div class="demo-credencial">%s / %s</div></div>'
             '<button type="button" class="btn btn-secundario btn-sm">Usar</button>'
@@ -373,48 +373,48 @@ def _filas_demo():
 
 def login():
     cuerpo = """
-<p class="acceso-nota">Ingresa con tu usuario y contrasena. Tu rol se determina
+<p class="acceso-nota">Ingresa con tu usuario y contraseña. Tu rol se determina
   automaticamente y abre el panel que le corresponde.</p>
 <form id="acceso" novalidate>
   <div class="campo"><label for="usuario">Usuario<span class="req">*</span></label>
     <input id="usuario" name="usuario" type="text" autocomplete="username"
       autocapitalize="none" spellcheck="false" placeholder="Ej. estudiante" required></div>
-  <div class="campo"><label for="clave">Contrasena<span class="req">*</span></label>
+  <div class="campo"><label for="clave">Contraseña<span class="req">*</span></label>
     <input id="clave" name="clave" type="password" autocomplete="current-password"
-      placeholder="Tu contrasena" required></div>
+      placeholder="Tu contraseña" required></div>
   <div class="fila-recordar">
     <label class="chk"><input id="recordar" type="checkbox" checked> Recordarme</label>
-    <a href="recuperar-contrasena.html">Olvide mi contrasena</a>
+    <a href="recuperar-contrasena.html">Olvide mi contraseña</a>
   </div>
   <button class="btn btn-primario ancho" type="submit">Ingresar al sistema</button>
 </form>
 <div id="acceso-error" class="acceso-error" role="alert" hidden></div>
 <div id="acceso-ok" class="acceso-ok" role="status" hidden></div>
 <section class="demo" aria-labelledby="demo-t">
-  <p class="demo-t" id="demo-t">Cuentas de demostracion</p>
+  <p class="demo-t" id="demo-t">Cuentas de demostración</p>
   <p class="demo-n">Pulsa una fila para completar el formulario. El prototipo valida
     en el navegador, sin servidor.</p>
   __FILAS__
 </section>
-<p class="acceso-nota">No tienes cuenta? <a href="registro.html"><b>Registrate aqui</b></a></p>
+<p class="acceso-nota">No tienes cuenta? <a href="registro.html"><b>Registrate aquí</b></a></p>
 """
     return auth_shell(
-        "Iniciar sesion",
+        "Iniciar sesión",
         cuerpo.replace("__FILAS__", _filas_demo()),
     )
 
 
 def registro():
     cuerpo = """
-<p class="acceso-nota acceso-inicial">Completa tus datos. Recibiras un codigo de verificacion de 8 digitos en tu correo institucional.</p>
-<form data-form-simulado novalidate data-mensaje="Cuenta creada. Revisa tu correo institucional para el codigo de verificacion." data-destino="verificar-otp.html">
+<p class="acceso-nota acceso-inicial">Completa tus datos. Recibiras un código de verificación de 8 digitos en tu correo institucional.</p>
+<form data-form-simulado novalidate data-mensaje="Cuenta creada. Revisa tu correo institucional para el código de verificación." data-destino="verificar-otp.html">
 <div class="grid g-2" style="gap:0 16px">
   <div class="campo"><label for="n1">Nombres<span class="req">*</span></label>
     <input id="n1" type="text" placeholder="Ej. Mariana" required></div>
   <div class="campo"><label for="n2">Apellidos<span class="req">*</span></label>
     <input id="n2" type="text" placeholder="Ej. Lopez Herrera" required></div>
 </div>
-<div class="campo"><label for="ti">Tipo y numero de documento<span class="req">*</span></label>
+<div class="campo"><label for="ti">Tipo y número de documento<span class="req">*</span></label>
   <div style="display:flex;gap:10px">
     <select id="ti" style="flex:0 0 150px"><option>CC</option><option>CE</option><option>TI</option></select>
     <input type="text" placeholder="1020304050" style="flex:1" required></div></div>
@@ -422,24 +422,24 @@ def registro():
   <input id="ce" type="email" placeholder="mariana@correo.com" required></div>
 <div class="campo"><label for="ci">Correo institucional<span class="req">*</span></label>
   <input id="ci" type="email" placeholder="mariana@minutodedios.edu.co" required>
-  <div class="ayuda">__ICO_MAIL__ Aqui recibiras las notificaciones del sistema.</div></div>
+  <div class="ayuda">__ICO_MAIL__ Aquí recibiras las notificaciones del sistema.</div></div>
 <div class="grid g-2" style="gap:0 16px">
-  <div class="campo"><label for="tf">Telefono fijo</label>
+  <div class="campo"><label for="tf">Teléfono fijo</label>
     <input id="tf" type="tel" placeholder="604 123 4567"></div>
   <div class="campo"><label for="tc">Celular<span class="req">*</span></label>
     <input id="tc" type="tel" placeholder="300 123 4567" required></div>
 </div>
-<div class="campo"><label for="pa">Contrasena<span class="req">*</span></label>
-  <input id="pa" type="password" placeholder="Minimo 8 caracteres" required>
-  <div class="ayuda">__ICO_ESCUDO__ Debe incluir mayuscula, minuscula, numero y simbolo.</div></div>
+<div class="campo"><label for="pa">Contraseña<span class="req">*</span></label>
+  <input id="pa" type="password" placeholder="Mínimo 8 caracteres" required>
+  <div class="ayuda">__ICO_ESCUDO__ Debe incluir mayuscula, minuscula, número y simbolo.</div></div>
 <label class="chk"><input type="checkbox" required> Acepto el tratamiento de mis datos personales y la
-  politica de privacidad de la institucion</label>
+  politica de privacidad de la institución</label>
 <label class="chk"><input type="checkbox"> Confirmo que los datos registrados son veraces</label>
 <button class="btn btn-acento ancho" type="submit">Crear cuenta y verificarme</button>
 </form>
 <div id="acceso-ok" class="acceso-ok" role="status" hidden></div>
 <p class="acceso-nota acceso-nota-centro">Ya tienes cuenta?
-  <a href="login.html"><b>Inicia sesion</b></a></p>
+  <a href="login.html"><b>Inicia sesión</b></a></p>
 """
     return auth_shell(
         "Crear mi cuenta",
@@ -449,9 +449,9 @@ def registro():
 
 def verificar_otp():
     cuerpo = """
-<p class="acceso-nota acceso-inicial">Ingresa el codigo de 8 digitos que enviamos a
+<p class="acceso-nota acceso-inicial">Ingresa el código de 8 digitos que enviamos a
   <b>mariana.lopez@minutodedios.edu.co</b></p>
-<form data-form-simulado novalidate data-mensaje="Codigo verificado. Tu perfil queda en estado Limitado hasta que un administrador active la cuenta.">
+<form data-form-simulado novalidate data-mensaje="Código verificado. Tu perfil queda en estado Limitado hasta que un administrador active la cuenta.">
 <div class="otp" role="group" aria-labelledby="otp-titulo" style="margin-bottom:18px">
   <input class="otp-d" type="text" inputmode="numeric" maxlength="1" aria-label="Digito 1">
   <input class="otp-d" type="text" inputmode="numeric" maxlength="1" aria-label="Digito 2">
@@ -465,46 +465,46 @@ def verificar_otp():
 <button class="btn btn-primario ancho" type="submit">Verificar mi cuenta</button>
 </form>
 <div class="otp-nota">__ICO_RELOJ__
-  <span>El codigo expira en <b>04:32</b> minutos.</span></div>
+  <span>El código expira en <b>04:32</b> minutos.</span></div>
 <div class="fila-recordar">
   <a href="registro.html">Volver al registro</a>
-  <span>No recibiste el codigo?</span>
-  <button class="btn btn-secundario btn-sm" type="button" data-accion="reenviar">Reenviar codigo</button>
+  <span>No recibiste el código?</span>
+  <button class="btn btn-secundario btn-sm" type="button" data-accion="reenviar">Reenviar código</button>
 </div>
 <div id="acceso-ok" class="acceso-ok" role="status" hidden></div>
 <div class="callout mt-24">__ICO_ALERTA__
   <div>Al verificar tu correo, tu perfil queda en estado <b>Limitado</b>: podras entrar al
-  sistema, pero los modulos de Diagnostico, Tareas y Asesorias permaneceran bloqueados
+  sistema, pero los modulos de Diagnóstico, Tareas y Asesorías permaneceran bloqueados
   hasta que un administrador active tu cuenta.</div></div>
 """
     return auth_shell(
         "Verifica tu correo",
         cuerpo.replace("__ICO_RELOJ__", ico("reloj", 16)).replace("__ICO_ALERTA__", ico("alerta", 18)),
         paso=1,
-        paso_txt="Paso 2 de 2 &middot; Codigo de verificacion",
+        paso_txt="Paso 2 de 2 &middot; Código de verificación",
     )
 
 
 def recuperar_contrasena():
     cuerpo = """
 <p class="acceso-nota acceso-inicial">Indica el correo con el que te registraste y te enviaremos un enlace para restablecer
-  tu contrasena.</p>
+  tu contraseña.</p>
 <form data-form-simulado novalidate data-mensaje="Si el correo y el documento coinciden, en unos minutos llega el enlace de restablecimiento.">
 <div class="campo"><label for="co">Correo registrado<span class="req">*</span></label>
   <input id="co" type="email" placeholder="nombre@minutodedios.edu.co" required>
   <div class="ayuda">__ICO_MAIL__ Puedes usar tu correo institucional o tu correo personal.</div></div>
-<div class="campo"><label for="do">Numero de documento<span class="req">*</span></label>
+<div class="campo"><label for="do">Número de documento<span class="req">*</span></label>
   <input id="do" type="text" placeholder="1020304050" required></div>
-<button class="btn btn-primario ancho" type="submit">Enviar enlace de recuperacion</button>
+<button class="btn btn-primario ancho" type="submit">Enviar enlace de recuperación</button>
 </form>
 <div id="acceso-ok" class="acceso-ok" role="status" hidden></div>
 <div class="callout mt-24">__ICO_ESCUDO__
   <div>Por seguridad el enlace caduca en 30 minutos. Si no lo recibes, comunicate con la
-  coordinacion academica de tu programa.</div></div>
-<p class="acceso-nota acceso-nota-centro">Recordaste la contrasena?
-  <a href="login.html"><b>Inicia sesion</b></a></p>
+  coordinación académica de tu programa.</div></div>
+<p class="acceso-nota acceso-nota-centro">Recordaste la contraseña?
+  <a href="login.html"><b>Inicia sesión</b></a></p>
 """
     return auth_shell(
-        "Recuperar contrasena",
+        "Recuperar contraseña",
         cuerpo.replace("__ICO_MAIL__", ico("mail", 13)).replace("__ICO_ESCUDO__", ico("escudo", 18)),
     )
