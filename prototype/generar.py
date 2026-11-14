@@ -7,10 +7,12 @@ Emite HTML autocontenido (CSS embebido, sin dependencias locales) en:
     prototype/estudiante/   rol ESTUDIANTE
     prototype/docente/       rol DOCENTE
     prototype/admin/         rol ADMINISTRADOR
+    prototype/superadmin/    rol SUPER ADMIN (gestión de perfiles)
 
 Uso:
     python generar.py                              # todas las pantallas
     python generar.py --rol admin                  # solo el rol administrador
+    python generar.py --rol superadmin             # solo el módulo Super Admin
     python generar.py --rol estudiante --vista perfil.html --vista configuracion.html
     python generar.py --vista dashboard.html       # ese archivo en todos los roles
 
@@ -29,7 +31,7 @@ sys.path.insert(0, BASE)
 
 SALIDAS = {}
 
-ROLES = ["compartido", "estudiante", "docente", "admin"]
+ROLES = ["compartido", "estudiante", "docente", "admin", "superadmin"]
 
 
 def registrar(carpeta, nombre, titulo, fn, orden):
@@ -81,6 +83,14 @@ try:
     import paginas_admin as pa
 
     pa.registrar(registrar)
+except ImportError:
+    pass
+
+# --- 5. Rol Super Admin ------------------------------------------------------
+try:
+    import paginas_superadmin as ps
+
+    ps.registrar(registrar)
 except ImportError:
     pass
 
@@ -138,13 +148,14 @@ def main():
              ".n{font-size:13px;color:#162644;background:rgba(0,74,147,.08);padding:2px 8px;",
              "border-radius:999px;font-weight:600}",".d{margin-left:auto;font-size:13px;color:#162644}",
              "</style></head><body><header><h1>SGEMD</h1>",
-             "<p class=\"o\">Indice del prototipo &middot; 3 roles + acceso global</p></header>",
+             "<p class=\"o\">Indice del prototipo &middot; 4 roles + acceso global</p></header>",
              '<div class="wrap">']
         etiquetas = {
-            "compartido": "Acceso global (los 3 roles)",
+            "compartido": "Acceso global (los 4 roles)",
             "estudiante": "Rol ESTUDIANTE",
             "docente": "Rol DOCENTE",
             "admin": "Rol ADMINISTRADOR",
+            "superadmin": "Rol SUPER ADMIN",
         }
         for carpeta in ROLES:
             filas = [x for x in indice if x[0] == carpeta]

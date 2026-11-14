@@ -1,8 +1,8 @@
 # Prototipo SGEMD
 
 Prototipo navegable del **SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios**.
-73 pantallas + índice, tres roles (Estudiante, Docente, Administrador) y las cuatro
-pantallas globales de acceso.
+80 pantallas + índice, cuatro roles (Estudiante, Docente, Administrador y Super
+Admin), incluidas las cuatro pantallas globales de acceso.
 
 - **Stitch:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Índice local:** [`index.html`](index.html) — ábrelo con doble clic, sin servidor
@@ -28,6 +28,7 @@ pantallas globales de acceso.
     - [3.2 Estudiante (20 vistas, 27 archivos)](#32-estudiante-20-vistas-27-archivos)
     - [3.3 Docente (23)](#33-docente-23)
     - [3.4 Administrador (19)](#34-administrador-19)
+    - [3.5 Super Admin (7)](#35-super-admin-7)
   - [4. Reglas de negocio representadas](#4-reglas-de-negocio-representadas)
   - [5. Sistema de diseño](#5-sistema-de-diseño)
     - [Paleta cerrada](#paleta-cerrada)
@@ -45,6 +46,7 @@ pantallas globales de acceso.
     - [12.6 Auditoría funcional de las vistas de Estudiante](#126-auditoría-funcional-de-las-vistas-de-estudiante)
   - [13. Cambios del rol Administrador (`prototype/Admin-Refactor`)](#13-cambios-del-rol-administrador-prototypeadmin-refactor)
     - [13.7 Verificación](#137-verificación)
+  - [14. Módulo Super Admin](#14-módulo-super-admin)
   - [Ver también](#ver-también)
 
 ---
@@ -57,7 +59,7 @@ pantallas globales de acceso.
 prototype/index.html
 ```
 
-Doble clic. El índice agrupa las 73 pantallas por carpeta y enlaza a cada una, así
+Doble clic. El índice agrupa las 77 pantallas por carpeta y enlaza a cada una, así
 que sirve como mapa de navegación del prototipo completo. Ábrelo **desde el
 sistema de archivos**: los enlaces son relativos y con `file://` funcionan tal cual.
 
@@ -73,7 +75,7 @@ Cada pantalla es un documento independiente dentro del proyecto.
 
 ### Cuentas de demostración
 
-El login trae un panel desplegable con las tres cuentas. También puedes escribirlas
+El login trae un panel desplegable con las cuatro cuentas. También puedes escribirlas
 a mano:
 
 | Rol | Usuario | Contraseña | Destino |
@@ -81,6 +83,7 @@ a mano:
 | Estudiante | `estudiante` | `estudiante` | `estudiante/dashboard.html` |
 | Docente | `profesor` | `profesor` | `docente/dashboard.html` |
 | Administrador | `admi` | `admi` | `admin/dashboard.html` |
+| Super Admin | `superadmin` | `superadmin` | `superadmin/dashboard.html` |
 
 En el login, pulsar una fila del panel completa el usuario y resalta el botón
 **Usar**. La contraseña se compara tal cual, sin distinguir mayúsculas.
@@ -95,9 +98,10 @@ En el login, pulsar una fila del panel completa el usuario y resalta el botón
 | `estudiante/` | 27 | Inicio, emprendimiento (lista + detalle por emprendimiento), diagnóstico, plan, seguimiento, tareas, asesorías, eventos, perfil, configuración, notificaciones |
 | `docente/` | 23 | Inicio (dashboard con calendario), emprendimientos asignados (por estudiante), expediente, avances, diagnóstico, tareas, asesorías, eventos (catálogo + detalle con recomendación), perfil (dashboard de la cuenta), configuración, notificaciones |
 | `admin/` | 19 | Inicio, gestión de perfiles, solicitudes, emprendimientos (lista + expediente + plan), seguimiento (lista + tablero), tareas, asesorías, eventos (catálogo + alta), asignaciones, diagnósticos, reportes, respaldos, perfil, notificaciones, configuración |
-| **Total** | **73** | más `index.html` como índice local |
+| `superadmin/` | 4 | Panel principal, creación de perfiles (asistente de 3 fases), gestión de perfiles y perfiles activos |
+| **Total** | **77** | más `index.html` como índice local |
 
-Son **66 vistas lógicas** repartidas en **73 archivos**: varias vistas se reproducen
+Son **70 vistas lógicas** repartidas en **77 archivos**: varias vistas se reproducen
 en más de un archivo. El *detalle de tarea* del estudiante (#15) se reproduce en cinco
 estados (`tarea-detalle.html` más los de `en-revision`, `completada-precio`,
 `completada-usuarios` y `completada-clientes`), el *detalle del evento* —en el rol
@@ -233,6 +237,27 @@ Las acciones del docente son **vistas completas**, no ventanas emergentes (solo 
 > rol va embebido en cada HTML y `python generar.py --rol admin` reproduce los
 > cambios. Detalle en [`cambios-a-admin.md`](cambios-a-admin.md).
 
+### 3.5 Super Admin (7)
+
+| # | Vista | Qué resuelve |
+|---|---|---|
+| 01 | Panel principal | Totales de perfiles registrados, activos, inactivos y limitados, distribución por rol, accesos directos y hover previews |
+| 02 | Creación de perfiles | Asistente de **3 fases**: datos básicos (identificación personal, ID institucional, correo @uniminuto.edu.co, contraseña provisional con generador), rol y permisos |
+| 03 | Gestión de perfiles | Tabla única con búsqueda, filtros por rol y estado, orden, paginación y acciones por fila (ver detalle, editar perfil, gestión de permisos) |
+| 04 | Perfiles activos | La misma gestión limitada a las cuentas con estado **Activo** |
+| 05 | Editar perfil | Vista dedicada: datos, estado (interruptor Activo), cambio de contraseña con generador y enlace a permisos |
+| 06 | Gestión de permisos | Vista dedicada: ficha del perfil, permisos por módulo, restablecer y guardar; estado derivado |
+| 07 | Mi perfil | Edición de los datos del propio Super Admin y de su contraseña; sincroniza el encabezado |
+
+> **Módulo Super Admin:** gestiona **solo perfiles** de Estudiante, Docente y
+> Administrador. No crea otros Super Admin, no cambia el rol de un perfil y no accede a
+> emprendimientos, asesorías, eventos, tareas ni información académica. Cada persona
+> tiene identificación personal e ID institucional; el correo es @uniminuto.edu.co.
+> Nada se elimina: el acceso se controla con el estado Activo/Inactivo. Los perfiles
+> sin todos los permisos del rol quedan como Limitados. El CRUD se simula en
+> `localStorage` (creados y cambios; las bajas lógicas se eliminaron) y las vistas
+> leen el mismo almacén. Detalle en [`cambios-superadmin.md`](cambios-superadmin.md).
+
 ---
 
 ## 4. Reglas de negocio representadas
@@ -251,7 +276,7 @@ razón de que las vistas no sean idénticas entre roles.
 - **Toda tarea exige evidencia** para cerrarse.
 - **Toda eliminación pide confirmación** antes de ejecutarse.
 - **El docente solo ve sus emprendimientos asignados**; el administrador ve todos.
-- **Roles y alcance:** los tres paneles laterales tienen ítems distintos porque las
+- **Roles y alcance:** los cuatro paneles laterales tienen ítems distintos porque las
   capacidades lo son.
 
 La especificación completa está en [`../README.md`](../README.md) (raíz) y
@@ -337,11 +362,12 @@ se pierde en la siguiente ejecución.
 
 ```
 prototype/
-├── generar.py              Orquestador: emite las 73 pantallas + index.html
+├── generar.py              Orquestador: emite las 77 pantallas + index.html
 ├── paginas_auth.py         4 pantallas de acceso + su CSS y su JS
 ├── paginas_estudiante.py   27 pantallas del estudiante
 ├── paginas_docente.py      23 pantallas del docente
 ├── paginas_admin.py        19 pantallas del administrador
+├── paginas_superadmin.py   4 pantallas del Super Admin (gestión de perfiles)
 ├── lib_ui.py               Shell, navegación, tablas, formularios, tarjetas
 ├── lib_css.py              Tokens, paleta, responsive, componentes
 ├── lib_js.py               Interacciones (filtros, menús, modales, toasts)
@@ -349,7 +375,7 @@ prototype/
 ├── logo_datos.py           Data URIs del logo (generado)
 ├── _marca/preparar_logo.py Deriva las variantes de logo
 ├── index.html              Índice local (generado)
-├── compartido/ estudiante/ docente/ admin/   HTML generado
+├── compartido/ estudiante/ docente/ admin/ superadmin/   HTML generado
 └── DESIGN.md               Guía de diseño
 ```
 
@@ -375,11 +401,12 @@ Playwright, y solo para las auditorías de navegador (`pip install playwright` y
 `playwright install chromium`).
 
 ```powershell
-# Generar (emite las 73 pantallas + index.html)
+# Generar (emite las 77 pantallas + index.html)
 python generar.py
 
 # Generar solo un rol, para no reescribir el resto
 python generar.py --rol admin
+python generar.py --rol superadmin
 python generar.py --rol estudiante --rol docente
 
 # Generar solo una pantalla (repetible), en los roles que se pidan
@@ -403,8 +430,9 @@ python _reconciliar.py
 ## 9. Validación automática
 
 El prototipo no se dio por bueno "a ojo": hay **ocho auditorías** sobre las 73
-pantallas —cinco estáticas y tres de navegador—. Las estáticas cierran sin
-hallazgos en paleta, tipografía, firmas, porcentajes y estructura, con una
+pantallas de los tres roles originales —cinco estáticas y tres de navegador—. Las
+estáticas cierran sin hallazgos en paleta, tipografía, firmas, porcentajes y
+estructura, con una
 salvedad: `_estructura.py` marca el presupuesto de **estilos inline** por encima
 del umbral (`PRESUPUESTO_INLINE`), que queda registrado como deuda pendiente y no
 bloquea la navegación.
@@ -418,7 +446,7 @@ bloquea la navegación.
 | `_check_pct.py` | Literales con `%` sueltos que romperían el formateo |
 | `_responsive.py` | 1440/1280/768/375 px: sin desbordes, sin celdas ocultas ni sin etiqueta |
 | `_interaccion.py` | Chromium real: filtros, menús, modales, formularios, avisos de error |
-| `_accesos.py` | Los tres accesos de punta a punta, incluido el rechazo de contraseña mala |
+| `_accesos.py` | Los tres accesos originales de punta a punta, incluido el rechazo de contraseña mala |
 
 Dos scripts más son de apoyo, no de verificación:
 
@@ -439,7 +467,7 @@ instalado, así que no se ejecutaron.
 - **Proyecto:** `projects/3060781598377201049`
 - **Enlace:** https://stitch.withgoogle.com/projects/3060781598377201049
 - **Total:** 51 documentos — 50 pantallas de interfaz más una de marca
-  (`_marca/logo-color-1200.png`). El prototipo local ya genera **73 archivos HTML**;
+  (`_marca/logo-color-1200.png`). El prototipo local ya genera **77 archivos HTML**;
   Stitch conserva los 50 originales: no se subieron los cuatro estados extra de
   *detalle de tarea* ni las vistas nuevas (*detalle del seguimiento*, *configuración*
   y el detalle de cada evento).
@@ -479,7 +507,7 @@ PUT ni DELETE de pantallas (devuelven `404`). Eso condiciona todo:
   porque se generaron así; un usuario real no debe depender de eso.
 - **Responsive validado en navegador de escritorio.** Chromium con viewport
   emulado; no se probó en Safari ni en un móvil físico.
-- **La tipografía depende de internet.** Si Google Fonts no responde, las 73
+- **La tipografía depende de internet.** Si Google Fonts no responde, las 77
   pantallas se ven con la fuente del sistema. El diseño aguanta el cambio, pero las
   medidas no son idénticas a las capturadas.
 
@@ -621,7 +649,7 @@ Estudiante (sin reescribir Docente, Administrador ni las de acceso):
 
 ```powershell
 # desde prototype/
-python generar.py          # emite las 73 pantallas + index.html (todos los roles)
+python generar.py          # emite las 77 pantallas + index.html (todos los roles)
 ```
 
 Si solo se tocó el rol Estudiante, `generar.py` completo reescribe también los otros
@@ -724,10 +752,53 @@ que no está registrada en el mapa de pantallas. Detalle en
 
 ---
 
+## 14. Módulo Super Admin
+
+Rol **Super Admin**: gestión de perfiles de usuario, nada más. Se agregó como un
+módulo independiente (`prototype/superadmin/`, 4 pantallas) generado desde
+`paginas_superadmin.py`; no se modificó ninguna vista de los roles existentes.
+
+| Pantalla | Contenido |
+|---|---|
+| Panel principal | 18 perfiles registrados (16 activos, 2 inactivos), distribución por rol y accesos directos |
+| Creación de perfiles | Asistente de 3 fases: datos básicos, rol y permisos por módulo |
+| Gestión de perfiles | Tabla con búsqueda, filtros, orden, paginación y acciones por fila |
+| Perfiles activos | La misma gestión limitada a las cuentas activas |
+
+### 14.1 Datos y permisos reales
+
+Los 18 perfiles base salen de las vistas existentes: 5 docentes y 12 estudiantes
+de `paginas_admin.py`, más la cuenta de la administradora. No se inventan campos
+ni entidades. Los permisos se derivan del menú lateral de cada rol: cada módulo y
+vista existente se convierte en un permiso `Módulo::Vista`.
+
+### 14.2 CRUD simulado con integridad
+
+Crear, leer, editar, cambiar rol, gestionar permisos, activar/desactivar y
+eliminar. La eliminación es **lógica** (el registro se conserva y deja de
+aparecer), las operaciones sensibles piden confirmación y el correo se valida por
+rol y la identificación de forma global. Los cambios viven en
+`localStorage` (`sgemd:superadmin:v1`: `creados`, `cambios` y `bajas`).
+
+### 14.3 Límites del rol
+
+No crea otros Super Admin, no cambia su propio rol y no accede a
+emprendimientos, asesorías, eventos, tareas, diagnósticos ni información
+académica. La campana de notificaciones se oculta y el menú de usuario solo
+ofrece **Cerrar sesión**. Si hay una sesión de otro rol, las pantallas redirigen
+al login.
+
+> Verificación: `python verify.py` OK, JS embebido validado con `node --check` y
+> prueba en navegador real sin errores de consola. Detalle completo en
+> [`cambios-superadmin.md`](cambios-superadmin.md).
+
+---
+
 ## Ver también
 
 - [`DESIGN.md`](DESIGN.md) — guía de diseño completa (paleta, tipografía, componentes)
 - [`cambios-a-admin.md`](cambios-a-admin.md) — registro del refactor del rol Administrador
+- [`cambios-superadmin.md`](cambios-superadmin.md) — registro del módulo Super Admin (gestión de perfiles)
 - [`cambios-a-docente.md`](cambios-a-docente.md) — registro del refactor del rol Docente
 - [`../README.md`](../README.md) — especificación maestra del SGEMD
 - [`../docs/fr_nfr_sgemd.md`](../docs/fr_nfr_sgemd.md) — requisitos funcionales y no funcionales

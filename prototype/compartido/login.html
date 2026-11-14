@@ -713,7 +713,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   <p class="demo-t" id="demo-t">Cuentas de demostración</p>
   <p class="demo-n">Pulsa una fila para completar el formulario. El prototipo valida
     en el navegador, sin servidor.</p>
-  <div class="demo-fila" data-demo="estudiante" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Estudiante"><div class="demo-info"><div class="demo-rol">Estudiante</div><div class="demo-credencial">estudiante / estudiante</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div><div class="demo-fila" data-demo="profesor" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Docente"><div class="demo-info"><div class="demo-rol">Docente</div><div class="demo-credencial">profesor / profesor</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div><div class="demo-fila" data-demo="admi" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Administrador"><div class="demo-info"><div class="demo-rol">Administrador</div><div class="demo-credencial">admi / admi</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div>
+  <div class="demo-fila" data-demo="estudiante" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Estudiante"><div class="demo-info"><div class="demo-rol">Estudiante</div><div class="demo-credencial">estudiante / estudiante</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div><div class="demo-fila" data-demo="profesor" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Docente"><div class="demo-info"><div class="demo-rol">Docente</div><div class="demo-credencial">profesor / profesor</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div><div class="demo-fila" data-demo="admi" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Administrador"><div class="demo-info"><div class="demo-rol">Administrador</div><div class="demo-credencial">admi / admi</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div><div class="demo-fila" data-demo="superadmin" role="button" tabindex="0" aria-label="Usar la cuenta de demostración Super Admin"><div class="demo-info"><div class="demo-rol">Super Admin</div><div class="demo-credencial">superadmin / superadmin</div></div><button type="button" class="btn btn-secundario btn-sm">Usar</button></div>
 </section>
 <p class="acceso-nota">No tienes cuenta? <a href="registro.html"><b>Registrate aquí</b></a></p>
 </div>
@@ -727,7 +727,8 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
   var CUENTAS = {
     estudiante: { rol: "Estudiante",    clave: "estudiante", destino: "../estudiante/dashboard.html" },
     profesor:   { rol: "Docente",       clave: "profesor",   destino: "../docente/dashboard.html" },
-    admi:       { rol: "Administrador", clave: "admi",       destino: "../admin/dashboard.html" }
+    admi:       { rol: "Administrador", clave: "admi",       destino: "../admin/dashboard.html" },
+    superadmin: { rol: "Super Admin",   clave: "superadmin", destino: "../superadmin/dashboard.html" }
   };
   var CLAVE_SESION = "sgemd:sesion";
   var CLAVE_RECORDAR = "sgemd:recordar";

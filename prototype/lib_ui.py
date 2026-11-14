@@ -126,12 +126,21 @@ NAV = {
         ("Notificaciones", "bell", "notificaciones"),
         ("Perfil", "user", "perfil"),
     ],
+    "superadmin": [
+        ("Panel principal", "grid", "dashboard"),
+        ("Crear perfil", "plus", "crear-perfil"),
+        ("Gestión de perfiles", [
+            ("Todos los perfiles", "users", "perfiles"),
+            ("Perfiles activos", "check", "perfiles-activos"),
+        ]),
+    ],
 }
 
 ROLES = {
     "estudiante": ("ESTUDIANTE", "Mariana López", "ML"),
     "docente": ("DOCENTE", "Carlos Mendoza", "CM"),
     "administrador": ("ADMINISTRADOR", "Ana Restrepo", "AR"),
+    "superadmin": ("SUPER ADMIN", "Laura Gómez", "LG"),
 }
 
 # --- Migas navegables --------------------------------------------------------
@@ -210,6 +219,17 @@ MIGAS = {
         "mi perfil": "perfil.html",
         "configuración": "configuracion.html",
         "notificaciones": "notificaciones.html",
+    },
+    "superadmin": {
+        "inicio": "dashboard.html",
+        "panel principal": "dashboard.html",
+        "crear perfil": "crear-perfil.html",
+        "gestión de perfiles": "perfiles.html",
+        "todos los perfiles": "perfiles.html",
+        "perfiles activos": "perfiles-activos.html",
+        "editar perfil": "editar-perfil.html",
+        "gestión de permisos": "permisos.html",
+        "mi perfil": "mi-perfil.html",
     },
 }
 
@@ -384,6 +404,14 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
         notif = (sum(1 for n in NOTIFS_ADMIN if not n[0])
                  if rol == "administrador" else 3)
     fuente = _notif_fuente(notif_lista) if notif_lista else ""
+    # El modulo Super Admin solo gestiona perfiles: no tiene bandeja de
+    # notificaciones propia, asi que la campana no se muestra (evita un enlace
+    # muerto a notificaciones.html, que no existe en esa carpeta).
+    campana = "" if rol == "superadmin" else (
+        '<button class="icon-btn" data-accion="notificaciones" '
+        'aria-label="Notificaciones">%s<span class="count">%d</span></button>'
+        % (ico("bell", 18), notif)
+    )
     encabezado = "<h1>%s</h1>" % titulo
     if sub:
         encabezado += '<p class="sub">%s</p>' % sub
@@ -420,7 +448,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
       </div>
       <div class="topbar-right">
-        <button class="icon-btn" data-accion="notificaciones" aria-label="Notificaciones">%(ico_bell)s<span class="count">%(notif)d</span></button>
+        %(campana)s
         <div class="who"><span class="avatar">%(ini)s</span>
           <div><div class="who-name">%(nombre)s</div><span class="who-role">%(etiqueta)s</span></div>
         </div>
@@ -445,9 +473,9 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
         "ini": iniciales,
         "notif": notif,
         "notif_fuente": fuente,
+        "campana": campana,
         "ico_menu": ico("menu", 20),
         "ico_search": ico("search", 16),
-        "ico_bell": ico("bell", 18),
         "js": JS,
         "migas": m,
         "cab": cab,

@@ -146,7 +146,8 @@ AUTH_JS = r"""
   var CUENTAS = {
     estudiante: { rol: "Estudiante",    clave: "estudiante", destino: "../estudiante/dashboard.html" },
     profesor:   { rol: "Docente",       clave: "profesor",   destino: "../docente/dashboard.html" },
-    admi:       { rol: "Administrador", clave: "admi",       destino: "../admin/dashboard.html" }
+    admi:       { rol: "Administrador", clave: "admi",       destino: "../admin/dashboard.html" },
+    superadmin: { rol: "Super Admin",   clave: "superadmin", destino: "../superadmin/dashboard.html" }
   };
   var CLAVE_SESION = "sgemd:sesion";
   var CLAVE_RECORDAR = "sgemd:recordar";
@@ -351,6 +352,7 @@ _CUENTAS_DEMO = [
     ("estudiante", "Estudiante"),
     ("profesor", "Docente"),
     ("admi", "Administrador"),
+    ("superadmin", "Super Admin"),
 ]
 
 
