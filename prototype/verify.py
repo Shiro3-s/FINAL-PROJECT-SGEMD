@@ -1,8 +1,10 @@
-with open('paginas_admin.py', 'r', encoding='utf-8') as f:
+import os
+BASE = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(BASE, 'paginas_admin.py'), 'r', encoding='utf-8') as f:
     pa = f.read()
-with open('lib_ui.py', 'r', encoding='utf-8') as f:
+with open(os.path.join(BASE, 'lib_ui.py'), 'r', encoding='utf-8') as f:
     lu = f.read()
-with open('lib_js.py', 'r', encoding='utf-8') as f:
+with open(os.path.join(BASE, 'lib_js.py'), 'r', encoding='utf-8') as f:
     lj = f.read()
 
 checks = [

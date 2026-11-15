@@ -323,8 +323,8 @@ def boton_accion(icono, etiqueta, clase=""):
 def _item_nav(txt, ic, clave, activo, badge="", href=""):
     bd = '<span class="nav-badge">%s</span>' % badge if badge else ""
     destino = href or ("%s.html" % clave)
-    return '<a class="%s" href="%s">%s<span>%s</span>%s</a>' % (
-        "activo" if clave == activo else "", destino, ico(ic, 16), txt, bd)
+    return '<a class="%s" href="%s" title="%s">%s<span>%s</span>%s</a>' % (
+        "activo" if clave == activo else "", destino, txt, ico(ic, 16), txt, bd)
 
 
 _ACENTOS_ID = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
@@ -456,6 +456,7 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
         <input type="text" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
       </div>
       <div class="topbar-right">
+        <button class="icon-btn search-toggle" type="button" data-accion="buscar-movil" aria-label="Buscar">%(ico_search)s</button>
         %(campana)s
         <div class="who"><span class="avatar">%(ini)s</span>
           <div><div class="who-name">%(nombre)s</div><span class="who-role">%(etiqueta)s</span></div>
