@@ -2013,11 +2013,11 @@ guardar(estado);
       if (!m) {
         m = document.createElement("div");
         m.className = "who-menu";
-        /* Estudiante y docente tienen una vista de configuración propia; en
-           administrador el menú conserva "Preferencias" (sin vista). Super
-           Admin gestiona su propio perfil desde "Mi perfil". */
+        /* Estudiante, docente y administrador tienen una vista de configuración
+           propia; Super Admin gestiona su propio perfil desde "Mi perfil". */
         var carpeta = location.pathname.split("/").slice(-2, -1)[0];
-        var conConfiguracion = carpeta === "estudiante" || carpeta === "docente";
+        var conConfiguracion = carpeta === "estudiante" || carpeta === "docente" ||
+          carpeta === "admin";
         if (carpeta === "superadmin") {
           m.innerHTML = '<button data-accion="perfil">Mi perfil</button>' +
             '<button data-accion="cerrar-sesion">Cerrar sesión</button>';

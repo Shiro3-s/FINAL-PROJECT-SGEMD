@@ -106,8 +106,6 @@ NAV = {
         ("Usuarios y asignaciones", [
             ("Gestión de perfiles", "users", "usuarios"),
             ("Asignaciones", "sliders", "asignaciones"),
-            ("Asignar docente", "user", "asignaciones",
-             "asignaciones.html#asignar-docente"),
         ]),
         ("Emprendimientos y seguimiento", [
             ("Emprendimientos", "maleta", "emprendimientos"),
@@ -123,8 +121,6 @@ NAV = {
             ("Reportes", "download", "reportes"),
             ("Respaldos", "bd", "respaldos"),
         ]),
-        ("Notificaciones", "bell", "notificaciones"),
-        ("Perfil", "user", "perfil"),
     ],
     "superadmin": [
         ("Panel principal", "grid", "dashboard"),
@@ -203,19 +199,33 @@ MIGAS = {
         "gestión de perfiles": "usuarios.html",
         "editar docente": "usuario-docente.html",
         "editar estudiante": "usuario-estudiante.html",
+        "detalle del usuario": "usuario-detalle.html",
+        "nuevo usuario": "usuario-nuevo.html",
         "emprendimientos": "emprendimientos.html",
-        "sabor y sabe": "emprendimiento-expediente.html",
-        "plan de trabajo": "emprendimiento-plan.html",
+        "detalle del emprendimiento": "emprendimiento-detalle.html",
+        "editar emprendimiento": "emprendimiento-editar.html",
         "seguimiento": "seguimiento.html",
-        "tablero": "seguimiento-dashboard.html",
+        "detalle del seguimiento": "seguimiento-detalle.html",
+        "registrar avance": "avance-form.html",
+        "tablero": "seguimiento.html",
         "asignaciones": "asignaciones.html",
-        "asignar emprendimiento": "asignaciones.html",
+        "asignar docente": "asignacion-form.html",
+        "reasignar docente": "asignacion-form.html",
         "asesorías": "asesorias.html",
+        "detalle de asesoría": "asesoria-detalle.html",
+        "crear asesoría": "asesoria-form.html",
+        "editar asesoría": "asesoria-form.html",
         "eventos": "eventos.html",
         "crear evento": "evento-form.html",
+        "editar evento": "evento-form.html",
+        "detalle del evento": "evento-detalle.html",
         "diagnosticos": "diagnosticos.html",
-        "reportes": "reportes.html",
+        "detalle del diagnóstico": "diagnostico-detalle.html",
+        "solicitudes pendientes": "solicitudes.html",
+        "detalle de la solicitud": "solicitud-detalle.html",
         "tareas": "tareas.html",
+        "detalle de tarea": "tarea-detalle.html",
+        "reportes": "reportes.html",
         "mi perfil": "perfil.html",
         "configuración": "configuracion.html",
         "notificaciones": "notificaciones.html",
@@ -278,7 +288,7 @@ NOTIFS_ADMIN = [
 LOGO_TILE = (
     '<span class="brand-tile">'
     '<img src="%s" width="600" height="286" decoding="async"'
-    ' alt="SGEMD, Emprendimiento Minuto de Dios"></span>' % LOGO_BLANCO
+    ' alt="SGEMD"></span>' % LOGO_BLANCO
 )
 
 
@@ -431,8 +441,6 @@ def shell(rol, activo, titulo, cuerpo, migas=None, notif=None, acciones="", sub=
 <div class="shell">
   <aside class="sidebar" id="sb">
     <div class="brand">%(logo)s
-      <div class="brand-text"><div class="brand-name">SGEMD</div>
-      <div class="brand-sub">Emprendimiento Minuto de Dios</div></div>
     </div>
     <nav class="nav">%(items)s</nav>
     <div class="side-foot"><div class="side-card">

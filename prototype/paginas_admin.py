@@ -199,6 +199,218 @@ EST_POR_NOMBRE = {_sin_tildes(e[1]): e for e in ESTUDIANTES}
 # Sede de cada estudiante, deducida del emprendimiento que tiene asignado.
 SEDE_EST = {e[2]: e[10] for e in EMPRENDIMIENTOS}
 
+# --- Fichas de detalle (vistas propias con ?clave= / ?cod=) -------------------
+# Cada vista dedicada del admin recibe sus datos por query string y los pinta
+# con los atributos data-campo / data-badge / data-valor. Estos diccionarios son
+# la fuente unica de esas fichas.
+
+SOLICITUDES_DET = {}
+for _i, (_c, _n, _r, _m, _f) in enumerate(SOLIC_DESBLOQUEOS, 1):
+    SOLICITUDES_DET["SOL-D%02d" % _i] = {
+        "id": "SOL-D%02d" % _i, "tipo": "Desbloqueo de cuenta", "codigo": _c,
+        "solicitante": _n, "rol": _r, "fecha": _f, "motivo": _m,
+        "correo": CORREOS_EST.get(_n, _sin_tildes(_n).replace(" ", ".")
+                                  + "@sgemd.edu.co"),
+        "accion": "Reactivar la cuenta y notificar al solicitante.",
+        "detalle": "La cuenta está bloqueada o inactiva. Al aprobar, el sistema "
+                   "restablece el acceso con el estado Activo y registra la "
+                   "decisión en la bitácora.",
+        "clase": "b-linea",
+    }
+for _i, (_c, _n, _emp, _nu, _s, _f) in enumerate(SOLIC_PARALELOS, 1):
+    SOLICITUDES_DET["SOL-P%02d" % _i] = {
+        "id": "SOL-P%02d" % _i, "tipo": "Emprendimiento en paralelo",
+        "codigo": _c, "solicitante": _n, "rol": "Estudiante", "fecha": _f,
+        "motivo": "Pasa de %s a %s (sector %s)." % (_emp, _nu, _s),
+        "correo": CORREOS_EST.get(_n, ""),
+        "accion": "Habilitar el segundo emprendimiento y asignar docente.",
+        "detalle": "El estudiante conserva su emprendimiento actual y suma %s. "
+                   "Revisa la capacidad docente antes de aprobar." % _nu,
+        "clase": "b-linea",
+    }
+for _i, (_n, _e, _d, _f, _m) in enumerate(SOLIC_CITAS, 1):
+    SOLICITUDES_DET["SOL-C%02d" % _i] = {
+        "id": "SOL-C%02d" % _i, "tipo": "Cita de asesoría",
+        "codigo": (EST_POR_NOMBRE.get(_sin_tildes(_n), ("",))[0] or "—"), "solicitante": _n, "rol": "Estudiante",
+        "fecha": _f, "motivo": _m, "correo": CORREOS_EST.get(_n, ""),
+        "accion": "Confirmar la cita con %s y notificar el horario." % _d,
+        "detalle": "La cita fue propuesta por el estudiante para el "
+                   "emprendimiento %s. El docente sugerido es %s." % (_e, _d),
+        "clase": "b-linea",
+    }
+
+# Ficha del docente/estudiante: alimenta usuario-detalle y los formularios.
+USUARIOS_DET = {}
+for _cod, _nom, _correo, _area, _carga, _emp, _est in DOCENTES:
+    USUARIOS_DET[_cod] = {
+        "tipo": "docente", "codigo": _cod, "nombre": _nom, "correo": _correo,
+        "area": _area, "carga": _carga, "emprendimientos": _emp,
+        "estado": _est, "telefono": "+57 300 555 0142",
+        "ultimo_acceso": "Hoy, 07:42", "registro": "12 mar 2024",
+        "clase": "b-azul" if _est == "Activo" else "b-amarillo",
+        "nombres": _nom.split(" ")[0], "apellidos": " ".join(_nom.split(" ")[1:]),
+        "nota": "Docente de acompañamiento del programa.",
+    }
+for _cod, _nom, _sec, _emp, _et, _av, _est in ESTUDIANTES:
+    USUARIOS_DET[_cod] = {
+        "tipo": "estudiante", "codigo": _cod, "nombre": _nom,
+        "correo": CORREOS_EST.get(_nom, ""), "sector": _sec,
+        "emprendimiento": _emp, "etapa": _et, "avance": "%d%%" % _av,
+        "sede": SEDE_EST.get(_nom, ""), "estado": _est,
+        "telefono": "+57 301 555 0199", "ultimo_acceso": "Hoy, 08:02",
+        "registro": "12 mar 2024",
+        "clase": "b-azul" if _est == "Activo" else "b-amarillo",
+        "nombres": _nom.split(" ")[0], "apellidos": " ".join(_nom.split(" ")[1:]),
+        "nota": "El estudiante edita sus datos personales; el administrador "
+                "gestiona el estado de acceso.",
+    }
+
+# Ficha completa del emprendimiento (ver, editar y registrar avance).
+EMP_DET = {}
+for _cod, _emp, _estu, _correo_est, _sector, _tipo, _etapa, _av, _doc, _correo_doc, _sede in EMPRENDIMIENTOS:
+    EMP_DET[_cod] = {
+        "codigo": _cod, "nombre": _emp, "estudiante": _estu,
+        "correo": _correo_est, "est_id": (EST_POR_NOMBRE.get(_sin_tildes(_estu), ("",))[0] or "—"),
+        "sector": _sector, "tipo": _tipo, "etapa": _etapa,
+        "avance": str(_av), "docente": _doc,
+        "correo_doc": _correo_doc, "sede": _sede,
+        "clase": "b-azul" if _doc != "Sin asignar" else "b-amarillo",
+        "docente_txt": _doc if _doc != "Sin asignar" else "Sin docente asignado",
+        "estado": ("Al día" if _av >= 60 else
+                   ("Sin avance" if _av == 0 else "En riesgo")),
+        "descripcion": ("Emprendimiento del sector %s en la etapa %s. Acompañado "
+                        "por el programa SGEMD." % (_sector, _etapa)),
+    }
+
+# Ficha de la asesoria (ver y editar).
+ASES_DET = {}
+for _cod, _estu, _doc, _fecha, _hora, _tema, _mod, _est in ASESORIAS:
+    ASES_DET[_cod] = {
+        "codigo": _cod, "estudiante": _estu, "docente": _doc,
+        "fecha": _fecha, "hora": _hora, "tema": _tema, "modalidad": _mod,
+        "estado": _est, "clase": BADGE.get(_est.lower(), "b-neutra"),
+        "emprendimiento": next((e[2] for e in ESTUDIANTES if e[1] == _estu), ""),
+        "lugar": ("meet.sgemd.edu.co/ases-" + _cod.split("-")[-1]
+                  if _mod == "Virtual" else "Sala 3 · Bloque B"),
+        "nota": "Sesión de acompañamiento del programa.",
+    }
+
+# Ficha del evento (tarjetas, ver y editar).
+EVENTOS_DET = {
+    "taller-costos": {
+        "ev": "taller-costos", "titulo": "Taller de costos y precios",
+        "fecha": "18 nov 2024", "hora": "09:00 - 11:00",
+        "formato": "Presencial", "lugar": "Auditorio A",
+        "lugar_etiqueta": "Ubicación", "enlace": "",
+        "descripcion": "Taller práctico para calcular el costo de insumos y "
+                       "definir el punto de equilibrio de un emprendimiento.",
+        "cupos": "32 de 40 cupos", "estado": "Publicado", "clase": "b-azul",
+        "dirigido": "Todos los estudiantes", "recordatorio": "Un día antes",
+    },
+    "feria-emprendedores": {
+        "ev": "feria-emprendedores", "titulo": "Feria de emprendedores",
+        "fecha": "22 nov 2024", "hora": "14:00 - 18:00",
+        "formato": "Mixto", "lugar": "Plaza central",
+        "lugar_etiqueta": "Ubicación", "enlace": "meet.sgemd.edu.co/feria-2024",
+        "descripcion": "Muestra de los emprendimientos del programa con "
+                       "compradores y aliados del ecosistema.",
+        "cupos": "86 de 120 cupos", "estado": "Publicado", "clase": "b-azul",
+        "dirigido": "Todos los estudiantes", "recordatorio": "Dos días antes",
+    },
+    "jornada-mentoria": {
+        "ev": "jornada-mentoria", "titulo": "Jornada de mentoría",
+        "fecha": "25 nov 2024", "hora": "08:30 - 12:00",
+        "formato": "Virtual", "lugar": "",
+        "lugar_etiqueta": "Enlace de conexión",
+        "enlace": "meet.sgemd.edu.co/mentoria-2024",
+        "descripcion": "Encuentro con mentores para revisar la propuesta de "
+                       "valor y el plan de crecimiento de cada emprendimiento.",
+        "cupos": "14 confirmados", "estado": "Por aprobar", "clase": "b-amarillo",
+        "dirigido": "Todos los estudiantes", "recordatorio": "Un día antes",
+    },
+    "marco-legal": {
+        "ev": "marco-legal", "titulo": "Charla: marco legal para negocios",
+        "fecha": "02 dic 2024", "hora": "10:00 - 11:30",
+        "formato": "Presencial", "lugar": "Auditorio B",
+        "lugar_etiqueta": "Ubicación", "enlace": "",
+        "descripcion": "Aspectos legales básicos para formalizar un "
+                       "emprendimiento: constitución, impuestos y contratos.",
+        "cupos": "0 de 50 cupos", "estado": "Borrador", "clase": "b-neutra",
+        "dirigido": "Todos los estudiantes", "recordatorio": "Un día antes",
+    },
+    "financiamiento": {
+        "ev": "financiamiento", "titulo": "Charla: opciones de financiamiento",
+        "fecha": "04 nov 2024", "hora": "10:00 - 12:00",
+        "formato": "Presencial", "lugar": "Auditorio B",
+        "lugar_etiqueta": "Ubicación", "enlace": "",
+        "descripcion": "Convocatorias, fondos y programas de crédito "
+                       "disponibles para emprendimientos en etapa temprana.",
+        "cupos": "48 asistentes", "estado": "Finalizado", "clase": "b-linea",
+        "dirigido": "Todos los estudiantes", "recordatorio": "Un día antes",
+    },
+}
+
+
+# Enlaces contextuales de cada ficha (los consumen las vistas de detalle).
+for _k, _v in USUARIOS_DET.items():
+    _v["editar_url"] = ("usuario-docente.html?cod=%s" % _k
+                        if _v["tipo"] == "docente"
+                        else "usuario-estudiante.html?cod=%s" % _k)
+    _v["area_txt"] = _v.get("area") or _v.get("sector", "—")
+    _v["carga_txt"] = _v.get("carga") or _v.get("etapa", "—")
+    _v["emp_txt"] = _v.get("emprendimiento") or _v.get("emprendimientos", "—")
+    _v["avance_txt"] = _v.get("avance", "—")
+    _v["sede_txt"] = _v.get("sede", "—")
+for _k, _v in EMP_DET.items():
+    _v["detalle_url"] = "emprendimiento-detalle.html?cod=%s" % _k
+    _v["editar_url"] = "emprendimiento-editar.html?cod=%s" % _k
+    _v["avance_url"] = "avance-form.html?cod=%s" % _k
+    _v["asignar_url"] = "asignacion-form.html?cod=%s" % _k
+    _v["seguimiento_url"] = "seguimiento-detalle.html?cod=%s" % _k
+    _v["diagnostico_url"] = "diagnostico-detalle.html?cod=%s" % _k
+for _k, _v in ASES_DET.items():
+    _v["detalle_url"] = "asesoria-detalle.html?cod=%s" % _k
+    _v["editar_url"] = "asesoria-form.html?cod=%s" % _k
+for _k, _v in EVENTOS_DET.items():
+    _v["editar_url"] = "evento-form.html?ev=%s" % _k
+    _v["ver_url"] = "evento-detalle.html?ev=%s" % _k
+
+
+def _aplicar_datos(datos, param="cod", defecto=""):
+    """Script de pagina que pinta la ficha seleccionada por query string.
+
+    Los elementos con data-campo reciben texto, los data-badge reciben la clase
+    de color, los data-valor rellenan inputs y selects y los data-enlace
+    actualizan el href de un boton."""
+    return ("<script>window.__DET=%s;(function(){"
+            "var q=new URLSearchParams(location.search);var k=q.get('%s');"
+            "var D=window.__DET;var d=D[k]||D['%s'];if(!d)return;"
+            "document.querySelectorAll('[data-campo]').forEach(function(el){"
+            "var f=el.getAttribute('data-campo');"
+            "if(d[f]!==undefined)el.textContent=d[f];});"
+            "document.querySelectorAll('[data-badge]').forEach(function(el){"
+            "var f=el.getAttribute('data-badge');"
+            "if(d[f])el.className='badge '+d[f];});"
+            "document.querySelectorAll('[data-valor]').forEach(function(el){"
+            "var f=el.getAttribute('data-valor');"
+            "if(d[f]!==undefined)el.value=d[f];});"
+            "document.querySelectorAll('[data-enlace]').forEach(function(el){"
+            "var f=el.getAttribute('data-enlace');"
+            "if(d[f]!==undefined)el.setAttribute('href',d[f]);});"
+            "document.querySelectorAll('[data-si-vacio]').forEach(function(el){"
+            "var f=el.getAttribute('data-si-vacio');if(!d[f])el.style.display='none';});"
+            "})();</script>"
+            % (json.dumps(datos, ensure_ascii=False), param, defecto))
+
+
+def _volver(href, texto="Volver"):
+    return ('<a class="btn btn-secundario" href="%s">%s %s</a>'
+            % (href, ico("izq", 16), texto))
+
+
+def _estado_badge(estado):
+    return badge(estado, BADGE.get(str(estado).lower(), "b-neutra"))
+
 
 def _estudiante(nombre):
     """Registro de ESTUDIANTES a partir del nombre (con o sin tildes)."""
@@ -820,6 +1032,41 @@ tr.adm-resaltada>td{background:var(--azul-08)}
 tr.adm-resaltada>td:first-child{box-shadow:inset 3px 0 0 var(--amarillo)}
 /* La cabecera de la zona del admin muestra el total de resultados */
 .adm-zona .card-head .hint{white-space:nowrap;font-weight:600}
+/* Navegacion por secciones de Configuracion */
+.cfg-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.cfg-nav-item{padding:8px 14px;border:1px solid var(--gris);border-radius:999px;
+  text-decoration:none;color:var(--tinta);font-size:13px;font-weight:600}
+.cfg-nav-item:hover{border-color:var(--azul-real);color:var(--azul-real)}
+.cfg-seccion{margin-bottom:24px;scroll-margin-top:16px}
+.cfg-titulo{font-size:18px;margin:0 0 12px;padding-bottom:8px;
+  border-bottom:1px solid var(--gris)}
+/* Tarjetas de evento con imagen (Eventos del admin) */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.ev-card{background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);
+  overflow:hidden;display:flex;flex-direction:column}
+.ev-img{position:relative;height:132px;display:flex;align-items:center;justify-content:center;
+  color:var(--blanco);background:linear-gradient(135deg,#1d4ed8,#0ea5e9)}
+.ev-img.g1{background:linear-gradient(135deg,#0f766e,#22c55e)}
+.ev-img.g2{background:linear-gradient(135deg,#7c3aed,#ec4899)}
+.ev-img.g3{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.ev-img.g4{background:linear-gradient(135deg,#334155,#64748b)}
+.ev-img svg{opacity:.9}
+.ev-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ev-body h3{margin:0;font-size:16px;color:var(--tinta)}
+.ev-meta{font-size:13px;color:var(--gris);display:flex;flex-wrap:wrap;gap:4px 12px}
+.ev-meta span{display:inline-flex;align-items:center;gap:4px}
+.ev-foot{margin-top:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ev-hero{height:220px;border-radius:var(--r-md);display:flex;align-items:center;
+  justify-content:center;color:var(--blanco);background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  margin-bottom:16px}
+.ev-hero.g1{background:linear-gradient(135deg,#0f766e,#22c55e)}
+.ev-hero.g2{background:linear-gradient(135deg,#7c3aed,#ec4899)}
+.ev-hero.g3{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.ev-hero.g4{background:linear-gradient(135deg,#334155,#64748b)}
+.ev-preview{height:150px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--blanco);background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  margin-bottom:12px}
+.ev-preview.has-img{background-size:cover;background-position:center}
 """
 
 
@@ -853,7 +1100,7 @@ def _adm_filtro(tid, etiqueta, opciones, col, texto=False):
             % (tid, col, etiqueta, ops))
 
 
-def _ficha(tipo, etiqueta="Ver ficha"):
+def _ficha(tipo, etiqueta="Ver"):
     """Boton de ficha de un registro. El controlador del admin (ADMIN_JS)
     arma el modal con los datos que la fila lleva en data-*."""
     return ('<button class="table-act" data-adm-accion="ficha" data-ficha="%s" '
@@ -945,14 +1192,33 @@ def _nuevo(accion, etiqueta):
             % (accion, ico("plus", 16), etiqueta))
 
 
+def _nuevo_link(href, etiqueta, clase="btn btn-primario btn-sm"):
+    """Alta que abre una vista propia (no un modal)."""
+    return ('<a class="%s" href="%s">%s %s</a>'
+            % (clase, href, ico("plus", 16), etiqueta))
+
+
+def _ver_link(href, etiqueta="Ver detalle", icono="doc"):
+    """Acción de fila que abre la vista completa del registro."""
+    return ('<a class="table-act" href="%s" title="%s" aria-label="%s">%s</a>'
+            % (href, etiqueta, etiqueta, ico(icono, 16)))
+
+
+def _editar_link(href, etiqueta, icono="edit"):
+    return ('<a class="table-act" href="%s" title="%s" aria-label="%s">%s</a>'
+            % (href, etiqueta, etiqueta, ico(icono, 16)))
+
+
 def _solic(accion, icono, etiqueta):
     """Botón de acción de la bandeja de solicitudes (Aprobar/Rechazar)."""
     return ('<button data-accion="%s" title="%s" aria-label="%s">%s</button>'
             % (accion, etiqueta, etiqueta, ico(icono, 16)))
 
 
-def _detalle(tipo, etiqueta="Ver detalle"):
-    """Botón que abre el detalle de una fila (panel de solicitud)."""
+def _detalle(tipo, etiqueta="Ver detalle", href=""):
+    """Acción de detalle: enlace a la vista propia o botón del panel interno."""
+    if href:
+        return _ver_link(href, etiqueta)
     return ('<button class="table-act" data-adm-accion="%s" title="%s" '
             'aria-label="%s">%s</button>' % (tipo, etiqueta, etiqueta, ico("eye", 16)))
 
@@ -1222,9 +1488,9 @@ def usuarios():
                 carga, emp,
                 (_sel_estado(cod, nom, estado), estado),
                 _acc(_ficha("docente"),
-                     '<button data-accion="editar-docente" title="Editar docente" '
-                     'aria-label="Editar docente">%s</button>' % ico("edit", 16)
-                     + '<button data-accion="dar-de-baja" title="Dar de baja" '
+                     _ver_link("usuario-detalle.html?cod=%s" % cod),
+                     _editar_link("usuario-docente.html?cod=%s" % cod, "Editar docente"),
+                     '<button data-accion="dar-de-baja" title="Dar de baja" '
                      'aria-label="Dar de baja a %s">%s</button>' % (nom, ico("trash", 16))),
             ],
         })
@@ -1240,9 +1506,10 @@ def usuarios():
                 sec, emp, badge(et, "b-linea"), _barra(av),
                 (_sel_estado(cod, nom, est), est),
                 _acc(_ficha("estudiante"),
-                     '<button data-accion="editar-estudiante" title="Editar estudiante" '
-                     'aria-label="Editar estudiante">%s</button>' % ico("edit", 16)
-                     + '<button data-accion="dar-de-baja" title="Dar de baja" '
+                     _ver_link("usuario-detalle.html?cod=%s" % cod),
+                     _editar_link("usuario-estudiante.html?cod=%s" % cod,
+                                  "Editar estudiante"),
+                     '<button data-accion="dar-de-baja" title="Dar de baja" '
                      'aria-label="Dar de baja a %s">%s</button>' % (nom, ico("trash", 16))),
             ],
         })
@@ -1267,7 +1534,7 @@ def usuarios():
                               "Muebles", "Tecnología"], 3)
                  + _adm_filtro("docentes", "Todos los estados",
                                ["Todos los estados", "Activo", "Limitado", "Inactivo"], 6)),
-        acciones=_nuevo("nuevo-docente", "Nuevo docente"))
+        acciones=_nuevo_link("usuario-nuevo.html?tipo=docente", "Nuevo docente"))
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += _tabla_adm(
         "estudiantes", "Estudiantes",
@@ -1282,11 +1549,7 @@ def usuarios():
                                ["Todas las etapas"] + ETAPAS, 5)
                  + _adm_filtro("estudiantes", "Todos los estados",
                                ["Todos los estados", "Activo", "Limitado", "Inactivo"], 7)),
-        acciones=_nuevo("nuevo-estudiante", "Nuevo estudiante"))
-    cuerpo += '<div id="form-docente" hidden>' + _cuerpo_docente() + "</div>"
-    cuerpo += '<div id="form-estudiante" hidden>' + _cuerpo_estudiante() + "</div>"
-    cuerpo += '<div id="form-nuevo-docente" hidden>' + _cuerpo_nuevo_docente() + "</div>"
-    cuerpo += '<div id="form-nuevo-estudiante" hidden>' + _cuerpo_nuevo_estudiante() + "</div>"
+        acciones=_nuevo_link("usuario-nuevo.html?tipo=estudiante", "Nuevo estudiante"))
     cuerpo = formulario("perfiles", cuerpo)
     return shell(R, "usuarios", "Gestión de perfiles", cuerpo,
                  migas=["Inicio", "Gestión de perfiles"],
@@ -1294,123 +1557,163 @@ def usuarios():
                  extra_head=ADMIN_CSS)
 
 
-# --- 35. Editar docente (formulario embebido en Gestion de perfiles) --------
-def _cuerpo_docente():
-    """Formulario de edición de docente. Se abre en un modal desde usuarios();
-    ya no es una página aparte."""
-    cuerpo = '<div class="grid g-2-1">'
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Datos del docente",
-                   campo("Código", valor="DOC-014", bloqueo="Código asignado por el sistema")
-                   + campo("Nombres", valor="Carlos Alejandro", req=True)
-                   + campo("Apellidos", valor="Mendoza Rios", req=True)
-                   + campo("Correo institucional", tipo="email",
-                           valor="carlos.mendoza@sgemd.edu.co", req=True)
-                   + campo("Teléfono", tipo="tel", valor="+57 300 555 0142"))
-    cuerpo += card("Área y carga", select("Área de conocimiento",
-                                          ["Alimentos", "Moda", "Ambiental",
-                                           "Tecnología", "Muebles"],
-                                          req=True, valor="Alimentos")
-                   + campo("Horas de asesoría por semana", tipo="number", valor="3",
-                           ph="De 1 a 20")
-                   + campo("Emprendimientos asignados", tipo="number", valor="8",
-                           bloqueo="Se actualiza desde Asignaciones"))
-    cuerpo += "</div>"
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Estado del acceso", lista_def([
-        ("Estado", "Activo"),
-        ("Último acceso", "Hoy, 07:42"),
-        ("Asesorías realizadas", "31"),
-        ("Promedio de calificación", "89 de 100"),
-    ]))
-    cuerpo += "</div></div>"
-    return cuerpo
-
-
-# --- 36. Editar estudiante (formulario embebido en Gestion de perfiles) -----
-def _cuerpo_estudiante():
-    """Formulario de edición de estudiante. Se abre en un modal desde
-    usuarios(); ya no es una página aparte."""
-    cuerpo = callout("El estudiante edita su cuenta. El administrador solo puede "
-                     "<b>cambiar el estado de acceso</b> (Activo, Limitado o Inactivo).", "bombilla")
+# --- 35. Vistas de usuario: detalle, edición y alta --------------------------
+def usuario_detalle():
+    """Ficha completa de un docente o estudiante (usuario-detalle.html?cod=)."""
+    cuerpo = metricas([
+        ("users", "Rol", '<span data-campo="tipo">docente</span>', "", 60,
+         "Perfil del programa"),
+        ("check", "Estado", '<span class="badge b-azul" data-badge="clase">'
+         '<span data-campo="estado">Activo</span></span>', "", 100,
+         "Acceso al sistema"),
+        ("reloj", "Último acceso", '<span data-campo="ultimo_acceso">Hoy, 07:42</span>',
+         "", 60, '<span data-campo="registro">12 mar 2024</span>'),
+    ])
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos del estudiante",
-                   campo("Código", valor="912646", bloqueo="Código asignado por el sistema")
-                   + campo("Nombres", valor="Mariana", bloqueo="Los edita el estudiante")
-                   + campo("Apellidos", valor="López", bloqueo="Los edita el estudiante")
-                   + campo("Correo institucional", tipo="email",
-                           valor="mariana.lopez@sgemd.edu.co",
-                           bloqueo="Los edita el estudiante"))
-    cuerpo += card("Emprendimiento y etapa", lista_def([
-        ("Emprendimiento", "Sabor y Sabe"),
-        ("Sector", "Alimentos"),
-        ("Etapa", "FASE 2 - Prototipo"),
-        ("Docente asignado", "Carlos Mendoza"),
+    cuerpo += card("Datos personales", lista_def([
+        ("Código", '<b data-campo="codigo">DOC-014</b>'),
+        ("Nombre completo", '<b data-campo="nombre">Carlos Mendoza</b>'),
+        ("Correo institucional", '<span data-campo="correo">carlos.mendoza@sgemd.edu.co</span>'),
+        ("Teléfono", '<span data-campo="telefono">+57 300 555 0142</span>'),
+        ("Fecha de registro", '<span data-campo="registro">12 mar 2024</span>'),
+        ("Último acceso", '<span data-campo="ultimo_acceso">Hoy, 07:42</span>'),
     ]))
+    cuerpo += card("Información del programa", lista_def([
+        ("Tipo de perfil", '<span data-campo="tipo">docente</span>'),
+        ("Área o sector", '<span data-campo="area_txt">Alimentos</span>'),
+        ("Carga o etapa", '<span data-campo="carga_txt">3 h</span>'),
+        ("Emprendimiento(s)", '<span data-campo="emp_txt">8</span>'),
+        ("Avance", '<span data-campo="avance_txt">—</span>'),
+        ("Sede", '<span data-campo="sede_txt">—</span>'),
+    ]))
+    cuerpo += card("Nota del administrador",
+                   '<p class="suave" data-campo="nota">Docente de acompañamiento '
+                   'del programa.</p>')
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Estado del acceso", lista_def([
-        ("Estado", "Activo"),
-        ("Fecha de registro", "12 mar 2024"),
-        ("Último acceso", "Hoy, 08:02"),
-        ("Asesorías recibidas", "3"),
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<a class="btn btn-primario" data-enlace="editar_url" '
+                   'href="usuario-docente.html">%s Editar perfil</a>'
+                   '<a class="btn btn-secundario" href="usuarios.html">%s Volver a '
+                   'gestión de perfiles</a>'
+                   '<button class="btn btn-secundario" data-accion="dar-de-baja">'
+                   '%s Dar de baja</button></div>'
+                   % (ico("edit", 16), ico("izq", 16), ico("trash", 16)))
+    cuerpo += card("Trazabilidad", lista_def([
+        ("Creado por", "Administración del programa"),
+        ("Cambios recientes", "Actualización de estado de acceso"),
+        ("Notificaciones", "Correo institucional"),
     ]))
     cuerpo += "</div></div>"
-    return cuerpo
+    cuerpo += _aplicar_datos(USUARIOS_DET, "cod", "DOC-014")
+    return shell(R, "usuarios", "Detalle del usuario", cuerpo,
+                 migas=["Inicio", "Gestión de perfiles", "Detalle del usuario"],
+                 sub="Consulta la ficha completa del docente o estudiante.",
+                 acciones=_volver("usuarios.html", "Volver"))
 
 
-# --- 36b. Alta de docente (formulario embebido en Gestion de perfiles) ------
-def _cuerpo_nuevo_docente():
-    """Alta de docente. Se abre en un modal desde usuarios(); el código y la
-    cuenta los asigna el sistema, por eso no son campos editables."""
-    cuerpo = callout("El docente recibirá un correo de activación en su cuenta "
-                     "institucional para definir su contraseña.", "mail")
+def _usuario_form(tipo):
+    """Formulario editable de docente o estudiante, con los datos precargados."""
+    es_doc = tipo == "docente"
+    cuerpo = callout(
+        ("El docente recibe un correo de activación en su cuenta institucional."
+         if es_doc else
+         "El estudiante edita sus datos personales. El administrador gestiona "
+         "el estado de acceso y la información académica."), "bombilla")
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos del docente",
-                   campo("Nombres", req=True)
-                   + campo("Apellidos", req=True)
+    cuerpo += card("Datos del %s" % tipo,
+                   campo("Código", name="codigo",
+                         bloqueo="Código asignado por el sistema")
+                   + campo("Nombres", req=True, name="nombres")
+                   + campo("Apellidos", req=True, name="apellidos")
                    + campo("Correo institucional", tipo="email", req=True,
+                           name="correo",
                            ayuda="Debe ser una cuenta @sgemd.edu.co")
-                   + campo("Teléfono", tipo="tel"))
-    cuerpo += card("Área y carga",
-                   select("Área de conocimiento", ["Alimentos", "Moda", "Ambiental",
-                                                   "Tecnología", "Muebles"],
-                          req=True, valor="Alimentos")
-                   + campo("Horas de asesoría por semana", tipo="number",
-                           ph="De 1 a 20"))
+                   + campo("Teléfono", tipo="tel", name="telefono"))
+    if es_doc:
+        cuerpo += card("Área y carga",
+                       select("Área de conocimiento",
+                              ["Alimentos", "Moda", "Ambiental", "Tecnología",
+                               "Muebles"], req=True, name="area")
+                       + campo("Horas de asesoría por semana", tipo="number",
+                               name="carga", ph="De 1 a 20")
+                       + campo("Emprendimientos asignados", tipo="number",
+                               name="emprendimientos",
+                               bloqueo="Se actualiza desde Asignaciones"))
+    else:
+        cuerpo += card("Emprendimiento y etapa",
+                       campo("Emprendimiento", name="emprendimiento")
+                       + select("Sector", ["Alimentos", "Moda", "Ambiental",
+                                           "Tecnología", "Muebles"], req=True,
+                                name="sector")
+                       + select("Etapa", ETAPAS, req=True, name="etapa"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
     cuerpo += card("Estado del acceso",
-                   select("Estado de la cuenta", ["Activo", "Limitado"],
-                          req=True, valor="Activo")
+                   select("Estado de la cuenta", ["Activo", "Limitado", "Inactivo"],
+                          req=True, name="estado")
                    + '<div class="ayuda">%s Limitado deja la cuenta creada pero '
                      'sin acceso hasta que la habilites.</div>' % ico("alerta", 13))
+    cuerpo += card("Actividad", lista_def([
+        ("Último acceso", '<span data-campo="ultimo_acceso">Hoy, 07:42</span>'),
+        ("Fecha de registro", '<span data-campo="registro">12 mar 2024</span>'),
+        ("Sede", '<span data-campo="sede_txt">Sede Norte</span>'),
+    ]))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                   '%s Guardar cambios</button>'
+                   '<a class="btn btn-secundario" href="usuario-detalle.html?cod=">'
+                   '%s Ver ficha</a>'
+                   '<a class="btn btn-secundario" href="usuarios.html">%s Cancelar</a>'
+                   '</div>' % (ico("check", 16), ico("eye", 16), ico("x", 16)))
     cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(USUARIOS_DET, "cod",
+                             "DOC-014" if es_doc else "912646")
     return cuerpo
 
 
-# --- 36c. Alta de estudiante (formulario embebido en Gestion de perfiles) ----
-def _cuerpo_nuevo_estudiante():
-    """Alta de estudiante. Se abre en un modal desde usuarios()."""
-    cuerpo = callout("El estudiante recibirá un correo de activación en su cuenta "
-                     "institucional para definir su contraseña.", "mail")
+def usuario_docente():
+    cuerpo = _usuario_form("docente")
+    return shell(R, "usuarios", "Editar docente", cuerpo,
+                 migas=["Inicio", "Gestión de perfiles", "Editar docente"],
+                 sub="Actualiza los datos y la carga del docente.",
+                 acciones=_volver("usuarios.html", "Volver"))
+
+
+def usuario_estudiante():
+    cuerpo = _usuario_form("estudiante")
+    return shell(R, "usuarios", "Editar estudiante", cuerpo,
+                 migas=["Inicio", "Gestión de perfiles", "Editar estudiante"],
+                 sub="Actualiza el estado de acceso y los datos académicos.",
+                 acciones=_volver("usuarios.html", "Volver"))
+
+
+def usuario_nuevo():
+    """Alta de docente o estudiante (usuario-nuevo.html?tipo=docente|estudiante)."""
+    cuerpo = callout("El nuevo usuario recibirá un correo de activación en su "
+                     "cuenta institucional para definir su contraseña.", "mail")
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos del estudiante",
-                   campo("Nombres", req=True)
-                   + campo("Apellidos", req=True)
+    cuerpo += card("Datos del nuevo usuario",
+                   campo("Nombres", req=True, name="nombres")
+                   + campo("Apellidos", req=True, name="apellidos")
                    + campo("Correo institucional", tipo="email", req=True,
+                           name="correo",
                            ayuda="Debe ser una cuenta @sgemd.edu.co")
-                   + campo("Teléfono", tipo="tel"))
-    cuerpo += card("Emprendimiento y sector",
-                   select("Sector", ["Alimentos", "Moda", "Ambiental",
-                                     "Tecnología", "Muebles"],
-                          req=True, valor="Alimentos")
+                   + campo("Teléfono", tipo="tel", name="telefono"))
+    cuerpo += card("Perfil y programa",
+                   select("Tipo de perfil", ["Docente", "Estudiante"], req=True,
+                          valor="Docente")
+                   + select("Sector o área", ["Alimentos", "Moda", "Ambiental",
+                                              "Tecnología", "Muebles"], req=True,
+                            valor="Alimentos")
                    + campo("Nombre del emprendimiento", ph="Ej.: Sabor y Sabe")
                    + select("Etapa", ETAPAS, req=True, valor="FASE 1 - Ideación"))
     cuerpo += "</div>"
@@ -1420,14 +1723,28 @@ def _cuerpo_nuevo_estudiante():
                           req=True, valor="Activo")
                    + '<div class="ayuda">%s Limitado deja la cuenta creada pero '
                      'sin acceso hasta que la habilites.</div>' % ico("alerta", 13))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                   '%s Crear usuario</button>'
+                   '<a class="btn btn-secundario" href="usuarios.html">%s Cancelar</a>'
+                   '</div>' % (ico("check", 16), ico("x", 16)))
     cuerpo += "</div></div>"
     return cuerpo
+
+
+def usuario_nuevo_vista():
+    cuerpo = usuario_nuevo()
+    return shell(R, "usuarios", "Nuevo usuario", cuerpo,
+                 migas=["Inicio", "Gestión de perfiles", "Nuevo usuario"],
+                 sub="Registra un docente o estudiante en el programa.",
+                 acciones=_volver("usuarios.html", "Volver"))
 
 
 # --- 35. Solicitudes pendientes (bandeja del Admin) --------------------------
 def _cuerpo_desb():
     filas = []
-    for c, n, r, m, f in SOLIC_DESBLOQUEOS:
+    for i, (c, n, r, m, f) in enumerate(SOLIC_DESBLOQUEOS, 1):
         filas.append({
             "attrs": {"sol-id": c, "sol-nombre": n, "sol-tipo": r,
                       "sol-detalle": m, "sol-fecha": f,
@@ -1436,7 +1753,8 @@ def _cuerpo_desb():
                 "<b>%s</b>" % c, "<b>%s</b>" % n, badge(r, "b-linea"), m, f,
                 _acc(_solic("solicitud-aprobar", "check", "Aprobar"),
                      _solic("solicitud-rechazar", "x", "Rechazar"),
-                     _detalle("solicitud", "Ver detalle"))],
+                     _detalle("solicitud", "Ver detalle",
+                              "solicitud-detalle.html?clave=SOL-D%02d" % i))],
         })
     return _tabla_adm(
         "desbloqueos", "Desbloqueos de cuenta",
@@ -1448,7 +1766,7 @@ def _cuerpo_desb():
 
 def _cuerpo_par():
     filas = []
-    for c, n, emp, nu, s, f in SOLIC_PARALELOS:
+    for i, (c, n, emp, nu, s, f) in enumerate(SOLIC_PARALELOS, 1):
         filas.append({
             "attrs": {"sol-id": c, "sol-nombre": n, "sol-tipo": "Emprendimiento paralelo",
                       "sol-detalle": "Pasa de %s a %s (sector %s)." % (emp, nu, s),
@@ -1457,7 +1775,8 @@ def _cuerpo_par():
                 "<b>%s</b>" % c, "<b>%s</b>" % n, emp, "<b>%s</b>" % nu, s, f,
                 _acc(_solic("solicitud-aprobar", "check", "Aprobar"),
                      _solic("solicitud-rechazar", "x", "Rechazar"),
-                     _detalle("solicitud", "Ver detalle"))],
+                     _detalle("solicitud", "Ver detalle",
+                              "solicitud-detalle.html?clave=SOL-P%02d" % i))],
         })
     return _tabla_adm(
         "paralelos", "Emprendimientos en paralelo",
@@ -1470,7 +1789,7 @@ def _cuerpo_par():
 
 def _cuerpo_cit():
     filas = []
-    for n, e, d, f, m in SOLIC_CITAS:
+    for i, (n, e, d, f, m) in enumerate(SOLIC_CITAS, 1):
         cid = _id_estudiante(n)
         filas.append({
             "attrs": {"sol-id": cid, "sol-nombre": n,
@@ -1481,7 +1800,8 @@ def _cuerpo_cit():
                 "<b>%s</b>" % cid, "<b>%s</b>" % n, e, d, f, m,
                 _acc(_solic("solicitud-aprobar", "check", "Aprobar"),
                      _solic("solicitud-rechazar", "x", "Rechazar"),
-                     _detalle("solicitud", "Ver detalle"))],
+                     _detalle("solicitud", "Ver detalle",
+                              "solicitud-detalle.html?clave=SOL-C%02d" % i))],
         })
     return _tabla_adm(
         "citas", "Citas de asesoria",
@@ -1527,6 +1847,67 @@ def solicitudes():
                  extra_head=ADMIN_CSS)
 
 
+def solicitud_detalle():
+    """Vista propia de una solicitud (solicitud-detalle.html?clave=SOL-D01)."""
+    cuerpo = steps(["Solicitud recibida", "Revisión del administrador",
+                    "Decisión", "Notificación"], 1)
+    cuerpo += '<div class="sep sep-22"></div>'
+    cuerpo += metricas([
+        ("doc", "Tipo", '<span data-campo="tipo">Desbloqueo de cuenta</span>', "", 60,
+         "Solicitud del programa"),
+        ("calendar", "Fecha", '<span data-campo="fecha">05 nov 2024</span>', "", 60,
+         '<span data-campo="rol">Estudiante</span>'),
+        ("users", "Solicitante", '<span data-campo="solicitante">Andres Felipe</span>',
+         "", 100, '<span data-campo="correo">andres.felipe@sgemd.edu.co</span>'),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la solicitud", lista_def([
+        ("Código de la solicitud", '<b data-campo="id">SOL-D01</b>'),
+        ("Tipo", '<span data-campo="tipo">Desbloqueo de cuenta</span>'),
+        ("Código del solicitante", '<span data-campo="codigo">912650</span>'),
+        ("Solicitante", '<b data-campo="solicitante">Andres Felipe</b>'),
+        ("Rol", '<span data-campo="rol">Estudiante</span>'),
+        ("Correo institucional", '<span data-campo="correo">andres.felipe@sgemd.edu.co</span>'),
+        ("Fecha de la solicitud", '<span data-campo="fecha">05 nov 2024</span>'),
+        ("Estado", '<span class="badge b-amarillo">Pendiente</span>'),
+    ]))
+    cuerpo += card("Motivo y contexto",
+                   '<div class="def-row"><dt>Motivo</dt><dd><b data-campo="motivo">'
+                   'Cuenta inactiva por 90 días sin acceso</b></dd></div>'
+                   '<div class="divisor"></div>'
+                   '<p class="suave" data-campo="detalle">La cuenta está bloqueada o '
+                   'inactiva. Al aprobar, el sistema restablece el acceso con el '
+                   'estado Activo y registra la decisión en la bitácora.</p>')
+    cuerpo += card("Decisión sugerida",
+                   '<div class="callout">%s<div data-campo="accion">Reactivar la '
+                   'cuenta y notificar al solicitante.</div></div>'
+                   % ico("bombilla", 18))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Acciones", '<div class="acciones-col">'
+                   '<button class="btn btn-primario" data-accion="solicitud-aprobar">'
+                   '%s Aprobar solicitud</button>'
+                   '<button class="btn btn-secundario" data-accion="solicitud-rechazar">'
+                   '%s Rechazar con motivo</button>'
+                   '<a class="btn btn-secundario" href="solicitudes.html">%s Volver a '
+                   'solicitudes</a></div>'
+                   % (ico("check", 16), ico("x", 16), ico("izq", 16)))
+    cuerpo += card("Trazabilidad", lista_def([
+        ("Solicitud registrada", "05 nov 2024, 08:14"),
+        ("Última actualización", "05 nov 2024, 08:14"),
+        ("Canal", "Portal del estudiante"),
+        ("Responsable", "Administración del programa"),
+    ]))
+    cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(SOLICITUDES_DET, "clave", "SOL-D01")
+    return shell(R, "solicitudes", "Detalle de la solicitud", cuerpo,
+                 migas=["Inicio", "Solicitudes pendientes", "Detalle de la solicitud"],
+                 sub="Revisa el contexto completo antes de tomar una decisión.",
+                 acciones=_volver("solicitudes.html", "Volver"))
+
+
 # --- 37. Emprendimientos -----------------------------------------------------
 def emprendimientos():
     """Registro maestro del admin: la tabla canonica, con buscador, filtros
@@ -1558,15 +1939,9 @@ def emprendimientos():
                 tipo, badge(etapa, "b-linea"), _barra(avance), sede,
                 docente if docente != "Sin asignar" else badge("Sin asignar", "b-amarillo"),
                 _acc(_ficha("emprendimiento"),
-                     _revisar(cod, emp, estu, sector, tipo, etapa, docente),
-                     '<a class="table-act" href="emprendimiento-plan.html" '
-                     'title="Abrir plan" aria-label="Abrir plan">%s</a>' % ico("eye", 16),
-                     '<a class="table-act" href="emprendimiento-expediente.html" '
-                     'title="Abrir expediente" aria-label="Abrir expediente">%s</a>'
-                     % ico("carpeta", 16),
-                     _emp("editar-emprendimiento", "edit", "Editar emprendimiento",
-                          cod=cod, emp=emp, estu=estu, sector=sector, tipo=tipo,
-                          etapa=etapa, avance=str(avance), docente=docente)),
+                     _ver_link("emprendimiento-detalle.html?cod=%s" % cod),
+                     _editar_link("emprendimiento-editar.html?cod=%s" % cod,
+                                  "Editar emprendimiento")),
             ],
         })
     cuerpo += _tabla_adm(
@@ -1583,244 +1958,136 @@ def emprendimientos():
                                ["Todas las etapas"] + ETAPAS, 7)
                  + _adm_filtro("emprendimientos", "Todas las sedes",
                                ["Todas las sedes"] + SEDES, 9)))
-    cuerpo += '<div id="form-emprendimiento" hidden>' + _cuerpo_emprendimiento() + "</div>"
     cuerpo = formulario("emprendimientos", cuerpo)
     return shell(R, "emprendimientos", "Emprendimientos", cuerpo,
                  migas=["Inicio", "Emprendimientos"],
                  sub="Todos los emprendimientos registrados en el programa.",
                  extra_head=ADMIN_CSS,
-                 acciones=_btn("sliders", "Asignar emprendimiento",
-                               "asignaciones.html", "btn btn-secundario"))
+                 acciones=_btn("sliders", "Asignar docente",
+                               "asignacion-form.html", "btn btn-secundario"))
 
 
-# --- 37b. Expediente del emprendimiento --------------------------------------
-def emprendimiento_expediente():
-    """Expediente del emprendimiento (C2/C3/C4/C11/C13): vista del admin.
-
-    Porta el arquetipo del expediente docente sin acciones de calificación ni
-    registro de avance (el admin consulta y modera); cada bloque se resuelve
-    en una vista admin existente (plan, seguimiento, asesorías, diagnosticos,
-    comentarios, reportes).
-    """
+# --- 37b. Detalle del emprendimiento -----------------------------------------
+def emprendimiento_detalle():
+    """Ficha completa del emprendimiento (emprendimiento-detalle.html?cod=)."""
     cuerpo = metricas([
-        ("trend", "Avance de fase", "62", "%", 62, "FASE 2 - Prototipo"),
-        ("medalla", "Promedio de calificación", "87", "/ 100", 87,
-         "3 avances calificados"),
-        ("clipboard", "Asesorías registradas", "2", "", 35, "1 por confirmar"),
-        ("chat", "Comentarios en el expediente", "12", "", 40, "2 reportados"),
+        ("trend", "Avance", '<span data-campo="avance">62</span>%', "", 62,
+         '<span data-campo="etapa">FASE 2 - Prototipo</span>'),
+        ("users", "Docente", '<span data-campo="docente_txt">Carlos Mendoza</span>',
+         "", 100, '<span data-campo="correo_doc">carlos.mendoza@sgemd.edu.co</span>'),
+        ("maleta", "Sede", '<span data-campo="sede">Sede Norte</span>', "", 60,
+         '<span data-campo="sector">Alimentos</span>'),
     ])
     cuerpo += '<div class="sep sep-20"></div>'
-
-    avances = _tabla_t(
-        ["Fecha", "Fase", "Descripción del avance", "Calificación"],
-        [["12 nov 2024", "FASE 2", "Prototipo de empaque listo para 20 unidades",
-          badge("92 de 100", "b-azul")],
-         ["05 nov 2024", "FASE 2", "Definición de precios y punto de equilibrio",
-          badge("88 de 100", "b-azul")],
-         ["28 oct 2024", "FASE 1", "Diagnóstico inicial y problema claro",
-          badge("81 de 100", "b-azul")]],
-        "Avances y calificaciones del emprendimiento Sabor y Sabe")
-
-    filas_as = [
-        [cod, _fmt_fecha(fecha) + ", " + hora, mod,
-         badge(estado, BADGE.get(estado, "b-neutra"))]
-        for cod, estu, doc, fecha, hora, tema, mod, estado in ASESORIAS
-        if estu == "Mariana López"]
-    asesorias_panel = _tabla_t(
-        ["Código", "Fecha y hora", "Modalidad", "Estado"], filas_as,
-        "Asesorías del emprendimiento Sabor y Sabe")
-    asesorias_panel += ('<div class="form-acciones">'
-                        + _btn("chat", "Ver todas las asesorías", "asesorias.html",
-                               "btn btn-secundario") + "</div>")
-
-    diag_panel = lista_def([
-        ("Última revisión", "28 oct 2024, 09:14"),
-        ("Puntaje heurísticas", "7.8 de 10"),
-        ("Recomendaciones enviadas", "Canal de venta y presupuesto de publicidad"),
-        ("Estado", badge("Revisado", "b-azul", "check")),
-    ]) + '<div class="form-acciones">' + _btn(
-        "clipboard", "Ver diagnósticos", "diagnosticos.html",
-        "btn btn-secundario") + "</div>"
-
-    com_panel = ('<div class="grid">'
-                 + _coment("Ana Restrepo", "Administradora", "AR", "12 nov 2024",
-                           "Se deja constancia de la moderación del comentario "
-                           "reportado; el expediente queda actualizado.")
-                 + _coment("Carlos Mendoza", "Docente", "CM", "12 nov 2024",
-                           "Buen avance en el prototipo. Falta medir el costo "
-                           "unitario de los empaques.")
-                 + _coment("Mariana López", "Estudiante", "ML", "11 nov 2024",
-                           "Adjunté las fotos del punto de venta y la lista de "
-                           "precios.")
-                 + "</div>"
-                 + '<div class="form-acciones">'
-                 + "</div>")
-
-    ev_panel = (
-        card("Evidencias y anexos del expediente",
-             '<p class="suave">Adjunta anexos institucionales del expediente '
-             "(actas, conceptos o soportes de moderación).</p>"
-             '<div style="margin-top:12px">' + _drop() + "</div>"
-             '<div class="divisor"></div>'
-             '<h3 style="margin-bottom:8px">Adjuntos del expediente</h3>'
-             '<div id="adjuntos-lista">' + estado_vacio(
-                 "Todavía no hay anexos en este expediente",
-                 "Cuando se adjunten archivos aparecerán aquí con su fecha de carga.",
-                 '<button class="btn btn-secundario" '
-                 'data-accion="adjuntar-evidencias">%s Adjuntar ahora</button>'
-                 % ico("clip", 16), "clip")
-             + "</div>",
-             hint='<span id="contador-adjuntos">0 archivos</span>')
-        + callout("El estudiante y el docente cargan la evidencia de tareas y "
-                  "avances; los anexos de esta zona son administrativos.", "clip"))
-
-    paneles = [
-        ("Avances", "exp-avances", avances),
-        ("Asesorías", "exp-asesorias", asesorias_panel),
-        ("Diagnóstico", "exp-diag", diag_panel),
-        ("Comentarios", "exp-com", com_panel),
-        ("Evidencias", "exp-ev", ev_panel),
-    ]
+    cuerpo += steps(["Ideación", "Prototipo", "Validación", "Crecimiento"], 1)
+    cuerpo += '<div class="sep sep-22"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += tabs_paneles([(n, pid) for n, pid, _ in paneles])
-    cuerpo += '<div class="sep sep-12"></div>'
-    cuerpo += "".join(
-        '<div data-panel-nombre="%s"%s>%s</div>' % (pid, "" if i == 0 else " hidden", b)
-        for i, (_, pid, b) in enumerate(paneles))
+    cuerpo += card("Datos del emprendimiento", lista_def([
+        ("Código", '<b data-campo="codigo">EMP-041</b>'),
+        ("Nombre", '<b data-campo="nombre">Sabor y Sabe</b>'),
+        ("Estudiante", '<span data-campo="estudiante">Mariana López</span>'),
+        ("ID del estudiante", '<span data-campo="est_id">912646</span>'),
+        ("Correo del estudiante", '<span data-campo="correo">mariana.lopez@sgemd.edu.co</span>'),
+        ("Sector", '<span data-campo="sector">Alimentos</span>'),
+        ("Tipo", '<span data-campo="tipo">Comercio</span>'),
+        ("Etapa", '<span data-campo="etapa">FASE 2 - Prototipo</span>'),
+        ("Sede", '<span data-campo="sede">Sede Norte</span>'),
+    ]))
+    cuerpo += card("Descripción",
+                   '<p class="suave" data-campo="descripcion">Emprendimiento del '
+                   'sector Alimentos en la etapa FASE 2 - Prototipo. Acompañado '
+                   'por el programa SGEMD.</p>')
+    cuerpo += card("Estado del acompañamiento", lista_def([
+        ("Docente asignado", '<span data-campo="docente_txt">Carlos Mendoza</span>'),
+        ("Correo del docente", '<span data-campo="correo_doc">carlos.mendoza@sgemd.edu.co</span>'),
+        ("Estado", '<span class="badge b-azul" data-badge="clase">'
+         '<span data-campo="estado">Al día</span></span>'),
+        ("Avance registrado", '<span data-campo="avance">62</span>%'),
+    ]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos del emprendimiento", lista_def([
-        ("Código", "EMP-041"),
-        ("Nombre", "Sabor y Sabe"),
-        ("Tipo", "Comercio"),
-        ("Sector", "Alimentos"),
-        ("Etapa", "FASE 2 - Prototipo"),
-        ("Docente asignado", "Carlos Mendoza"),
-    ]))
-    cuerpo += card("Estudiantes del grupo", lista_def([
-        ("Mariana López", "912646 · Sede Norte"),
-    ]) + '<div class="nota-foot">Las calificaciones y avances aplican a todos '
-         "los integrantes del emprendimiento.</div>")
-    cuerpo += card("Historial del expediente", linea_tiempo([
-        ("12", "nov", "Asesoría programada: revisión del prototipo",
-         "ASE-012 · Carlos Mendoza · 10:00",
-         '<div class="mt-10">%s</div>' % badge("Programada", "b-amarillo", "reloj")),
-        ("06", "nov", "Asesoría finalizada: impacto ambiental",
-         "ASE-007 · Héctor Vargas · 15:00",
-         '<div class="mt-10">%s</div>' % badge("Finalizada", "b-linea", "check")),
-        ("28", "oct", "Diagnóstico revisado",
-         "Puntaje heurísticas 7.8 de 10",
-         '<div class="mt-10">%s</div>' % badge("Revisado", "b-azul", "check")),
-    ]))
     cuerpo += card("Acciones",
-                   '<div class="fila-col">'
-                   + _btn("layers", "Ver plan de trabajo",
-                          "emprendimiento-plan.html")
-                   + _btn("trend", "Ver tablero de seguimiento",
-                          "seguimiento-dashboard.html", "btn btn-secundario")
-
-                   + _exportar("Exportar expediente")
-                   + "</div>")
+                   '<div class="acciones-col acc-vertical">'
+                   '<a class="btn btn-primario" data-enlace="editar_url" '
+                   'href="emprendimiento-editar.html">%s Editar emprendimiento</a>'
+                   '<a class="btn btn-secundario" data-enlace="seguimiento_url" '
+                   'href="seguimiento-detalle.html">%s Ver seguimiento</a>'
+                   '<a class="btn btn-secundario" data-enlace="avance_url" '
+                   'href="avance-form.html">%s Registrar avance</a>'
+                   '<a class="btn btn-secundario" data-enlace="asignar_url" '
+                   'href="asignacion-form.html">%s Asignar docente</a>'
+                   '<a class="btn btn-secundario" data-enlace="diagnostico_url" '
+                   'href="diagnostico-detalle.html">%s Ver diagnóstico</a>'
+                   '<a class="btn btn-secundario" href="emprendimientos.html">'
+                   '%s Volver</a></div>'
+                   % (ico("edit", 16), ico("trend", 16), ico("checklist", 16),
+                      ico("sliders", 16), ico("clipboard", 16), ico("izq", 16)))
+    cuerpo += card("Hitos recientes", linea_tiempo([
+        ("12", "nov", "Cierre de prototipo", "Control de calidad del producto",
+         '<div class="mt-10">' + badge("En curso", "b-amarillo", "reloj") + "</div>"),
+        ("05", "nov", "Revisión con el docente", "Ajustes al modelo de negocio",
+         '<div class="mt-10">' + badge("Completado", "b-azul", "check") + "</div>"),
+    ]))
     cuerpo += "</div></div>"
-    cuerpo = formulario("expediente", cuerpo)
-    return shell(R, "emprendimientos", "Sabor y Sabe", cuerpo,
-                 migas=["Inicio", "Emprendimientos", "Sabor y Sabe"],
-                 sub="Expediente completo del emprendimiento y su grupo.",
-                 acciones=_btn("izq", "Volver", "emprendimientos.html",
-                               "btn btn-secundario"))
+    cuerpo += _aplicar_datos(EMP_DET, "cod", "EMP-041")
+    return shell(R, "emprendimientos", "Detalle del emprendimiento", cuerpo,
+                 migas=["Inicio", "Emprendimientos", "Detalle del emprendimiento"],
+                 sub="Información completa del emprendimiento y su acompañamiento.",
+                 acciones=_volver("emprendimientos.html", "Volver"))
 
 
-# --- 38. Plan de trabajo -----------------------------------------------------
-def emprendimiento_plan():
-    """Plan operativo del admin: fases, carga y estado, sin notas academicas."""
-    cuerpo = metricas([
-        ("layers", "Fases completadas", "1", "/ 4", 25, "FASE 2 en curso"),
-        ("checklist", "Tareas en curso", "4", "/ 11", 36, "2 sin responsable"),
-        ("reloj", "Días sin avance", "6", "", 40, "Último: 05 nov 2024"),
-        ("calendar", "Asesorías programadas", "3", "", 60, "1 por confirmar"),
-    ])
+# --- 37c. Editar emprendimiento ----------------------------------------------
+def emprendimiento_editar():
+    cuerpo = callout("Como administrador puedes actualizar la ficha del "
+                     "emprendimiento; el avance y las tareas los registra el "
+                     "docente.", "bombilla")
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Plan de trabajo por fase", tabla(
-        ["Fase", "Tareas", "Completadas", "Avance", "Estado", "@ACC"],
-        [[badge(ETAPAS[0], "b-linea"), "3", "3", "100%",
-          badge("Finalizada", "b-azul"), _acc(_b("eye", "Ver detalle"))],
-         [badge(ETAPAS[1], "b-linea"), "5", "4", "80%",
-          badge("En curso", "b-amarillo"), _acc(_b("eye", "Ver detalle"))],
-         [badge(ETAPAS[2], "b-linea"), "4", "1", "25%",
-          badge("Pendiente", "b-neutra"), _acc(_b("eye", "Ver detalle"))],
-         [badge(ETAPAS[3], "b-linea"), "2", "0", "0%",
-          badge("No iniciada", "b-neutra"), _acc(_b("eye", "Ver detalle"))]]))
-    cuerpo += card("Hitos de la fase actual", linea_tiempo([
-        ("12", "nov", "Cierre de prototipo y control de calidad",
-         "Responsable: Mariana López · 5 tareas abiertas",
-         '<div class="mt-10">' + badge("En curso", "b-amarillo", "reloj")
-         + '</div>'),
-        ("20", "nov", "Revisión tecnica con el docente",
-         "Responsable: Carlos Mendoza · Confirmado",
-         '<div class="mt-10">' + badge("Confirmado", "b-azul", "check")
-         + '</div>'),
-        ("28", "nov", "Prueba de ventas en punto real",
-         "Responsable: equipo del emprendimiento · Sin asignar",
-         '<div class="mt-10">' + badge("Sin asignar", "b-amarillo")
-         + '</div>'),
-        ("05", "dic", "Evaluación y cierre de FASE 2",
-         "Comite académico · Pendiente",
-         '<div class="mt-10">' + badge("Pendiente", "b-neutra")
-         + '</div>'),
-    ]))
+    cuerpo += card("Datos del emprendimiento",
+                   campo("Emprendimiento", req=True, name="nombre")
+                   + campo("Código", name="codigo",
+                           bloqueo="Código asignado por el sistema")
+                   + campo("Estudiante", name="estudiante",
+                           bloqueo="Se cambia desde Gestión de perfiles")
+                   + campo("Descripción", alto=True, name="descripcion"))
+    cuerpo += card("Clasificación",
+                   '<div class="grid g-2" style="gap:0 16px">'
+                   + select("Sector", ["Alimentos", "Moda", "Ambiental",
+                                       "Tecnología", "Muebles"], req=True,
+                            name="sector")
+                   + select("Tipo", ["Comercio", "Moda", "Industrial",
+                                     "Alimentos", "Artesanal"], req=True,
+                            name="tipo")
+                   + "</div>"
+                   + '<div class="grid g-2" style="gap:0 16px">'
+                   + select("Etapa", ETAPAS, req=True, name="etapa")
+                   + campo("Avance (%)", tipo="number", name="avance")
+                   + "</div>"
+                   + select("Sede", SEDES, name="sede"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos del emprendimiento", lista_def([
-        ("Código", "EMP-041"),
-        ("Nombre", "Sabor y Sabe"),
-        ("Tipo", "Comercio"),
-        ("Sector", "Alimentos"),
-        ("Etapa", "FASE 2 - Prototipo"),
-        ("Docente", "Carlos Mendoza"),
-    ]))
+    cuerpo += card("Docente asignado",
+                   select("Docente", [d[1] for d in DOCENTES] + ["Sin asignar"],
+                          name="docente")
+                   + '<p class="nota-foot">La asignación definitiva se gestiona '
+                     "desde Asignaciones.</p>")
     cuerpo += card("Acciones",
-                   '<div class="fila-col">'
-                   + '<a class="btn btn-primario" href="seguimiento-dashboard.html">'
-                     "%s Ver seguimiento</a>" % ico("trend", 16)
-                   + '<a class="btn btn-secundario" href="asignaciones.html">'
-                     "%s Reasignar docente</a>" % ico("sliders", 16)
-                   + "</div>")
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                   '%s Guardar cambios</button>'
+                   '<a class="btn btn-secundario" data-enlace="detalle_url" '
+                   'href="emprendimiento-detalle.html">%s Ver ficha</a>'
+                   '<a class="btn btn-secundario" href="emprendimientos.html">'
+                   '%s Cancelar</a></div>'
+                   % (ico("check", 16), ico("eye", 16), ico("x", 16)))
     cuerpo += "</div></div>"
-    cuerpo = formulario("plan", cuerpo)
-    return shell(R, "emprendimientos", "Plan de trabajo", cuerpo,
-                 migas=["Inicio", "Emprendimientos", "Plan de trabajo"],
-                 sub="Plan, fases y carga de trabajo del emprendimiento EMP-041.",
-                 acciones='<a class="btn btn-secundario" href="emprendimientos.html">%s Volver</a>'
-                          % ico("izq", 16))
-
-
-def _cuerpo_avance():
-    """Formulario de registrar avance; vive oculto y lo abre el modal
-    (case 'registrar-avance' en lib_js) con prefill desde data-* de la fila."""
-    cuerpo = '<div class="grid">'
-    cuerpo += campo("Emprendimiento", valor="Sabor y Sabe", bloqueo="No editable",
-                    name="emp")
-    cuerpo += campo("Estudiante", valor="Mariana López", bloqueo="No editable",
-                    name="estu")
-    cuerpo += "</div>"
-    cuerpo += '<div class="grid g-2">'
-    cuerpo += select("Fase", ETAPAS, req=True, name="etapa")
-    cuerpo += campo("Avance (%)", tipo="number", valor="62", req=True, name="avance")
-    cuerpo += "</div>"
-    cuerpo += campo("Notas del avance", tipo="textarea",
-                    valor="Prototipo de empaque validado con el grupo focal.")
-    cuerpo += '<div class="fila" style="margin-top:16px">'
-    cuerpo += '<button class="btn btn-primario" data-accion="guardar-avance">'
-    cuerpo += '%s Guardar avance</button>' % ico("check", 16)
-    cuerpo += '<a class="btn btn-secundario" href="emprendimiento-plan.html">'
-    cuerpo += '%s Ver plan de trabajo</a>' % ico("izq", 16)
-    cuerpo += "</div>"
-    cuerpo += '<div class="nota-foot">El avance actualiza el semáforo de estado '
-    cuerpo += "y notifica al docente responsable.</div>"
-    return cuerpo
+    cuerpo += _aplicar_datos(EMP_DET, "cod", "EMP-041")
+    return shell(R, "emprendimientos", "Editar emprendimiento", cuerpo,
+                 migas=["Inicio", "Emprendimientos", "Editar emprendimiento"],
+                 sub="Actualiza la ficha y la clasificación del emprendimiento.",
+                 acciones=_volver("emprendimientos.html", "Volver"))
 
 
 def _sem(avance):
@@ -1832,20 +2099,8 @@ def _sem(avance):
     return badge("Al día", "b-azul", "check")
 
 
-def _avance(accion, icono, etiqueta, cod="", emp="", estu="", etapa="",
-            docente="", avance=""):
-    """Botón 'Registrar avance' por fila; los datos viajan en data-* para el
-    prefill del modal #form-avance."""
-    extra = "".join(' data-%s="%s"' % (k, v) for k, v in (
-        ("cod", cod), ("emp", emp), ("estu", estu), ("etapa", etapa),
-        ("doc", docente), ("avance", avance)) if v)
-    return ('<button data-accion="%s"%s title="%s" aria-label="%s">%s</button>'
-            % (accion, extra, etiqueta, etiqueta, ico(icono, 16)))
-
-
 def seguimiento():
-    """Seguimiento de todos los undertakings con filtros por columna,
-    paginacion propia y ficha de cada uno."""
+    """Seguimiento de todos los emprendimientos (tabla única del rol admin)."""
     filas = []
     for cod, emp, estu, correo_est, sector, tipo, etapa, avance, docente, correo_doc, sede in EMPRENDIMIENTOS:
         est_id = _id_estudiante(estu)
@@ -1864,13 +2119,30 @@ def seguimiento():
                 docente if docente != "Sin asignar" else badge("Sin asignar", "b-amarillo"),
                 _barra(avance), _sem(avance),
                 _acc(_ficha("emprendimiento"),
-                     _b("eye", "Ver detalle", "ver-detalle"),
-                     _avance("registrar-avance", "edit", "Registrar avance",
-                             cod=cod, emp=emp, estu=estu, etapa=etapa,
-                             docente=docente, avance=avance)),
+                     _ver_link("seguimiento-detalle.html?cod=%s" % cod),
+                     _editar_link("avance-form.html?cod=%s" % cod,
+                                  "Registrar avance")),
             ],
         })
-    cuerpo = _tabla_adm(
+    cuerpo = metricas([
+        ("trend", "Avance promedio",
+         str(round(sum(e[7] for e in EMPRENDIMIENTOS) / float(len(EMPRENDIMIENTOS)))),
+         "%", 62, "Promedio del programa"),
+        ("check", "Al día", str(sum(1 for e in EMPRENDIMIENTOS if e[7] >= 60)),
+         "", 62, "Avance ≥ 60%"),
+        ("alerta", "En riesgo",
+         str(sum(1 for e in EMPRENDIMIENTOS if e[7] < 60)), "", 30,
+         "Avance < 60%"),
+        ("users", "Sin docente",
+         str(sum(1 for e in EMPRENDIMIENTOS if e[8] == "Sin asignar")), "", 18,
+         "Requieren asignación"),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += callout("Como administrador ves el <b>seguimiento de todos los "
+                      "emprendimientos</b>. Puedes consultar la ficha, el detalle "
+                      "completo y registrar un avance.", "bombilla")
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += _tabla_adm(
         "seguimiento", "Seguimiento de emprendimientos",
         ["Código", "Emprendimiento", "Estudiante", "Sector", "Etapa",
          "Docente", "Avance", "Estado", "@ACC"], filas,
@@ -1888,148 +2160,332 @@ def seguimiento():
                  + _adm_filtro("seguimiento", "Todo el estado",
                                ["Todo el estado", "Al día", "En riesgo", "Sin avance"], 7)),
         acciones=_exportar("Exportar seguimiento"))
-    cuerpo += '<div id="form-avance" hidden>' + _cuerpo_avance() + "</div>"
     cuerpo = formulario("seguimiento", cuerpo)
     return shell(R, "seguimiento", "Seguimiento", cuerpo,
                  migas=["Inicio", "Seguimiento"],
                  sub="Estado y avance de los %d emprendimientos del programa."
                      % len(EMPRENDIMIENTOS),
                  extra_head=ADMIN_CSS,
-                 acciones=_btn("grid", "Ver tablero", "seguimiento-dashboard.html",
+                 acciones=_btn("grid", "Registrar avance", "avance-form.html",
                                "btn btn-secundario"))
-# --- 40. Tablero de seguimiento ----------------------------------------------
-def seguimiento_dashboard():
+
+
+def seguimiento_detalle():
+    """Detalle del seguimiento de un emprendimiento (seguimiento-detalle.html?cod=)."""
     cuerpo = metricas([
-        ("trend", "Avances del mes", "61", "", 88, "+14"),
-        ("checklist", "Tareas sin calificar", "11", "", 34, None),
-        ("alerta", "Emprendimientos en riesgo", "9", "", 20, None),
-        ("medalla", "Promedio institucional", "87", "", 87, "+2"),
+        ("trend", "Avance", '<span data-campo="avance">62</span>%', "", 62,
+         '<span data-campo="etapa">FASE 2 - Prototipo</span>'),
+        ("check", "Estado", '<span class="badge b-azul" data-badge="clase">'
+         '<span data-campo="estado">Al día</span></span>', "", 100,
+         "Semáforo del programa"),
+        ("users", "Docente", '<span data-campo="docente_txt">Carlos Mendoza</span>',
+         "", 100, '<span data-campo="correo_doc">carlos.mendoza@sgemd.edu.co</span>'),
     ])
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Avance acumulado por mes", lineas(
-        "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"],
-        [("Avances", [12, 19, 27, 41, 61], AZUL),
-         ("Tareas", [9, 14, 20, 33, 52, ], AMAR)], unidad=""))
-    cuerpo += card("Avance por emprendimiento", barras_h(
-        "", "", [e[1] for e in EMPRENDIMIENTOS], [e[7] for e in EMPRENDIMIENTOS],
-        maximo=100, unidad="%"))
-    cuerpo += card("Rendimiento por docente", barras(
-        "", "", ["C. Mendoza", "P. Rios", "H. Vargas", "N. Beltran", "R. Nieto"],
-        [92, 86, 84, 78, 74], maximo=100, unidad=" de 100"))
+    cuerpo += card("Plan de trabajo por fase", tabla(
+        ["Fase", "Tareas", "Completadas", "Avance", "Estado"],
+        [[badge(ETAPAS[0], "b-linea"), "3", "3", "100%", badge("Finalizada", "b-azul")],
+         [badge(ETAPAS[1], "b-linea"), "5", "4", "80%", badge("En curso", "b-amarillo")],
+         [badge(ETAPAS[2], "b-linea"), "4", "1", "25%", badge("Pendiente", "b-neutra")],
+         [badge(ETAPAS[3], "b-linea"), "2", "0", "0%", badge("No iniciada", "b-neutra")]]))
+    cuerpo += card("Historial de avances", linea_tiempo([
+        ("12", "nov", "Avance al 62%", "Prototipo de empaque validado",
+         '<div class="mt-10">' + badge("Registrado", "b-azul", "check") + "</div>"),
+        ("05", "nov", "Avance al 55%", "Ajustes al modelo de negocio",
+         '<div class="mt-10">' + badge("Registrado", "b-azul", "check") + "</div>"),
+        ("28", "oct", "Avance al 41%", "Primer prototipo terminado",
+         '<div class="mt-10">' + badge("Registrado", "b-azul", "check") + "</div>"),
+    ]))
+    cuerpo += card("Datos del emprendimiento", lista_def([
+        ("Código", '<b data-campo="codigo">EMP-041</b>'),
+        ("Emprendimiento", '<b data-campo="nombre">Sabor y Sabe</b>'),
+        ("Estudiante", '<span data-campo="estudiante">Mariana López</span>'),
+        ("Sector", '<span data-campo="sector">Alimentos</span>'),
+        ("Sede", '<span data-campo="sede">Sede Norte</span>'),
+    ]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Salud de los seguimiento", donut(
-        "", "", [("Al día", 31, AZUL), ("En riesgo", 9, AMAR),
-                 ("Inactivos", 6, GRIS)], "emprendimientos"))
-    cuerpo += card("Acciones sugeridas", lista_def([
-        ("Asignar docente a 1 emprendimiento", "Sin asignar"),
-        ("Contactar 6 estudiantes inactivos", "15 días sin avance"),
-        ("Revisar 5 diagnosticos", "Sin revisión"),
-    ]) + _vacio(".def-row", "Sin acciones pendientes",
-                "Cuando haya emprendimientos sin docente, estudiantes inactivos "
-                "o diagnósticos sin revisar, aparecerán aquí.", "checklist"))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<a class="btn btn-primario" data-enlace="avance_url" '
+                   'href="avance-form.html">%s Registrar avance</a>'
+                   '<a class="btn btn-secundario" data-enlace="detalle_url" '
+                   'href="emprendimiento-detalle.html">%s Ver ficha completa</a>'
+                   '<a class="btn btn-secundario" href="seguimiento.html">'
+                   '%s Volver a seguimiento</a></div>'
+                   % (ico("checklist", 16), ico("eye", 16), ico("izq", 16)))
+    cuerpo += card("Alertas", lista_def([
+        ("Días sin avance", "6"),
+        ("Tareas vencidas", "1"),
+        ("Última asesoría", "12 nov 2024"),
+    ]))
     cuerpo += "</div></div>"
-    cuerpo = formulario("tablero", cuerpo)
-    return shell(R, "seguimiento", "Tablero de seguimiento", cuerpo,
-                 migas=["Inicio", "Seguimiento", "Tablero"],
-                 sub="Métricas consolidadas de seguimiento institucional.",
-                 acciones=_exportar("Exportar tablero"))
+    cuerpo += _aplicar_datos(EMP_DET, "cod", "EMP-041")
+    return shell(R, "seguimiento", "Detalle del seguimiento", cuerpo,
+                 migas=["Inicio", "Seguimiento", "Detalle del seguimiento"],
+                 sub="Historial y estado del avance del emprendimiento.",
+                 acciones=_volver("seguimiento.html", "Volver"))
 
 
-# --- 41. Asignar emprendimiento ---------------------------------------------
-def asignar_emprendimiento():
+def avance_form():
+    """Registrar avance de un emprendimiento (avance-form.html?cod=)."""
+    cuerpo = steps(["Seleccionar emprendimiento", "Registrar avance",
+                    "Notificar al docente"], 1)
+    cuerpo += '<div class="sep sep-22"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Emprendimiento",
+                   campo("Emprendimiento", name="nombre", bloqueo="No editable")
+                   + campo("Estudiante", name="estudiante", bloqueo="No editable")
+                   + campo("Docente asignado", name="docente_txt", bloqueo="No editable"))
+    cuerpo += card("Nuevo avance",
+                   select("Fase", ETAPAS, req=True, name="etapa")
+                   + campo("Avance (%)", tipo="number", req=True, name="avance")
+                   + campo("Notas del avance", tipo="textarea", name="notas",
+                           valor="Prototipo de empaque validado con el grupo focal."))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Estado actual", lista_def([
+        ("Avance registrado", '<span data-campo="avance">62</span>%'),
+        ("Etapa", '<span data-campo="etapa">FASE 2 - Prototipo</span>'),
+        ("Semáforo", '<span class="badge b-azul" data-badge="clase">'
+         '<span data-campo="estado">Al día</span></span>'),
+    ]))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="guardar-avance">'
+                   '%s Guardar avance</button>'
+                   '<a class="btn btn-secundario" data-enlace="seguimiento_url" '
+                   'href="seguimiento-detalle.html">%s Ver seguimiento</a>'
+                   '<a class="btn btn-secundario" href="seguimiento.html">'
+                   '%s Cancelar</a></div>'
+                   % (ico("check", 16), ico("trend", 16), ico("x", 16)))
+    cuerpo += card("Nota", '<p class="suave">El avance actualiza el semáforo de '
+                   'estado y notifica al docente responsable.</p>')
+    cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(EMP_DET, "cod", "EMP-041")
+    return shell(R, "seguimiento", "Registrar avance", cuerpo,
+                 migas=["Inicio", "Seguimiento", "Registrar avance"],
+                 sub="Actualiza el porcentaje de avance y la fase del emprendimiento.",
+                 acciones=_volver("seguimiento.html", "Volver"))
+
+
+# --- 41. Asignar / reasignar docente -----------------------------------------
+def asignacion_form():
+    """Asignar o reasignar docente a un emprendimiento.
+
+    Se abre desde el botón superior de Asignaciones (alta) o desde la fila
+    (reasignación) con ?cod=EMP-...; ambos casos usan la misma vista."""
     cuerpo = steps(["Seleccionar emprendimiento", "Elegir docente",
                     "Confirmar asignación"], 1)
     cuerpo += '<div class="sep sep-22"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Emprendimiento sin docente", tabla(
-        ["Código", "Emprendimiento", "Estudiante", "Sector", "Etapa", "@ACC"],
-        [["EMP-038", "<b>Aromas del Sur</b>", "Sofia Ramirez", "Alimentos",
-          badge("FASE 1 - Ideación", "b-linea"), _acc(_b("check", "Seleccionar", "seleccionar"))],
-         ["EMP-036", "<b>Sabores de la Costa</b>", "Daniel Rojas", "Alimentos",
-          badge("FASE 1 - Ideación", "b-linea"), _acc(_b("check", "Seleccionar", "seleccionar"))],
-         ["EMP-034", "<b>Eco Hogar</b>", "Valeria Cruz", "Muebles",
-          badge("FASE 2 - Prototipo", "b-linea"), _acc(_b("check", "Seleccionar", "seleccionar"))]]))
-    cuerpo += card("Docente disponible", tabla(
-        ["Docente", "Área", "Carga actual", "Horas disponibles", "@ACC"],
-        [["Carlos Mendoza", "Alimentos", "3 h de 5 h", "2 h",
-          _acc(_b("check", "Seleccionar", "seleccionar"))],
-         ["Paula Andrea Rios", "Moda", "2 h de 4 h", "2 h",
-          _acc(_b("check", "Seleccionar", "seleccionar"))],
-         ["Rafael Nieto", "Tecnología", "5 h de 6 h", "1 h",
-          _acc(_b("check", "Seleccionar", "seleccionar"))]]))
+    cuerpo += card("Emprendimiento",
+                   campo("Emprendimiento", name="nombre", bloqueo="No editable")
+                   + campo("Estudiante", name="estudiante", bloqueo="No editable")
+                   + campo("Código", name="codigo", bloqueo="No editable")
+                   + campo("Sector", name="sector", bloqueo="No editable"))
+    cuerpo += card("Docente y carga",
+                   select("Docente", [d[1] + " - " + d[3] for d in DOCENTES]
+                          + ["Sin asignar"], req=True, name="docente")
+                   + campo("Horas semanales", tipo="number", valor="2", req=True,
+                           name="horas", ph="De 1 a 20")
+                   + campo("Fecha de inicio", tipo="date", name="inicio"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
-    cuerpo += card("Asignación seleccionada", lista_def([
-        ("Emprendimiento", "Aromas del Sur"),
-        ("Estudiante", "Sofia Ramirez"),
-        ("Docente", "Carlos Mendoza"),
-        ("Horas asignadas", "2 h por semana"),
+    cuerpo += card("Asignación actual", lista_def([
+        ("Docente", '<span data-campo="docente_txt">Sin docente asignado</span>'),
+        ("Correo del docente", '<span data-campo="correo_doc">—</span>'),
+        ("Etapa", '<span data-campo="etapa">FASE 1 - Ideación</span>'),
+        ("Avance", '<span data-campo="avance">15</span>%'),
     ]))
     cuerpo += card("Acciones",
-                   '<div class="fila-col">'
-                   + '<button class="btn btn-primario" data-accion="confirmar-asignacion">'
-                     '%s Confirmar asignación</button>' % ico("check", 16)
-                   + '<button class="btn btn-secundario">%s Cancelar</button>'
-                     % ico("x", 16)
-                   + "</div>"
-                     '<div class="nota-foot">El docente y el estudiante reciben una '
-                     "notificación con la asignación.</div>")
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" '
+                   'data-accion="guardar-asignacion-docente">%s Confirmar '
+                   'asignación</button>'
+                   '<a class="btn btn-secundario" href="asignaciones.html">'
+                   '%s Cancelar</a></div>'
+                   % (ico("check", 16), ico("x", 16)))
+    cuerpo += card("Regla de asignación",
+                   '<p class="suave">Verifica que el acta de confidencialidad '
+                   'esté aceptada antes de confirmar. Un docente puede tener '
+                   'hasta <b>12 emprendimientos</b>.</p>')
     cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(EMP_DET, "cod", "EMP-038")
+    return shell(R, "asignaciones", "Asignar docente", cuerpo,
+                 migas=["Inicio", "Asignaciones", "Asignar docente"],
+                 sub="Asigna o cambia el docente responsable del emprendimiento.",
+                 acciones=_volver("asignaciones.html", "Volver"))
 
-    # Modal para asignar docente por fila
-    cuerpo += '<div id="form-asignar-docente" hidden>' + '</div>' + ""
+
+# --- 42. Asesorías: dashboard único ------------------------------------------
+def asesorias():
+    """Dashboard único de asesorías con métricas, gráficos y programación."""
+    filas = []
+    for c, e, d, f, h, t, m, es in ASESORIAS:
+        filas.append([
+            "<b>%s</b>" % c, "<b>%s</b>" % e, d,
+            "{f} · {h}".format(f=_fmt_fecha(f), h=h), t, m,
+            badge(es, BADGE.get(es.lower(), "b-neutra")),
+            _acc(_asesoria("ver", "eye", "Ver"),
+                 _ver_link("asesoria-detalle.html?cod=%s" % c),
+                 _editar_link("asesoria-form.html?cod=%s" % c,
+                              "Editar asesoría")),
+        ])
+    cuerpo = metricas([
+        ("chat", "Asesorías este mes", str(len(ASESORIAS)), "", 84, "+9"),
+        ("reloj", "Promedio de respuesta", "4.2", " h", 42, "-0.6"),
+        ("checklist", "Asesorías finalizadas",
+         str(sum(1 for a in ASESORIAS if a[7] == "Finalizada")), "", 82, None),
+        ("alerta", "Sin confirmar",
+         str(sum(1 for a in ASESORIAS if a[7] == "Programada")), "", 22, None),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += campo("Estudiante", bloqueo="No editable", name="estudiante")
-    cuerpo += campo("Emprendimiento", bloqueo="No editable", name="emprendimiento")
-    cuerpo += campo("Correo", bloqueo="No editable", name="correo")
+    cuerpo += card("Asesorías por mes", barras(
+        "", "", ["Jul", "Ago", "Sep", "Oct", "Nov"], [18, 24, 29, 33, 38],
+        unidad=" asesorías"))
+    cuerpo += card("Asesorías por sector", barras_h(
+        "", "", ["Alimentos", "Moda", "Ambiental", "Muebles", "Tecnología"],
+        [16, 10, 7, 3, 2], color=AMAR))
     cuerpo += "</div>"
-    cuerpo += '<div class="grid g-2">'
-    cuerpo += select("Docente", [d[1] + " - " + d[3] for d in DOCENTES] + ["Sin asignar"], req=True, name="docente")
-    cuerpo += campo("Horas semanales", tipo="number", valor="2", req=True, name="horas")
-    cuerpo += "</div>"
-    cuerpo += '<div class="fila" style="margin-top:16px">'
-    cuerpo += '<button class="btn btn-primario" data-accion="guardar-asignacion-docente">'
-    cuerpo += '%s Guardar asignación</button>' % ico("check", 16)
-    cuerpo += '<a class="btn btn-secundario" href="asignaciones.html">'
-    cuerpo += '%s Volver</a>' % ico("izq", 16)
-    cuerpo += "</div>"
-    cuerpo += '<div class="nota-foot">El docente y el estudiante reciben una '
-    cuerpo += "notificación con la asignación.</div>"
-    cuerpo += "</div>"
-    cuerpo = formulario("asignar", cuerpo)
-    return shell(R, "asignaciones", "Asignar emprendimiento", cuerpo,
-                 migas=["Inicio", "Asignaciones", "Asignar emprendimiento"],
-                 sub="Asigna un docente a los emprendimientos que aún no lo tienen.",
-                 acciones='<a class="btn btn-secundario" href="asignaciones.html">%s Volver</a>'
-                          % ico("izq", 16))
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Estado de las asesorías", donut(
+        "", "", [("Finalizadas", 31, AZUL), ("Confirmadas", 7, AMAR),
+                 ("Sin confirmar", 5, GRIS), ("Canceladas", 3, GRIS)],
+        "asesorías"))
+    cuerpo += card("Docentes con mejor respuesta", lista_def([
+        ("Hector Vargas", "1.8 h promedio"),
+        ("Paula Andrea Rios", "2.4 h promedio"),
+        ("Carlos Mendoza", "3.1 h promedio"),
+    ]))
+    cuerpo += "</div></div>"
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += card("Programación de asesorías", tabla(
+        ["Código", "Estudiante", "Docente", "Fecha y hora", "Tema", "Modalidad",
+         "Estado", "@ACC"], filas, caption="Programación de asesorías"),
+        accion=_nuevo_link("asesoria-form.html", "Nueva asesoría"),
+        sin_pad=True)
+    cuerpo = formulario("asesorias", cuerpo)
+    return shell(R, "asesorias", "Asesorías", cuerpo,
+                 migas=["Inicio", "Asesorías"],
+                 sub="Indicadores de uso, respuesta y programación del servicio de "
+                     "asesorías.",
+                 acciones=_nuevo_link("asesoria-form.html", "Nueva asesoría"))
 
 
-# --- 42. Moderacion de comentarios -------------------------------------------
-def _cuerpo_asesoria_form():
-    """Formulario de crear/editar asesoría. Se abre en un modal desde asesorías();
-    los campos llevan name para prefiltarlos al editar."""
-    cuerpo = '<div class="grid">'
-    cuerpo += select("Estudiante", [e[1] for e in ESTUDIANTES], req=True,
-                     name="estudiante")
-    cuerpo += select("Docente asignado", [d[1] for d in DOCENTES], req=True,
-                     name="docente")
-    cuerpo += '<div class="grid g-2">'
-    cuerpo += campo("Fecha", tipo="date", req=True, name="fecha")
-    cuerpo += campo("Hora", tipo="time", req=True, name="hora")
+def asesoria_detalle():
+    """Vista propia de una asesoría (asesoria-detalle.html?cod=ASE-012)."""
+    cuerpo = steps(["Solicitud", "Confirmación", "Sesión", "Acta"], 2)
+    cuerpo += '<div class="sep sep-22"></div>'
+    cuerpo += metricas([
+        ("calendar", "Fecha", '<span data-campo="fecha">2024-11-12</span>', "", 60,
+         '<span data-campo="hora">10:00</span>'),
+        ("chat", "Modalidad", '<span data-campo="modalidad">Virtual</span>', "", 60,
+         '<span data-campo="lugar">meet.sgemd.edu.co</span>'),
+        ("users", "Docente", '<span data-campo="docente">Carlos Mendoza</span>',
+         "", 100, '<span data-campo="estudiante">Mariana López</span>'),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la asesoría", lista_def([
+        ("Código", '<b data-campo="codigo">ASE-012</b>'),
+        ("Estudiante", '<b data-campo="estudiante">Mariana López</b>'),
+        ("Emprendimiento", '<span data-campo="emprendimiento">Sabor y Sabe</span>'),
+        ("Docente", '<span data-campo="docente">Carlos Mendoza</span>'),
+        ("Fecha", '<span data-campo="fecha">2024-11-12</span>'),
+        ("Hora", '<span data-campo="hora">10:00</span>'),
+        ("Modalidad", '<span data-campo="modalidad">Virtual</span>'),
+        ("Lugar o enlace", '<span data-campo="lugar">meet.sgemd.edu.co/ases-012</span>'),
+        ("Estado", '<span class="badge b-azul" data-badge="clase">'
+         '<span data-campo="estado">Programada</span></span>'),
+    ]))
+    cuerpo += card("Tema de la asesoría",
+                   '<p class="suave"><b data-campo="tema">Revisión del prototipo '
+                   'de empaque</b></p><div class="divisor"></div>'
+                   '<p class="suave" data-campo="nota">Sesión de acompañamiento '
+                   'del programa.</p>')
     cuerpo += "</div>"
-    cuerpo += campo("Tema", ph="P. ej. Plan financiero del emprendimiento",
-                    req=True, name="tema")
-    cuerpo += select("Modalidad", ["Virtual", "Presencial"], valor="Virtual",
-                     name="modalidad")
-    cuerpo += select("Estado", ["Programada", "Confirmada", "En curso",
-                                "Finalizada", "Cancelada"], valor="Programada",
-                     name="estado")
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<a class="btn btn-primario" data-enlace="editar_url" '
+                   'href="asesoria-form.html">%s Editar asesoría</a>'
+                   '<button class="btn btn-secundario" data-accion="cancelar-asesoria">'
+                   '%s Cancelar asesoría</button>'
+                   '<a class="btn btn-secundario" href="asesorias.html">'
+                   '%s Volver a asesorías</a></div>'
+                   % (ico("edit", 16), ico("x", 16), ico("izq", 16)))
+    cuerpo += card("Participantes", lista_def([
+        ("Estudiante", '<span data-campo="estudiante">Mariana López</span>'),
+        ("Docente", '<span data-campo="docente">Carlos Mendoza</span>'),
+        ("Modalidad", '<span data-campo="modalidad">Virtual</span>'),
+    ]))
+    cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(ASES_DET, "cod", "ASE-012")
+    return shell(R, "asesorias", "Detalle de asesoría", cuerpo,
+                 migas=["Inicio", "Asesorías", "Detalle de asesoría"],
+                 sub="Información completa de la asesoría y sus participantes.",
+                 acciones=_volver("asesorias.html", "Volver"))
+
+
+def asesoria_form():
+    """Crear o editar asesoría con calendario y horas disponibles."""
+    horas = ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00"]
+    cuerpo = callout("Selecciona la fecha en el calendario y una hora disponible. "
+                     "El docente y el estudiante reciben la notificación.", "calendar")
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la asesoría",
+                   select("Estudiante", [e[1] for e in ESTUDIANTES], req=True,
+                          name="estudiante")
+                   + select("Docente asignado", [d[1] for d in DOCENTES], req=True,
+                            name="docente")
+                   + campo("Tema", name="tema", req=True,
+                           ph="P. ej. Plan financiero del emprendimiento"))
+    cuerpo += card("Fecha y hora",
+                   '<div data-vacio-lista>'
+                   + calendario_interactivo("noviembre", 2024, {12: "Día sugerido"},
+                                            hoy=12, vacio="Sin asesorías")
+                   + "</div>"
+                   + '<div class="sep sep-16"></div>'
+                   + campo("Fecha", tipo="date", req=True, name="fecha")
+                   + select("Hora disponible", ["- Elegir hora -"] + horas,
+                            req=True, name="hora")
+                   + select("Modalidad", ["Virtual", "Presencial"], valor="Virtual",
+                            name="modalidad")
+                   + select("Estado", ["Programada", "Confirmada", "En curso",
+                                       "Finalizada", "Cancelada"],
+                            valor="Programada", name="estado"))
     cuerpo += "</div>"
-    return cuerpo
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Resumen", lista_def([
+        ("Estudiante", '<span data-campo="estudiante">Mariana López</span>'),
+        ("Docente", '<span data-campo="docente">Carlos Mendoza</span>'),
+        ("Tema", '<span data-campo="tema">Revisión del prototipo de empaque</span>'),
+        ("Fecha", '<span data-campo="fecha">2024-11-12</span>'),
+        ("Hora", '<span data-campo="hora">10:00</span>'),
+    ]))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                   '%s Guardar asesoría</button>'
+                   '<a class="btn btn-secundario" href="asesorias.html">'
+                   '%s Cancelar</a></div>'
+                   % (ico("check", 16), ico("x", 16)))
+    cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(ASES_DET, "cod", "ASE-012")
+    return shell(R, "asesorias", "Asesoría", cuerpo,
+                 migas=["Inicio", "Asesorías", "Asesoría"],
+                 sub="Crea o actualiza la programación de una asesoría.",
+                 acciones=_volver("asesorias.html", "Volver"))
 
 
 def _instrumento():
@@ -2074,55 +2530,44 @@ def _instrumento():
             "responde el estudiante al iniciar su plan.</div>" + "".join(uls))
 
 
-def _cuerpo_emprendimiento():
-    """Formulario de edición de emprendimiento (A07). Se abre en un modal desde
-    emprendimientos(); los campos llevan name para prefiltarlos al editar."""
-    cuerpo = '<div class="grid">'
-    cuerpo += campo("Emprendimiento", valor="EcoPack", req=True, name="nombre")
-    cuerpo += campo("Código", valor="EMP-039",
-                    bloqueo="Código asignado por el sistema", name="codigo")
-    cuerpo += select("Estudiante", [e[1] for e in ESTUDIANTES], req=True,
-                     name="estudiante")
-    cuerpo += '<div class="grid g-2">'
-    cuerpo += select("Sector", ["Alimentos", "Moda", "Ambiental", "Muebles"],
-                     req=True, name="sector")
-    cuerpo += select("Tipo", ["Comercio", "Moda", "Industrial", "Alimentos",
-                              "Artesanal"], req=True, name="tipo")
-    cuerpo += "</div>"
-    cuerpo += '<div class="grid g-2">'
-    cuerpo += select("Etapa", ETAPAS, req=True, name="etapa")
-    cuerpo += campo("Avance (%)", tipo="number", valor="62", req=True, name="avance")
-    cuerpo += "</div>"
-    cuerpo += select("Docente asignado", [d[1] for d in DOCENTES] + ["Sin asignar"],
-                     valor="Sin asignar", name="docente")
-    cuerpo += "</div>"
-    return cuerpo
-
-
-def asesorias():
-    panel_res = metricas([
-        ("chat", "Asesorías este mes", "38", "", 84, "+9"),
-        ("reloj", "Promedio de respuesta", "4.2", " h", 42, "-0.6"),
-        ("checklist", "Asesorías finalizadas", "31", "", 82, None),
-        ("alerta", "Sin confirmar", "5", "", 22, None),
-    ])
-    panel_graf = card("Asesorías por mes", barras("","",["Jul","Ago","Sep","Oct","Nov"],[18,24,29,33,38],unidad=" asesorías"))+card("Asesorías por sector", barras_h("","",["Alimentos","Moda","Ambiental","Muebles","Tecnología"],[16,10,7,3,2],color=AMAR))
-    panel_kpi = card("Estado de las asesorías", donut("","",[("Finalizadas",31,AZUL),("Confirmadas",7,AMAR),("Sin confirmar",5,GRIS),("Canceladas",3,GRIS)],"asesorías"))+card("Docentes con mejor respuesta", lista_def([("Hector Vargas","1.8 h promedio"),("Paula Andrea Rios","2.4 h promedio"),("Carlos Mendoza","3.1 h promedio")]))
-    panel_prog = card("Programación de asesorías", tabla(["Estudiante","Docente","Fecha y hora","Tema","Modalidad","Estado","@ACC"], [ ["<b>{estu}</b>".format(estu=e), d, "{f} · {h}".format(f=_fmt_fecha(f), h=h), t, m, badge(es,BADGE.get(es.lower(),"b-neutra")), _acc(_asesoria("ver","eye","Ver asesoría"), _asesoria("editar-asesoria","edit","Editar asesoría",cod=c,estu=e,doc=d,fecha=f,hora=h,tema=t,mod=m,est=es), _asesoria("cancelar-asesoria","x","Cancelar asesoría",estu=e,fecha=_fmt_fecha(f),hora=h,tema=t))] for c,e,d,f,h,t,m,es in ASESORIAS]), accion=_nuevo("nueva-asesoria","Nueva asesoría"), sin_pad=True)
-    panels = [("Resumen","ases-res",panel_res),("Gráficas","ases-graf",panel_graf),("KPIs","ases-kpi",panel_kpi),("Programación","ases-prog",panel_prog)]
-    cuerpo = '<div class="sep sep-20"></div>'+tabs_paneles([(n,pid) for n,pid,_ in panels])+'<div class="sep sep-12"></div>'+''.join('<div data-panel-nombre="%s"%s>%s</div>'%(pid,'' if i==0 else ' hidden',b) for i,(_,pid,b) in enumerate(panels))+'<div id="form-asesoria" hidden>'+_cuerpo_asesoria_form()+'</div>'
-    cuerpo = formulario("asesorias", cuerpo)
-    return shell(R, "asesorias", "Métricas de asesorías", cuerpo,
-                 migas=["Inicio","Asesorías"],
-                 sub="Indicadores de uso, respuesta y programación del servicio de asesorías.",
-                 acciones=_exportar("Exportar asesorías"))
 # --- 44. Eventos -------------------------------------------------------------
+def _ev_grad(i):
+    return "g%d" % (i % 5)
+
+
+def _evento_card(ev, i):
+    return (
+        '<article class="ev-card">'
+        '<div class="ev-img %s">%s</div>'
+        '<div class="ev-body">'
+        '<div><span class="badge %s">%s</span></div>'
+        '<h3>%s</h3>'
+        '<div class="ev-meta"><span>%s %s · %s</span>'
+        '<span>%s %s</span></div>'
+        '<p class="suave" style="margin:0">%s</p>'
+        '<div class="ev-foot">'
+        '<a class="btn btn-sm btn-primario" href="evento-detalle.html?ev=%s">'
+        '%s Ver evento</a>'
+        '<a class="btn btn-sm btn-secundario" href="evento-form.html?ev=%s">%s</a>'
+        '<span class="badge b-neutra">%s</span>'
+        "</div></div></article>"
+        % (_ev_grad(i), ico("calendar", 44), ev["clase"], ev["estado"],
+           ev["titulo"], ico("calendar", 13), ev["fecha"], ev["hora"],
+           ico("users", 13), ev["formato"], ev["descripcion"],
+           ev["ev"], ev["titulo"].split(":")[0], ev["ev"], ico("edit", 13),
+           ev["cupos"]))
+
+
 def eventos():
-    """Pipeline editorial con calendario y agenda de eventos."""
+    """Pipeline editorial con calendario y tarjetas con imagen."""
+    lista = list(EVENTOS_DET.values())
     cuerpo = metricas([
-        ("calendar", "Eventos publicados", "2", "", 40, None),
-        ("reloj", "Por aprobar", "1", "", 20, None),
-        ("doc", "Borradores", "1", "", 20, None),
+        ("calendar", "Eventos publicados",
+         str(sum(1 for e in lista if e["estado"] == "Publicado")), "", 40, None),
+        ("reloj", "Por aprobar",
+         str(sum(1 for e in lista if e["estado"] == "Por aprobar")), "", 20, None),
+        ("doc", "Borradores",
+         str(sum(1 for e in lista if e["estado"] == "Borrador")), "", 20, None),
         ("users", "Confirmaciones", "141", "", 88, "+37"),
     ])
     cuerpo += '<div class="sep sep-20"></div>'
@@ -2140,7 +2585,7 @@ def eventos():
                             badge("Publicado", "b-azul", "check")),
                        ]),
                        ("25 nov 2024", [
-                           ("08:30", "Jornada de mentoria",
+                           ("08:30", "Jornada de mentoría",
                             "Sala 2 · 14 confirmados",
                             badge("Por aprobar", "b-amarillo", "reloj")),
                        ]),
@@ -2148,45 +2593,18 @@ def eventos():
     cuerpo += card("Calendario de noviembre",
                    '<div data-vacio-lista>'
                    + calendario_interactivo("noviembre", 2024, EVENTOS_CAL,
-                                              hoy=12, vacio="Sin eventos")
+                                            hoy=12, vacio="Sin eventos")
                    + "</div>")
     cuerpo += "</div>"
     cuerpo += '<div class="sep sep-20"></div>'
-    cuerpo += kanban([
-        ("Por aprobar", [
-            ("<b>Jornada de mentoria</b>",
-             "25 nov 2024, 08:30 · Sala 2 · 14 confirmados",
-             badge("1 solicitud", "b-amarillo", "reloj"),
-             _evento("aprobar-evento", "check", "Aprobar evento",
-                     titulo="Jornada de mentoria", fecha="25 nov 2024, 08:30",
-                     lugar="Sala 2", confirmados="14", sector="Alimentos",
-                     primario=True)
-             + _evento("rechazar-evento", "x", "Rechazar",
-                       titulo="Jornada de mentoria")),
-        ]),
-        ("Borrador", [
-            ("<b>Charla: marco legal para negocios</b>",
-             "02 dic 2024, 10:00 · Auditorio B",
-             badge("Sin publicar", "b-neutra"),
-             _btn("edit", "Editar", "evento-form.html", "btn btn-sm btn-secundario")),
-        ]),
-        ("Publicado", [
-            ("<b>Taller de costos y precios</b>",
-             "18 nov 2024, 09:00 · Auditorio A",
-             badge("32 de 40 cupos", "b-azul"),
-             _btn("edit", "Editar", "evento-form.html", "btn btn-sm btn-secundario")),
-            ("<b>Feria de emprendedores</b>",
-             "22 nov 2024, 14:00 · Plaza central",
-             badge("86 de 120 cupos", "b-azul"),
-             _btn("edit", "Editar", "evento-form.html", "btn btn-sm btn-secundario")),
-        ]),
-        ("Finalizados", [
-            ("<b>Charla: opciones de financiamiento</b>",
-             "04 nov 2024, 10:00 · Auditorio B · 48 asistentes",
-             badge("Cerrado", "b-linea"),
-             _btn("eye", "Ver", "evento-form.html", "btn btn-sm btn-secundario")),
-        ]),
-    ])
+    cuerpo += '<div class="card-head"><div><h3>Tarjetas de eventos</h3>'
+    cuerpo += '<p class="sub">Todos los eventos del programa con su imagen, '
+    cuerpo += 'estado y cupos.</p></div>'
+    cuerpo += _nuevo_link("evento-form.html", "Crear evento") + "</div>"
+    cuerpo += '<div class="sep sep-16"></div>'
+    cuerpo += '<div class="ev-grid">'
+    cuerpo += "".join(_evento_card(ev, i) for i, ev in enumerate(lista))
+    cuerpo += "</div>"
     cuerpo += ('<p class="nota-foot">Publicar un evento notifica a los estudiantes '
                'del sector correspondiente.</p>')
     cuerpo = formulario("eventos", cuerpo)
@@ -2194,151 +2612,146 @@ def eventos():
                  migas=["Inicio", "Eventos"],
                  sub="Aprueba y publica eventos del programa.",
                  acciones=_btn("plus", "Crear evento", "evento-form.html"))
-# --- 45. Crear evento --------------------------------------------------------
+
+
+def evento_detalle():
+    """Vista atractiva de un evento (evento-detalle.html?ev=...)."""
+    cuerpo = ('<div class="ev-hero g0" data-campo-clase="ev">%s</div>'
+              % ico("calendar", 64))
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Descripción del evento",
+                   '<h2 style="margin:0 0 8px" data-campo="titulo">Taller de costos '
+                   'y precios</h2>'
+                   '<p class="suave" data-campo="descripcion">Taller práctico para '
+                   'calcular el costo de insumos y definir el punto de equilibrio '
+                   'de un emprendimiento.</p>')
+    cuerpo += card("Detalles", lista_def([
+        ("Fecha", '<span data-campo="fecha">18 nov 2024</span>'),
+        ("Hora", '<span data-campo="hora">09:00 - 11:00</span>'),
+        ("Formato", '<span class="badge b-azul" data-badge="clase">'
+         '<span data-campo="formato">Presencial</span></span>'),
+        ("Dirigido a", '<span data-campo="dirigido">Todos los estudiantes</span>'),
+        ("Cupos", '<span data-campo="cupos">32 de 40 cupos</span>'),
+        ("Recordatorio", '<span data-campo="recordatorio">Un día antes</span>'),
+    ]))
+    cuerpo += card("Ubicación y conexión",
+                   '<dl class="lista-def">'
+                   '<div class="def-row" data-si-vacio="lugar"><dt>'
+                   '<span data-campo="lugar_etiqueta">Ubicación</span></dt>'
+                   '<dd><span data-campo="lugar">Auditorio A</span></dd></div>'
+                   '<div class="def-row" data-si-vacio="enlace"><dt>Enlace</dt>'
+                   '<dd><span data-campo="enlace">—</span></dd></div></dl>'
+                   '<p class="nota-foot">El lugar aplica a eventos presenciales o '
+                   'mixtos; el enlace, a virtuales o mixtos.</p>')
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<a class="btn btn-primario" data-enlace="editar_url" '
+                   'href="evento-form.html">%s Editar evento</a>'
+                   '<button class="btn btn-secundario" data-accion="publicar-evento">'
+                   '%s Publicar</button>'
+                   '<button class="btn btn-secundario" data-accion="guardar-borrador">'
+                   '%s Guardar borrador</button>'
+                   '<a class="btn btn-secundario" href="eventos.html">%s Volver a '
+                   'eventos</a></div>'
+                   % (ico("edit", 16), ico("enviar", 16), ico("doc", 16),
+                      ico("izq", 16)))
+    cuerpo += card("Estado", lista_def([
+        ("Publicación", '<span data-campo="estado">Publicado</span>'),
+        ("Formato", '<span data-campo="formato">Presencial</span>'),
+        ("Cupos", '<span data-campo="cupos">32 de 40 cupos</span>'),
+    ]))
+    cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(EVENTOS_DET, "ev", "taller-costos")
+    cuerpo += ('<script>(function(){var d=window.__DET[(new URLSearchParams('
+               "location.search)).get('ev')]||window.__DET['taller-costos'];"
+               "var hero=document.querySelector('.ev-hero');"
+               "var orden=Object.keys(window.__DET);"
+               "hero.className='ev-hero g'+(orden.indexOf(d.ev)%5);})();</script>")
+    return shell(R, "eventos", "Detalle del evento", cuerpo,
+                 migas=["Inicio", "Eventos", "Detalle del evento"],
+                 sub="Toda la información del evento y su formato.",
+                 acciones=_volver("eventos.html", "Volver"))
+
+
 def evento_form():
-    cuerpo = steps(["Datos del evento", "Fecha y lugar", "Publicar"], 1)
+    """Crear o editar un evento (evento-form.html o ?ev=...).
+
+    Incluye sección de imagen, guardar borrador y publicar."""
+    cuerpo = steps(["Datos del evento", "Fecha, formato y lugar", "Publicar"], 1)
     cuerpo += '<div class="sep sep-22"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
     cuerpo += card("Datos del evento",
-                   campo("Título del evento", valor="Taller de costos y precios", req=True)
+                   campo("Título del evento", req=True, name="titulo")
                    + select("Dirigido a", ["Todos los estudiantes",
                                            "Solo Alimentos", "Solo Moda",
                                            "Solo Ambiental", "Solo Muebles"],
-                            req=True, valor="Alimentos")
-                   + campo("Descripción", alto=True,
-                           valor="Taller practico para calcular el costo de insumos y "
-                                 "definir el punto de equilibrio de un emprendimiento.",
-                           ph="De que tratara el evento")
-                   + campo("Cupo máximo", tipo="number", valor="40",
+                            req=True, name="dirigido")
+                   + campo("Descripción", alto=True, name="descripcion",
+                           ph="De qué tratará el evento")
+                   + campo("Cupo máximo", tipo="number", name="cupos",
                            ph="Número de asistentes"))
-    cuerpo += card("Fecha y lugar",
-                   campo("Fecha", tipo="date", valor="2024-11-18", req=True)
-                   + campo("Hora de inicio", tipo="time", valor="09:00", req=True)
-                   + campo("Hora de cierre", tipo="time", valor="11:00", req=True)
-                   + campo("Lugar", valor="Auditorio A")
-                   + campo("Link de inscripción",
-                           valor="sgemd.edu.co/eventos/taller-costos"))
+    cuerpo += card("Fecha y formato",
+                   campo("Fecha", tipo="date", req=True, name="fecha")
+                   + '<div class="grid g-2" style="gap:0 16px">'
+                   + campo("Hora de inicio", tipo="time", req=True, name="hora")
+                   + campo("Hora de cierre", tipo="time", name="hora_fin")
+                   + "</div>"
+                   + select("Formato", ["Presencial", "Virtual", "Mixto"],
+                            req=True, name="formato")
+                   + '<div data-campo-formato="presencial">'
+                   + campo("Ubicación", name="lugar", ph="Ej.: Auditorio A")
+                   + "</div>"
+                   + '<div data-campo-formato="virtual">'
+                   + campo("Enlace de conexión", name="enlace",
+                           ph="Ej.: meet.sgemd.edu.co/evento")
+                   + "</div>"
+                   + select("Recordatorio", ["Un día antes", "Dos días antes",
+                                             "La misma mañana"], name="recordatorio"))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
+    cuerpo += card("Imagen del evento",
+                   '<div class="ev-preview" id="ev-preview">%s</div>' % ico("doc", 44)
+                   + '<p class="suave">Sube una imagen horizontal (mínimo 1200×600). '
+                     "Se muestra en las tarjetas y en la vista del evento.</p>"
+                   + _drop())
+    cuerpo += card("Publicación",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="guardar-borrador">'
+                   '%s Guardar borrador</button>'
+                   '<button class="btn btn-secundario" data-accion="publicar-evento">'
+                   '%s Publicar evento</button>'
+                   '<a class="btn btn-secundario" href="eventos.html">%s Cancelar</a>'
+                   '</div>' % (ico("doc", 16), ico("enviar", 16), ico("x", 16)))
     cuerpo += card("Visibilidad", lista_def([
-        ("Visibilidad", "Visible para-Alimentos"),
-        ("Confirmaciones", "32 de 40"),
-        ("Recordatorio", "Un día antes"),
-    ]) + _vacio(".def-row", "Sin configuración de visibilidad",
-                "Selecciona a qué sector va dirigido el evento y su "
-                "recordatorio antes de publicar.", "eye"))
-    cuerpo += card("Acciones",
-                   '<div class="fila-col">'
-                   + '<button class="btn btn-primario" data-accion="publicar-evento">'
-                     '%s Publicar evento</button>' % ico("enviar", 16)
-                    + '<button class="btn btn-secundario" data-accion="guardar-borrador">'
-                      '%s Guardar borrador</button>' % ico("doc", 16)
-                   + '<a class="btn btn-secundario" href="eventos.html">%s Cancelar</a>'
-                     % ico("x", 16)
-                   + "</div>")
+        ("Visibilidad", '<span data-campo="dirigido">Todos los estudiantes</span>'),
+        ("Estado", '<span data-campo="estado">Borrador</span>'),
+        ("Confirmaciones", '<span data-campo="cupos">0 de 40 cupos</span>'),
+    ]))
     cuerpo += "</div></div>"
-    cuerpo = formulario("crear-evento", cuerpo)
-    return shell(R, "eventos", "Crear evento", cuerpo,
-                 migas=["Inicio", "Eventos", "Crear evento"],
-                 sub="Publica un evento y notifica a los asistentes.",
-                 acciones='<button class="btn btn-primario" data-accion="guardar-borrador">'
-                          '%s Guardar</button>' % ico("check", 16))
+    cuerpo += _aplicar_datos(EVENTOS_DET, "ev", "marco-legal")
+    cuerpo += ("<script>(function(){var f=document.querySelector("
+               "'select[name=formato]');if(!f)return;"
+               "function pintar(){var v=f.value.toLowerCase();"
+               "var pre=document.querySelector('[data-campo-formato=presencial]');"
+               "var vir=document.querySelector('[data-campo-formato=virtual]');"
+               "if(pre)pre.style.display=(v==='presencial'||v==='mixto')?'':'none';"
+               "if(vir)vir.style.display=(v==='virtual'||v==='mixto')?'':'none';}"
+               "f.addEventListener('change',pintar);pintar();})();</script>")
+    return shell(R, "eventos", "Evento", cuerpo,
+                 migas=["Inicio", "Eventos", "Evento"],
+                 sub="Datos, formato, imagen y publicación del evento.",
+                 acciones='<button class="btn btn-primario" '
+                          'data-accion="guardar-borrador">%s Guardar</button>'
+                          % ico("check", 16))
 
 
 # --- 46. Asignaciones --------------------------------------------------------
-# --- 46. Asignaciones: hoja de pagina y modal de asignacion ----------------
-# El boton de la tabla pasa de icono 32x32 a btn-sm con texto al confirmar
-# (evita el desborde) y la hoja anade el margen/nowrap que lo contiene.
-HOJA_BTN_REASIGNAR = "\ntable.tabla .acc .btn{margin-left:4px;white-space:nowrap;max-width:100%;width:auto;min-width:0;padding:0 12px;justify-content:center;height:32px;flex:0 0 auto}"
-JS_ASIGNAR_DOCENTE = r"""
-/* Asignar/reasignar docente: modal inline que lee y escribe los dataset de la
-   fila. Al confirmar, el boton se vuelve btn-sm con el texto "Reasignar
-   docente" (antes solo tenia el icono y desbordaba la celda). */
-document.querySelector("#vista-asignaciones").addEventListener("click", function (event) {
-  var button = event.target.closest("[data-accion='asignar-docente-inline']");
-  if (!button) return;
-  var fila = button.closest("tr");
-  var actual = fila.dataset.docente || "Sin docente asignado";
-  var docentes = (function () {
-    var vistos = {};
-    var nombres = [];
-    document.querySelectorAll("table.tabla tbody tr").forEach(function (tr) {
-      var n = (tr.dataset.docente || "").trim();
-      if (n && n !== "Sin docente" && !vistos[n]) { vistos[n] = 1; nombres.push(n); }
-    });
-    return nombres;
-  })();
-  var opciones = docentes.map(function (d) {
-    var sel = d === actual ? " selected" : "";
-    return "<option" + sel + ">" + d + "</option>";
-  }).join("");
-  var velo = document.createElement("div");
-  velo.className = "modal-velo";
-  velo.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-label="Asignar docente"><div class="modal-head"><h2>' +
-    (actual === "Sin docente asignado" ? "Asignar docente" : "Reasignar docente") + '</h2><button class="icon-btn modal-x" aria-label="Cerrar">\u00d7</button></div>' +
-    '<div class="modal-cuerpo"><p><b>Proyecto:</b> ' + fila.dataset.proyecto + '<br><b>Estudiante:</b> ' + fila.dataset.estudiante + '</p>' +
-    '<div class="campo"><label for="docente-asignacion">Docente registrado</label><select id="docente-asignacion">' + opciones + '</select></div>' +
-    '<p class="modal-aviso">La confirmaci\u00f3n actualizar\u00e1 el docente visible en esta tabla.</p></div><div class="modal-foot"><button class="btn btn-secundario modal-cancelar">Cancelar</button><button class="btn btn-primario modal-confirmar">Confirmar asignaci\u00f3n</button></div></div>';
-  document.body.appendChild(velo);
-  function cerrar() { velo.remove(); document.body.classList.remove("sin-scroll"); }
-  document.body.classList.add("sin-scroll");
-  velo.querySelector(".modal-x").addEventListener("click", function (e) { e.stopPropagation(); cerrar(); });
-  velo.querySelector(".modal-cancelar").addEventListener("click", function (e) { e.stopPropagation(); cerrar(); });
-  velo.querySelector(".modal-confirmar").addEventListener("click", function (e) {
-    e.stopPropagation();
-    var docente = velo.querySelector("#docente-asignacion").value;
-    fila.dataset.docente = docente.split(" \u2014 ")[0];
-    fila.cells[3].textContent = fila.dataset.docente;
-    fila.cells[4].innerHTML = '<span class="badge b-azul">Asignado</span>';
-    button.className = "btn btn-sm btn-secundario";
-    button.textContent = "Reasignar docente";
-    button.title = "Reasignar docente";
-    button.setAttribute("aria-label", "Reasignar docente");
-    cerrar();
-    if (typeof toast === "function") toast("Docente asignado correctamente", "ok");
-  });
-});
-"""
-
-
-def _cuerpo_asignar_docente():
-    """Plantilla del modal de asignar/reasignar docente.
-
-    Vive oculta en la pantalla de Asignaciones; el JS la clona, la rellena con
-    los data-* de la fila y abre el modal con ella."""
-    opciones = "".join('<option value="%s">%s · %s</option>' % (d[1], d[1], d[2])
-                       for d in DOCENTES)
-    return (
-        '<div class="grid">'
-        + '<div class="campo"><label for="asg-estudiante">Estudiante</label>'
-          '<input id="asg-estudiante" name="estudiante" type="text" disabled></div>'
-        + '<div class="campo"><label for="asg-emprendimiento">Emprendimiento</label>'
-          '<input id="asg-emprendimiento" name="emprendimiento" type="text" disabled></div>'
-        + '<div class="campo"><label for="asg-correo">Correo</label>'
-          '<input id="asg-correo" name="correo" type="text" disabled></div>'
-        + "</div>"
-        + '<div class="grid g-2">'
-        + '<div class="campo"><label for="docente-asignacion">Docente registrado</label>'
-          '<select id="docente-asignacion" name="docente">'
-          '<option value="">Sin asignar</option>' + opciones + "</select></div>"
-        + '<div class="campo"><label for="asg-horas">Horas semanales</label>'
-          '<input id="asg-horas" name="horas" type="number" value="2" min="1" max="20">'
-          "</div>"
-        + "</div>"
-        + '<p class="modal-aviso">La confirmación actualizará el docente visible '
-          "en esta tabla.</p>"
-    )
-
-
 def asignaciones():
-    """Asignaciones de docente a emprendimiento.
-
-    Mantiene la estructura ya aprobada en el prototipo (regla de asignacion,
-    tres metricas y la tabla "Estudiantes y emprendimientos"), pero los tres
-    filtros los resuelve el controlador del admin (data-filtro-adm) en vez de
-    un script suelto, y la fila lleva los datos que necesita el modal de
-    reasignacion."""
+    """Asignaciones de docente a emprendimiento (tabla única del admin)."""
     filas = []
     for cod, emp, estu, correo, sector, tipo, etapa, avance, docente, correo_doc, sede in EMPRENDIMIENTOS[:5]:
         est_id = _id_estudiante(estu)
@@ -2356,9 +2769,8 @@ def asignaciones():
                 sector,
                 docente if not sin_doc else "Sin docente asignado",
                 estado,
-                ('<div class="acciones-cell"><button class="table-act" '
-                 'data-adm-accion="reasignar" title="%s" aria-label="%s">%s</button></div>'
-                 % (etiqueta, etiqueta, ico("edit", 16))),
+                _acc(_editar_link("asignacion-form.html?cod=%s" % cod, etiqueta,
+                                  "sliders")),
             ],
         })
     cab = "".join(th(c) for c in ["Proyecto", "Estudiante", "Sector",
@@ -2427,32 +2839,158 @@ def asignaciones():
                               "No hay estudiantes que coincidan con los filtros actuales.",
                               "", "alerta"))
     cuerpo += "</div>"
-    # Plantilla del modal de asignar/reasignar docente: vive oculta en la
-    # pagina y el JS la clona al abrir el modal (data-adm-accion="reasignar").
-    cuerpo += '<div id="form-asignar-docente" hidden>%s</div>' % _cuerpo_asignar_docente()
     cuerpo = formulario("asignaciones", cuerpo)
     return shell(R, "asignaciones", "Asignaciones", cuerpo,
                  migas=["Inicio", "Asignaciones"],
                  sub="Asigna docentes registrados a los emprendimientos y consulta "
                      "el estado actual del vínculo.",
                  extra_head=ADMIN_CSS,
-                 acciones=_exportar("Exportar asignaciones"))
+                 acciones=_btn("plus", "Asignar docente", "asignacion-form.html"))
 
 
-# --- 47. Diagnosticos --------------------------------------------------------
+# --- 47. Diagnósticos: dashboard único ---------------------------------------
+DIAG_DET = {}
+for _cod, _emp, _estu, _correo, _sector, _tipo, _etapa, _av, _doc, _cdoc, _sede in EMPRENDIMIENTOS[:6]:
+    DIAG_DET[_cod] = {
+        "codigo": _cod, "emprendimiento": _emp, "estudiante": _estu,
+        "docente_txt": _doc if _doc != "Sin asignar" else "Sin docente asignado",
+        "sector": _sector, "etapa": _etapa,
+        "puntaje": str(60 + (_av % 40)),
+        "fecha": "02 nov 2024", "estado": "Sin revisión",
+        "clase": "b-amarillo",
+        "resumen": ("El estudiante respondió las 5 secciones del instrumento. "
+                    "La propuesta de valor y el mercado objetivo están bien "
+                    "definidos; falta profundizar en costos y proyección de ventas."),
+        "detalle_url": "emprendimiento-detalle.html?cod=%s" % _cod,
+        "editar_url": "diagnostico-detalle.html?cod=%s" % _cod,
+    }
+
+
 def diagnosticos():
-    """Gráfico de puntajes + cola de revisión con pestañas."""
-    panel_res = metricas([
+    """Dashboard único de diagnósticos: resultados y pendientes en una vista."""
+    filas = []
+    for cod, d in DIAG_DET.items():
+        filas.append({
+            "attrs": {"cod": cod, "emp": d["emprendimiento"],
+                      "estu": d["estudiante"]},
+            "celdas": [
+                "<b>%s</b>" % d["emprendimiento"],
+                d["estudiante"], d["docente_txt"], d["puntaje"],
+                d["fecha"], badge(d["estado"], "b-amarillo", "reloj"),
+                _acc(_ver_link("diagnostico-detalle.html?cod=%s" % cod,
+                               "Revisar diagnóstico", "check"),
+                     _ver_link("emprendimiento-detalle.html?cod=%s" % cod,
+                               "Ver emprendimiento", "maleta")),
+            ],
+        })
+    cuerpo = metricas([
         ("clipboard", "Respondidos", "94", "", 88, "+8"),
-        ("reloj", "Sin revisión", "5", "", 22, None),
+        ("reloj", "Sin revisión", str(len(DIAG_DET)), "", 22, "Requieren acción"),
         ("medalla", "Promedio", "74", "", 74, "+2"),
     ])
-    panel_graf = card("Puntaje por emprendimiento", '<div class="card-body">')+barras_h("", "Último diagnóstico registrado", ["EcoPack", "Sabor y Sabe", "Aromas del Sur", "Krea Textil", "Muebles Origen"], [91,78,64,71,70], maximo=100)+'</div>'+card("Rendimiento del grupo", '<div class="card-body">')+distribucion([("90 - 100","12",26),("70 - 89","45",48),("50 - 69","28",30),("Menos de 50","9",19)])+'<p class="nota-foot">La mayoria de los estudiantes se ubica entre 70 y 89 puntos.</p></div>'
-    panel_pen = card("Pendientes de revisión", '<div class="card-body">')+lista_avisos([("Sin revisión del docente", [("clipboard", "Aromas del Sur · Sofia Ramirez", "Sin docente asignado · 02 nov 2024", "diagnosticos.html", "alta", _b("check","Revisar")), ("clipboard", "Krea Textil · Jhon Ospina", "Paula Andrea Rios · 30 oct 2024", "diagnosticos.html", "media", _b("check","Revisar")), ("clipboard", "Muebles Origen · Andres Felipe", "Ninafq Beltran · 18 oct 2024", "diagnosticos.html", "media", _b("check","Revisar"))])])+_vacio(".aviso", "Sin diagnósticos pendientes", "Cuando los estudiantes respondan nuevos diagnósticos, aparecerán aquí para su revisión.", "clipboard")+'</div>'+card("Acciones", '<div class="fila-col">')+_btn("download","Exportar resultados","reportes.html","btn btn-secundario")+'<button class="btn btn-secundario" data-accion="ver-instrumento">%s Ver instrumento</button>'%ico("doc",16)+"</div>"
-    panels = [("Resumen","diag-res",panel_res),("Gráficas","diag-graf",panel_graf),("Pendientes","diag-pen",panel_pen)]
-    cuerpo = '<div class="sep sep-20"></div>'+tabs_paneles([(n,pid) for n,pid,_ in panels])+'<div class="sep sep-12"></div>'+''.join('<div data-panel-nombre="%s"%s>%s</div>'%(pid,'' if i==0 else ' hidden',b) for i,(_,pid,b) in enumerate(panels))+'<div id="contenido-instrumento" hidden>'+_instrumento()+'</div>'
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Puntaje por emprendimiento", barras_h(
+        "", "Último diagnóstico registrado",
+        ["EcoPack", "Sabor y Sabe", "Aromas del Sur", "Krea Textil",
+         "Muebles Origen"], [91, 78, 64, 71, 70], maximo=100))
+    cuerpo += card("Pendientes de revisión",
+                   '<p class="suave">Cada pendiente abre la ficha del proyecto, '
+                   'donde puedes quitar el pendiente, dar puntaje o corregir.</p>',
+                   accion=_exportar("Exportar pendientes"))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Rendimiento del grupo", distribucion([
+        ("90 - 100", "12", 26), ("70 - 89", "45", 48),
+        ("50 - 69", "28", 30), ("Menos de 50", "9", 19)]))
+    cuerpo += card("Acciones", '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-secundario" data-accion="ver-instrumento">'
+                   '%s Ver instrumento</button>'
+                   '<a class="btn btn-secundario" href="reportes.html">%s Exportar '
+                   'resultados</a></div>' % (ico("doc", 16), ico("download", 16)))
+    cuerpo += "</div></div>"
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += _tabla_adm(
+        "diagnosticos", "Diagnósticos por emprendimiento",
+        ["Emprendimiento", "Estudiante", "Docente", "Puntaje", "Fecha", "Estado",
+         "@ACC"], filas,
+        sub="Resultados del diagnóstico de los estudiantes y su estado de revisión.",
+        caption="Diagnósticos por emprendimiento")
+    cuerpo += '<div id="contenido-instrumento" hidden>' + _instrumento() + "</div>"
     cuerpo = formulario("diagnosticos", cuerpo)
-    return shell(R, "diagnosticos", "Diagnosticos respondidos", cuerpo, migas=["Inicio","Diagnosticos"], sub="Resultados del diagnóstico de los estudiantes.")
+    return shell(R, "diagnosticos", "Diagnósticos", cuerpo,
+                 migas=["Inicio", "Diagnósticos"],
+                 sub="Resultados del diagnóstico y pendientes de revisión.")
+
+
+def diagnostico_detalle():
+    """Ficha de revisión de un diagnóstico (diagnostico-detalle.html?cod=)."""
+    cuerpo = metricas([
+        ("medalla", "Puntaje", '<span data-campo="puntaje">78</span>', "", 78,
+         "Sobre 100"),
+        ("clipboard", "Secciones", "5 de 5", "", 100, "Instrumento completo"),
+        ("reloj", "Estado", '<span class="badge b-amarillo" data-badge="clase">'
+         '<span data-campo="estado">Sin revisión</span></span>', "", 40,
+         '<span data-campo="fecha">02 nov 2024</span>'),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos del diagnóstico", lista_def([
+        ("Emprendimiento", '<b data-campo="emprendimiento">Sabor y Sabe</b>'),
+        ("Código", '<span data-campo="codigo">EMP-041</span>'),
+        ("Estudiante", '<span data-campo="estudiante">Mariana López</span>'),
+        ("Docente", '<span data-campo="docente_txt">Carlos Mendoza</span>'),
+        ("Sector", '<span data-campo="sector">Alimentos</span>'),
+        ("Etapa", '<span data-campo="etapa">FASE 2 - Prototipo</span>'),
+        ("Fecha de respuesta", '<span data-campo="fecha">02 nov 2024</span>'),
+    ]))
+    cuerpo += card("Resumen de respuestas",
+                   '<p class="suave" data-campo="resumen">El estudiante respondió '
+                   'las 5 secciones del instrumento.</p>')
+    cuerpo += card("Revisión del administrador",
+                   '<div class="grid g-2" style="gap:0 16px">'
+                   + campo("Puntaje (0 a 100)", tipo="number", valor="78",
+                           name="puntaje")
+                   + select("Estado de revisión", ["Sin revisión", "En revisión",
+                                                   "Revisado"], name="estado")
+                   + "</div>"
+                   + campo("Correcciones u observaciones", alto=True,
+                           name="observaciones",
+                           valor="Ajustar la proyección de ventas y el costo unitario.")
+                   + '<div class="fila" style="margin-top:8px">'
+                   + '<button class="btn btn-primario" data-accion="guardar-perfil">'
+                     "%s Guardar puntaje</button>" % ico("check", 16)
+                   + '<button class="btn btn-secundario" data-accion="quitar-pendiente">'
+                     "%s Quitar pendiente</button>" % ico("x", 16)
+                   + "</div>")
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="quitar-pendiente">'
+                   '%s Quitar pendiente</button>'
+                   '<a class="btn btn-secundario" data-enlace="detalle_url" '
+                   'href="emprendimiento-detalle.html">%s Ver emprendimiento</a>'
+                   '<a class="btn btn-secundario" href="diagnosticos.html">'
+                   '%s Volver a diagnósticos</a></div>'
+                   % (ico("check", 16), ico("maleta", 16), ico("izq", 16)))
+    cuerpo += card("Instrumento", lista_def([
+        ("Secciones", "5"),
+        ("Preguntas", "22"),
+        ("Última actualización", "01 oct 2024"),
+    ]) + '<div class="form-acciones">'
+         '<button class="btn btn-secundario btn-sm" data-accion="ver-instrumento">'
+         "%s Ver instrumento</button></div>" % ico("doc", 14))
+    cuerpo += "</div></div>"
+    cuerpo += _aplicar_datos(DIAG_DET, "cod", "EMP-041")
+    return shell(R, "diagnosticos", "Revisión del diagnóstico", cuerpo,
+                 migas=["Inicio", "Diagnósticos", "Revisión del diagnóstico"],
+                 sub="Califica, corrige o quita el pendiente del diagnóstico.",
+                 acciones=_volver("diagnosticos.html", "Volver"))
+
+
 def reportes():
     cuerpo = card("Tipo de reporte", tabla(
         ["Reporte", "Descripción", "Formato", "Última generación", "@ACC"],
@@ -2558,7 +3096,7 @@ def tareas():
     """Tareas del admin: dos tablas propias (emprendimientos con tareas y
     tareas asignadas), cada una con buscador, filtros y paginacion."""
     filas_t = []
-    for t, emp, estu, prio, vence, est in TAREAS_ADM:
+    for i, (t, emp, estu, prio, vence, est) in enumerate(TAREAS_ADM, 1):
         est_id = _id_estudiante(estu)
         filas_t.append({
             "attrs": {"est-id": est_id, "est-nombre": estu,
@@ -2569,6 +3107,7 @@ def tareas():
                 "<b>%s</b>" % t, emp, estu, badge(prio, PRIO_ADM[prio]), vence,
                 badge(est, ESTADO_TAREA_ADM[est]),
                 _acc(_ficha("estudiante"),
+                     _ver_link("tarea-detalle.html?clave=TAR-%02d" % i),
                      _b("edit", "Editar", "editar-tarea"),
                      _b("trash", "Eliminar", "eliminar-tarea"))],
         })
@@ -2586,6 +3125,8 @@ def tareas():
             "celdas": [
                 cod, "<b>%s</b>" % emp, estu, badge(etapa, "b-linea"), n_tareas,
                 _acc(_ficha("emprendimiento"),
+                     _ver_link("tarea-detalle.html?cod=%s" % cod,
+                               "Ver detalle"),
                      _b("eye", "Ver tareas", "ver-tareas"))],
         })
     cuerpo = callout("Como administrador puedes <b>consultar, añadir y eliminar</b> "
@@ -2622,8 +3163,105 @@ def tareas():
                  acciones=_nuevo("nueva-tarea", "Nueva tarea"))
 
 
+# --- 52b. Detalle de tarea ----------------------------------------------------
+TAREAS_DET = {}
+for _i, (_t, _emp, _estu, _prio, _vence, _est) in enumerate(TAREAS_ADM, 1):
+    TAREAS_DET["TAR-%02d" % _i] = {
+        "clave": "TAR-%02d" % _i, "titulo": _t,
+        "emprendimiento": _emp, "estudiante": _estu,
+        "prioridad": _prio, "vence": _vence, "estado": _est,
+        "clase_prio": PRIO_ADM[_prio],
+        "clase_estado": ESTADO_TAREA_ADM[_est],
+        "est_id": _id_estudiante(_estu),
+        "correo": CORREOS_EST.get(_estu, ""),
+        "descripcion": "Tarea asignada por el programa. El estudiante debe "
+                       "entregarla antes de la fecha límite y el docente "
+                       "califica el resultado.",
+        "puntos": "100",
+    }
+
+# Detalle por emprendimiento: se resuelve con el código del emprendimiento.
+TAREAS_POR_EMP = {}
+for _cod, _emp, _estu, _etapa, _n in (
+        ("EMP-041", "Sabor y Sabe", "Mariana López", "FASE 2 - Prototipo", "2"),
+        ("EMP-040", "Krea Textil", "Jhon Ospina", "FASE 1 - Ideación", "1"),
+        ("EMP-039", "EcoPack", "Lucía Fernández", "FASE 3 - Validación", "1"),
+        ("EMP-038", "Aromas del Sur", "Sofía Ramírez", "FASE 1 - Ideación", "1")):
+    TAREAS_POR_EMP[_cod] = {
+        "codigo": _cod, "emprendimiento": _emp, "estudiante": _estu,
+        "etapa": _etapa, "num_tareas": _n,
+        "tareas": [t for t in TAREAS_ADM if t[1] == _emp],
+        "clase": "b-azul",
+    }
+
+
+def tarea_detalle():
+    """Vista propia de una tarea o de las tareas de un emprendimiento.
+
+    Acepta ?clave=TAR-01 (tarea) o ?cod=EMP-041 (emprendimiento)."""
+    cuerpo = metricas([
+        ("checklist", "Tareas activas", str(len(TAREAS_ADM)), "", 60, None),
+        ("reloj", "Vencen esta semana", "3", "", 30, None),
+        ("medalla", "Completadas",
+         str(sum(1 for t in TAREAS_ADM if t[5] == "Completada")), "", 17, None),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la tarea", lista_def([
+        ("Código", '<b data-campo="clave">TAR-01</b>'),
+        ("Título", '<b data-campo="titulo">Evidencia fotográfica del punto de venta</b>'),
+        ("Emprendimiento", '<span data-campo="emprendimiento">Sabor y Sabe</span>'),
+        ("Estudiante", '<span data-campo="estudiante">Mariana López</span>'),
+        ("ID del estudiante", '<span data-campo="est_id">912646</span>'),
+        ("Prioridad", '<span class="badge b-amarillo" data-badge="clase_prio">'
+         '<span data-campo="prioridad">Alta</span></span>'),
+        ("Vence", '<span data-campo="vence">12 nov 2024</span>'),
+        ("Estado", '<span class="badge b-amarillo" data-badge="clase_estado">'
+         '<span data-campo="estado">En revisión</span></span>'),
+        ("Puntos", '<span data-campo="puntos">100</span>'),
+    ]))
+    cuerpo += card("Descripción",
+                   '<p class="suave" data-campo="descripcion">Tarea asignada por el '
+                   'programa.</p>')
+    cuerpo += card("Emprendimiento asociado", lista_def([
+        ("Código", '<span data-campo="codigo">EMP-041</span>'),
+        ("Nombre", '<span data-campo="emprendimiento">Sabor y Sabe</span>'),
+        ("Etapa", '<span data-campo="etapa">FASE 2 - Prototipo</span>'),
+        ("Tareas activas", '<span data-campo="num_tareas">2</span>'),
+    ]))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col acc-vertical">'
+                   '<button class="btn btn-primario" data-accion="editar-tarea">'
+                   '%s Editar tarea</button>'
+                   '<button class="btn btn-secundario" data-accion="eliminar-tarea">'
+                   '%s Eliminar tarea</button>'
+                   '<a class="btn btn-secundario" href="tareas.html">%s Volver a '
+                   'tareas</a></div>'
+                   % (ico("edit", 16), ico("trash", 16), ico("izq", 16)))
+    cuerpo += card("Trazabilidad", lista_def([
+        ("Creada por", "Administración del programa"),
+        ("Asignada a", '<span data-campo="estudiante">Mariana López</span>'),
+        ("Calificación", "Pendiente del docente"),
+    ]))
+    cuerpo += "</div></div>"
+    # Pintar datos de la tarea (si viene por clave) o del emprendimiento.
+    cuerpo += _aplicar_datos(TAREAS_DET, "clave", "TAR-01")
+    cuerpo += _aplicar_datos(TAREAS_POR_EMP, "cod", "EMP-041")
+    return shell(R, "tareas", "Detalle de tarea", cuerpo,
+                 migas=["Inicio", "Tareas", "Detalle de tarea"],
+                 sub="Información completa de la tarea y su emprendimiento.",
+                 acciones=_volver("tareas.html", "Volver"))
+
 # --- 49. Mi perfil -----------------------------------------------------------
+
 def perfil():
+    """Perfil del administrador: solo visualización.
+
+    La edición se hace en Configuración; el botón superior derecho lleva a la
+    sección Información General de esa vista."""
     cuerpo = metricas([
         ("users", "Usuarios gestionados", "128", "", 84, "+12"),
         ("medalla", "Reportes generados", "24", "", 62, "+4"),
@@ -2632,61 +3270,66 @@ def perfil():
     cuerpo += '<div class="sep sep-20"></div>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
-    cuerpo += card("Datos personales",
-                   '<div class="campos-perfil">'
-                   + campo("Nombres", valor="Ana", req=True)
-                   + campo("Apellidos", valor="Restrepo", req=True)
-                   + campo("Correo institucional", tipo="email",
-                           valor="ana.restrepo@sgemd.edu.co",
-                           bloqueo="El correo institucional no se puede editar")
-                   + campo("Teléfono", tipo="tel", valor="+57 301 555 0199")
-                   + "</div>")
-    cuerpo += card("Zona horaria", campo("Zona horaria", valor="America/Bogota")
-                   + campo("Cargo", valor="Administradora del programa",
-                           bloqueo="El cargo lo asigna la institución"))
+    cuerpo += card("Datos personales", lista_def([
+        ("Nombres", "Ana"),
+        ("Apellidos", "Restrepo"),
+        ("Correo institucional", "ana.restrepo@sgemd.edu.co"),
+        ("Teléfono", "+57 301 555 0199"),
+        ("Cargo", "Administradora del programa"),
+        ("Sede principal", "Sede Norte"),
+        ("Zona horaria", "America/Bogota"),
+    ]))
+    cuerpo += card("Actividad", lista_def([
+        ("Último acceso", "Hoy, 07:15"),
+        ("Contraseña", "Actualizada hace 2 meses"),
+        ("Verificación en dos pasos", "Activada"),
+    ]))
     cuerpo += "</div>"
     cuerpo += '<div class="grid">'
     cuerpo += card("Seguridad", lista_def([
         ("Contraseña", "Actualizada hace 2 meses"),
         ("Verificación en dos pasos", "Activada"),
         ("Último acceso", "Hoy, 07:15"),
-    ]) + _vacio(".def-row", "Sin datos de seguridad",
-                "La información de tu contraseña y tu último acceso "
-                "aparecerá aquí.", "lock"))
-    cuerpo += card("Cambiar contraseña",
-                   '<div class="grid g-3 g-col">'
-                   + campo("Contraseña actual", tipo="password", ph="••••••••")
-                   + campo("Nueva contraseña", tipo="password", ph="Mínimo 8 caracteres")
-                   + campo("Repetir nueva contraseña", tipo="password", ph="••••••••")
-                   + "</div>"
-                   '<div style="display:flex;justify-content:flex-end">'
-                   + '<button class="btn btn-secundario" data-accion="actualizar-contrasena">'
-                     '%s Actualizar contraseña</button></div>' % ico("lock", 16))
+    ]))
     cuerpo += card("Acciones",
-                   '<div class="fila-col">'
-                   + '<button class="btn btn-primario" data-accion="guardar-perfil">'
-                     '%s Guardar cambios</button>' % ico("check", 16)
-                   + "</div>")
+                   '<div class="acciones-col acc-vertical">'
+                   '<a class="btn btn-primario" href="configuracion.html#general">'
+                   '%s Editar perfil</a>'
+                   '<a class="btn btn-secundario" href="configuracion.html">'
+                   '%s Ir a configuración</a></div>'
+                   % (ico("edit", 16), ico("engranaje", 16)))
     cuerpo += "</div></div>"
     cuerpo = formulario("perfil", cuerpo)
     return shell(R, "perfil", "Mi perfil", cuerpo,
                  migas=["Inicio", "Mi perfil"],
-                 sub="Actualiza tus datos y revisa tu actividad.")
+                 sub="Consulta tus datos personales y de seguridad.",
+                 acciones='<a class="btn btn-primario" href="configuracion.html#general">'
+                          '%s Editar perfil</a>' % ico("edit", 16))
 
 
 # --- 51. Configuracion del administrador --------------------------------------
 
-def configuracion():
-    """Configuracion del admin: cuenta, parametros del programa, sedes,
-    notificaciones y bitacora de decisiones.
 
-    Es la vista a la que lleva el mini-menu (que el kit arma como
-    "Preferencias" y el JS del admin renombra a "Configuracion")."""
+def configuracion():
+    """Configuración del admin con navegación por secciones."""
     sin_doc = sum(1 for e in EMPRENDIMIENTOS if e[8] == "Sin asignar")
     cuerpo = callout(
         "Los cambios de esta pantalla aplican a todo el programa: sedes, etapas, "
         "cupos y reglas de asignación.", "escudo")
     cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<nav class="cfg-nav" aria-label="Secciones de configuración">'
+    for ancla, etiqueta in [("general", "Información General"),
+                            ("seguridad", "Seguridad"),
+                            ("notificaciones", "Notificaciones"),
+                            ("parametros", "Parámetros del programa"),
+                            ("bitacora", "Bitácora de decisiones")]:
+        cuerpo += ('<a class="cfg-nav-item" href="#%s">%s</a>' % (ancla, etiqueta))
+    cuerpo += "</nav>"
+    cuerpo += '<div class="sep sep-16"></div>'
+
+    # Seccion: Informacion General
+    cuerpo += '<section id="general" class="cfg-seccion">'
+    cuerpo += '<h2 class="cfg-titulo">Información General</h2>'
     cuerpo += '<div class="grid g-2-1">'
     cuerpo += '<div class="grid">'
     cuerpo += card("Cuenta del administrador",
@@ -2710,6 +3353,55 @@ def configuracion():
                      "Cancelar</button>"
                    + '<button class="btn btn-primario" data-accion="guardar-perfil">%s '
                      "Guardar cambios</button></div>" % ico("check", 16))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Sedes del programa", tabla(
+        ["Sede", "Emprendimientos", "Estudiantes", "Estado"],
+        [[s,
+          str(sum(1 for e in EMPRENDIMIENTOS if e[10] == s)),
+          str(sum(1 for e in ESTUDIANTES
+                  if any(x[10] == s for x in EMPRENDIMIENTOS
+                         if x[2] == e[1]))),
+          badge("Activa", "b-azul")] for s in SEDES],
+        caption="Sedes del programa"))
+    cuerpo += "</div></div></section>"
+
+    # Seccion: Seguridad
+    cuerpo += '<section id="seguridad" class="cfg-seccion">'
+    cuerpo += '<h2 class="cfg-titulo">Seguridad</h2>'
+    cuerpo += card("Cambiar contraseña",
+                   '<div class="grid g-3 g-col">'
+                   + campo("Contraseña actual", tipo="password", ph="••••••••")
+                   + campo("Nueva contraseña", tipo="password", ph="Mínimo 8 caracteres")
+                   + campo("Repetir nueva contraseña", tipo="password", ph="••••••••")
+                   + "</div>"
+                   '<div style="display:flex;justify-content:flex-end">'
+                   + '<button class="btn btn-secundario" data-accion="actualizar-contrasena">'
+                     "%s Actualizar contraseña</button></div>" % ico("lock", 16))
+    cuerpo += card("Estado de la cuenta", lista_def([
+        ("Último acceso", "Hoy, 07:15"),
+        ("Verificación en dos pasos", "Activada"),
+        ("Sesiones activas", "1"),
+    ]))
+    cuerpo += "</section>"
+
+    # Seccion: Notificaciones
+    cuerpo += '<section id="notificaciones" class="cfg-seccion">'
+    cuerpo += '<h2 class="cfg-titulo">Notificaciones</h2>'
+    cuerpo += card("Notificaciones automáticas",
+                   '<div class="fila-col">'
+                   + _check("Aviso de solicitud de desbloqueo", True)
+                   + _check("Aviso de emprendimiento en paralelo", True)
+                   + _check("Aviso de tarea vencida", True)
+                   + _check("Resumen semanal al equipo docente", False)
+                   + "</div>"
+                   + '<p class="nota-foot">Los avisos se envían al correo '
+                     "institucional de cada docente y estudiante.</p>")
+    cuerpo += "</section>"
+
+    # Seccion: Parametros
+    cuerpo += '<section id="parametros" class="cfg-seccion">'
+    cuerpo += '<h2 class="cfg-titulo">Parámetros del programa</h2>'
     cuerpo += card("Parámetros del programa",
                    '<div class="grid g-2" style="gap:0 16px">'
                    + campo("Carga máxima por docente (horas)", tipo="number", valor="12")
@@ -2727,35 +3419,11 @@ def configuracion():
                    + "</div>"
                    + '<p class="nota-foot">Hoy hay %d emprendimientos sin docente '
                      'asignado: la cola se resuelve desde Asignaciones.</p>' % sin_doc)
-    cuerpo += card("Notificaciones automáticas",
-                   '<div class="fila-col">'
-                   + _check("Aviso de solicitud de desbloqueo", True)
-                    + _check("Aviso de emprendimiento en paralelo", True)
-                   + _check("Aviso de tarea vencida", True)
-                   + _check("Resumen semanal al equipo docente", False)
-                   + "</div>"
-                   + '<p class="nota-foot">Los avisos se envían al correo '
-                     "institucional de cada docente y estudiante.</p>")
-    cuerpo += "</div>"
-    cuerpo += '<div class="grid">'
-    cuerpo += card("Sedes del programa", tabla(
-        ["Sede", "Emprendimientos", "Estudiantes", "Estado"],
-        [[s,
-          str(sum(1 for e in EMPRENDIMIENTOS if e[10] == s)),
-          str(sum(1 for e in ESTUDIANTES
-                  if any(x[10] == s for x in EMPRENDIMIENTOS
-                         if x[2] == e[1]))),
-          badge("Activa", "b-azul")] for s in SEDES],
-        caption="Sedes del programa"))
-    cuerpo += card("Cambiar contraseña",
-                   '<div class="grid g-3 g-col">'
-                   + campo("Contraseña actual", tipo="password", ph="••••••••")
-                   + campo("Nueva contraseña", tipo="password", ph="Mínimo 8 caracteres")
-                   + campo("Repetir nueva contraseña", tipo="password", ph="••••••••")
-                   + "</div>"
-                   '<div style="display:flex;justify-content:flex-end">'
-                   + '<button class="btn btn-secundario" data-accion="actualizar-contrasena">'
-                     "%s Actualizar contraseña</button></div>" % ico("lock", 16))
+    cuerpo += "</section>"
+
+    # Seccion: Bitacora
+    cuerpo += '<section id="bitacora" class="cfg-seccion">'
+    cuerpo += '<h2 class="cfg-titulo">Bitácora de decisiones</h2>'
     cuerpo += card("Bitácora de decisiones",
                    lista_def([
                        ("Aprobación de desbloqueo de cuenta",
@@ -2767,7 +3435,8 @@ def configuracion():
                    ]) + _vacio(".def-row", "Sin decisiones registradas",
                                "Las aprobaciones, rechazos y cambios de docente "
                                "quedan registrados aquí.", "checklist"))
-    cuerpo += "</div></div>"
+    cuerpo += "</section>"
+
     cuerpo = formulario("configuracion", cuerpo)
     return shell(R, "configuracion", "Configuración", cuerpo,
                  migas=["Inicio", "Configuración"],
@@ -2775,6 +3444,7 @@ def configuracion():
                  extra_head=ADMIN_CSS)
 
 
+# --- 50. Notificaciones ------------------------------------------------------
 # --- 50. Notificaciones ------------------------------------------------------
 def notificaciones():
     """Bandeja del administrador: items .notif + chips de filtro (NO2/NO3).
@@ -2886,22 +3556,35 @@ def registrar(reg):
     paginas_adm = [
         ("dashboard.html", "01 Admin - Inicio (dashboard)", dashboard),
         ("usuarios.html", "02 Admin - Gestión de perfiles", usuarios),
+        ("usuario-detalle.html", "02b Admin - Detalle de usuario", usuario_detalle),
+        ("usuario-docente.html", "02c Admin - Editar docente", usuario_docente),
+        ("usuario-estudiante.html", "02d Admin - Editar estudiante", usuario_estudiante),
+        ("usuario-nuevo.html", "02e Admin - Nuevo usuario", usuario_nuevo_vista),
         ("solicitudes.html", "03 Admin - Solicitudes pendientes", solicitudes),
+        ("solicitud-detalle.html", "03b Admin - Detalle de solicitud", solicitud_detalle),
         ("emprendimientos.html", "04 Admin - Emprendimientos", emprendimientos),
-        ("emprendimiento-expediente.html",
-         "05 Admin - Expediente del emprendimiento", emprendimiento_expediente),
-        ("emprendimiento-plan.html", "06 Admin - Plan de trabajo",
-         emprendimiento_plan),
+        ("emprendimiento-detalle.html", "04b Admin - Detalle de emprendimiento",
+         emprendimiento_detalle),
+        ("emprendimiento-editar.html", "04c Admin - Editar emprendimiento",
+         emprendimiento_editar),
         ("seguimiento.html", "07 Admin - Seguimiento", seguimiento),
-        ("seguimiento-dashboard.html", "08 Admin - Tablero de seguimiento",
-         seguimiento_dashboard),
+        ("seguimiento-detalle.html", "07b Admin - Detalle de seguimiento",
+         seguimiento_detalle),
+        ("avance-form.html", "07c Admin - Registrar avance", avance_form),
         ("asesorias.html", "11 Admin - Asesorías", asesorias),
+        ("asesoria-detalle.html", "11b Admin - Detalle de asesoría", asesoria_detalle),
+        ("asesoria-form.html", "11c Admin - Formulario de asesoría", asesoria_form),
         ("eventos.html", "12 Admin - Eventos", eventos),
-        ("evento-form.html", "13 Admin - Crear evento", evento_form),
+        ("evento-detalle.html", "12b Admin - Detalle de evento", evento_detalle),
+        ("evento-form.html", "12c Admin - Formulario de evento", evento_form),
         ("asignaciones.html", "14 Admin - Asignaciones", asignaciones),
+        ("asignacion-form.html", "14b Admin - Asignar docente", asignacion_form),
         ("diagnosticos.html", "15 Admin - Diagnósticos", diagnosticos),
+        ("diagnostico-detalle.html", "15b Admin - Revisión de diagnóstico",
+         diagnostico_detalle),
         ("reportes.html", "16 Admin - Reportes", reportes),
         ("tareas.html", "17 Admin - Tareas", tareas),
+        ("tarea-detalle.html", "17b Admin - Detalle de tarea", tarea_detalle),
         ("perfil.html", "18 Admin - Mi perfil", perfil),
         ("notificaciones.html", "19 Admin - Notificaciones", notificaciones),
         ("respaldos.html", "20 Admin - Respaldos y recuperación", respaldos),

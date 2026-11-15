@@ -929,7 +929,7 @@ SA_JS = r"""
   }
   function norm(t) {
     return String(t || "").toLowerCase().normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "").trim();
+      .replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
   }
   function param(nombre) {
     var m = new RegExp("[?&]" + nombre + "=([^&]*)").exec(location.search || "");
