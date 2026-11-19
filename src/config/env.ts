@@ -21,6 +21,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET debe tener al menos 32 caracteres'),
   OTP_HMAC_SECRET: z.string().min(32, 'OTP_HMAC_SECRET debe tener al menos 32 caracteres'),
+  OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),
 
   // Correo: solo `file` se ejercita en pruebas; relay/oauth2 necesitan credenciales de TI.
   MAIL_TRANSPORT: z.enum(['file', 'relay', 'oauth2']).default('file'),

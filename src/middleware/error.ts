@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { logger } from '../config/logger.js';
 import { AppError } from '../utils/AppError.js';
@@ -36,7 +37,9 @@ export function errorHandler(
     return;
   }
 
-  logger.error({ err: error }, 'Error no controlado');
+  const correlationId = randomUUID();
+  res.setHeader('X-Correlation-Id', correlationId);
+  logger.error({ err: error, correlationId }, 'Error no controlado');
   res.status(500).json({
     success: false,
     error: {

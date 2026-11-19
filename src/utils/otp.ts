@@ -10,8 +10,8 @@ export const OTP_TTL_MINUTES = 5;
 /** Intentos permitidos por código antes de quemarlo (master §15: máximo 5). */
 export const OTP_MAX_ATTEMPTS = 5;
 
-/** Espera mínima entre reenvíos (decisión P-11; configurable por entorno). */
-export const OTP_RESEND_COOLDOWN_SECONDS = Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60);
+/** Espera mínima entre reenvíos (decisión P-11; validada en `config/env.ts`). */
+export const OTP_RESEND_COOLDOWN_SECONDS = env.OTP_RESEND_COOLDOWN_SECONDS;
 
 /** 8 dígitos criptográficamente aleatorios, con ceros a la izquierda. */
 export function generateOtp(): string {

@@ -234,6 +234,9 @@ async function writeUpload(
   nombreArchivo: string,
   options: { entity: string; maxBytes: number },
 ): Promise<StoredUpload> {
+  if (!/^[a-z0-9_-]+$/i.test(options.entity)) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'Entidad de almacenamiento inválida.');
+  }
   const now = new Date();
   const relativeDir = join(
     'attachments',
