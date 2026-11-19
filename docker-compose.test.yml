@@ -1,12 +1,12 @@
-# Solo para pruebas de integración (`make test-db`).
+# Contenedor efímero de PostgreSQL 17 para la suite de pruebas (`npm test`).
 #
-# La pila principal NO publica el puerto de PostgreSQL (puerta de la Etapa 1). Este
-# archivo crea una base desechable en un proyecto Compose aparte (`sgemd-test`) y la
-# expone **solo en loopback** para que vitest pueda recrearla desde `schema.sql` y
-# `seed.sql` en cada ejecución.
+# Crea una base desechable en un proyecto Compose aparte (`sgemd-test`) y la
+# expone **solo en loopback** (`127.0.0.1:55432`) para que vitest pueda recrearla desde
+# `database/schema.sql` y `database/seed.sql` en cada ejecución.
 #
 # Uso:
 #   docker compose -p sgemd-test -f docker-compose.test.yml up -d --wait postgres
+#   npm test
 #   docker compose -p sgemd-test -f docker-compose.test.yml down -v
 
 name: sgemd-test

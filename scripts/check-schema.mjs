@@ -7,7 +7,7 @@
  *  1. Cada atributo de las 27 clases de negocio de `docs/diagrama-clases.md` tiene su
  *     columna en `database/schema.sql`, con el mapeo PascalCase -> snake_case.
  *  2. El esquema define exactamente 41 tablas: las 27 de negocio + los 14 catálogos.
- *  3. Cada `CHECK (columna IN (...))` coincide con la constante de `shared/src/enums.ts`
+ *  3. Cada `CHECK (columna IN (...))` coincide con la constante de `src/shared/enums.ts`
  *     que declara esos valores (fuente única de las cadenas canónicas).
  *
  * Si algo falla, imprime todas las diferencias y sale con código 1.
@@ -22,7 +22,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const DIAGRAM = resolve(root, 'docs/diagrama-clases.md');
 const SCHEMA = resolve(root, 'database/schema.sql');
-const ENUMS = resolve(root, 'shared/src/enums.ts');
+const ENUMS = resolve(root, 'src/shared/enums.ts');
 
 /* -------------------------------------------------------------------------------------
  * 1. Diagrama: clases y atributos
@@ -403,7 +403,7 @@ for (const [table, column, constant] of ENUM_COLUMNS) {
 
   const expected = enumConstants.get(constant);
   if (!expected) {
-    fail(`Falta la constante ${constant} en shared/src/enums.ts`);
+    fail(`Falta la constante ${constant} en src/shared/enums.ts`);
     continue;
   }
 
@@ -439,4 +439,4 @@ console.log('✓ Verificación del esquema');
 console.log(`  · ${expectedBusinessTables.length} clases de negocio con todas sus columnas`);
 console.log(`  · ${CATALOGS.length} catálogos`);
 console.log(`  · ${schemaTables.size} tablas en total`);
-console.log(`  · ${ENUM_COLUMNS.length} listas CHECK coinciden con shared/src/enums.ts`);
+console.log(`  · ${ENUM_COLUMNS.length} listas CHECK coinciden con src/shared/enums.ts`);

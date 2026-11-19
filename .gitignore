@@ -1,4 +1,4 @@
-# Material local del área: contiene datos personales (Ley 1581 de 2012) → no versionar.
+# Material local del área: contiene datos personales (Ley 1581 de 2012) -> no versionar.
 docs/centroProgresa/
 docs/estudiante/
 docs/transcription_*.md
@@ -9,8 +9,6 @@ node_modules/
 npm-debug.log*
 *.tsbuildinfo
 dist/
-.vite
-backend/node_modules/
 
 # Entorno y secretos
 .env
@@ -26,15 +24,16 @@ database/dumps/
 *.dump
 *.sql.gz
 
-# Correo generado en desarrollo
+# Correo generado en desarrollo y pruebas
 storage/mail/
+storage/mail-test/
 
 # Registros y temporales
 logs/
 *.log
 coverage/
 test-results/
-playwright-report/
 
-# Sistema
+# Sistema operativo
 .DS_Store
+Thumbs.db

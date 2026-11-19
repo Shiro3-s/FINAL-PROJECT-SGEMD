@@ -1,25 +1,51 @@
 {
-  "name": "sgemd",
+  "name": "@sgemd/backend",
   "version": "0.1.0",
   "private": true,
-  "description": "SGEMD — Sistema de Gestión de Emprendimiento Minuto de Dios (MVP)",
-  "workspaces": [
-    "shared",
-    "backend",
-    "frontend"
-  ],
+  "type": "module",
   "engines": {
     "node": ">=22"
   },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "bcryptjs": "3.0.3",
+    "busboy": "1.6.0",
+    "cookie-parser": "1.4.7",
+    "dotenv": "18.0.9",
+    "exceljs": "^4.4.0",
+    "express": "5.3.0",
+    "helmet": "8.3.0",
+    "jose": "6.2.13",
+    "nodemailer": "10.2.1",
+    "pdfkit": "^0.15.1",
+    "pg": "8.23.1",
+    "pino": "10.4.0",
+    "zod": "4.6.7"
+  },
   "scripts": {
-    "build": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
-    "typecheck": "npm run typecheck -w shared && npm run typecheck -w backend && npm run typecheck -w frontend",
-    "test": "npm run test -w backend",
-    "lint": "npm run lint -w backend && npm run lint -w frontend",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "check:schema": "node scripts/check-schema.mjs"
   },
   "devDependencies": {
-    "typescript": "7.0.2"
+    "@types/archiver": "^6.0.3",
+    "@types/busboy": "1.5.4",
+    "@types/cookie-parser": "1.4.10",
+    "@types/express": "5.0.6",
+    "@types/node": "26.6.5",
+    "@types/nodemailer": "8.0.2",
+    "@types/pdfkit": "^0.13.9",
+    "@types/pg": "8.23.1",
+    "@types/supertest": "7.2.1",
+    "supertest": "7.3.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
   },
   "allowScripts": {
     "esbuild@0.28.2": true
