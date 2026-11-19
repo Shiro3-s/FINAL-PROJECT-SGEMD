@@ -55,7 +55,8 @@ export function useLogin() {
     mutationFn: (body: LoginBody) =>
       apiSend<LoginResponse>('POST', '/auth/login', body),
     onSuccess: async () => {
-      // `refetchQueries` espera la petición: la guarda ya ve al usuario al navegar.
+      // Purga cualquier caché previa antes de cargar la nueva sesión.
+      queryClient.clear();
       await queryClient.invalidateQueries({ queryKey: sessionKeys.me });
       await queryClient.refetchQueries({ queryKey: sessionKeys.me });
     },

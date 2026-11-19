@@ -42,7 +42,14 @@ export function LoginPage() {
     setError(null);
     try {
       await login.mutateAsync({ correoInstitucional: correo.trim(), password });
-      navigate(state?.from && state.from !== '/login' ? state.from : '/', {
+      const safeFrom =
+        state?.from &&
+        state.from.startsWith('/') &&
+        !state.from.startsWith('//') &&
+        state.from !== '/login'
+          ? state.from
+          : '/';
+      navigate(safeFrom, {
         replace: true,
       });
     } catch (caught) {

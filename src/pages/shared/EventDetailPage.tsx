@@ -136,9 +136,13 @@ export function EventDetailPage({ roleLabel, basePath }: EventDetailPageProps) {
                     {
                       term: 'Enlace',
                       value: event.enlace ? (
-                        <a href={event.enlace} target="_blank" rel="noreferrer">
-                          {event.enlace}
-                        </a>
+                        /^https?:\/\//i.test(event.enlace) ? (
+                          <a href={event.enlace} target="_blank" rel="noopener noreferrer">
+                            {event.enlace}
+                          </a>
+                        ) : (
+                          event.enlace
+                        )
                       ) : (
                         '—'
                       ),

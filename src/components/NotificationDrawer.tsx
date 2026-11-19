@@ -37,7 +37,7 @@ export function NotificationDrawer({ open, onClose, role }: NotificationDrawerPr
       // Si falla el marcado, el enlace sigue siendo útil: no se bloquea la navegación.
     }
     onClose();
-    if (url) navigate(url);
+    if (url && url.startsWith('/') && !url.startsWith('//')) navigate(url);
   };
 
   return (

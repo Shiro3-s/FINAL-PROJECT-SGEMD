@@ -48,7 +48,7 @@ export function NotificationsPage() {
     } catch {
       // Se navega igual: el enlace sigue siendo útil.
     }
-    if (url) navigate(url);
+    if (url && url.startsWith('/') && !url.startsWith('//')) navigate(url);
   };
 
   return (
