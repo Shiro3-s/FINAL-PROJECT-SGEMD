@@ -136,27 +136,32 @@ SHELL_CSS = """
 .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.85}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
 .icon-btn{position:relative;width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--blanco-08);background:var(--blanco-08);color:var(--blanco);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.search-toggle{display:none}
 .count{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:var(--r-full);background:var(--amarillo);color:var(--tinta);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--azul-noche)}
 .who{display:flex;align-items:center;gap:10px;padding-left:14px;border-left:1px solid var(--blanco-08)}
 .avatar{width:36px;height:36px;border-radius:var(--r-full);background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:0 0 36px}
 .who-name{font-size:14px;font-weight:600;line-height:1.2;color:var(--blanco)}
 .who-role{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--tinta);background:var(--amarillo);border-radius:var(--r-full);padding:1px 8px;display:inline-block;margin-top:2px}
-.content{padding:28px 32px 48px;max-width:1440px;width:100%}
+.content{padding:28px 32px 48px;max-width:1440px;width:100%;margin:0 auto}
 .page-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
 .page-head .sub{color:var(--tinta-2);font-size:14px;margin-top:4px}
 .page-head .acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 .crumbs{font-size:13px;color:var(--tinta-2);margin-bottom:10px}
 .crumbs a{color:var(--tinta-2)}
-@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{justify-content:center}.nav-group{margin-bottom:8px}.nav-hijos{max-height:none;overflow:visible}}
-@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.side-foot{display:block}.nav a{justify-content:flex-start}.nav-label{display:flex}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
+/* Pantallas grandes: PC widescreen, monitores 2K y Smart TV 4K */
+@media (min-width:1600px){.content{max-width:1680px;padding:32px 40px 56px}.search{max-width:520px}}
+@media (min-width:1920px){.sidebar{width:288px;flex:0 0 288px}.content{max-width:1840px;padding:36px 48px 64px}.topbar{height:76px;flex:0 0 76px;padding:0 32px}.search{max-width:600px}}
+@media (min-width:2560px){html{font-size:18px}body{font-size:16px}.sidebar{width:320px;flex:0 0 320px}.brand-tile{width:210px}.topbar{height:84px;flex:0 0 84px;padding:0 48px}.content{max-width:2320px;padding:44px 64px 72px}.search{max-width:720px}.search input{height:44px;font-size:16px}.btn{height:44px;font-size:16px}.campo input[type=text],.campo input[type=email],.campo input[type=password],.campo input[type=tel],.campo input[type=date],.campo input[type=time],.campo select{height:44px;font-size:16px}}
+@media (max-width:1279px){.sidebar{width:72px;flex:0 0 72px;transition:width .2s ease,flex-basis .2s ease}.brand{padding:16px 8px}.brand-tile{width:44px}.brand-text,.nav a span,.nav-label,.side-foot{display:none}.nav a{position:relative;justify-content:center}.nav-badge{position:absolute;top:2px;right:4px;padding:0 4px;min-width:16px;height:16px;font-size:13px;display:flex;align-items:center;justify-content:center}.nav-group{margin-bottom:8px}.nav-hijos{max-height:none;overflow:visible}.burger{display:flex}.sidebar.abierto{width:264px;flex:0 0 264px}.sidebar.abierto .brand{padding:22px 20px 20px}.sidebar.abierto .brand-tile{width:180px}.sidebar.abierto .brand-text,.sidebar.abierto .nav a span,.sidebar.abierto .side-foot{display:block}.sidebar.abierto .nav a{justify-content:flex-start}.sidebar.abierto .nav-label{display:flex}.sidebar.abierto .nav-badge{position:static;padding:3px 7px;height:auto}}
+@media (max-width:1023px){.sidebar{position:fixed;left:0;top:0;z-index:60;width:min(280px,85vw);flex:0 0 auto;height:100vh;height:100dvh;transform:translateX(-100%);transition:transform .25s}.sidebar.abierto{width:min(280px,85vw);flex:0 0 auto;transform:translateX(0)}.brand{padding:22px 20px 20px}.brand-tile{width:180px}.brand-text,.nav a span,.side-foot{display:block}.nav a{justify-content:flex-start}.nav-label{display:flex}.nav-badge{position:static;padding:3px 7px;height:auto}.burger{display:flex}.content{padding:20px 16px 40px}.topbar-mark{display:flex}}
 /* Con el drawer abierto el logo del drawer tiene el protagonismo: se oculta el
    del topbar para que nunca haya dos logos visibles a la vez. */
 .shell:has(.sidebar.abierto) .topbar-mark{display:none}
 /* En movil el bloque de identidad (nombre + badge de rol) no cabe junto al
    buscador y los tres botones, y empujaba la barra 102px fuera de pantalla.
    Se conserva el avatar, que ya identifica al usuario, y se retiran los textos. */
-@media (max-width:767px){.content{padding:16px 12px 36px}.page-head{flex-direction:column}.page-head .acciones{margin-left:0}.topbar{padding:0 12px;gap:10px}.topbar-right{gap:8px}.who{padding-left:10px;border-left:0}.who-name,.who-role{display:none}.search input{font-size:13px}}
-@media (max-width:479px){.search{display:none}}
+@media (max-width:767px){.content{padding:16px 12px 36px}.page-head{flex-direction:column;gap:12px}.page-head h1{font-size:24px}.page-head .acciones{margin-left:0;width:100%}.topbar{padding:0 12px;gap:10px}.topbar-right{gap:8px}.who{padding-left:10px;border-left:0}.who-name,.who-role{display:none}.search input{font-size:13px}}
+@media (max-width:479px){.topbar{flex-wrap:wrap;height:auto;min-height:60px;padding:8px 10px;gap:8px}.topbar-mark{width:82px;height:40px;flex:0 0 82px}.search-toggle{display:flex}.search{display:none;order:10;flex:1 1 100%;max-width:none;width:100%;margin-top:4px}.topbar.buscando .search{display:block}}
 .overlay{display:none;position:fixed;inset:0;background:var(--noche-55);z-index:55}
 .overlay.visible{display:block}
 """
@@ -176,8 +181,8 @@ COMPONENTES_CSS = """
 .btn:disabled{background:var(--gris);color:var(--blanco);border-color:var(--gris);cursor:not-allowed}
 
 .card{background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);box-shadow:var(--shadow-1)}
-.card-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}
-.card-head h3{flex:1;font-size:16px;font-weight:600;line-height:1.4;letter-spacing:-.005em}
+.card-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris);flex-wrap:wrap}
+.card-head h3{flex:1;min-width:140px;font-size:16px;font-weight:600;line-height:1.4;letter-spacing:-.005em}
 .card-head .hint{font-size:13px;color:var(--tinta-2);font-weight:400}
 .card-body{padding:20px}
 .card-body.sin-pad{padding:0}
@@ -197,9 +202,10 @@ COMPONENTES_CSS = """
    y se les deja envolver en vez de salirse de la pantalla. */
 @media (max-width:767px){div:has(> .btn + .btn){flex-wrap:wrap}}
 @media (max-width:479px){div:has(> .btn + .btn) > .btn{flex:1 1 140px}}
-@media (max-width:1279px){.g-4{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:1023px){.g-3,.g-2-1,.g-1-2{grid-template-columns:1fr}}
-@media (max-width:767px){.g-4,.g-3,.g-2{grid-template-columns:1fr}}
+@media (max-width:1279px){.g-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1023px){.g-2-1,.g-1-2{grid-template-columns:minmax(0,1fr)}.g-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:767px){.g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}.grid{gap:16px}}
+@media (max-width:479px){.card-head{padding:14px 16px}.card-body{padding:16px}.metrica{padding:16px}.metrica-val{font-size:28px}}
 
 /* Utilidades de espaciado y de fila: sustituyen los estilos en linea que se
    repetian en las vistas (separadores de altura fija, filas de botones, textos
@@ -214,14 +220,24 @@ COMPONENTES_CSS = """
 .g-col{gap:0 16px}
 .suave{font-size:13px;color:var(--tinta-2)}
 .fuerte{font-size:13px;color:var(--tinta)}
-.fila-acciones{display:flex;gap:10px}
+.fila-acciones{display:flex;gap:10px;flex-wrap:wrap}
 .form-acciones{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.fila-6{display:flex;gap:6px}
-.fila-fin{display:flex;justify-content:flex-end;gap:10px}
+.fila-6{display:flex;gap:6px;flex-wrap:wrap}
+.fila-fin{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 .fila-col{display:flex;flex-direction:column;gap:10px}
 .kpi-caja{border:1px solid var(--gris);border-radius:var(--r-sm);padding:12px 14px}
 .kpi-caja .k-lbl{font-size:13px;color:var(--tinta-2)}
 .kpi-caja .k-val{font-size:20px;font-weight:700;color:var(--tinta)}
+.bloque-progreso{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.bloque-progreso-cuerpo{flex:1;min-width:min(280px,100%)}
+.kpi-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:479px){.kpi-grid-2{grid-template-columns:minmax(0,1fr)}}
+.doc-grupo{display:flex;gap:10px}
+.doc-grupo select{flex:0 0 130px}
+.doc-grupo input{flex:1;min-width:0}
+@media (max-width:420px){.doc-grupo{flex-direction:column}.doc-grupo select{flex:1 1 auto;width:100%}}
+.donut-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+@media (max-width:479px){.donut-wrap{justify-content:center}}
 .fila-paso{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--gris)}
 .mt-8{margin-top:8px}
 .mt-10{margin-top:10px}
@@ -257,7 +273,7 @@ table.tabla .acc{text-align:right;white-space:nowrap}
 table.tabla .acc button,.table-act{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--gris);background:var(--blanco);border-radius:var(--r-sm);color:var(--azul-real);cursor:pointer;margin-left:4px}
 table.tabla .acc button:hover{background:var(--azul-real);color:var(--blanco);border-color:var(--azul-real)}
 table.tabla tbody tr:last-child td{border-bottom:none}
-.tabla-scroll{overflow-x:auto}
+.tabla-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tabla-envoltura{overflow:hidden}
 /* A31: el checkbox de seleccion de tabla ya no lleva accent-color inline;
    color y medidas salen de los tokens (antes style="...#004a93..." x2). */
@@ -268,6 +284,9 @@ table.tabla tbody tr:last-child td{border-bottom:none}
    por debajo de 1280px el padding lateral se reduce. */
 @media (max-width:1279px){
   table.tabla thead th,table.tabla tbody td{padding-left:10px;padding-right:10px}
+}
+@media (min-width:768px) and (max-width:1023px){
+  table.tabla{min-width:680px}
 }
 
 /* Vista tarjeta. A 375px una tabla de hasta 9 columnas no cabe ni con scroll
@@ -291,9 +310,15 @@ table.tabla tbody tr:last-child td{border-bottom:none}
   table.tabla tbody td::before{content:attr(data-label);flex:0 0 38%;
     font-size:13px;font-weight:600;color:var(--azul-real);line-height:1.4;
     text-transform:uppercase;letter-spacing:.04em}
+  table.tabla tbody td .barra-celda,table.tabla tbody td .prog,table.tabla tbody td .medida{flex:1;min-width:120px}
   table.tabla tbody td.acc{justify-content:flex-start}
+  table.tabla tbody td .acciones-cell{justify-content:flex-start;flex-wrap:wrap;gap:6px}
   table.tabla tbody td.sel{display:none}
   table.tabla tbody tr td:last-child{border-bottom:none}
+}
+@media (max-width:380px){
+  table.tabla tbody td{flex-direction:column;gap:4px;padding:10px 12px}
+  table.tabla tbody td::before{flex:0 0 auto}
 }
 .toolbar{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--gris);background:var(--blanco);flex-wrap:wrap}
 .toolbar .crece{flex:1;min-width:200px}
@@ -305,6 +330,18 @@ select.filtro,input.filtro{height:40px;border:1px solid var(--gris);border-radiu
 select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r-sm);padding:0 8px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tinta);background:var(--blanco);cursor:pointer}
 .paginacion{display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2);flex-wrap:wrap}
 .paginacion .pag{margin-left:auto;display:flex;gap:6px}
+@media (max-width:767px){
+  .toolbar .buscador,.toolbar .adm-busca,.toolbar .crece{flex:1 1 100%;min-width:0;width:100%}
+  .toolbar select.filtro,.toolbar input.filtro{flex:1 1 calc(50% - 6px);min-width:130px}
+  .toolbar .btn{flex:1 1 auto;justify-content:center}
+}
+@media (max-width:479px){
+  .toolbar select.filtro,.toolbar input.filtro,.toolbar .btn{flex:1 1 100%;width:100%}
+}
+@media (max-width:639px){
+  .paginacion{flex-direction:column;align-items:stretch;text-align:center;gap:10px}
+  .paginacion .pag{margin-left:0;justify-content:center;flex-wrap:wrap}
+}
 
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:var(--r-full);font-size:13px;font-weight:600;border:1px solid;white-space:nowrap}
 .b-amarillo{background:var(--amarillo-14);color:var(--tinta);border-color:var(--amarillo)}
@@ -335,6 +372,10 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
   .otp{gap:6px}
   .otp input,.otp span{width:calc((100% - 42px)/8);min-width:32px;height:48px;font-size:18px}
 }
+@media (max-width:380px){
+  .otp{gap:4px}
+  .otp input,.otp span{width:calc((100% - 28px)/8);min-width:28px;height:44px;font-size:16px}
+}
 .drop{border:1px dashed var(--gris);border-radius:var(--r-md);background:var(--noche-02);padding:28px;text-align:center;color:var(--tinta-2);cursor:pointer;display:block}
 .drop.sobre{border-color:var(--azul-real);background:var(--azul-06);color:var(--azul-real)}
 .drop svg{color:var(--azul-real);margin:0 auto 8px}
@@ -355,7 +396,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
    rompan los selectores que esperan los hijos reales dentro de .main. */
 .vista-form{display:contents}
 
-.steps{display:flex;align-items:center;gap:0;margin-bottom:28px;flex-wrap:wrap}
+.steps{display:flex;align-items:center;gap:10px 0;margin-bottom:28px;flex-wrap:wrap}
 .step{display:flex;align-items:center;gap:9px}
 .step i{width:28px;height:28px;flex:0 0 28px;border-radius:var(--r-full);background:var(--blanco);border:1px solid var(--gris);color:var(--tinta-2);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:700}
 .step b{font-size:13px;font-weight:500;color:var(--tinta-2)}
@@ -363,15 +404,27 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 .step.activo b{color:var(--tinta);font-weight:600}
 .step.hecho i{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}
 .step-line{width:44px;height:1px;background:var(--gris);margin:0 12px}
+@media (max-width:767px){
+  .steps{gap:10px 12px}
+  .step-line{display:none}
+  .step{flex:1 1 calc(50% - 12px);min-width:140px}
+}
+@media (max-width:420px){
+  .step{flex:1 1 100%}
+}
 
 .lista-def{display:flex;flex-direction:column}
 .def-row{display:flex;gap:16px;padding:11px 0;border-bottom:1px solid var(--gris);font-size:14px}
 .def-row:last-child{border-bottom:none}
 .def-row dt{flex:0 0 210px;color:var(--tinta-2);font-weight:500}
-.def-row dd{margin:0;color:var(--tinta);font-weight:500}
+.def-row dd{margin:0;color:var(--tinta);font-weight:500;min-width:0}
 /* El dt reserva 210px fijos: a 375px no deja sitio para el valor y la fila se
-   sale. En movil el par se apila. */
-@media (max-width:767px){.def-row{flex-direction:column;gap:2px}.def-row dt{flex:0 0 auto}}
+   sale. En movil el par se apila, salvo cuando dt es un icono inline (flex:0 0 auto). */
+@media (max-width:767px){
+  .def-row:not(:has(> dt[style*="flex:0 0 auto"])){flex-direction:column;gap:2px}
+  .def-row:not(:has(> dt[style*="flex:0 0 auto"])) dt{flex:0 0 auto}
+  .def-row:has(> dt[style*="flex:0 0 auto"]){flex-wrap:wrap;align-items:center;gap:8px 12px}
+}
 
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--gris);margin-bottom:20px;overflow-x:auto}
 .tabs button{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--tinta-2);cursor:pointer;white-space:nowrap}
@@ -390,7 +443,7 @@ select.sel-estado{height:32px;border:1px solid var(--gris);border-radius:var(--r
 .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--gris)}
 
 .drawer-fondo{position:fixed;inset:0;background:var(--noche-55);z-index:70}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:360px;background:var(--blanco);box-shadow:var(--shadow-3);z-index:75;display:flex;flex-direction:column;border-left:1px solid var(--gris)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);background:var(--blanco);box-shadow:var(--shadow-3);z-index:75;display:flex;flex-direction:column;border-left:1px solid var(--gris)}
 .drawer-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris);background:var(--azul-noche)}
 .drawer-head h2{flex:1;color:var(--blanco);font-size:16px}
 .drawer-body{flex:1;overflow-y:auto}
@@ -434,7 +487,7 @@ LISTADOS_CSS = """
 .aviso-meta{font-size:13px;color:var(--tinta-2);margin-top:3px}
 .aviso-acc{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 
-.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.kanban{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
 .kan-col{background:var(--noche-04);border:1px solid var(--gris);border-radius:var(--r-md);padding:16px}
 .kan-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .kan-titulo{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-2)}
@@ -445,7 +498,8 @@ LISTADOS_CSS = """
 .kan-meta{font-size:13px;color:var(--tinta-2);margin-top:5px}
 .kan-foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--gris);font-size:13px;color:var(--tinta-2)}
 .kan-empty{font-size:13px;color:var(--gris);text-align:center;padding:18px 0;border:1px dashed var(--gris);border-radius:var(--r-sm)}
-@media (max-width:1023px){.kanban{grid-template-columns:1fr}}
+@media (max-width:1199px){.kanban{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:767px){.kanban{grid-template-columns:minmax(0,1fr)}}
 
 .linea{list-style:none;margin:0;padding:0}
 .ln-item{display:flex;gap:18px;position:relative;padding-bottom:18px}
@@ -471,9 +525,9 @@ LISTADOS_CSS = """
 .ag-titulo{font-size:14px;font-weight:600;color:var(--tinta)}
 .ag-meta{font-size:13px;color:var(--tinta-2);margin-top:3px}
 
-.emp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-@media (max-width:1279px){.emp-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:1023px){.emp-grid{grid-template-columns:1fr}}
+.emp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:1279px){.emp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:767px){.emp-grid{grid-template-columns:minmax(0,1fr)}}
 .emp-card{background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);padding:18px;box-shadow:var(--shadow-1)}
 .emp-top{display:flex;align-items:flex-start;gap:12px}
 .emp-ico{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-sm);background:var(--azul-08);color:var(--azul-real);display:flex;align-items:center;justify-content:center}
@@ -500,7 +554,7 @@ LISTADOS_CSS = """
 .fila-simple button:hover{border-color:var(--azul-real);color:var(--azul-real)}
 @media (max-width:767px){.fila-simple{flex-wrap:wrap}}
 
-@media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-fecha{width:62px;flex:0 0 62px}}
+@media (max-width:767px){.aviso{flex-wrap:wrap}.aviso-acc{width:100%;justify-content:flex-end}.ln-item{gap:12px}.ln-item::after{left:30px}.ln-fecha{width:62px;flex:0 0 62px}.ag-ev{flex-wrap:wrap;gap:8px 14px;padding:12px 16px}.ag-dia-h{padding:11px 16px;flex-wrap:wrap}.dist-lbl{width:76px;flex:0 0 76px}}
 """
 
 # El respaldo del topbar reutiliza el mismo artwork, pero como fondo decorativo.
@@ -533,7 +587,7 @@ INTERACCION_CSS = (
     ".modal-velo{position:fixed;inset:0;z-index:110;background:rgba(5,21,51,.55);"
     "display:flex;align-items:center;justify-content:center;padding:20px}"
     ".modal{background:var(--blanco);border-radius:var(--r-md);box-shadow:var(--shadow-3);"
-    "width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column}"
+    "width:100%;max-width:520px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column}"
     ".modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--gris)}"
     ".modal-head h2{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em}"
     ".modal-cuerpo{padding:20px;overflow-y:auto}"
@@ -569,8 +623,12 @@ INTERACCION_CSS = (
     ".kan-col.sobre{background:var(--azul-06);outline:2px dashed var(--azul-real);outline-offset:-2px}"
     ".kan-card.arrastrando{opacity:.45}"
     "@media (prefers-reduced-motion:reduce){.toast,.sg-drawer{animation:none}}"
+    "@media (min-width:1600px){.modal{max-width:600px}.modal.wide{max-width:840px}.sg-drawer,.drawer{width:420px}}"
     "@media (max-width:767px){"
     ".toast-pila{left:12px;right:12px;bottom:12px;max-width:none}"
+    ".modal-velo,.modal-fondo{padding:12px}"
+    ".modal{max-height:calc(100dvh - 24px)}"
+    ".modal-head,.modal-cuerpo,.modal-body,.modal-foot{padding:14px 16px}"
     ".modal-foot{flex-direction:column-reverse}"
     ".modal-foot .btn{width:100%}"
     "}"
@@ -582,19 +640,20 @@ LOGO_MARCA_CSS = ""
 # repetian el mismo bloque; la parte que varia (fondo, peso, punto de hito) baja
 # a modificadores de clase.
 CALENDARIO_CSS = (
-    ".cal{display:grid;grid-template-columns:repeat(7,1fr)}"
+    ".cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}"
     ".cal-cab{background:#162644}"
-    ".cal-cab div{padding:8px;text-align:center;color:#ffffff;font-size:13px;"
+    ".cal-cab div{padding:8px 4px;text-align:center;color:#ffffff;font-size:13px;"
     "font-weight:600;letter-spacing:.04em}"
-    ".cal-celda,.cal-vacio{padding:8px;border:1px solid #bbbbbb}"
+    ".cal-celda,.cal-vacio{padding:8px 4px;border:1px solid #bbbbbb;min-height:40px;"
+    "display:flex;align-items:center;justify-content:center}"
     ".cal-celda{position:relative;background:#ffffff;color:#051533;"
     "text-align:center;font-size:13px;font-weight:400}"
     ".cal-celda.hoy{background:#ffd300;font-weight:700}"
     ".cal-punto{position:absolute;top:4px;right:4px;width:5px;height:5px;"
     "border-radius:999px;background:#004a93}"
-    ".cal-celda.cal-dia-btn{display:block;width:100%;box-sizing:border-box;font:inherit;"
-    "font-size:13px;font-weight:400;padding:8px;text-align:center;cursor:pointer;"
-    "color:#051533;background:#ffffff;border:1px solid #bbbbbb}"
+    ".cal-celda.cal-dia-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:inherit;"
+    "font-size:13px;font-weight:400;padding:8px 4px;text-align:center;cursor:pointer;"
+    "color:#051533;background:#ffffff;border:1px solid #bbbbbb;min-height:40px}"
     ".cal-celda.cal-dia-btn:hover{background:rgba(0,74,147,.06);border-color:#004a93}"
     ".cal-celda.cal-dia-btn:focus-visible{outline:2px solid #004a93;outline-offset:-2px}"
     # Calendario navegable del Docente: cada dia es un boton. Se anaden
@@ -609,6 +668,7 @@ CALENDARIO_CSS = (
     ".cal-btn.activo .cal-punto{background:#ffd300}"
     ".cal-resumen{margin:16px 0 10px;font-size:14px;color:#162644}"
     ".cal-resumen b{font-size:16px;color:#051533}"
+    "@media (max-width:479px){.cal-cab div,.cal-celda,.cal-vacio,.cal-celda.cal-dia-btn{padding:6px 2px;min-height:36px}}"
 )
 
 # --- Ampliaciones del rol Estudiante -----------------------------------------
@@ -643,16 +703,18 @@ EXTRA_CSS = """
 .metrica-enlace:hover .mini-prev,.metrica-enlace:focus-visible .mini-prev{
   opacity:1;visibility:visible;transform:none}
 @media (prefers-reduced-motion:reduce){.mini-prev{transition:none}}
+@media (hover:none){.mini-prev{display:none!important}}
 
 /* --- Aviso superior de Inicio (tareas pendientes) ------------------------- */
 .mini-aviso{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
   border:1px solid var(--azul-real);border-left:4px solid var(--amarillo);
   border-radius:var(--r-sm);background:var(--azul-06);color:var(--tinta-2);
-  text-decoration:none}
+  text-decoration:none;flex-wrap:wrap}
 .mini-aviso:hover{background:var(--azul-12);text-decoration:none}
 .mini-aviso b{color:var(--tinta)}
 .mini-aviso .mini-aviso-ico{flex:0 0 18px;color:var(--azul-real);margin-top:1px}
 .mini-aviso .mini-aviso-cta{margin-left:auto;font-weight:700;color:var(--azul-real);white-space:nowrap}
+@media (max-width:639px){.mini-aviso .mini-aviso-cta{margin-left:30px;width:100%}}
 
 /* --- Desplegable de opciones de tareas ------------------------------------ */
 .desplegable{border:1px solid var(--gris);border-radius:var(--r-sm);background:var(--blanco)}
@@ -662,7 +724,7 @@ EXTRA_CSS = """
 .desplegable[open]>summary{border-bottom:1px solid var(--gris)}
 .desp-lista{display:flex;flex-direction:column}
 .desp-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
-  border-bottom:1px solid var(--gris);font-size:13px;color:var(--tinta);text-decoration:none}
+  border-bottom:1px solid var(--gris);font-size:13px;color:var(--tinta);text-decoration:none;flex-wrap:wrap}
 .desp-item:last-child{border-bottom:none}
 .desp-item:hover{background:var(--azul-06);text-decoration:none}
 .desp-item svg{flex:0 0 16px;color:var(--azul-real)}
@@ -686,7 +748,7 @@ EXTRA_CSS = """
   background:var(--azul-real);color:var(--blanco);display:flex;align-items:center;
   justify-content:center;font-size:32px;font-weight:700;border:1px solid var(--gris);overflow:hidden}
 .perfil-foto img{width:100%;height:100%;object-fit:cover}
-.perfil-datos{flex:1;min-width:240px}
+.perfil-datos{flex:1;min-width:min(240px,100%)}
 .perfil-nombre{font-size:28px;font-weight:800;letter-spacing:-.02em}
 .perfil-usuario{font-size:16px;color:var(--tinta-2);margin-top:2px}
 .perfil-bio{font-size:14px;color:var(--tinta-2);margin-top:12px;max-width:640px}
@@ -697,6 +759,13 @@ EXTRA_CSS = """
 .perfil-acciones{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 .perfil-repo{display:block;color:inherit;text-decoration:none}
 .perfil-repo:hover{text-decoration:none}
+@media (max-width:639px){
+  .perfil-cab{flex-direction:column;align-items:center;text-align:center;gap:16px}
+  .perfil-foto{width:104px;height:104px;flex:0 0 104px}
+  .perfil-nombre{font-size:24px}
+  .perfil-meta{justify-content:center}
+  .perfil-acciones{margin-left:0;width:100%;justify-content:center}
+}
 
 /* --- Diagnostico: selector por tarjetas ----------------------------------- */
 .radio-grupo{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
@@ -708,7 +777,7 @@ EXTRA_CSS = """
 /* --- Kanban de 4 columnas (tareas: comple., en curso, revision, pendiente) -- */
 .kanban[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media (max-width:1279px){.kanban[data-cols="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:767px){.kanban[data-cols="4"]{grid-template-columns:1fr}}
+@media (max-width:767px){.kanban[data-cols="4"]{grid-template-columns:minmax(0,1fr)}}
 
 /* --- Bandeja de notificaciones: cada aviso navega ------------------------- */
 a.notif{color:inherit;text-decoration:none;cursor:pointer;align-items:center}
@@ -737,7 +806,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .fila-tarea:last-child{border-bottom:none}
 .fila-tarea:hover{background:var(--azul-06);text-decoration:none}
 .fila-ico{flex:0 0 16px;color:var(--azul-real);display:flex}
-.fila-txt{flex:1;font-size:13px;color:var(--tinta)}
+.fila-txt{flex:1;font-size:13px;color:var(--tinta);min-width:0}
 .fila-sub{display:block;font-size:13px;color:var(--tinta-2);margin-top:2px}
 .fase-link{color:inherit;text-decoration:none}
 .fase-link:hover{color:var(--azul-real);text-decoration:underline}
@@ -758,7 +827,7 @@ a.notif:hover{background:var(--azul-06);text-decoration:none}
 .estado-vacio-mini b{display:block;color:var(--tinta)}
 
 /* --- Ayuda bajo un select en formularios --------------------------------- */
-.select-ayuda{display:block;margin-top:4px;font-size:12px;color:var(--tinta-2)}
+.select-ayuda{display:block;margin-top:4px;font-size:13px;color:var(--tinta-2)}
 """
 
 CSS = (TOKENS_CSS + TOKENS_LOGO_CSS + SHELL_CSS + COMPONENTES_CSS + LISTADOS_CSS

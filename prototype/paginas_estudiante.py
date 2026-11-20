@@ -177,9 +177,9 @@ def dashboard():
         + '<div class="grid g-2-1">'
         + card(
             "Progreso de mi emprendimiento",
-            '<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">'
+            '<div class="bloque-progreso">'
             + circular(62, "avance", "FASE 2 · Ejecución")
-            + '<div style="flex:1;min-width:280px">'
+            + '<div class="bloque-progreso-cuerpo">'
             + progreso_fases([
                 ("FASE 1 · Ideación", 100, AZUL),
                 ("FASE 2 · Ejecución", 62, AZUL),
@@ -263,10 +263,10 @@ def _estado_emp(d):
         + '<div class="grid">'
         + card(
             "Movimiento en el plan",
-            '<div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap">'
+            '<div class="bloque-progreso">'
             + circular(d["pct"], "avance", d["fase"])
-            + '<div style="flex:1;min-width:300px">'
-            + '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">'
+            + '<div class="bloque-progreso-cuerpo">'
+            + '<div class="kpi-grid-2">'
             + "".join(
                 '<div style="border:1px solid #bbbbbb;border-radius:8px;padding:12px 14px">'
                 '<div class="suave">%s</div>'

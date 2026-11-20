@@ -862,7 +862,7 @@ SA_CSS = """
   color:var(--tinta-2);padding:4px 0;cursor:pointer}
 .sa-perm input{accent-color:var(--azul-real);margin-top:2px}
 .sa-perm-titulo{font-size:14px;font-weight:700;color:var(--tinta);margin:18px 0 10px}
-.sa-subt{font-size:12px;font-weight:700;color:var(--tinta);margin:16px 0 6px;
+.sa-subt{font-size:13px;font-weight:700;color:var(--tinta);margin:16px 0 6px;
   letter-spacing:.06em;text-transform:uppercase}
 .sa-exito{text-align:left}
 .sa-exito h3{font-size:20px;margin:0 0 6px}
@@ -895,7 +895,7 @@ a.table-act{text-decoration:none}
 .sa-switch input:checked + .sa-switch-pista::after{transform:translateX(20px)}
 .sa-switch input:focus-visible + .sa-switch-pista{box-shadow:0 0 0 3px var(--azul-12)}
 .sa-switch-texto b{display:block;font-size:14px;color:var(--tinta)}
-.sa-switch-texto small{display:block;font-size:12px;color:var(--tinta-2)}
+.sa-switch-texto small{display:block;font-size:13px;color:var(--tinta-2)}
 .sa-estado-fila,.sa-perm-resumen{display:flex;align-items:center;gap:10px;
   flex-wrap:wrap;margin:10px 0 0}
 .sa-mini{font-size:13px;color:var(--tinta-2)}

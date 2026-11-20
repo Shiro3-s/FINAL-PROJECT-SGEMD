@@ -27,8 +27,8 @@ def barras(titulo, sub, etiquetas, valores, maximo=None, unidad="", alto=180, co
     W, H = 520, alto
     pad_l, pad_b, pad_t = 44, 30, 16
     pw, ph = W - pad_l - 12, H - pad_b - pad_t
-    s = ['<svg viewBox="0 0 %d %d" width="100%%" height="%d" role="img" '
-         'aria-label="%s" style="display:block">' % (W, H, H, _esc(titulo or "Gráfico de barras"))]
+    s = ['<svg viewBox="0 0 %d %d" role="img" '
+         'aria-label="%s" style="display:block;width:100%%;height:auto">' % (W, H, _esc(titulo or "Gráfico de barras"))]
     # rejilla + eje Y con valores
     for i in range(5):
         y = pad_t + ph - i * ph / 4
@@ -69,13 +69,9 @@ def barras_h(titulo, sub, etiquetas, valores, maximo=None, unidad="", color=AZUL
     filas = len(valores)
     alto = filas * alto_fila + 8
     W = ancho
-    if responsive:
-        s = ['<svg viewBox="0 0 %d %d" role="img" aria-label="%s" '
-             'style="display:block;width:100%%;height:auto">'
-             % (W, alto, _esc(titulo or "Gráfico"))]
-    else:
-        s = ['<svg viewBox="0 0 %d %d" width="100%%" height="%d" role="img" aria-label="%s" '
-             'style="display:block">' % (W, alto, alto, _esc(titulo or "Gráfico"))]
+    s = ['<svg viewBox="0 0 %d %d" role="img" aria-label="%s" '
+         'style="display:block;width:100%%;height:auto">'
+         % (W, alto, _esc(titulo or "Gráfico"))]
     pw = W - pad_l - pad_r
     for i, (et, v) in enumerate(zip(etiquetas, valores)):
         y = i * alto_fila + 6
@@ -99,8 +95,8 @@ def lineas(titulo, sub, etiquetas, series, maximo=None, unidad="", alto=200):
     W, H = 520, alto
     pad_l, pad_b, pad_t = 44, 32, 20
     pw, ph = W - pad_l - 12, H - pad_b - pad_t
-    s = ['<svg viewBox="0 0 %d %d" width="100%%" height="%d" role="img" aria-label="%s" '
-         'style="display:block">' % (W, H, H, _esc(titulo or "Gráfico de líneas"))]
+    s = ['<svg viewBox="0 0 %d %d" role="img" aria-label="%s" '
+         'style="display:block;width:100%%;height:auto">' % (W, H, _esc(titulo or "Gráfico de líneas"))]
     for i in range(5):
         y = pad_t + ph - i * ph / 4
         v = mx * i / 4
@@ -168,8 +164,8 @@ def donut(titulo, sub, segmentos, unidad=""):
     lg = '<div class="leyenda" style="flex-direction:column;gap:8px">%s</div>' % "".join(
         '<span><i style="background:%s"></i>%s <b style="color:#051533">%d</b></span>' % (c, _esc(n), v)
         for n, v, c in segmentos)
-    return ('<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">'
-            '<div>%s</div><div style="flex:1;min-width:180px">%s</div></div>'
+    return ('<div class="donut-wrap">'
+            '<div>%s</div><div style="flex:1;min-width:160px">%s</div></div>'
             % ("".join(s), lg))
 
 

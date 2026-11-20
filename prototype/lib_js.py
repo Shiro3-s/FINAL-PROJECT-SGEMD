@@ -122,7 +122,7 @@ JS = r"""
     document.body.classList.remove("sin-scroll");
   }
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { cerrarModal(); cerrarDrawer(); }
+    if (e.key === "Escape") { cerrarModal(); cerrarDrawer(); abrirSB(false); }
   });
 
   /* --- drawer (notificaciones) ------------------------------------------ */
@@ -221,7 +221,11 @@ JS = r"""
   function abrirSB(abrir) {
     if (!sb) return;
     sb.classList.toggle("abierto", abrir);
-    if (ov) ov.classList.toggle("visible", abrir);
+    var esDrawer = window.innerWidth < 1024;
+    if (ov) ov.classList.toggle("visible", Boolean(abrir && esDrawer));
+    if (!$(".modal-velo") && !$(".sg-drawer")) {
+      document.body.classList.toggle("sin-scroll", Boolean(abrir && esDrawer));
+    }
     $$(".burger").forEach(function (b) {
       b.setAttribute("aria-expanded", abrir ? "true" : "false");
     });
@@ -229,6 +233,16 @@ JS = r"""
   if (ov) ov.addEventListener("click", function () { abrirSB(false); });
   if (sb) sb.addEventListener("click", function (e) {
     if (window.innerWidth < 1024 && e.target.closest("a")) abrirSB(false);
+  });
+  window.addEventListener("resize", function () {
+    if (window.innerWidth >= 1024) {
+      if (ov && !$(".sg-drawer")) ov.classList.remove("visible");
+      if (!$(".modal-velo")) document.body.classList.remove("sin-scroll");
+    }
+    if (window.innerWidth >= 480) {
+      var tb = $(".topbar");
+      if (tb) tb.classList.remove("buscando");
+    }
   });
 
   /* --- acordeon del menu lateral (grupos desplegables) ------------------- */
@@ -835,6 +849,17 @@ JS = r"""
         e.preventDefault();
         abrirSB(!sb.classList.contains("abierto"));
         break;
+
+      case "buscar-movil": {
+        e.preventDefault();
+        var tb = $(".topbar");
+        if (tb) {
+          var activo = tb.classList.toggle("buscando");
+          var inp = $(".search input", tb);
+          if (activo && inp) inp.focus();
+        }
+        break;
+      }
 
       case "ver":
       case "ver-detalle":

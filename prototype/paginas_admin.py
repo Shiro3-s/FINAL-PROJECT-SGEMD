@@ -1019,7 +1019,7 @@ ADMIN_CSS = """
 /* Buscador propio del admin: no usa la clase .buscador porque el kit
    compartido se engancha a ".buscador input" y filtraria la primera tabla
    de la pagina, no la que el admin quiere. */
-.adm-busca{display:flex;align-items:center;gap:8px;flex:1 1 240px;min-width:200px;
+.adm-busca{display:flex;align-items:center;gap:8px;flex:1 1 240px;min-width:min(200px,100%);
   padding:0 12px;background:var(--blanco);border:1px solid var(--gris);
   border-radius:var(--r-sm)}
 .adm-busca svg{flex:0 0 16px;color:var(--gris)}
@@ -1041,32 +1041,36 @@ tr.adm-resaltada>td:first-child{box-shadow:inset 3px 0 0 var(--amarillo)}
 .cfg-titulo{font-size:18px;margin:0 0 12px;padding-bottom:8px;
   border-bottom:1px solid var(--gris)}
 /* Tarjetas de evento con imagen (Eventos del admin) */
-.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:16px}
 .ev-card{background:var(--blanco);border:1px solid var(--gris);border-radius:var(--r-md);
   overflow:hidden;display:flex;flex-direction:column}
 .ev-img{position:relative;height:132px;display:flex;align-items:center;justify-content:center;
-  color:var(--blanco);background:linear-gradient(135deg,#1d4ed8,#0ea5e9)}
-.ev-img.g1{background:linear-gradient(135deg,#0f766e,#22c55e)}
-.ev-img.g2{background:linear-gradient(135deg,#7c3aed,#ec4899)}
-.ev-img.g3{background:linear-gradient(135deg,#b45309,#f59e0b)}
-.ev-img.g4{background:linear-gradient(135deg,#334155,#64748b)}
+  color:var(--blanco);background:linear-gradient(135deg,var(--azul-noche),var(--azul-real))}
+.ev-img.g1{background:linear-gradient(135deg,var(--azul-profundo),var(--azul-real))}
+.ev-img.g2{background:linear-gradient(135deg,var(--azul-real),var(--azul-profundo));box-shadow:inset 0 -4px 0 var(--amarillo)}
+.ev-img.g3{background:linear-gradient(135deg,var(--azul-noche),var(--azul-profundo));box-shadow:inset 0 -4px 0 var(--amarillo)}
+.ev-img.g4{background:linear-gradient(135deg,var(--azul-profundo),var(--azul-noche))}
 .ev-img svg{opacity:.9}
 .ev-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
 .ev-body h3{margin:0;font-size:16px;color:var(--tinta)}
-.ev-meta{font-size:13px;color:var(--gris);display:flex;flex-wrap:wrap;gap:4px 12px}
+.ev-meta{font-size:13px;color:var(--tinta-2);display:flex;flex-wrap:wrap;gap:4px 12px}
 .ev-meta span{display:inline-flex;align-items:center;gap:4px}
 .ev-foot{margin-top:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .ev-hero{height:220px;border-radius:var(--r-md);display:flex;align-items:center;
-  justify-content:center;color:var(--blanco);background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  justify-content:center;color:var(--blanco);background:linear-gradient(135deg,var(--azul-noche),var(--azul-real));
   margin-bottom:16px}
-.ev-hero.g1{background:linear-gradient(135deg,#0f766e,#22c55e)}
-.ev-hero.g2{background:linear-gradient(135deg,#7c3aed,#ec4899)}
-.ev-hero.g3{background:linear-gradient(135deg,#b45309,#f59e0b)}
-.ev-hero.g4{background:linear-gradient(135deg,#334155,#64748b)}
+.ev-hero.g1{background:linear-gradient(135deg,var(--azul-profundo),var(--azul-real))}
+.ev-hero.g2{background:linear-gradient(135deg,var(--azul-real),var(--azul-profundo));box-shadow:inset 0 -4px 0 var(--amarillo)}
+.ev-hero.g3{background:linear-gradient(135deg,var(--azul-noche),var(--azul-profundo));box-shadow:inset 0 -4px 0 var(--amarillo)}
+.ev-hero.g4{background:linear-gradient(135deg,var(--azul-profundo),var(--azul-noche))}
 .ev-preview{height:150px;border-radius:var(--r-sm);display:flex;align-items:center;
-  justify-content:center;color:var(--blanco);background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  justify-content:center;color:var(--blanco);background:linear-gradient(135deg,var(--azul-noche),var(--azul-real));
   margin-bottom:12px}
 .ev-preview.has-img{background-size:cover;background-position:center}
+@media (max-width:479px){
+  .ev-hero{height:160px}
+  .cfg-nav-item{flex:1 1 calc(50% - 8px);text-align:center}
+}
 """
 
 

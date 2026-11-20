@@ -49,7 +49,7 @@ _PAG = """<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>__CSS__
 __LOGO_COLOR_CSS__
-.auth{display:flex;min-height:100vh}
+.auth{display:flex;min-height:100vh;min-height:100dvh}
 /* Panel navy. Esto vive en una clase y no en un style= en línea a proposito: un
    estilo inline gana a cualquier media query, asi que con el inline este panel
    no se ocultaba nunca en movil y empujaba el formulario fuera de pantalla. */
@@ -62,6 +62,17 @@ __LOGO_COLOR_CSS__
 .auth-panel{flex:0 0 560px;background:#ffffff;padding:56px 60px;
   display:flex;align-items:center;justify-content:center}
 .auth-panel>div{width:100%;max-width:__ANCHO__px}
+@media (min-width:1600px){
+  .auth-izq{padding:72px 88px}
+  .auth-panel{flex:0 0 680px;padding:72px 80px}
+  .auth-panel>div{max-width:520px}
+}
+@media (min-width:2560px){
+  .auth-izq{padding:96px 120px}
+  .accede-logo{width:340px}
+  .auth-panel{flex:0 0 840px;padding:96px 104px}
+  .auth-panel>div{max-width:620px}
+}
 /* A <=1023px el panel navy se oculta, asi que la marca pasa al panel blanco como
    barra compacta: sin esto el movil y la tablet entran sin logo. Se pinta con
    background y no con un segundo <img> para no duplicar el logo en el DOM.
@@ -73,6 +84,10 @@ __LOGO_COLOR_CSS__
   .auth-marca{display:block;width:170px;height:81px;margin:0 auto 22px;
     background-image:var(--logo-color-url);background-repeat:no-repeat;
     background-position:center;background-size:contain}
+}
+@media (max-width:479px){
+  .auth-panel{padding:24px 16px}
+  .auth-marca{width:140px;height:66px;margin-bottom:18px}
 }
 __ACCESO_CSS__
 </style>
@@ -417,9 +432,9 @@ def registro():
     <input id="n2" type="text" placeholder="Ej. Lopez Herrera" required></div>
 </div>
 <div class="campo"><label for="ti">Tipo y número de documento<span class="req">*</span></label>
-  <div style="display:flex;gap:10px">
-    <select id="ti" style="flex:0 0 150px"><option>CC</option><option>CE</option><option>TI</option></select>
-    <input type="text" placeholder="1020304050" style="flex:1" required></div></div>
+  <div class="doc-grupo">
+    <select id="ti"><option>CC</option><option>CE</option><option>TI</option></select>
+    <input type="text" placeholder="1020304050" required></div></div>
 <div class="campo"><label for="ce">Correo personal<span class="req">*</span></label>
   <input id="ce" type="email" placeholder="mariana@correo.com" required></div>
 <div class="campo"><label for="ci">Correo institucional<span class="req">*</span></label>
