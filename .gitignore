@@ -26,3 +26,4 @@ playwright-report/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+.netlify
