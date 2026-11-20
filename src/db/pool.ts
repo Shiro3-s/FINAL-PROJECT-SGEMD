@@ -13,8 +13,39 @@ export const pool = new Pool({
   connectionString: env.DATABASE_URL,
   max: 10,
   idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
+  connectionTimeoutMillis: 15_000,
 });
+
+/**
+ * Conexión directa (sin PgBouncer) para operaciones de sesión como `pg_try_advisory_lock`.
+ * Si `DATABASE_URL_UNPOOLED` no está definida, usa una conexión normal del pool.
+ */
+export async function connectDirect(): Promise<{
+  client: pg.Client | PoolClient;
+  release: () => Promise<void>;
+}> {
+  if (env.DATABASE_URL_UNPOOLED) {
+    const client = new pg.Client({
+      connectionString: env.DATABASE_URL_UNPOOLED,
+      connectionTimeoutMillis: 15_000,
+    });
+    await client.connect();
+    return {
+      client,
+      release: async () => {
+        await client.end();
+      },
+    };
+  }
+
+  const client = await pool.connect();
+  return {
+    client,
+    release: async () => {
+      client.release();
+    },
+  };
+}
 
 pool.on('error', (error) => {
   logger.error({ err: error }, 'Error en una conexión inactiva del pool');

@@ -6,7 +6,7 @@ import archiver from 'archiver';
 import ExcelJS from 'exceljs';
 import type { RespaldoEstado, RespaldoTipo } from '../../shared/index.js';
 import { env } from '../../config/env.js';
-import { pool, query } from '../../db/pool.js';
+import { connectDirect, query } from '../../db/pool.js';
 import { AUDIT_ACTIONS, audit } from '../../services/audit.js';
 import {
   buildManifest,
@@ -279,7 +279,7 @@ interface CreateBackupOptions {
  * libera al terminar o al caer la conexión.
  */
 export async function createBackup(options: CreateBackupOptions): Promise<BackupDetail> {
-  const client = await pool.connect();
+  const { client, release } = await connectDirect();
   let locked = false;
 
   try {
@@ -406,7 +406,7 @@ export async function createBackup(options: CreateBackupOptions): Promise<Backup
         .query(`SELECT pg_advisory_unlock(hashtext('respaldos:ejecutar'))`)
         .catch(() => undefined);
     }
-    client.release();
+    await release().catch(() => undefined);
   }
 }
 

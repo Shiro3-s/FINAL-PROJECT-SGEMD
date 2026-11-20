@@ -30,7 +30,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "check:schema": "node scripts/check-schema.mjs"
+    "check:schema": "node scripts/check-schema.mjs",
+    "db:init": "node scripts/init-db.mjs"
   },
   "devDependencies": {
     "@types/archiver": "^6.0.3",

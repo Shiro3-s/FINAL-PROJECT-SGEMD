@@ -14,6 +14,7 @@ dist/
 .env
 .env.*
 !.env.example
+.neon
 
 # Datos de la aplicación
 storage/*

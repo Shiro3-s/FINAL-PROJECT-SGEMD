@@ -83,7 +83,14 @@ export async function runDump(file: string): Promise<number> {
   try {
     await execFileAsync(
       env.PG_DUMP_BIN,
-      ['--format=custom', '--no-owner', '--no-privileges', '--file', file, env.DATABASE_URL],
+      [
+        '--format=custom',
+        '--no-owner',
+        '--no-privileges',
+        '--file',
+        file,
+        env.DATABASE_URL_UNPOOLED ?? env.DATABASE_URL,
+      ],
       { maxBuffer: 10 * MB },
     );
   } catch (error) {

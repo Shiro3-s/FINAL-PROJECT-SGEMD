@@ -18,7 +18,9 @@ const envSchema = z.object({
     .string()
     .default('true')
     .transform((value) => value === 'true'),
+  TRUST_PROXY: z.coerce.number().int().min(0).default(1),
   DATABASE_URL: z.string().min(1),
+  DATABASE_URL_UNPOOLED: optionalText,
   JWT_SECRET: z.string().min(32, 'JWT_SECRET debe tener al menos 32 caracteres'),
   OTP_HMAC_SECRET: z.string().min(32, 'OTP_HMAC_SECRET debe tener al menos 32 caracteres'),
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),

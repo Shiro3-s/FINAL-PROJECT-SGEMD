@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
+import { env } from './config/env.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { originCheck } from './middleware/originCheck.js';
 import { actaRouter } from './modules/acta/routes.js';
@@ -32,8 +33,8 @@ export function createApp(): express.Express {
   const app = express();
 
   app.disable('x-powered-by');
-  // Detrás de Caddy: rate limits y auditoría ven la IP real del cliente.
-  app.set('trust proxy', 1);
+  // 1 salto detrás de Caddy; 2 saltos detrás de Netlify Proxy + Render.
+  app.set('trust proxy', env.TRUST_PROXY);
 
   app.use(helmet());
   // Los JSON son pequeños; las evidencias suben por multipart en streaming (nunca por aquí).

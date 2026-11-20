@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: sgemd-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    branch: back/production
+    plan: free
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TZ
+        value: America/Bogota
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: TRUST_PROXY
+        value: "2"
+      - key: PROXY_MAX_BODY_MB
+        value: "25"
+      - key: OTP_RESEND_COOLDOWN_SECONDS
+        value: "60"
+      - key: STORAGE_DIR
+        value: /app/storage
+      - key: BACKUPS_DIR
+        value: /app/backups
+      - key: MAIL_TRANSPORT
+        value: file
+      - key: MAIL_FROM
+        value: "SGEMD <no-reply@uniminuto.edu>"
+      - key: MAIL_FILE_DIR
+        value: /app/storage/mail
+      - key: APP_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OTP_HMAC_SECRET
+        generateValue: true
