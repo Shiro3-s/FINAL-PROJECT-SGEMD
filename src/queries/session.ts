@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, apiGet, apiSend } from '../api/client.ts';
-import type { RoleRef, SessionUser } from '../api/types.ts';
+import type { SessionUser } from '../api/types.ts';
 
 /**
  * Sesión de la SPA.
@@ -33,11 +33,7 @@ export function useSessionQuery() {
 }
 
 export interface LoginResponse {
-  usuario: {
-    id: number;
-    estado: SessionUser['estado'];
-    rol: RoleRef;
-  };
+  usuario: SessionUser;
 }
 
 export interface LoginBody {
@@ -46,19 +42,20 @@ export interface LoginBody {
 }
 
 /**
- * Inicio de sesión. El `POST` solo devuelve id, estado y rol; el perfil completo
- * se pide después a `/users/me` para no duplicar la forma del usuario.
+ * Inicio de sesión. El `POST` devuelve `{ usuario }` con la misma forma pública
+ * de `GET /users/me`; sembramos la caché de inmediato tras limpiar el estado
+ * anterior para que `useAuth()` y las guardas de ruta vean al usuario sin
+ * depender de que una consulta `refetchQueries` esté montada.
  */
 export function useLogin() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: LoginBody) =>
       apiSend<LoginResponse>('POST', '/auth/login', body),
-    onSuccess: async () => {
-      // Purga cualquier caché previa antes de cargar la nueva sesión.
+    onSuccess: (data) => {
+      // Purga cualquier caché previa y fija inmediatamente la nueva sesión.
       queryClient.clear();
-      await queryClient.invalidateQueries({ queryKey: sessionKeys.me });
-      await queryClient.refetchQueries({ queryKey: sessionKeys.me });
+      queryClient.setQueryData(sessionKeys.me, data.usuario);
     },
   });
 }

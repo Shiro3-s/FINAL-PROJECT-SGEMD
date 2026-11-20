@@ -7,6 +7,7 @@ import { Button } from '../../components/Button.tsx';
 import { errorMessage } from '../../components/States.tsx';
 import { TextField } from '../../components/FormField.tsx';
 import { useAuth } from '../../auth/AuthProvider.tsx';
+import { homeForUser } from '../../navigation/nav.ts';
 import { useLogin } from '../../queries/session.ts';
 
 interface LoginState {
@@ -41,14 +42,14 @@ export function LoginPage() {
     event.preventDefault();
     setError(null);
     try {
-      await login.mutateAsync({ correoInstitucional: correo.trim(), password });
+      const response = await login.mutateAsync({ correoInstitucional: correo.trim(), password });
       const safeFrom =
         state?.from &&
         state.from.startsWith('/') &&
         !state.from.startsWith('//') &&
         state.from !== '/login'
           ? state.from
-          : '/';
+          : homeForUser(response.usuario);
       navigate(safeFrom, {
         replace: true,
       });
