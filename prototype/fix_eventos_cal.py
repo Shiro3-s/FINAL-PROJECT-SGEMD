@@ -4,11 +4,11 @@ with open('paginas_admin.py','r',encoding='utf-8') as f:
 old = """# Se pinta con calendario_interactivo (data-cal-doc) y lo controla ADMIN_JS.
 EVENTOS_CAL = {
     18: agenda([("09:00", "Taller de costos y precios",
-                 "Auditorio A Ã© 32 de 40 cupos", badge("Publicado", "b-azul"))]),
+                 "Auditorio A é 32 de 40 cupos", badge("Publicado", "b-azul"))]),
     22: agenda([("14:00", "Feria de emprendedores",
-                 "Plaza central Ã© 86 de 120 cupos", badge("Publicado", "b-azul"))]),
+                 "Plaza central é 86 de 120 cupos", badge("Publicado", "b-azul"))]),
     25: agenda([("08:30", "Jornada de mentoria",
-                 "Sala 2 Ã© 14 confirmados", badge("Por aprobar", "b-amarillo", "reloj"))]),
+                 "Sala 2 é 14 confirmados", badge("Por aprobar", "b-amarillo", "reloj"))]),
 }"""
 
 new = """# Se pinta con calendario_interactivo (data-cal-doc) y lo controla ADMIN_JS.

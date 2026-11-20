@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """Rol ESTUDIANTE — 26 pantallas."""
 
+import json
+
 from lib_ui import (
     shell, metricas, metricas_enlace, opciones_card, tabla, toolbar, paginas, badge,
     campo, select, callout, card, estado_vacio, lista_def, steps, tabs, tabs_paneles,
-    ico, boton_accion, ico, linea_tiempo, kanban, agenda, NOTIFS_EST,
+    ico, boton_accion, ico, linea_tiempo, kanban, agenda, NOTIFS_EST, formulario,
 )
 from lib_charts import (
     barras, barras_h, lineas, donut, circular, progreso_fases, stacked_tareas,
@@ -116,6 +118,8 @@ def registrar(reg):
         ("tarea-detalle-completada-clientes.html", "15e Estudiante - Detalle tarea completada (clientes)",
          tarea_detalle_completada_clientes),
         ("asesorias.html", "16 Estudiante - Mis asesorías", asesorias),
+        ("asesoria-detalle.html", "16b Estudiante - Detalle de asesoría",
+         _detalle_asesoria_est),
         ("solicitar-asesoria.html", "17 Estudiante - Solicitar asesoría", solicitar_asesoria),
         ("eventos.html", "18 Estudiante - Eventos", eventos),
         ("evento-detalle-startup.html", "18a Estudiante - Detalle evento (Startup Minuto de Dios)",
@@ -1602,6 +1606,131 @@ def tarea_detalle_completada_clientes():
 
 
 # --- 12. Asesorias -----------------------------------------------------------
+# Fuente unica del detalle de asesorias del estudiante. Cada registro alimenta
+# la vista propia asesoria-detalle.html (se abre con ?id=...).
+ASES_EST = [
+    ("ASE-EST-019", "19 nov 2024", "09:00 - 10:00", "Virtual", "Confirmada",
+     "Sabor y Sabe", "Carlos Mendoza", "meet.sgemd.edu.co/ases-019",
+     "Validación del empaque y precio de venta",
+     "Revisar el costo unitario del empaque, el punto de equilibrio y el precio "
+     "de venta sugerido para la línea de salsas.", "Confirmada",
+     "Sesión confirmada. Ingresa al enlace 5 minutos antes y lleva el archivo "
+     "de costos actualizado."),
+    ("ASE-EST-014", "14 nov 2024", "14:30 - 15:30", "Presencial", "Pendiente de confirmar",
+     "Mochilas Origen", "Laura Sanchez", "Sala 3 · Bloque B",
+     "Costos y capacidad de producción",
+     "Definir la capacidad mensual del taller y el costo real de cada mochila "
+     "para la primera producción.", "Pendiente de confirmar",
+     "El docente aún no confirma la fecha. Recibirás una notificación cuando lo haga."),
+    ("ASE-EST-012", "12 nov 2024", "10:00 - 11:00", "Virtual", "Confirmada",
+     "Sabor y Sabe", "Carlos Mendoza", "meet.sgemd.edu.co/ases-012",
+     "Empaque y presentación del producto",
+     "Revisar alternativas de empaque sostenible y su impacto en el costo final.",
+     "Confirmada",
+     "Sesión confirmada. Lleva las cotizaciones de los proveedores de empaque."),
+    ("ASE-EST-004", "04 nov 2024", "09:00 - 10:00", "Virtual", "Realizada",
+     "Sabor y Sabe", "Carlos Mendoza", "meet.sgemd.edu.co/ases-004",
+     "Modelo de negocio y clientes",
+     "Aterrizar el cliente ideal y validar el canal de venta en el campus.",
+     "Realizada",
+     "Asesoría realizada. El acta con los compromisos quedó registrada."),
+]
+
+
+def _detalle_asesoria_est():
+    """Vista propia de una asesoría del estudiante (una por registro)."""
+    datos = {}
+    for (aid, fecha, hora, mod, estado, emp, doc, lugar, tema, necesidades,
+         estado_txt, nota) in ASES_EST:
+        datos[aid] = {
+            "fecha": fecha, "hora": hora, "modalidad": mod, "estado": estado_txt,
+            "emprendimiento": emp, "docente": doc, "lugar": lugar, "tema": tema,
+            "necesidades": necesidades, "nota": nota,
+            "clase": ("b-azul" if estado_txt in ("Confirmada", "Realizada")
+                      else "b-amarillo"),
+        }
+    cuerpo = steps(["Solicitud enviada", "Confirmación del docente",
+                    "Sesión realizada", "Acta y compromisos"], 1)
+    cuerpo += '<div class="sep sep-22"></div>'
+    cuerpo += metricas([
+        ("chat", "Modalidad", '<span data-campo="modalidad">Virtual</span>', "", 60,
+         '<span data-campo="lugar">meet.sgemd.edu.co</span>'),
+        ("reloj", "Horario", '<span data-campo="hora">09:00 - 10:00</span>', "", 60,
+         '<span data-campo="fecha">19 nov 2024</span>'),
+        ("users", "Docente", '<span data-campo="docente">Carlos Mendoza</span>', "",
+         100, "Acompañamiento asignado"),
+    ])
+    cuerpo += '<div class="sep sep-20"></div>'
+    cuerpo += '<div class="grid g-2-1">'
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Datos de la asesoría", lista_def([
+        ("Código", '<b data-campo="id">ASE-EST-019</b>'),
+        ("Estado", '<span class="badge b-azul" data-badge><span data-campo="estado">Confirmada</span></span>'),
+        ("Emprendimiento", '<span data-campo="emprendimiento">Sabor y Sabe</span>'),
+        ("Docente asignado", '<span data-campo="docente">Carlos Mendoza</span>'),
+        ("Fecha", '<span data-campo="fecha">19 nov 2024</span>'),
+        ("Hora", '<span data-campo="hora">09:00 - 10:00</span>'),
+        ("Modalidad", '<span data-campo="modalidad">Virtual</span>'),
+        ("Lugar o enlace", '<span data-campo="lugar">meet.sgemd.edu.co/ases-019</span>'),
+    ]))
+    cuerpo += card("Tema y necesidades",
+                   '<div class="def-row"><dt>Tema</dt><dd><b data-campo="tema">'
+                   'Validación del empaque y precio de venta</b></dd></div>'
+                   '<div class="divisor"></div>'
+                   '<p class="suave" data-campo="necesidades">Revisar el costo unitario '
+                   'del empaque, el punto de equilibrio y el precio de venta sugerido.</p>')
+    cuerpo += card("Compromisos de la sesión",
+                   '<div class="callout">%s<div data-campo="nota">Sesión confirmada. '
+                   'Ingresa al enlace 5 minutos antes y lleva el archivo de costos '
+                   'actualizado.</div></div>'
+                   '<div class="divisor"></div>'
+                   '<ul class="lista-check">'
+                   '<li>Llevar el archivo de costos actualizado.</li>'
+                   '<li>Registrar dudas y acuerdos en la bitácora del emprendimiento.</li>'
+                   '<li>Subir la evidencia de la sesión en la tarea asociada.</li>'
+                   '</ul>' % ico("bombilla", 18))
+    cuerpo += "</div>"
+    cuerpo += '<div class="grid">'
+    cuerpo += card("Docente asignado",
+                   '<div class="coment"><span class="avatar">CM</span>'
+                   '<div style="flex:1;min-width:0"><div class="coment-cab"><b>'
+                   '<span data-campo="docente">Carlos Mendoza</span></b>'
+                   '<span class="who-role">DOCENTE</span></div>'
+                   '<div class="coment-txt">Acompañamiento de Alimentos · '
+                   'carlos.mendoza@sgemd.edu.co</div></div></div>')
+    cuerpo += card("Emprendimiento", lista_def([
+        ("Nombre", '<span data-campo="emprendimiento">Sabor y Sabe</span>'),
+        ("Sector", "Alimentos"),
+        ("Etapa", "FASE 2 - Prototipo"),
+        ("Avance", "62%"),
+    ]) + '<div class="form-acciones"><a class="btn btn-secundario btn-sm" '
+         'href="emprendimiento-detalle.html">%s Ver emprendimiento</a></div>'
+         % ico("maleta", 14))
+    cuerpo += card("Acciones",
+                   '<div class="acciones-col">'
+                   '<button class="btn btn-primario" data-accion="solicitar-reprogramacion">'
+                   '%s Solicitar reprogramación</button>'
+                   '<button class="btn btn-secundario" data-accion="ver-acta">'
+                   '%s Ver acta de la sesión</button>'
+                   '<a class="btn btn-secundario" href="asesorias.html">%s Volver a asesorías</a>'
+                   '</div>' % (ico("calendar", 16), ico("doc", 16), ico("izq", 16)))
+    cuerpo += "</div></div>"
+    cuerpo = formulario("asesoria-detalle-est", cuerpo)
+    script = ("<script>window.ASES_EST_DET=%s;(function(){"
+              "var q=new URLSearchParams(location.search);var id=q.get('id');"
+              "var d=window.ASES_EST_DET[id]||window.ASES_EST_DET['ASE-EST-019'];"
+              "document.querySelectorAll('[data-campo]').forEach(function(el){"
+              "var k=el.getAttribute('data-campo');if(d[k]!==undefined)el.textContent=d[k];});"
+              "var b=document.querySelector('[data-badge]');if(b){b.className='badge '+d.clase;}"
+              "})();</script>" % json.dumps(datos, ensure_ascii=False))
+    cuerpo += script
+    return shell(R, "asesorias", "Detalle de asesoría", cuerpo,
+                 migas=["Inicio", "Asesorías", "Detalle de asesoría"],
+                 sub="Información completa de la asesoría y sus compromisos.",
+                 acciones='<a class="btn btn-secundario" href="asesorias.html">%s Volver</a>'
+                          % ico("izq", 16))
+
+
 def asesorias():
     """Línea de tiempo: primero lo que viene, después lo ya realizado."""
     cuerpo = (
@@ -1621,17 +1750,20 @@ def asesorias():
              "14:30 - 15:30 · Presencial · Pendiente de confirmar · Mochilas Origen",
              '<div style="margin-top:10px">'
              + badge("Pendiente de confirmar", "b-amarillo", "reloj")
-             + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver detalle</button></div>"),
+             + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver</button>"
+             + " <a class=\"btn btn-sm btn-primario\" href=\"asesoria-detalle.html?id=ASE-EST-014\">Ver detalle</a></div>"),
             ("19", "nov", "Asesoría con Carlos Mendoza",
              "09:00 - 10:00 · Virtual · Confirmada · Sabor y Sabe",
              '<div style="margin-top:10px">'
              + badge("Confirmada", "b-azul", "check")
-             + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver detalle</button></div>"),
+             + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver</button>"
+             + " <a class=\"btn btn-sm btn-primario\" href=\"asesoria-detalle.html?id=ASE-EST-019\">Ver detalle</a></div>"),
             ("12", "nov", "Asesoría con Carlos Mendoza",
              "10:00 - 11:00 · Virtual · Confirmada · Sabor y Sabe",
              '<div style="margin-top:10px">'
              + badge("Confirmada", "b-azul", "check")
-             + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver detalle</button></div>"),
+             + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-detalle\">Ver</button>"
+             + " <a class=\"btn btn-sm btn-primario\" href=\"asesoria-detalle.html?id=ASE-EST-012\">Ver detalle</a></div>"),
         ]), sin_pad=False)
         + '<div class="sep sep-20"></div>'
         + card("Asesorías realizadas", linea_tiempo([
@@ -1639,6 +1771,7 @@ def asesorias():
              "09:00 - 10:00 · Virtual · Realizada · Sabor y Sabe",
              '<div style="margin-top:10px">'
              + badge("Realizada", "b-linea", "check")
+             + " <a class=\"btn btn-sm btn-primario\" href=\"asesoria-detalle.html?id=ASE-EST-004\">Ver detalle</a>"
              + " <button class=\"btn btn-sm btn-secundario\" data-accion=\"ver-acta\">Ver acta</button></div>"),
         ]))
     )

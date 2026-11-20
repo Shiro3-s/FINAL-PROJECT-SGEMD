@@ -2013,15 +2013,21 @@ guardar(estado);
       if (!m) {
         m = document.createElement("div");
         m.className = "who-menu";
-        /* Estudiante y docente tienen una vista de configuración propia; en
-           administrador el menú conserva "Preferencias" (sin vista). */
+        /* Estudiante, docente y administrador tienen una vista de configuración
+           propia; Super Admin gestiona su propio perfil desde "Mi perfil". */
         var carpeta = location.pathname.split("/").slice(-2, -1)[0];
-        var conConfiguracion = carpeta === "estudiante" || carpeta === "docente";
-        m.innerHTML = '<button data-accion="perfil">Mi perfil</button>' +
-          (conConfiguracion
-            ? '<button data-accion="configuracion">Configuración</button>'
-            : '<button data-accion="preferencias">Preferencias</button>') +
-          '<button data-accion="cerrar-sesion">Cerrar sesión</button>';
+        var conConfiguracion = carpeta === "estudiante" || carpeta === "docente" ||
+          carpeta === "admin";
+        if (carpeta === "superadmin") {
+          m.innerHTML = '<button data-accion="perfil">Mi perfil</button>' +
+            '<button data-accion="cerrar-sesion">Cerrar sesión</button>';
+        } else {
+          m.innerHTML = '<button data-accion="perfil">Mi perfil</button>' +
+            (conConfiguracion
+              ? '<button data-accion="configuracion">Configuración</button>'
+              : '<button data-accion="preferencias">Preferencias</button>') +
+            '<button data-accion="cerrar-sesion">Cerrar sesión</button>';
+        }
         w.parentNode.appendChild(m);
         $$("button", m).forEach(function (b) {
           b.addEventListener("click", function (e) {
@@ -2030,8 +2036,8 @@ guardar(estado);
             m.remove();
             if (b.dataset.accion === "perfil") {
               /* El perfil se abre desde el mini menu de la esquina superior
-                 derecha; navega a la misma vista que tenia el menu lateral. */
-              location.href = "perfil.html";
+                 derecha. El Super Admin tiene su propia vista. */
+              location.href = carpeta === "superadmin" ? "mi-perfil.html" : "perfil.html";
               return;
             }
             if (b.dataset.accion === "configuracion") {
