@@ -1533,3 +1533,4 @@ performance, availability or capacity target; and whether the team accepts the s
 declared in `README.md` §4/§11 as final (v1.2 changes that stack in the points of §20.3a, taken by the project
 owner, not yet by the author of `README.md`). Those are the pending decisions of §20. This
 document does not authorize converting any of them into a confirmed requirement.
+
