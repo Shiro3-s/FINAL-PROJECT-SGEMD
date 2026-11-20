@@ -913,7 +913,7 @@ Las acciones del docente son **vistas completas**, no ventanas emergentes (solo 
 - **Acta de compromiso (AQ-10):** el **rechazo exige motivo obligatorio** y notifica al estudiante (BR-009, AQ-05). Queda pendiente el **tiempo de revisión** y el efecto completo del rechazo (dossier §6).
 - **Restauración de respaldos:** es una **operación técnica**, no una función del Administrador; la UI solo exporta y consulta estado/integridad (`Fuera de alcance / Post-MVP`, AQ-04).
 - **Estructura de datos (AQ-11):** **cerrada** con el modelo textual de [§5](#5-modelo-de-datos) (29 tablas, 42 relaciones). Los diagramas están desactualizados y no se usan como fuente.
-- **`.py` de correcciones de `context_admin`:** **resuelto (AQ-03)**. El archivo es `docs/audit/correcciones-adiciones-requisitos.md`; la copia usada es idéntica por SHA-256 (`EDCDE30F…836B5872`) y sus 28 ítems están mapeados.
+- **`.py` de correcciones de `context_admin`:** **resuelto (AQ-03)**. El archivo es `Config-admin/correcciones-adiciones-requisitos.md`; la copia usada es idéntica por SHA-256 (`EDCDE30F…836B5872`) y sus 28 ítems están mapeados.
 - **Documentos de referencia no disponibles (AQ-12):** `control.pdf` y el **Excel de preguntas** (§16.3). Si no llegan, no se bloquea el cierre ni se inventa su contenido.
 
 ---
@@ -1089,7 +1089,7 @@ Cuando el MVP esté terminado, el proyecto debe verse así:
 - `docs/historias_usuario.md` — historias actualizadas (US-011 … US-026).
 - `docs/CONSOLIDACION-ANOTACIONES.md` — anotaciones del equipo reorganizadas (diagnóstico, registro/validación, roles, BD, Git).
 - `CORRECCIONES-VISTAS-ESTUDIANTE.md` — hallazgos validados del prototipo.
-- `docs/audit/correcciones-adiciones-requisitos.md` — correcciones C-1…C-7 y adiciones A-1…A-21 aplicadas.
+- `Config-admin/correcciones-adiciones-requisitos.md` — correcciones C-1…C-7 y adiciones A-1…A-21 aplicadas.
 - `prototype/cambios-a-admin.md`, `prototype/orquestacion-docente-2026.md` — evidencia de los refactors de rol.
 
 ### 16.5 Sobre datos sensibles y Git
