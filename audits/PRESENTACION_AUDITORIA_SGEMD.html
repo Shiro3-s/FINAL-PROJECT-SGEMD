@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auditoría de Seguridad SGEMD — Frontend &amp; Backend</title>
+  <style>
+    :root {
+      --navy-deep: #051533;
+      --navy: #162644;
+      --blue: #004a93;
+      --gold: #ffd300;
+      --white: #ffffff;
+      --muted: #bbbbbb;
+      --slate-bg: #f4f6fa;
+      --ink: #0f1b33;
+      --ink-soft: #4a5875;
+      --border: #dde3ee;
+      --ok-bg: #e7f6ee;
+      --ok-ink: #0d6e3f;
+      --warn-bg: #fff6d6;
+      --warn-ink: #8a6200;
+      --med-bg: #ffeedb;
+      --med-ink: #a64b00;
+      --info-bg: #e6f0fa;
+      --info-ink: #004a93;
+      --shadow: 0 22px 60px rgba(5, 21, 51, 0.24);
+      --radius: 16px;
+      --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background: radial-gradient(circle at 20% 15%, #162644 0%, #051533 70%);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Chrome Bar */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(5, 21, 51, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--white);
+      z-index: 40;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      background: var(--gold);
+      box-shadow: 0 0 12px rgba(255, 211, 0, 0.6);
+    }
+
+    .topbar-brand span.sub {
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ctrl-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 211, 0, 0.16);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .ctrl-btn.primary {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--navy-deep);
+    }
+
+    .ctrl-btn.primary:hover {
+      background: #ffe047;
+      color: var(--navy-deep);
+    }
+
+    /* Progress Bar */
+    .progress-track {
+      position: fixed;
+      top: 54px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      z-index: 41;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #ffe566);
+      width: 9%;
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Deck Stage */
+    .stage {
+      position: fixed;
+      top: 57px;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 28px;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1240px;
+      height: 100%;
+      max-height: 720px;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      flex-direction: column;
+      animation: slideIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.992);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Dark Hero Slide */
+    .slide.hero {
+      background: linear-gradient(135deg, #051533 0%, #162644 55%, #004a93 100%);
+      color: var(--white);
+      justify-content: space-between;
+      padding: 48px 56px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: -120px;
+      top: -120px;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 211, 0, 0.18) 0%, rgba(255, 211, 0, 0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 2;
+    }
+
+    .pill-gold {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 211, 0, 0.14);
+      border: 1px solid rgba(255, 211, 0, 0.55);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .hero-main {
+      z-index: 2;
+      max-width: 920px;
+    }
+
+    .hero-main h1 {
+      font-size: clamp(32px, 4vw, 52px);
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 18px;
+    }
+
+    .hero-main h1 .accent {
+      color: var(--gold);
+    }
+
+    .hero-main p {
+      font-size: clamp(15px, 1.55vw, 19px);
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.84);
+      max-width: 780px;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      z-index: 2;
+    }
+
+    .hero-stat {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .hero-stat .val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .hero-stat .lbl {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.35;
+    }
+
+    .hero-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      padding-top: 16px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.72);
+      z-index: 2;
+    }
+
+    /* Standard Slide Header & Body */
+    .slide-header {
+      padding: 22px 34px 16px;
+      background: linear-gradient(90deg, #051533 0%, #162644 100%);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 4px solid var(--gold);
+      flex-shrink: 0;
+    }
+
+    .slide-header .kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .slide-header h2 {
+      font-size: clamp(20px, 2.2vw, 26px);
+      font-weight: 800;
+      letter-spacing: -0.015em;
+    }
+
+    .slide-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 5px 11px;
+      border-radius: 8px;
+      color: var(--white);
+      white-space: nowrap;
+    }
+
+    .slide-body {
+      padding: 22px 34px 20px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--white);
+    }
+
+    /* Reusable Components */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .kpi-card {
+      background: var(--slate-bg);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--blue);
+      border-radius: 12px;
+      padding: 15px 16px;
+    }
+
+    .kpi-card.gold { border-top-color: var(--gold); }
+    .kpi-card.ok { border-top-color: #0d6e3f; }
+    .kpi-card.navy { border-top-color: var(--navy); }
+
+    .kpi-card .num {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--navy-deep);
+      line-height: 1.1;
+    }
+
+    .kpi-card .title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .kpi-card .desc {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .card {
+      background: var(--slate-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card.white {
+      background: var(--white);
+    }
+
+    .card h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--navy-deep);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card p, .card li {
+      font-size: 13px;
+      line-height: 1.48;
+      color: var(--ink-soft);
+    }
+
+    .card ul {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .badge.pass { background: var(--ok-bg); color: var(--ok-ink); }
+    .badge.hardened { background: #dcebff; color: var(--blue); }
+    .badge.med { background: var(--med-bg); color: var(--med-ink); }
+    .badge.low { background: var(--warn-bg); color: var(--warn-ink); }
+    .badge.info { background: var(--info-bg); color: var(--info-ink); }
+    .badge.navy { background: var(--navy); color: var(--white); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    th {
+      text-align: left;
+      background: var(--navy);
+      color: var(--white);
+      font-weight: 700;
+      padding: 9px 11px;
+      font-size: 11.5px;
+      letter-spacing: 0.03em;
+    }
+
+    th:first-child { border-top-left-radius: 8px; }
+    th:last-child { border-top-right-radius: 8px; }
+
+    td {
+      padding: 8px 11px;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    tr:nth-child(even) td {
+      background: #f9fafd;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      background: #eaf0f8;
+      color: var(--navy-deep);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: #071734;
+      color: #e6eefc;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.48;
+      padding: 12px 14px;
+      border-radius: 10px;
+      overflow-x: auto;
+      border-left: 3px solid var(--gold);
+    }
+
+    pre .hl-add { color: #7ef2a8; }
+    pre .hl-del { color: #ff8e8e; }
+    pre .hl-key { color: #ffd300; }
+    pre .hl-com { color: #8da2c4; }
+
+    .callout {
+      background: #eef4fc;
+      border-left: 4px solid var(--blue);
+      padding: 11px 14px;
+      border-radius: 0 10px 10px 0;
+      font-size: 12.5px;
+      color: var(--navy-deep);
+      line-height: 1.45;
+    }
+
+    .callout.gold {
+      background: #fffbe6;
+      border-left-color: var(--gold);
+    }
+
+    /* Finding Box */
+    .finding {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .finding-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .finding-id {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--navy-deep);
+    }
+
+    /* Bottom Navigation Bar */
+    .bottombar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(5, 21, 51, 0.92);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--white);
+      z-index: 40;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+
+    .dot.active {
+      width: 28px;
+      background: var(--gold);
+    }
+
+    .dot:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .nav-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Overview Grid Modal */
+    .overview {
+      display: none;
+      position: fixed;
+      inset: 57px 0 60px 0;
+      background: rgba(5, 21, 51, 0.96);
+      z-index: 50;
+      padding: 28px 36px;
+      overflow-y: auto;
+    }
+
+    .overview.open {
+      display: block;
+    }
+
+    .overview-grid {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .thumb {
+      background: #162644;
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+
+    .thumb:hover, .thumb.current {
+      border-color: var(--gold);
+      background: #1d335a;
+      transform: translateY(-2px);
+    }
+
+    .thumb .t-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .thumb .t-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .thumb .t-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 960px) {
+      .grid-2, .grid-3, .grid-4, .hero-metrics {
+        grid-template-columns: 1fr;
+      }
+      .slide.hero {
+        padding: 28px;
+      }
+      .slide-body {
+        padding: 16px 20px;
+      }
+    }
+
+    /* Print / PDF Export Mode */
+    @media print {
+      html, body {
+        overflow: visible;
+        background: #ffffff;
+        height: auto;
+      }
+      .topbar, .bottombar, .progress-track, .overview {
+        display: none !important;
+      }
+      .stage {
+        position: static;
+        display: block;
+        padding: 0;
+      }
+      .slide {
+        display: flex !important;
+        max-width: none;
+        max-height: none;
+        height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+        page-break-after: always;
+        break-after: page;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-dot"></span>
+      <span>SGEMD · UNIMINUTO</span>
+      <span class="sub">Auditoría de Seguridad — Frontend &amp; Backend</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="ctrl-btn" id="btnOverview" title="Ver índice de diapositivas (Tecla G)">Vista General (G)</button>
+      <button class="ctrl-btn" id="btnFullscreen" title="Pantalla completa (Tecla F)">Pantalla Completa (F)</button>
+      <button class="ctrl-btn primary" id="btnPrint" title="Imprimir o guardar como PDF">Exportar PDF</button>
+    </div>
+  </header>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <!-- Presentation Stage -->
+  <main class="stage" id="stage">
+
+    <!-- SLIDE 1: PORTADA -->
+    <section class="slide hero active" data-title="Portada — Auditoría de Seguridad SGEMD" data-sub="Resumen de alcance en ramas front/production y back/production">
+      <div class="hero-top">
+        <span class="pill-gold">Centro Progresa · UNIMINUTO · security-audit-runner</span>
+        <span class="slide-tag">19 Nov 2026 · Riesgo Final: BAJO</span>
+      </div>
+
+      <div class="hero-main">
+        <h1>Auditoría de Seguridad y Remediación <span class="accent">SGEMD MVP</span></h1>
+        <p>
+          Evaluación integral de seguridad, endurecimiento de código, remediación de cadena de suministro
+          (<code>npm audit</code>) y verificación en ejecución real sobre las ramas independientes de producción
+          <strong><code>front/production</code></strong> (Vercel) y <strong><code>back/production</code></strong> (Supabase).
+        </p>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="hero-stat">
+          <div class="val">17 / 17</div>
+          <div class="lbl">Dominios de seguridad auditados (7 Frontend + 10 Backend)</div>
+        </div>
+        <div class="hero-stat">
+          <div class="val">13 / 13</div>
+          <div class="lbl">Hallazgos evaluados y remediados / verificados (100%)</div>
+        </div>
+        <div class="hero-stat">
+          <div class="val">0</div>
+          <div class="lbl">Vulnerabilidades <code>npm audit</code> en ambas ramas (Backend: 7 &rarr; 0)</div>
+        </div>
+        <div class="hero-stat">
+          <div class="val">292 / 292</div>
+          <div class="lbl">Pruebas de integración aprobadas contra PostgreSQL 17</div>
+        </div>
+      </div>
+
+      <div class="hero-footer">
+        <span>Repositorio: <code>github.com/Shiro3-s/FINAL-PROJECT-SGEMD</code></span>
+        <span>Ramas auditadas: <code>front/production (25f779e)</code> · <code>back/production (e9f857e)</code></span>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: RESUMEN EJECUTIVO Y TOPOLOGÍA -->
+    <section class="slide" data-title="Resumen Ejecutivo y Topología de Ramas" data-sub="Estado de las ramas independientes y postura global post-remediación">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">01 · Panorama Ejecutivo</div>
+          <h2>Resumen Ejecutivo y Topología de Ramas Auditadas</h2>
+        </div>
+        <span class="slide-tag">Postura: LISTO PARA PRODUCCIÓN</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-4">
+          <div class="kpi-card ok">
+            <div class="title">Riesgo Crítico / Alto</div>
+            <div class="num">0</div>
+            <div class="desc">Cero vulnerabilidades críticas o altas en código y dependencias.</div>
+          </div>
+          <div class="kpi-card gold">
+            <div class="title">Frontend Remediado</div>
+            <div class="num">4 + 2</div>
+            <div class="desc">4 controles endurecidos (<code>FE-SEC-001..004</code>) y 2 verificados por diseño.</div>
+          </div>
+          <div class="kpi-card">
+            <div class="title">Backend Remediado</div>
+            <div class="num">5 + 2</div>
+            <div class="desc">5 remediaciones (incluyendo 7 avisos npm &rarr; 0) y 2 verificados.</div>
+          </div>
+          <div class="kpi-card navy">
+            <div class="title">Cumplimiento Legal</div>
+            <div class="num">100%</div>
+            <div class="desc">Cero PII real y cero secretos en Git (Ley 1581 de 2012).</div>
+          </div>
+        </div>
+
+        <div class="card white">
+          <h3>Topología Final Publicada en GitHub</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Rama de Producción</th>
+                <th>Commit HEAD</th>
+                <th>Stack Aislado en Raíz (<code>/</code>)</th>
+                <th><code>npm audit</code></th>
+                <th>Entregable en Rama</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>front/production</code><br><small>(sincronizada con <code>frontend</code>)</small></td>
+                <td><code>25f779e</code></td>
+                <td>React 19.3.1 · Vite 8.3.5 · TypeScript 7.0.2 · 64 vistas · <code>src/shared/</code></td>
+                <td><span class="badge pass">0 vulnerabilidades</span> (85 pkgs)</td>
+                <td><code>docs/SECURITY_AUDIT_FRONTEND.md</code></td>
+              </tr>
+              <tr>
+                <td><code>back/production</code><br><small>(sincronizada con <code>backend</code>)</small></td>
+                <td><code>e9f857e</code></td>
+                <td>Node 22 · Express 5.3.0 · PostgreSQL 17 (41 tablas) · 20 módulos · <code>Dockerfile</code></td>
+                <td><span class="badge pass">0 vulnerabilidades</span> (7 &rarr; 0)</td>
+                <td><code>docs/SECURITY_AUDIT_BACKEND.md</code></td>
+              </tr>
+              <tr>
+                <td><code>feat/mvp-implementation-v1</code></td>
+                <td><code>079248a</code></td>
+                <td>Monorepo histórico original (3 workspaces)</td>
+                <td><span class="badge info">Línea Base Intacta</span></td>
+                <td>Sin modificaciones</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout gold">
+          <strong>Principio de aislamiento preservado:</strong> Ninguna remediación de seguridad alteró los contratos REST, las 41 tablas / 22 <code>CHECK</code> de PostgreSQL 17, las cadenas canónicas en español ni la paleta institucional de 6 tokens hexadecimales.
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: DISTRIBUCIÓN DE HALLAZGOS (GRÁFICOS SVG) -->
+    <section class="slide" data-title="Distribución de Hallazgos y Reducción de Riesgo" data-sub="Comparativa visual por severidad y remediación de dependencias">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">02 · Métricas de Auditoría</div>
+          <h2>Distribución de Hallazgos por Severidad y Cadena de Suministro</h2>
+        </div>
+        <span class="slide-tag">13 Hallazgos · 100% Cerrados</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2" style="flex:1; align-items: stretch;">
+          <!-- Chart 1: Severity Breakdown -->
+          <div class="card white" style="justify-content: space-between;">
+            <h3>Hallazgos Detectados y Cerrados por Severidad</h3>
+            <svg viewBox="0 0 480 265" width="100%" aria-label="Gráfico de hallazgos por severidad">
+              <!-- Gridlines -->
+              <line x1="130" y1="20" x2="130" y2="230" stroke="#dde3ee" stroke-width="1"/>
+              <line x1="210" y1="20" x2="210" y2="230" stroke="#eef2f8" stroke-width="1"/>
+              <line x1="290" y1="20" x2="290" y2="230" stroke="#eef2f8" stroke-width="1"/>
+              <line x1="370" y1="20" x2="370" y2="230" stroke="#eef2f8" stroke-width="1"/>
+              <line x1="450" y1="20" x2="450" y2="230" stroke="#eef2f8" stroke-width="1"/>
+
+              <!-- Row 1: Crítica -->
+              <text x="120" y="45" text-anchor="end" font-size="12" font-weight="700" fill="#162644">Crítica</text>
+              <rect x="130" y="30" width="4" height="22" rx="4" fill="#d0d7e5"/>
+              <text x="142" y="45" font-size="12" font-weight="700" fill="#0d6e3f">0 (Limpio)</text>
+
+              <!-- Row 2: Alta -->
+              <text x="120" y="88" text-anchor="end" font-size="12" font-weight="700" fill="#162644">Alta</text>
+              <rect x="130" y="73" width="4" height="22" rx="4" fill="#d0d7e5"/>
+              <text x="142" y="88" font-size="12" font-weight="700" fill="#0d6e3f">0 (Limpio)</text>
+
+              <!-- Row 3: Media / Moderada (1 FE + 1 BE = 2) -->
+              <text x="120" y="131" text-anchor="end" font-size="12" font-weight="700" fill="#162644">Media / Mod.</text>
+              <rect x="130" y="116" width="40" height="22" rx="4" fill="#ffd300"/>
+              <rect x="172" y="116" width="40" height="22" rx="4" fill="#004a93"/>
+              <text x="222" y="131" font-size="12" font-weight="700" fill="#162644">2 (1 FE + 1 BE) · Remediadas</text>
+
+              <!-- Row 4: Baja (3 FE + 4 BE = 7) -->
+              <text x="120" y="174" text-anchor="end" font-size="12" font-weight="700" fill="#162644">Baja</text>
+              <rect x="130" y="159" width="120" height="22" rx="4" fill="#ffd300"/>
+              <rect x="252" y="159" width="160" height="22" rx="4" fill="#004a93"/>
+              <text x="420" y="174" font-size="12" font-weight="700" fill="#162644">7</text>
+
+              <!-- Row 5: Informativa (2 FE + 2 BE = 4) -->
+              <text x="120" y="217" text-anchor="end" font-size="12" font-weight="700" fill="#162644">Informativa</text>
+              <rect x="130" y="202" width="80" height="22" rx="4" fill="#ffd300"/>
+              <rect x="212" y="202" width="80" height="22" rx="4" fill="#004a93"/>
+              <text x="302" y="217" font-size="12" font-weight="700" fill="#162644">4 (Seguros por diseño)</text>
+
+              <!-- Legend -->
+              <rect x="130" y="246" width="12" height="12" rx="3" fill="#ffd300"/>
+              <text x="148" y="256" font-size="11.5" font-weight="600" fill="#4a5875">Frontend (6)</text>
+              <rect x="245" y="246" width="12" height="12" rx="3" fill="#004a93"/>
+              <text x="263" y="256" font-size="11.5" font-weight="600" fill="#4a5875">Backend (7)</text>
+            </svg>
+            <p>Todos los hallazgos accionables (<strong>2 Media/Moderada</strong> y <strong>7 Baja</strong>) fueron corregidos en código/configuración y re-verificados antes de subir a GitHub.</p>
+          </div>
+
+          <!-- Chart 2: Supply Chain Reduction & Coverage -->
+          <div class="card white" style="justify-content: space-between;">
+            <h3>Reducción de Vulnerabilidades <code>npm audit</code></h3>
+            <svg viewBox="0 0 460 220" width="100%" aria-label="Reducción de vulnerabilidades npm audit">
+              <!-- Before Backend -->
+              <text x="20" y="28" font-size="12" font-weight="700" fill="#162644">Backend — Antes de auditoría (d9dba88)</text>
+              <rect x="20" y="38" width="340" height="28" rx="6" fill="#ffeedb" stroke="#a64b00" stroke-width="1"/>
+              <rect x="20" y="38" width="280" height="28" rx="6" fill="#d97706"/>
+              <text x="310" y="57" font-size="13" font-weight="800" fill="#a64b00">7 Mod.</text>
+
+              <!-- After Backend -->
+              <text x="20" y="102" font-size="12" font-weight="700" fill="#162644">Backend — Después de overrides (e9f857e)</text>
+              <rect x="20" y="112" width="340" height="28" rx="6" fill="#e7f6ee" stroke="#0d6e3f" stroke-width="1"/>
+              <text x="34" y="131" font-size="13" font-weight="800" fill="#0d6e3f">0 Vulnerabilidades (-100%) · 490 paquetes auditados</text>
+
+              <!-- Frontend -->
+              <text x="20" y="174" font-size="12" font-weight="700" fill="#162644">Frontend — Estado verificado (25f779e)</text>
+              <rect x="20" y="184" width="340" height="28" rx="6" fill="#e7f6ee" stroke="#0d6e3f" stroke-width="1"/>
+              <text x="34" y="203" font-size="13" font-weight="800" fill="#0d6e3f">0 Vulnerabilidades · 85 paquetes · 0 CDNs externos</text>
+            </svg>
+
+            <div class="callout">
+              <strong>Cobertura OWASP:</strong> Se validaron controles contra XSS (<code>CWE-79</code>), Open Redirect (<code>CWE-601</code>), fuga de caché/source maps (<code>CWE-200/540</code>), BOLA/IDOR, inyección SQL/comandos, traversal de archivos (<code>CWE-22</code>) y dependencias vulnerables (<code>A06:2021</code>).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: FRONTEND — MATRIZ 7 DOMINIOS -->
+    <section class="slide" data-title="Auditoría Frontend — Matriz de 7 Dominios" data-sub="F-DOM-01 a F-DOM-07 sobre React 19 + Vite 8 (64 vistas)">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">03 · Auditoría Frontend (`front/production`)</div>
+          <h2>Matriz de Evaluación por Dominio Frontend (<code>F-DOM-01</code> a <code>F-DOM-07</code>)</h2>
+        </div>
+        <span class="slide-tag">Commit 25f779e · 64 Vistas</span>
+      </div>
+      <div class="slide-body">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:105px;">Dominio</th>
+              <th style="width:210px;">Área de Control</th>
+              <th>Evidencia e Invariante Verificada</th>
+              <th style="width:110px;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>F-DOM-01</code></td>
+              <td><strong>Tokens, Sesión y Almacenamiento</strong></td>
+              <td>Cero referencias a <code>localStorage</code>, <code>sessionStorage</code>, <code>indexedDB</code> o <code>document.cookie</code> en todo <code>src/</code>. Credenciales gestionadas solo vía cookie <code>HttpOnly</code> (<code>credentials: 'same-origin'</code>).</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>F-DOM-02</code></td>
+              <td><strong>XSS, Inyección DOM y Redirecciones</strong></td>
+              <td>Cero <code>eval</code>/<code>innerHTML</code> controlados por usuario. Se endureció el único <code>&lt;a href&gt;</code> externo (<code>FE-SEC-001</code>) y las rutas dinámicas en <code>navigate()</code> (<code>FE-SEC-002</code>).</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>F-DOM-03</code></td>
+              <td><strong>Guardas de Ruta y Aislamiento de Caché</strong></td>
+              <td><code>&lt;RequireAuth&gt;</code>, <code>&lt;RequireRole&gt;</code> y <code>&lt;RequireActive&gt;</code> bloquean cuentas <code>Limitado</code>/<code>Inactivo</code>. Se agregó <code>queryClient.clear()</code> también en login (<code>FE-SEC-003</code>).</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>F-DOM-04</code></td>
+              <td><strong>Subidas y Descargas Binarias</strong></td>
+              <td><code>apiUpload</code> usa XHR con cancelación segura; <code>saveDownload</code> crea URLs <code>blob:</code> efímeras revocadas en <code>1000 ms</code> y parsea RFC 5987 <code>filename*</code>.</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>F-DOM-05</code></td>
+              <td><strong>Supply-Chain y Cero CDNs</strong></td>
+              <td><code>npm audit</code> = <strong>0 vulnerabilidades</strong> (85 paquetes). Tipografía <code>@fontsource/inter</code> autoalojada; cero peticiones a Google Fonts o CDNs.</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>F-DOM-06</code></td>
+              <td><strong>Build de Producción y Source Maps</strong></td>
+              <td>Se desactivó la emisión pública por defecto del mapa de código <code>2.71 MB</code> (<code>.js.map</code>) en <code>vite.config.ts</code> (<code>FE-SEC-004</code>).</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>F-DOM-07</code></td>
+              <td><strong>Privacidad y Ley 1581 de 2012</strong></td>
+              <td>Cero secretos, llaves o datos personales reales en archivos versionados. <code>.gitignore</code> protege carpetas locales sensibles del área.</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: FRONTEND — FE-SEC-001 & FE-SEC-002 -->
+    <section class="slide" data-title="Frontend — Remediaciones XSS y Open Redirect" data-sub="FE-SEC-001 (EventDetailPage) y FE-SEC-002 (Login & Notificaciones)">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">04 · Hallazgos y Remediaciones Frontend (1/2)</div>
+          <h2>Mitigación de Esquemas Peligrosos (XSS) y Redirección Abierta</h2>
+        </div>
+        <span class="slide-tag">FE-SEC-001 · FE-SEC-002</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- FE-SEC-001 -->
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">FE-SEC-001 · Enlace Externo Sin Validar</span>
+              <span class="badge med">Media · CWE-79 / CWE-1022</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <strong>Ubicación:</strong> <code>src/pages/shared/EventDetailPage.tsx:138-144</code><br>
+              <strong>Hallazgo:</strong> <code>event.enlace</code> se inyectaba directamente en <code>&lt;a href={event.enlace} target="_blank" rel="noreferrer"&gt;</code>. Si un registro contuviera un esquema <code>javascript:</code> o <code>data:</code>, podría ejecutarse en el contexto del origen; además faltaba <code>noopener</code> explícito.
+            </p>
+            <pre><span class="hl-com">// Antes</span>
+<span class="hl-del">&lt;a href={event.enlace} target="_blank" rel="noreferrer"&gt;</span>
+
+<span class="hl-com">// Después (Remediado)</span>
+<span class="hl-add">/^https?:\/\//i.test(event.enlace) ? (</span>
+<span class="hl-add">  &lt;a href={event.enlace} target="_blank" rel="noopener noreferrer"&gt;</span>
+<span class="hl-add">    {event.enlace}</span>
+<span class="hl-add">  &lt;/a&gt;</span>
+<span class="hl-add">) : event.enlace</span></pre>
+            <div style="font-size:12px; color:var(--ok-ink); font-weight:600;">&#10003; Verificado con <code>npm run typecheck &amp;&amp; npm run build</code></div>
+          </div>
+
+          <!-- FE-SEC-002 -->
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">FE-SEC-002 · Validación de Rutas Internas</span>
+              <span class="badge low">Baja · CWE-601 (Open Redirect)</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <strong>Ubicación:</strong> <code>LoginPage.tsx:45</code> · <code>NotificationsPage.tsx:51</code> · <code>NotificationDrawer.tsx:40</code><br>
+              <strong>Hallazgo:</strong> <code>navigate(state.from)</code> y <code>navigate(item.url)</code> no verificaban que el destino fuera una ruta relativa interna de una sola barra (rechazando URLs relativas de protocolo como <code>//evil.com</code>).
+            </p>
+            <pre><span class="hl-com">// LoginPage.tsx (Remediado)</span>
+<span class="hl-add">const safeFrom =</span>
+<span class="hl-add">  state?.from &amp;&amp; state.from.startsWith('/') &amp;&amp;</span>
+<span class="hl-add">  !state.from.startsWith('//') &amp;&amp; state.from !== '/login'</span>
+<span class="hl-add">    ? state.from : '/';</span>
+<span class="hl-add">navigate(safeFrom, { replace: true });</span>
+
+<span class="hl-com">// NotificationsPage.tsx &amp; NotificationDrawer.tsx</span>
+<span class="hl-add">if (url &amp;&amp; url.startsWith('/') &amp;&amp; !url.startsWith('//'))</span>
+<span class="hl-add">  navigate(url);</span></pre>
+            <div style="font-size:12px; color:var(--ok-ink); font-weight:600;">&#10003; Defensa en profundidad contra Open Redirect</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: FRONTEND — FE-SEC-003 A FE-SEC-006 -->
+    <section class="slide" data-title="Frontend — Caché, Source Maps y Controles Seguros" data-sub="FE-SEC-003, FE-SEC-004 y hallazgos informativos FE-SEC-005/006">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">05 · Hallazgos y Remediaciones Frontend (2/2)</div>
+          <h2>Aislamiento de Caché, Build de Producción y Controles Verificados</h2>
+        </div>
+        <span class="slide-tag">FE-SEC-003 · FE-SEC-004 · Info</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">FE-SEC-003 · Purga de Caché al Iniciar Sesión</span>
+              <span class="badge low">Baja · CWE-200</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <strong>Archivo:</strong> <code>src/queries/session.ts:57-62</code><br>
+              Aunque <code>useLogout()</code> limpiaba el caché, <code>useLogin()</code> solo invalidaba <code>sessionKeys.me</code>. En un computador compartido (ej. laboratorio universitario) donde expiró la sesión previa sin cerrar sesión manualmente, podían persistir brevemente datos en memoria del usuario anterior.
+            </p>
+            <pre><span class="hl-key">onSuccess</span>: async () =&gt; {
+<span class="hl-add">  queryClient.clear();</span>
+  await queryClient.invalidateQueries({ queryKey: sessionKeys.me });
+  await queryClient.refetchQueries({ queryKey: sessionKeys.me });
+}</pre>
+          </div>
+
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">FE-SEC-004 · Exposición de Source Maps</span>
+              <span class="badge low">Baja · CWE-540</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <strong>Archivo:</strong> <code>vite.config.ts:21-24</code><br>
+              <code>sourcemap: true</code> emitía un archivo público <code>dist/assets/index-*.js.map</code> de <strong>2.71 MB</strong> con todo el código fuente TypeScript original en despliegues de producción.
+            </p>
+            <pre><span class="hl-key">build</span>: {
+  outDir: 'dist',
+<span class="hl-del">- sourcemap: true,</span>
+<span class="hl-add">+ sourcemap: process.env.VITE_SOURCEMAP === 'true',</span>
+}</pre>
+            <p style="font-size:12px; color:var(--ok-ink); font-weight:600;">&#10003; Resultado: 0 archivos <code>.js.map</code> emitidos en <code>dist/</code> (bundle JS: 560.99 kB).</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3><span>FE-SEC-005 · SVG Estáticos en <code>Icon.tsx</code></span> <span class="badge info">Informativo · Seguro</span></h3>
+            <p>El único <code>dangerouslySetInnerHTML</code> del frontend inyecta exclusivamente constantes literales en tiempo de compilación (<code>ICON_PATHS as const</code>), sin datos de usuario ni de API.</p>
+          </div>
+          <div class="card">
+            <h3><span>FE-SEC-006 · Canal SSE de Notificaciones</span> <span class="badge info">Informativo · Seguro</span></h3>
+            <p>El stream <code>/api/notifications/stream</code> transmite únicamente <code>{ id, tipo, unreadCount }</code> sin cuerpo de texto sensible; el cliente invalida y consulta el contenido vía API autenticada.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: BACKEND — MATRIZ 10 DOMINIOS -->
+    <section class="slide" data-title="Auditoría Backend — Matriz de 10 Dominios" data-sub="B-DOM-01 a B-DOM-10 mapeados a controles §15 y pruebas T01–T40">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">06 · Auditoría Backend (`back/production`)</div>
+          <h2>Matriz de Evaluación Backend (<code>B-DOM-01</code> a <code>B-DOM-10</code>)</h2>
+        </div>
+        <span class="slide-tag">Commit e9f857e · 20 Módulos</span>
+      </div>
+      <div class="slide-body">
+        <table style="font-size:11.8px;">
+          <thead>
+            <tr>
+              <th style="width:92px;">Dominio</th>
+              <th style="width:195px;">Área de Control (§15)</th>
+              <th>Verificación Técnica y Pruebas Automatizadas</th>
+              <th style="width:98px;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>B-DOM-01</code></td>
+              <td><strong>Auth, JWT y Cookie de Sesión</strong></td>
+              <td><code>bcryptjs</code> coste 10; JWT <code>HS256</code> fijado explícitamente (8 h, payload <code>{id, role}</code>); cookie <code>HttpOnly; Secure; SameSite=Strict</code>; re-lectura de usuario en BD por petición (<code>T02, T04, T13</code>).</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-02</code></td>
+              <td><strong>Criptografía OTP y Rate-Limit</strong></td>
+              <td>OTP de 8 dígitos (<code>randomInt</code>), HMAC-SHA256 contextual, <code>timingSafeEqual</code>, TTL 5 min, máx. 5 intentos (<code>FOR UPDATE</code>), cooldown validado con Zod (<code>BE-SEC-003</code>, <code>T01, T05, T39</code>).</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-03</code></td>
+              <td><strong>CSRF, Origin y Cabeceras</strong></td>
+              <td><code>helmet()</code> global, <code>x-powered-by</code> deshabilitado, <code>trust proxy: 1</code>, <code>originCheck</code> estricto contra <code>APP_ORIGIN</code> (<code>403 ORIGIN_NOT_ALLOWED</code>), cero CORS abierto (<code>T04</code>).</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-04</code></td>
+              <td><strong>Autorización, BOLA/IDOR y Roles</strong></td>
+              <td>Denegación por defecto por rol y propiedad en los 20 servicios; <code>Limitado/Inactivo</code> bloqueados; rol <code>Auditor</code> estrictamente solo lectura + enmascaramiento PII (<code>T03, T08–T10, T38</code>).</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-05</code></td>
+              <td><strong>Validación Zod y Anti-SQLi</strong></td>
+              <td>Esquemas Zod descartan llaves desconocidas (cero mass assignment); 100% consultas parametrizadas <code>$1..$N</code> y <code>ORDER BY</code> por diccionario cerrado (<code>T33</code>).</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-06</code></td>
+              <td><strong>Uploads, Magic-Bytes y Traversal</strong></td>
+              <td>Verificación binaria de JPG/PNG/PDF, escritura atómica <code>*.part</code> (<code>0o600</code>), nombres UUID, <code>absolutePath</code> contenido en <code>STORAGE_DIR</code> + regex en <code>entity</code> (<code>BE-SEC-005</code>, <code>T19, T40</code>).</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-07</code></td>
+              <td><strong>Respaldos y Ejecución Sin Shell</strong></td>
+              <td><code>pg_dump</code>, <code>rsync</code> y <code>tar</code> mediante <code>execFile</code>/<code>spawn</code> sin shell (<code>shell: false</code>), advisory lock, exclusión <code>mail*/*.part</code>, manifiesto SHA-256 (<code>T24</code> — 23 tests).</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-08</code></td>
+              <td><strong>Errores 5xx, Logs y Ley 1581</strong></td>
+              <td>Errores 500 JSON sin stack trace + nuevo <code>correlationId</code> (<code>BE-SEC-002</code>); redacción Pino ampliada para campos en español (<code>BE-SEC-004</code>); <code>seed.sql</code> sin PII real.</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-09</code></td>
+              <td><strong>Dependencias (<code>npm audit</code>)</strong></td>
+              <td>Las 7 vulnerabilidades moderadas transitivas (<code>glob</code>, <code>minimatch</code>, <code>uuid</code>) fueron eliminadas vía <code>overrides</code>: <strong>0 vulnerabilidades</strong> (<code>BE-SEC-001</code>).</td>
+              <td><span class="badge hardened">HARDENED</span></td>
+            </tr>
+            <tr>
+              <td><code>B-DOM-10</code></td>
+              <td><strong>Contenedor y Esquema SQL</strong></td>
+              <td><code>Dockerfile</code> multi-stage Alpine no-root (<code>USER node</code>), <code>postgresql17-client</code> fijado; <code>check:schema</code> valida 41 tablas y 22 <code>CHECK</code>.</td>
+              <td><span class="badge pass">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: BACKEND — BE-SEC-001 (SUPPLY CHAIN 7 -> 0) -->
+    <section class="slide" data-title="Backend — Remediación de Cadena de Suministro" data-sub="BE-SEC-001: eliminación de 7 vulnerabilidades transitivas en npm audit">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">07 · Hallazgos y Remediaciones Backend (1/2)</div>
+          <h2><code>BE-SEC-001</code> — Remediación de 7 Vulnerabilidades en Dependencias</h2>
+        </div>
+        <span class="slide-tag">Moderada · 7 &rarr; 0 Vulnerabilidades</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card white">
+            <h3><span>Paquetes Transitivos Vulnerables Detectados</span> <span class="badge med">OWASP A06:2021</span></h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Paquete</th>
+                  <th>Advisory / CWE</th>
+                  <th>Origen</th>
+                  <th>Versión Fijada</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>glob</code><br><small>9.0.0 – 14.0.1</small></td>
+                  <td><code>GHSA-3g3m-2fjr-6pw4</code><br><small>AbortSignal traversal bypass</small></td>
+                  <td><code>archiver</code> &rarr; <code>archiver-utils</code></td>
+                  <td><span class="badge pass">14.0.6</span></td>
+                </tr>
+                <tr>
+                  <td><code>minimatch</code><br><small>7.0.0 – 11.0.0</small></td>
+                  <td><code>GHSA-g3hv-75wg-m249</code><br><small>ReDoS globparts amplification</small></td>
+                  <td><code>archiver</code> &rarr; <code>readdir-glob</code></td>
+                  <td><span class="badge pass">11.0.9</span></td>
+                </tr>
+                <tr>
+                  <td><code>uuid</code><br><small>&lt; 11.1.1</small></td>
+                  <td><code>GHSA-w5hq-g745-h8pq</code><br><small>Buffer bounds check v3/v5/v6</small></td>
+                  <td><code>exceljs@4.4.0</code></td>
+                  <td><span class="badge pass">11.1.1</span><br><small>(CJS compatible)</small></td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top:4px;">
+              <strong>Nota técnica clave:</strong> Se eligió <code>uuid@11.1.1</code> (en lugar de v13/v14 que son solo ESM) para garantizar compatibilidad total con <code>require('uuid')</code> en <code>exceljs</code> sin romper la exportación de reportes XLSX.
+            </p>
+          </div>
+
+          <div class="card white">
+            <h3><span>Remediación Aplicada en <code>package.json</code></span> <span class="badge pass">0 Vulnerabilidades</span></h3>
+            <pre><span class="hl-com">// package.json (rama back/production)</span>
+<span class="hl-key">"overrides"</span>: {
+<span class="hl-add">  "glob@&gt;=9.0.0 &lt;=14.0.1": "14.0.6",</span>
+<span class="hl-add">  "minimatch@&gt;=7.0.0 &lt;=11.0.0": "11.0.9",</span>
+<span class="hl-add">  "uuid@&lt;11.1.1": "11.1.1"</span>
+}</pre>
+            <div class="callout">
+              <strong>Verificación ejecutada tras regenerar <code>package-lock.json</code>:</strong>
+              <ul style="margin-top:6px; padding-left:18px;">
+                <li><code>npm audit</code> &rarr; <strong><code>found 0 vulnerabilities</code></strong> (490 paquetes)</li>
+                <li><code>tests/reports.test.ts</code> (exportación CSV/XLSX/PDF) &rarr; <strong>15 / 15 PASS</strong></li>
+                <li><code>tests/auth.test.ts</code> &amp; <code>attachments.test.ts</code> &rarr; <strong>47 / 47 PASS</strong></li>
+                <li><code>npm run typecheck &amp;&amp; npm run build &amp;&amp; npm run check:schema</code> &rarr; <strong>EXIT 0</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: BACKEND — BE-SEC-002 A BE-SEC-007 -->
+    <section class="slide" data-title="Backend — Endurecimiento de Código y Controles" data-sub="BE-SEC-002 a BE-SEC-005 remediados y BE-SEC-006/007 verificados">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">08 · Hallazgos y Remediaciones Backend (2/2)</div>
+          <h2>Endurecimiento de Errores, OTP, Logging y Almacenamiento</h2>
+        </div>
+        <span class="slide-tag">BE-SEC-002 .. BE-SEC-007</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">BE-SEC-002 · Correlation ID en Errores 5xx</span>
+              <span class="badge low">Baja · CWE-778 (§15)</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <code>src/middleware/error.ts</code> no generaba identificador de correlación en fallos 500. Ahora genera un UUID, añade la cabecera <code>X-Correlation-Id</code> y registra <code>{ err, correlationId }</code> sin filtrar stack traces al cliente.
+            </p>
+            <pre><span class="hl-add">const correlationId = randomUUID();</span>
+<span class="hl-add">res.setHeader('X-Correlation-Id', correlationId);</span>
+<span class="hl-add">logger.error({ err: error, correlationId }, 'Error no controlado');</span></pre>
+          </div>
+
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">BE-SEC-003 · Validación Zod de Cooldown OTP</span>
+              <span class="badge low">Baja · CWE-20</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <code>src/utils/otp.ts</code> leía <code>Number(process.env.OTP_RESEND_COOLDOWN_SECONDS)</code> sin validación. Ahora se valida al arranque en <code>src/config/env.ts</code> como entero positivo (<code>default: 60</code>), impidiendo desactivar el cooldown con valores inválidos.
+            </p>
+            <pre><span class="hl-add">OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60)</span></pre>
+          </div>
+
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">BE-SEC-004 · Redacción Ampliada en Logger Pino</span>
+              <span class="badge low">Baja · CWE-532</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              Se agregaron a <code>redact.paths</code> en <code>src/config/logger.ts</code> los campos de dominio en español y cabeceras de sesión: <code>*.passwordActual</code>, <code>*.passwordNueva</code>, <code>*.codigo</code> y <code>res.headers["set-cookie"]</code>.
+            </p>
+          </div>
+
+          <div class="finding">
+            <div class="finding-head">
+              <span class="finding-id">BE-SEC-005 · Allow-List de Entidad en Storage</span>
+              <span class="badge low">Baja · CWE-22</span>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft);">
+              <code>writeUpload()</code> en <code>src/services/storage.ts</code> valida ahora <code>/^[a-z0-9_-]+$/i.test(options.entity)</code> antes de construir rutas de directorio, blindando la frontera contra traversal incluso ante futuros llamados dinámicos.
+            </p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Controles críticos verificados sin hallazgos (<code>BE-SEC-006</code> &amp; <code>BE-SEC-007</code>):</strong>
+          100% de consultas SQL parametrizadas (<code>$1..$N</code>) en los 20 módulos y ejecución sin shell (<code>execFile</code>/<code>spawn</code> con arrays de argumentos) en <code>backupFiles.ts</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: VERIFICACIÓN Y PUERTAS SA01–SA12 -->
+    <section class="slide" data-title="Verificación y Puertas de Calidad SA01–SA12" data-sub="Evidencia de compilación, pruebas en PostgreSQL 17, Docker y sincronización Git">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">09 · Evidencia de Verificación</div>
+          <h2>Matriz de Puertas de Seguridad y Calidad (<code>SA01</code>–<code>SA12</code>)</h2>
+        </div>
+        <span class="slide-tag">12 / 12 Puertas PASS</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <table style="font-size:12px;">
+            <thead>
+              <tr><th>ID</th><th>Puerta de Verificación</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>SA01</code></td><td>Ejecución <code>security-audit-runner</code> en ambas ramas</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA02</code></td><td>Auditoría y remediación <code>F-DOM-01..07</code> (Frontend)</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA03</code></td><td><code>npm run typecheck &amp;&amp; npm run build</code> (Frontend)</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA04</code></td><td><code>SECURITY_AUDIT_FRONTEND.md</code> en <code>front/production</code></td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA05</code></td><td>Auditoría y remediación <code>B-DOM-01..10</code> (Backend)</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA06</code></td><td><code>typecheck</code> + <code>build</code> + <code>check:schema</code> (41 tablas)</td><td><span class="badge pass">PASS</span></td></tr>
+            </tbody>
+          </table>
+
+          <table style="font-size:12px;">
+            <thead>
+              <tr><th>ID</th><th>Puerta de Verificación</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>SA07</code></td><td>Suite Vitest contra PostgreSQL 17 real (21/21 suites)</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA08</code></td><td><code>SECURITY_AUDIT_BACKEND.md</code> en <code>back/production</code></td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA09</code></td><td>Escaneo de secretos y cumplimiento Ley 1581 de 2012</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA10</code></td><td><code>npm audit</code> = <strong>0 vulnerabilidades</strong> (Front &amp; Back)</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA11</code></td><td>Higiene Git (<code>git status --porcelain</code> limpio)</td><td><span class="badge pass">PASS</span></td></tr>
+              <tr><td><code>SA12</code></td><td>Sincronización remota en GitHub verificada</td><td><span class="badge pass">PASS</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-3">
+          <div class="kpi-card ok">
+            <div class="title">Pruebas Backend + Docker</div>
+            <div class="num">292 / 292</div>
+            <div class="desc">20 suites en host + <code>backups.test.ts</code> (23 tests) en <code>node:22-alpine</code>.</div>
+          </div>
+          <div class="kpi-card">
+            <div class="title">Smoke Test Contenedor</div>
+            <div class="num">200 OK</div>
+            <div class="desc"><code>GET /api/health</code> &rarr; <code>{"status":"ok","db":"up"}</code> desde imagen <code>Dockerfile</code>.</div>
+          </div>
+          <div class="kpi-card gold">
+            <div class="title">Integridad Esquema SQL</div>
+            <div class="num">41 / 22</div>
+            <div class="desc">41 tablas y 22 restricciones <code>CHECK</code> sincronizadas con <code>enums.ts</code>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 11: HOJA DE RUTA PRODUCCIÓN (VERCEL + SUPABASE) -->
+    <section class="slide" data-title="Checklist de Despliegue Seguro (Vercel + Supabase)" data-sub="Controles finales recomendados al conectar front/production y back/production">
+      <div class="slide-header">
+        <div>
+          <div class="kicker">10 · Siguiente Fase — Despliegue Seguro</div>
+          <h2>Checklist de Endurecimiento en Producción (Vercel + Supabase)</h2>
+        </div>
+        <span class="slide-tag">front/production + back/production</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Vercel Column -->
+          <div class="card white">
+            <h3><span>Frontend en Vercel (<code>front/production</code>)</span> <span class="badge navy">Vercel</span></h3>
+            <ul>
+              <li><strong>Root Directory:</strong> <code>./</code> (raíz directa de <code>front/production</code>) · Build: <code>npm run build</code> · Output: <code>dist</code>.</li>
+              <li><strong>Cabeceras de Seguridad en <code>vercel.json</code>:</strong>
+                <ul>
+                  <li><code>Content-Security-Policy</code>: <code>default-src 'self'; font-src 'self'; script-src 'self'; frame-ancestors 'none'</code></li>
+                  <li><code>Strict-Transport-Security</code>: <code>max-age=63072000; includeSubDomains; preload</code></li>
+                  <li><code>X-Content-Type-Options: nosniff</code> · <code>X-Frame-Options: DENY</code></li>
+                  <li><code>Referrer-Policy: strict-origin-when-cross-origin</code></li>
+                  <li><code>Permissions-Policy: camera=(), microphone=(), geolocation=()</code></li>
+                </ul>
+              </li>
+              <li><strong>Proxy API:</strong> Enrutar <code>/api/:path*</code> al origen HTTPS del backend para mantener cookie <code>SameSite=Strict</code>.</li>
+            </ul>
+          </div>
+
+          <!-- Supabase Column -->
+          <div class="card white">
+            <h3><span>Backend en Supabase (<code>back/production</code>)</span> <span class="badge hardened">Supabase + API</span></h3>
+            <ul>
+              <li><strong>Cifrado en Tránsito:</strong> Configurar <code>DATABASE_URL</code> con <code>?sslmode=require</code> (o certificado CA del pooler de Supabase).</li>
+              <li><strong>Secretos Criptográficos:</strong> Generar <code>JWT_SECRET</code> y <code>OTP_HMAC_SECRET</code> independientes de 256 bits (<code>openssl rand -hex 32</code>).</li>
+              <li><strong>Emparejamiento de Origen:</strong> Fijar <code>APP_ORIGIN</code> exactamente al dominio HTTPS de Vercel y mantener <code>COOKIE_SECURE=true</code>.</li>
+              <li><strong>Mínimo Privilegio BD:</strong> Operar la aplicación con un rol PostgreSQL no-superusuario con permisos únicamente sobre el esquema <code>public</code>.</li>
+              <li><strong>Inicialización:</strong> Ejecutar <code>database/schema.sql</code> y <code>database/seed.sql</code> (sin PII real) y validar <code>GET /api/health</code>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout gold" style="text-align:center; font-size:13.5px;">
+          <strong>Conclusión:</strong> Ambas ramas (<code>front/production</code> y <code>back/production</code>) superan los controles de seguridad OWASP y Ley 1581 de 2012 con <strong>0 vulnerabilidades abiertas</strong> y están listas para despliegue inmediato.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Overview Grid Overlay -->
+  <div class="overview" id="overview">
+    <div class="overview-grid" id="overviewGrid"></div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <footer class="bottombar">
+    <div class="slide-counter" id="slideCounter">01 / 11</div>
+    <div class="dots" id="dots"></div>
+    <div class="nav-group">
+      <button class="ctrl-btn" id="btnPrev">&larr; Anterior</button>
+      <button class="ctrl-btn primary" id="btnNext">Siguiente &rarr;</button>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dotsContainer = document.getElementById('dots');
+      const overview = document.getElementById('overview');
+      const overviewGrid = document.getElementById('overviewGrid');
+      const counter = document.getElementById('slideCounter');
+      const progressFill = document.getElementById('progressFill');
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const btnOverview = document.getElementById('btnOverview');
+      const btnFullscreen = document.getElementById('btnFullscreen');
+      const btnPrint = document.getElementById('btnPrint');
+
+      let current = 0;
+
+      // Build navigation dots and overview thumbnails
+      slides.forEach((slide, idx) => {
+        const dot = document.createElement('button');
+        dot.className = 'dot';
+        dot.title = `${idx + 1}. ${slide.dataset.title || ''}`;
+        dot.setAttribute('aria-label', `Ir a diapositiva ${idx + 1}`);
+        dot.addEventListener('click', () => goTo(idx));
+        dotsContainer.appendChild(dot);
+
+        const thumb = document.createElement('button');
+        thumb.className = 'thumb';
+        thumb.innerHTML = `
+          <div class="t-num">DIAPOSITIVA ${String(idx + 1).padStart(2, '0')}</div>
+          <div class="t-title">${slide.dataset.title || ''}</div>
+          <div class="t-sub">${slide.dataset.sub || ''}</div>
+        `;
+        thumb.addEventListener('click', () => {
+          goTo(idx);
+          overview.classList.remove('open');
+        });
+        overviewGrid.appendChild(thumb);
+      });
+
+      const dots = Array.from(dotsContainer.querySelectorAll('.dot'));
+      const thumbs = Array.from(overviewGrid.querySelectorAll('.thumb'));
+
+      function goTo(index) {
+        current = Math.max(0, Math.min(slides.length - 1, index));
+        slides.forEach((s, i) => s.classList.toggle('active', i === current));
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        thumbs.forEach((t, i) => t.classList.toggle('current', i === current));
+        counter.textContent = `${String(current + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        progressFill.style.width = `${((current + 1) / slides.length) * 100}%`;
+        btnPrev.disabled = current === 0;
+        btnNext.disabled = current === slides.length - 1;
+        btnPrev.style.opacity = current === 0 ? '0.45' : '1';
+        btnNext.style.opacity = current === slides.length - 1 ? '0.45' : '1';
+      }
+
+      btnPrev.addEventListener('click', () => goTo(current - 1));
+      btnNext.addEventListener('click', () => goTo(current + 1));
+      btnOverview.addEventListener('click', () => overview.classList.toggle('open'));
+      btnPrint.addEventListener('click', () => window.print());
+      btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overview.classList.contains('open')) {
+          overview.classList.remove('open');
+          return;
+        }
+        if (e.key === 'g' || e.key === 'G') {
+          overview.classList.toggle('open');
+          return;
+        }
+        if (e.key === 'f' || e.key === 'F') {
+          btnFullscreen.click();
+          return;
+        }
+        if (overview.classList.contains('open')) return;
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          goTo(current + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          goTo(current - 1);
+        } else if (e.key === 'Home') {
+          goTo(0);
+        } else if (e.key === 'End') {
+          goTo(slides.length - 1);
+        }
+      });
+
+      goTo(0);
+    })();
+  </script>
+</body>
+</html>
