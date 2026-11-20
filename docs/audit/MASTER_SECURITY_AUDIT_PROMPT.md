@@ -84,15 +84,15 @@ Execute the following sequential stages using the **`security-audit-runner`** sk
    - Apply code or configuration fixes directly on the `frontend` branch for every actionable finding identified by `security-audit-runner`.
    - Re-run `npm run typecheck` and `npm run build` to confirm zero regressions.
 4. **Write the Frontend Security Audit Report**:
-   - Create `docs/SECURITY_AUDIT_FRONTEND.md` following the exact specification in §4.1.
+   - Create `docs/audit/SECURITY_AUDIT_FRONTEND.md` following the exact specification in §4.1.
 5. **Commit and Push to `origin/frontend`**:
-   - Stage all frontend fixes and `docs/SECURITY_AUDIT_FRONTEND.md`.
+   - Stage all frontend fixes and `docs/audit/SECURITY_AUDIT_FRONTEND.md`.
    - Commit using Spanish Conventional Commits (`security(frontend): ...` or `fix(frontend): ...`) and push to `origin/frontend`:
      ```bash
      git status --porcelain
      git push origin frontend
      ```
-- **Gate 1**: `npm run typecheck`, `npm run build`, and `npm audit` pass on `frontend`; `docs/SECURITY_AUDIT_FRONTEND.md` is committed; `git status --porcelain` is empty; `origin/frontend` is up to date with local `frontend`.
+- **Gate 1**: `npm run typecheck`, `npm run build`, and `npm audit` pass on `frontend`; `docs/audit/SECURITY_AUDIT_FRONTEND.md` is committed; `git status --porcelain` is empty; `origin/frontend` is up to date with local `frontend`.
 
 ---
 
@@ -145,16 +145,16 @@ Execute the following sequential stages using the **`security-audit-runner`** sk
      ```
      *(using the PostgreSQL 17 test container from `docker-compose.test.yml`)*.
 4. **Write the Backend Security Audit Report**:
-   - Create `docs/SECURITY_AUDIT_BACKEND.md` following the exact specification in §4.2.
+   - Create `docs/audit/SECURITY_AUDIT_BACKEND.md` following the exact specification in §4.2.
 5. **Commit and Push to `origin/backend`**:
    - Clean any temporary test artifacts in `storage/` or `backups/` (retaining `.gitkeep`).
-   - Stage all backend fixes and `docs/SECURITY_AUDIT_BACKEND.md`.
+   - Stage all backend fixes and `docs/audit/SECURITY_AUDIT_BACKEND.md`.
    - Commit using Spanish Conventional Commits (`security(backend): ...` or `fix(backend): ...`) and push to `origin/backend`:
      ```bash
      git status --porcelain
      git push origin backend
      ```
-- **Gate 2**: `npm run typecheck`, `npm run build`, `npm run check:schema`, and the full integration test suite pass on `backend`; `docs/SECURITY_AUDIT_BACKEND.md` is committed; `git status --porcelain` is empty; `origin/backend` is up to date with local `backend`.
+- **Gate 2**: `npm run typecheck`, `npm run build`, `npm run check:schema`, and the full integration test suite pass on `backend`; `docs/audit/SECURITY_AUDIT_BACKEND.md` is committed; `git status --porcelain` is empty; `origin/backend` is up to date with local `backend`.
 
 ---
 
@@ -162,7 +162,7 @@ Execute the following sequential stages using the **`security-audit-runner`** sk
 
 All deliverables must be written in **English** in GitHub-Flavored Markdown (`.md`).
 
-### 4.1 Deliverable 1 — `docs/SECURITY_AUDIT_FRONTEND.md` (Committed & Pushed to `origin/frontend`)
+### 4.1 Deliverable 1 — `docs/audit/SECURITY_AUDIT_FRONTEND.md` (Committed & Pushed to `origin/frontend`)
 Must contain:
 1. **Executive Summary & Audit Metadata**: Branch (`frontend`), base commit, audited commit, timestamp, `security-audit-runner` version/scope, overall risk rating, and summary counts by severity (`Critical`, `High`, `Medium`, `Low`, `Informational`).
 2. **Domain-by-Domain Audit Matrix (`F-DOM-01` through `F-DOM-07`)**: Status (`PASS`, `HARDENED`, `MITIGATED`), exact files and line numbers inspected, and technical evidence.
@@ -175,7 +175,7 @@ Must contain:
 4. **Supply-Chain & Dependency Audit (`npm audit`)**: Output before and after remediation, plus confirmation of zero external runtime CDN calls.
 5. **Vercel Deployment Security Checklist**: Recommended `vercel.json` security headers (`Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`).
 
-### 4.2 Deliverable 2 — `docs/SECURITY_AUDIT_BACKEND.md` (Committed & Pushed to `origin/backend`)
+### 4.2 Deliverable 2 — `docs/audit/SECURITY_AUDIT_BACKEND.md` (Committed & Pushed to `origin/backend`)
 Must contain:
 1. **Executive Summary & Audit Metadata**: Branch (`backend`), base commit, audited commit, timestamp, `security-audit-runner` scope, overall risk rating, and summary counts by severity (`Critical`, `High`, `Medium`, `Low`, `Informational`).
 2. **Domain-by-Domain Audit Matrix (`B-DOM-01` through `B-DOM-10`)**: Mapping directly against the 24 security controls of `MASTER_IMPLEMENTATION_PROMPT.md` §15, with exact `file:line` references and corresponding integration test IDs (`T01`–`T40`).
@@ -188,8 +188,8 @@ Must contain:
 4. **Supply-Chain & Container Security Audit**: `npm audit` analysis before and after remediation, plus `Dockerfile` security posture review.
 5. **Supabase & Production Hardening Checklist**: SSL connection enforcement (`?sslmode=require`), least-privilege database role (non-superuser), secret rotation policy (`JWT_SECRET`, `OTP_HMAC_SECRET`), and `APP_ORIGIN` pairing with Vercel.
 
-### 4.3 Deliverable 3 — Consolidated Response & Local Master Summary (`SECURITY_AUDIT_MASTER_REPORT.md`)
-Produce a consolidated English summary report in your final response (and save it locally as `SECURITY_AUDIT_MASTER_REPORT.md` excluded via `.git/info/exclude` so branch working trees remain clean) summarizing:
+### 4.3 Deliverable 3 — Consolidated Response & Local Master Summary (`docs/audit/SECURITY_AUDIT_MASTER_REPORT.md`)
+Produce a consolidated English summary report in your final response (and save it locally as `docs/audit/SECURITY_AUDIT_MASTER_REPORT.md` excluded via `.git/info/exclude` so branch working trees remain clean) summarizing:
 - Branch commits pushed to `origin/frontend` and `origin/backend`
 - Summary table of all `FE-SEC-*` and `BE-SEC-*` findings and their remediation status
 - Verification checklist table (`SA01`–`SA12`)
@@ -200,7 +200,7 @@ Produce a consolidated English summary report in your final response (and save i
 
 Use the following structure and engineering precision (modeled after `MASTER_IMPLEMENTATION_PROMPT.md` §15 and §18) when writing your audit ledgers and commit messages:
 
-### 5.1 Example — Domain Audit Matrix Row (`docs/SECURITY_AUDIT_BACKEND.md`)
+### 5.1 Example — Domain Audit Matrix Row (`docs/audit/SECURITY_AUDIT_BACKEND.md`)
 
 | Domain ID | Control Area (§15 Reference) | Inspected Files | Security Invariant Verified | Automated Test Proof | Status |
 |---|---|---|---|---|---|
@@ -226,7 +226,7 @@ Use the following structure and engineering precision (modeled after `MASTER_IMP
 
   - Execute F-DOM-01..F-DOM-07 security audit with security-audit-runner
   - Harden production Vite build configuration and verify zero external CDN leaks
-  - Add docs/SECURITY_AUDIT_FRONTEND.md with full finding ledger and Vercel CSP headers
+  - Add docs/audit/SECURITY_AUDIT_FRONTEND.md with full finding ledger and Vercel CSP headers
   - Verify npm run typecheck, npm run build, and npm audit (0 vulnerabilities)
   ```
 - **On `backend` branch (`origin/backend`)**:
@@ -235,7 +235,7 @@ Use the following structure and engineering precision (modeled after `MASTER_IMP
 
   - Execute B-DOM-01..B-DOM-10 security audit with security-audit-runner
   - Apply security remediations and dependency overrides while preserving 292/292 tests
-  - Add docs/SECURITY_AUDIT_BACKEND.md mapped to §15 controls and T01-T40 test catalog
+  - Add docs/audit/SECURITY_AUDIT_BACKEND.md mapped to §15 controls and T01-T40 test catalog
   - Verify npm run typecheck, npm run build, npm run check:schema, and Vitest suite
   ```
 
@@ -244,10 +244,10 @@ Use the following structure and engineering precision (modeled after `MASTER_IMP
 ## 6. CONSTRAINTS & NON-NEGOTIABLE RULES (`Restricciones`)
 
 1. **Mandatory Use of `security-audit-runner`**: You must load and follow the `security-audit-runner` skill methodology for both branches. Do not skip static analysis, dependency auditing, or access-control verification.
-2. **Strict English Deliverable Language**: All generated audit reports (`docs/SECURITY_AUDIT_FRONTEND.md`, `docs/SECURITY_AUDIT_BACKEND.md`, and your final response) must be written in clear, technical **English**. (User-facing UI copy and canonical enum strings in the application code itself must remain in **Spanish (Colombia)** per project rules!).
+2. **Strict English Deliverable Language**: All generated audit reports (`docs/audit/SECURITY_AUDIT_FRONTEND.md`, `docs/audit/SECURITY_AUDIT_BACKEND.md`, and your final response) must be written in clear, technical **English**. (User-facing UI copy and canonical enum strings in the application code itself must remain in **Spanish (Colombia)** per project rules!).
 3. **Strict Branch Isolation**:
-   - Never commit backend files or `SECURITY_AUDIT_BACKEND.md` onto the `frontend` branch.
-   - Never commit frontend files or `SECURITY_AUDIT_FRONTEND.md` onto the `backend` branch.
+   - Never commit backend files or `docs/audit/SECURITY_AUDIT_BACKEND.md` onto the `frontend` branch.
+   - Never commit frontend files or `docs/audit/SECURITY_AUDIT_FRONTEND.md` onto the `backend` branch.
    - Never modify or push to `feat/mvp-implementation-v1` or `main`.
 4. **Zero Functional or Visual Regression**:
    - Do not alter any API endpoint path, HTTP status code contract, database table/column name in `database/schema.sql`, Spanish enum string in `src/shared/enums.ts`, or CSS hex token in `src/styles/tokens.css`.
@@ -267,11 +267,11 @@ Before declaring the audit complete, verify all 12 gates:
 - [ ] **SA01 (`security-audit-runner` Execution)**: `security-audit-runner` workflow executed across both `frontend` and `backend` branches.
 - [ ] **SA02 (`frontend` Static & DOM Audit)**: All 7 frontend domains (`F-DOM-01`…`F-DOM-07`) audited and remediated on `frontend`.
 - [ ] **SA03 (`frontend` Build & Typecheck Gate)**: `npm run typecheck` and `npm run build` on `frontend` exit with code `0` after hardening.
-- [ ] **SA04 (`frontend` Report Committed & Pushed)**: `docs/SECURITY_AUDIT_FRONTEND.md` (in English) is committed and pushed to `origin/frontend`.
+- [ ] **SA04 (`frontend` Report Committed & Pushed)**: `docs/audit/SECURITY_AUDIT_FRONTEND.md` (in English) is committed and pushed to `origin/frontend`.
 - [ ] **SA05 (`backend` 10-Domain Audit)**: All 10 backend domains (`B-DOM-01`…`B-DOM-10`) audited against §15 security baseline and remediated on `backend`.
 - [ ] **SA06 (`backend` Build, Typecheck & Schema Gate)**: `npm run typecheck`, `npm run build`, and `npm run check:schema` on `backend` exit with code `0` after hardening.
 - [ ] **SA07 (`backend` Real PostgreSQL 17 Integration Suite)**: Full integration test suite (`npm test`) passes against PostgreSQL 17 after all backend security remediations.
-- [ ] **SA08 (`backend` Report Committed & Pushed)**: `docs/SECURITY_AUDIT_BACKEND.md` (in English) is committed and pushed to `origin/backend`.
+- [ ] **SA08 (`backend` Report Committed & Pushed)**: `docs/audit/SECURITY_AUDIT_BACKEND.md` (in English) is committed and pushed to `origin/backend`.
 - [ ] **SA09 (Ley 1581 de 2012 & Secret Scan)**: Zero hardcoded secrets, tokens, or real PII exist in tracked files on `frontend` or `backend`.
 - [ ] **SA10 (Supply-Chain Audit)**: `npm audit` executed and documented on both `frontend` and `backend`.
 - [ ] **SA11 (Git Hygiene)**: `git status --porcelain` is empty on `frontend`, `backend`, and `feat/mvp-implementation-v1`.

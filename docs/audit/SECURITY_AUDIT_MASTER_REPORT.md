@@ -10,8 +10,8 @@
 
 | Branch | Remote Tracking | Base Commit | Audited & Hardened Commit | `npm audit` Post-Remediation | Deliverable Report | Status |
 |---|---|---|---|---|---|---|
-| **`frontend`** | `origin/frontend` | `122d6e0` | `25f779e` | **`0` vulnerabilities** (`85` packages) | `docs/SECURITY_AUDIT_FRONTEND.md` | **Verified & Pushed** |
-| **`backend`** | `origin/backend` | `d9dba88` | `e9f857e` | **`0` vulnerabilities** (`490` packages; down from `7` moderate) | `docs/SECURITY_AUDIT_BACKEND.md` | **Verified & Pushed** |
+| **`frontend`** | `origin/frontend` | `122d6e0` | `25f779e` | **`0` vulnerabilities** (`85` packages) | `docs/audit/SECURITY_AUDIT_FRONTEND.md` | **Verified & Pushed** |
+| **`backend`** | `origin/backend` | `d9dba88` | `e9f857e` | **`0` vulnerabilities** (`490` packages; down from `7` moderate) | `docs/audit/SECURITY_AUDIT_BACKEND.md` | **Verified & Pushed** |
 | **`feat/mvp-implementation-v1`** | `origin/feat/mvp-implementation-v1` | `079248a` | `079248a` | Historical Monorepo Baseline | Untouched | **Clean** |
 
 ---
@@ -52,11 +52,11 @@
 | **`SA01`** | `security-audit-runner` workflow executed across both branches | `frontend` & `backend` | 7 frontend domains + 10 backend domains audited | **PASS** |
 | **`SA02`** | `frontend` Static & DOM Audit (`F-DOM-01`…`F-DOM-07`) | `frontend` | `FE-SEC-001`…`FE-SEC-004` remediated | **PASS** |
 | **`SA03`** | `frontend` Build & Typecheck Gate | `frontend` | `npm run typecheck && npm run build` (`0` errors) | **PASS** |
-| **`SA04`** | `frontend` Report Committed & Pushed | `frontend` | `docs/SECURITY_AUDIT_FRONTEND.md` pushed to `origin/frontend` (`25f779e`) | **PASS** |
+| **`SA04`** | `frontend` Report Committed & Pushed | `frontend` | `docs/audit/SECURITY_AUDIT_FRONTEND.md` pushed to `origin/frontend` (`25f779e`) | **PASS** |
 | **`SA05`** | `backend` 10-Domain Audit (`B-DOM-01`…`B-DOM-10`) | `backend` | `BE-SEC-001`…`BE-SEC-005` remediated | **PASS** |
 | **`SA06`** | `backend` Build, Typecheck & Schema Gate | `backend` | `npm run typecheck && npm run build && npm run check:schema` (`0` errors, 41 tables, 22 `CHECK`) | **PASS** |
 | **`SA07`** | `backend` Real PostgreSQL 17 Integration Suite | `backend` | Vitest integration suites against PostgreSQL 17 (`docker-compose.test.yml`) | **PASS** |
-| **`SA08`** | `backend` Report Committed & Pushed | `backend` | `docs/SECURITY_AUDIT_BACKEND.md` pushed to `origin/backend` (`e9f857e`) | **PASS** |
+| **`SA08`** | `backend` Report Committed & Pushed | `backend` | `docs/audit/SECURITY_AUDIT_BACKEND.md` pushed to `origin/backend` (`e9f857e`) | **PASS** |
 | **`SA09`** | Ley 1581 de 2012 & Secret Scan | `frontend` & `backend` | Zero hardcoded secrets, tokens, or real PII in tracked files | **PASS** |
 | **`SA10`** | Supply-Chain Audit (`npm audit`) | `frontend` & `backend` | `0` vulnerabilities on `frontend`; `0` vulnerabilities on `backend` | **PASS** |
 | **`SA11`** | Git Hygiene | All 3 branches | `git status --porcelain` empty on `frontend`, `backend`, `feat/mvp-implementation-v1` | **PASS** |

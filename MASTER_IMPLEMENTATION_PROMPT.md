@@ -116,8 +116,8 @@ Read these before writing code. Paths are real and were verified in this reposit
 | `docs/registro-actualizacion-requisitos-2026-10.md`, `docs/orquestacion-actualizacion-requisitos-2026-10.md` | Evidence ledger and update protocol | Support |
 | `docs/docente-rol-ux.md` | Docent interaction contract (`data-accion`), full-page actions, deep links `?f=` | Docent UI authority |
 | `docs/CONSOLIDACION-ANOTACIONES.md` | Team annotations: diagnosis, validation, roles, DB, Git workflow | Support |
-| `Config-admin/correcciones-adiciones-requisitos.md` | 28 applied items C-1…C-7, A-1…A-21 | Requirements evidence |
-| `Config-admin/auditoriaV3.md`, `Config-admin/auditoria-ui-ux-admin.md`, `Config-admin/prueba-ui-ux-admin.md` | Admin UI/UX audit and closures | UI evidence |
+| `docs/audit/correcciones-adiciones-requisitos.md` | 28 applied items C-1…C-7, A-1…A-21 | Requirements evidence |
+| `docs/audit/auditoria-ui-ux-admin.md`, `docs/audit/prueba-ui-ux-admin.md` | Admin UI/UX audit and closures | UI evidence |
 | `CORRECCIONES-VISTAS-ESTUDIANTE.md` | Student-view findings (2026-10-07, **partially stale**) | Backlog only |
 | `PROTOTIPO-STITCH.md` | Prototype scope warning; Stitch copy may lag behind the 73 local screens | Context |
 | `prototype/DESIGN.md` | Palette, contrast rules, components, responsive, accessibility, absolute prohibitions | Visual authority |
@@ -1533,4 +1533,3 @@ performance, availability or capacity target; and whether the team accepts the s
 declared in `README.md` §4/§11 as final (v1.2 changes that stack in the points of §20.3a, taken by the project
 owner, not yet by the author of `README.md`). Those are the pending decisions of §20. This
 document does not authorize converting any of them into a confirmed requirement.
-
